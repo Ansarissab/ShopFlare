@@ -1,26 +1,100 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ─── Tailwind theme tokens ──────────────────────────────────────────────── */
+@theme {
+  --color-bg:           var(--bg);
+  --color-fg:           var(--fg);
+  --color-primary:      var(--primary);
+  --color-primary-fg:   var(--primary-fg);
+  --color-accent:       var(--accent);
+  --color-accent-fg:    var(--accent-fg);
+  --color-muted:        var(--muted);
+  --color-muted-fg:     var(--muted-fg);
+  --color-border:       var(--border);
+  --color-card:         var(--card);
+  --color-card-fg:      var(--card-fg);
+  --color-destructive:  var(--destructive);
+  --color-success:      var(--success);
+  --color-warning:      var(--warning);
+
+  --radius-sm:   calc(var(--radius) - 4px);
+  --radius-md:   calc(var(--radius) - 2px);
+  --radius-lg:   var(--radius);
+  --radius-xl:   calc(var(--radius) + 4px);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+/* ─── Light mode ─────────────────────────────────────────────────────────── */
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+    --bg:           #ffffff;
+    --fg:           #09090b;
+    --card:         #ffffff;
+    --card-fg:      #09090b;
+    --muted:        #f4f4f5;
+    --muted-fg:     #71717a;
+    --border:       #e4e4e7;
+    --destructive:  #ef4444;
+    --success:      #22c55e;
+    --warning:      #f59e0b;
+    --radius:       0.5rem;
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+    /* Merchant-configurable brand colors — injected at runtime from D1 */
+    --primary:      var(--store-primary, #18181b);
+    --primary-fg:   var(--store-primary-fg, #fafafa);
+    --accent:       var(--store-accent, #6366f1);
+    --accent-fg:    var(--store-accent-fg, #ffffff);
+
+    /* shadcn/ui compat aliases */
+    --background:           var(--bg);
+    --foreground:           var(--fg);
+    --card-foreground:      var(--card-fg);
+    --popover:              var(--bg);
+    --popover-foreground:   var(--fg);
+    --primary-foreground:   var(--primary-fg);
+    --secondary:            var(--muted);
+    --secondary-foreground: var(--fg);
+    --muted-foreground:     var(--muted-fg);
+    --accent-foreground:    var(--accent-fg);
+    --input:                var(--border);
+    --ring:                 var(--accent);
+  }
+
+  /* ─── Dark mode ─────────────────────────────────────────────────────────── */
+  [data-theme="dark"] {
+    --bg:       #09090b;
+    --fg:       #fafafa;
+    --card:     #18181b;
+    --card-fg:  #fafafa;
+    --muted:    #27272a;
+    --muted-fg: #a1a1aa;
+    --border:   #3f3f46;
+  }
+
+  /* ─── Base resets ────────────────────────────────────────────────────────── */
+  * {
+    border-color: var(--border);
+    box-sizing: border-box;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--fg);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── Typography scale ───────────────────────────────────────────────────── */
+  h1 { @apply text-4xl font-bold tracking-tight; }
+  h2 { @apply text-3xl font-semibold tracking-tight; }
+  h3 { @apply text-2xl font-semibold; }
+  h4 { @apply text-xl font-medium; }
+
+  /* ─── Focus ring ─────────────────────────────────────────────────────────── */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
 }

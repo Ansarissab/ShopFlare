@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SinglePageEcomm
 
-## Getting Started
+> White-label serverless ecommerce for small businesses. **$0 hosting cost.**
 
-First, run the development server:
+[![Next.js](https://img.shields.io/badge/Next.js-16.2-black)](https://nextjs.org)
+[![Cloudflare](https://img.shields.io/badge/Cloudflare-Stack-orange)](https://cloudflare.com)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+
+## What is this?
+
+A free, open-source, self-hosted ecommerce store. Fork it, configure it, start selling. No monthly fees.
+
+Replaces Shopify Basic ($29/month) for merchants selling a few products — especially in emerging markets.
+
+## Stack
+
+| Layer | Technology |
+| --- | --- |
+| Hosting | Cloudflare Pages (free) |
+| API / Webhooks | Cloudflare Workers + Hono |
+| Database | Cloudflare D1 (SQLite) + Drizzle ORM |
+| Cache | Cloudflare KV |
+| Images | Cloudflare R2 (zero egress) |
+| Admin Auth | Cloudflare Access |
+| Payments | Stripe Checkout |
+| Email | Resend (BCC strategy) |
+| Push Notifications | PWA Web Push |
+| Frontend | Next.js 16.2 + React 19 + Tailwind 4.3 + shadcn/ui |
+
+## Quick Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+# 1. Fork this repo
+# 2. Install deps
+pnpm install
+
+# 3. Run setup wizard (guides you through CF + Stripe setup)
+pnpm setup
+
+# 4. Start local dev
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+See [docs/setup/quickstart.md](docs/setup/quickstart.md) for full guide.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Build Progress
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Phase 0 — Foundation
 
-## Learn More
+- [x] Project scaffold (Next.js 16.2, pnpm, TypeScript)
+- [x] Cloudflare Workers + Hono setup
+- [x] D1 database schema (Drizzle ORM)
+- [x] shadcn/ui + Tailwind theme (light/dark)
+- [x] lib/ skeleton (constants, i18n, schemas, utils)
+- [ ] Phase 0 complete
 
-To learn more about Next.js, take a look at the following resources:
+### Phase 1 — Store Frontend
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [ ] Product catalog + variant selector
+- [ ] Cart (Zustand + localStorage)
+- [ ] Checkout flows (Stripe, COD, WhatsApp)
+- [ ] Order tracking page
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Phase 2 — Admin Dashboard
 
-## Deploy on Vercel
+- [ ] Product CRUD + image upload (R2)
+- [ ] Order management
+- [ ] Coupon management
+- [ ] POS (cash register mode)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Phase 3 — Polish
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [ ] Reviews + ratings
+- [ ] PWA push notifications
+- [ ] SEO + sitemap + JSON-LD
+- [ ] Setup wizard CLI
+
+## Cost Breakdown
+
+Normal operations: **$0/month**
+Black Friday (100k orders): **~$5-10**
+
+See [docs/architecture/cost-breakdown-normal.md](docs/architecture/cost-breakdown-normal.md)
+
+## License
+
+MIT
