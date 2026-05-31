@@ -1,0 +1,20 @@
+name = "singlepage-ecomm-worker"
+main = "worker/index.ts"
+compatibility_date = "2026-05-31"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "store-db"
+database_id = "placeholder-replace-after-cf-setup"
+
+[[kv_namespaces]]
+binding = "KV"
+id = "placeholder-replace-after-cf-setup"
+
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "store-images"
+
+[vars]
+ENVIRONMENT = "development"
