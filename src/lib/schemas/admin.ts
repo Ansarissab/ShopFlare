@@ -3,7 +3,7 @@
 import { z } from 'zod/v4'
 import { idField } from './base'
 import { storeConfigSchema } from './config'
-import { ORDER_STATUSES } from '@/lib/constants'
+import { ORDER_STATUSES, MIN_COUPON_CODE_LENGTH, MAX_COUPON_CODE_LENGTH } from '@/lib/constants'
 
 // ─── Product ─────────────────────────────────────────────────────────────────
 
@@ -67,6 +67,42 @@ export const posOrderSchema = z.object({
   customerPhone: z.string().optional(),
 })
 
+// ─── Coupon admin (Agent N) ──────────────────────────────────────────────────
+// Drives D1 row creation + Stripe coupon/promotion-code sync. value is percent
+// (1–100) when type='percentage', else amount-off in cents when type='fixed'.
+
+// Single source of truth for coupon fields — both create and update compose
+// from this shape (no field duplication / drift). The optional money/limit
+// fields are `.nullish()` so an update can explicitly send `null` to CLEAR them
+// (e.g. remove a minimum-order requirement) — `.optional()` alone can't express
+// "clear this", it can only omit.
+const couponBaseShape = {
+  code:             z.string().min(MIN_COUPON_CODE_LENGTH).max(MAX_COUPON_CODE_LENGTH).regex(/^[A-Z0-9_-]+$/i),
+  type:             z.enum(['percentage', 'fixed']),
+  value:            z.number().int().positive(),
+  minOrderCents:    z.number().int().nonnegative().nullish(),
+  maxDiscountCents: z.number().int().positive().nullish(),
+  usageLimit:       z.number().int().positive().nullish(),
+  expiresAt:        z.string().nullish(), // ISO-8601 timestamp
+}
+
+export const createCouponSchema = z.object({
+  ...couponBaseShape,
+  perCustomerLimit: z.number().int().positive().default(1),
+  active:           z.boolean().default(true),
+}).refine(
+  (d) => d.type !== 'percentage' || d.value <= 100,
+  { message: 'Percentage value must be between 1 and 100', path: ['value'] },
+)
+
+// Update: same shape, no defaults (an omitted field means "leave unchanged"),
+// all-partial so the client can patch any subset.
+export const updateCouponSchema = z.object({
+  ...couponBaseShape,
+  perCustomerLimit: z.number().int().positive(),
+  active:           z.boolean(),
+}).partial()
+
 // ─── Config admin ─────────────────────────────────────────────────────────────
 
 // Allow partial updates — merchant edits one section at a time
@@ -84,3 +120,5 @@ export type UpdateOrderStatusInput = z.infer<typeof updateOrderStatusSchema>
 export type UpdateTrackingInput    = z.infer<typeof updateTrackingSchema>
 export type PosOrderInput          = z.infer<typeof posOrderSchema>
 export type UpdateConfigInput      = z.infer<typeof updateConfigSchema>
+export type CreateCouponInput      = z.infer<typeof createCouponSchema>
+export type UpdateCouponInput      = z.infer<typeof updateCouponSchema>

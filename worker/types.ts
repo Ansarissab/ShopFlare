@@ -14,6 +14,9 @@ export type Bindings = {
 
   // Resend (transactional email)
   RESEND_API_KEY: string
+  // Verified sender address for outbound email. Falls back per email.ts:
+  //   store_config.senderEmail → RESEND_FROM → onboarding@resend.dev (test only).
+  RESEND_FROM?: string
 
   // Web Push / VAPID
   VAPID_PRIVATE_KEY: string

@@ -9,6 +9,10 @@ import type { AdminEnv } from '../../lib/access'
 import orders from './orders'
 import products from './products'
 import config from './config'
+import coupons from './coupons'
+import reviews from './reviews'
+import notify from './notify'
+import push from '../push'
 
 const app = new Hono<AdminEnv>()
 
@@ -18,5 +22,11 @@ app.use('*', requireAccess)
 app.route('/orders', orders)
 app.route('/products', products)
 app.route('/config', config)
+app.route('/coupons', coupons)
+app.route('/reviews', reviews)
+app.route('/notify', notify)
+// Push subscription mgmt is merchant-only (order alerts to merchant devices),
+// so it lives behind CF Access here — not on the public /api router.
+app.route('/push', push)
 
 export default app

@@ -62,9 +62,9 @@ app.route('/api/stripe', (await import('./routes/stripe')).default)
 app.route('/api/products', (await import('./routes/products')).default)
 app.route('/api/orders', (await import('./routes/orders')).default)
 app.route('/api/config', (await import('./routes/config')).default)
-app.route('/api/push', (await import('./routes/push')).default)
 app.route('/api/notify', (await import('./routes/notify')).default)
 app.route('/api/coupons', (await import('./routes/coupons')).default)
+app.route('/api/reviews', (await import('./routes/reviews')).default)
 
 // Admin API — every sub-route is gated by CF Access JWT verification.
 app.route('/api/admin', (await import('./routes/admin/index')).default)
