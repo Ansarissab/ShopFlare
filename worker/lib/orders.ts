@@ -91,6 +91,49 @@ export class CouponError extends Error {
   }
 }
 
+/**
+ * Thrown by assertItemsAvailable when a line item references a missing/inactive
+ * sizeOption or there isn't enough stock. Routes map it to a 422 response.
+ */
+export class StockError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'StockError'
+  }
+}
+
+/**
+ * Validates that every item references an existing, active sizeOption with
+ * sufficient stock (stock === -1 means unlimited). Shared by the COD and POS
+ * routes so both fail fast with a typed StockError before createOrder runs.
+ * Batched — one query for the whole cart.
+ */
+export async function assertItemsAvailable(
+  db: Database,
+  items: CreateOrderItem[],
+): Promise<void> {
+  const ids = items.map((i) => i.sizeOptionId)
+  const rows = ids.length
+    ? await db
+        .select()
+        .from(schema.sizeOptions)
+        .where(inArray(schema.sizeOptions.id, ids))
+        .all()
+    : []
+
+  const byId = new Map(rows.map((s) => [s.id, s]))
+
+  for (const item of items) {
+    const sizeOpt = byId.get(item.sizeOptionId)
+    if (!sizeOpt || !sizeOpt.active) {
+      throw new StockError(`Size option not found: ${item.sizeOptionId}`)
+    }
+    if (sizeOpt.stock !== -1 && sizeOpt.stock < item.quantity) {
+      throw new StockError(`Insufficient stock for size: ${sizeOpt.size}`)
+    }
+  }
+}
+
 export type EvaluateCouponResult =
   | { ok: true; discountCents: number }
   | { ok: false; message: string }
@@ -329,11 +372,11 @@ export async function createOrder(
     await db.insert(schema.orderItems).values({ ...item, orderId })
   }
 
-  // ── 5. Stock decrement — skip unlimited (-1) items ────────────────────────
+  // ── 5. Stock decrement — skip unlimited (-1) items, floor at 0 ────────────
   for (const item of items) {
     await db
       .update(schema.sizeOptions)
-      .set({ stock: sql`stock - ${item.quantity}` })
+      .set({ stock: sql`MAX(0, ${schema.sizeOptions.stock} - ${item.quantity})` })
       .where(
         and(
           eq(schema.sizeOptions.id, item.sizeOptionId),

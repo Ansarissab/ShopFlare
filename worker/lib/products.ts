@@ -77,13 +77,16 @@ function groupVariants(
  */
 export async function assembleProductList(
   db: Database,
+  opts: { includeInactive?: boolean } = {},
 ): Promise<ProductWithVariants[]> {
-  // 1. Fetch all active products
-  const activeProducts = await db
-    .select()
-    .from(schema.products)
-    .where(eq(schema.products.active, true))
-    .all()
+  // 1. Fetch products — storefront sees active only; admin passes
+  //    includeInactive to also surface soft-deleted products (so they can be
+  //    re-activated rather than vanishing forever).
+  const baseProducts = db.select().from(schema.products)
+  const activeProducts = await (opts.includeInactive
+    ? baseProducts
+    : baseProducts.where(eq(schema.products.active, true))
+  ).all()
 
   if (activeProducts.length === 0) return []
 
