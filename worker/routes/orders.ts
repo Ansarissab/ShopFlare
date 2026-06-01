@@ -11,7 +11,10 @@ import { codOrderSchema, cancelOrderSchema } from '@/lib/schemas'
 import { createOrder, assertItemsAvailable, CouponError, StockError } from '../lib/orders'
 import { parseBody } from '../lib/http'
 import { verifyTurnstile } from '../lib/turnstile'
+import { sendOrderEmails } from '../lib/email'
+import { sendPushToAll } from '../lib/push'
 import type { Bindings } from '../types'
+import { en } from '@/lib/i18n/en'
 
 const app = new Hono<{ Bindings: Bindings }>()
 
@@ -136,6 +139,25 @@ app.post('/cod', async (c) => {
       shippingAddress: shippingAddress as Record<string, unknown>,
       couponCode,
     })
+
+    // Fire notifications via waitUntil — never blocks the 201 response.
+    c.executionCtx.waitUntil(
+      (async () => {
+        try {
+          // Fresh D1 handle for post-response work (mirrors stripe.ts).
+          const notifyDb = createDb(c.env.DB)
+          await sendOrderEmails(notifyDb, c.env, orderId)
+          // Payload-less tickle (see worker/lib/push.ts) — SW shows generic copy.
+          await sendPushToAll(notifyDb, c.env, {
+            title: en.notifications.newOrderTitle,
+            body: orderNumber,
+            url: `${c.env.FRONTEND_URL || ''}/admin/orders`,
+          })
+        } catch (err) {
+          console.warn('[orders/cod] post-create notify error', err)
+        }
+      })(),
+    )
 
     return c.json({ orderId, orderNumber }, 201)
   } catch (err) {

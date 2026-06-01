@@ -7,7 +7,10 @@ import * as schema from '../db/schema'
 import { createCheckoutSessionSchema } from '@/lib/schemas'
 import { createOrder } from '../lib/orders'
 import { parseBody } from '../lib/http'
+import { sendOrderEmails } from '../lib/email'
+import { sendPushToAll } from '../lib/push'
 import type { Bindings } from '../types'
+import { en } from '@/lib/i18n/en'
 
 const app = new Hono<{ Bindings: Bindings }>()
 
@@ -204,6 +207,37 @@ app.post('/webhook', async (c) => {
       })
 
       console.info('[stripe/webhook] order confirmed', { orderId, sessionId: session.id })
+
+      // Fire notifications — wrapped in waitUntil so they never block the webhook ack.
+      // The order's customerEmail may have just been populated above; sendOrderEmails
+      // re-reads from D1 so it always sees the latest row.
+      const orderIdForNotify = orderId
+      c.executionCtx.waitUntil(
+        (async () => {
+          try {
+            const notifyDb = createDb(c.env.DB)
+            const confirmOrder = await notifyDb
+              .select({ orderNumber: schema.orders.orderNumber })
+              .from(schema.orders)
+              .where(eq(schema.orders.id, orderIdForNotify))
+              .get()
+            await sendOrderEmails(notifyDb, c.env, orderIdForNotify)
+            if (confirmOrder) {
+              // Payload-less tickle (see worker/lib/push.ts): the SW shows a
+              // generic notification, so we pass only the order number for the
+              // (currently non-transmitted) body — no price formatting needed.
+              await sendPushToAll(notifyDb, c.env, {
+                title: en.notifications.newOrderTitle,
+                body: confirmOrder.orderNumber,
+                url: `${c.env.FRONTEND_URL || ''}/admin/orders`,
+              })
+            }
+          } catch (err) {
+            console.warn('[stripe/webhook] post-confirm notify error', err)
+          }
+        })(),
+      )
+
       break
     }
 
