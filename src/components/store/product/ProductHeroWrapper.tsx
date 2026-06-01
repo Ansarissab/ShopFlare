@@ -54,6 +54,14 @@ export function ProductHeroWrapper({ item }: ProductHeroWrapperProps) {
     [buildCartItem, addItem, openCart],
   )
 
+  const handleBuyNow = useCallback(
+    (size: SizeOption) => {
+      addItem(buildCartItem(size))
+      router.push('/checkout')
+    },
+    [buildCartItem, addItem, router],
+  )
+
   const handleWhatsApp = useCallback(
     (size: SizeOption) => {
       if (!config?.whatsappNumber) {
@@ -94,7 +102,7 @@ export function ProductHeroWrapper({ item }: ProductHeroWrapperProps) {
       imagesByVariant={imagesByVariant}
       isAddingToCart={isAddingToCart}
       onAddToCart={handleAddToCart}
-      onBuyNow={handleAddToCart}
+      onBuyNow={handleBuyNow}
       onWhatsApp={handleWhatsApp}
       onCOD={handleCOD}
     />

@@ -1,15 +1,23 @@
+'use client'
+
 import Link from 'next/link'
 import { Separator } from '@/components/ui/separator'
 import { en } from '@/lib/i18n/en'
 import { layout } from '@/lib/styles'
+import { useStoreConfig } from '@/hooks/useStoreConfig'
 
 export function StorefrontFooter() {
+  const { config } = useStoreConfig()
+  const year = new Date().getFullYear()
+
   return (
     <footer className="border-t bg-background">
       <div className={layout.page}>
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-          {/* Store name */}
-          <span className="text-sm font-semibold text-foreground">Store</span>
+          {/* Store name + year */}
+          <span className="text-sm font-semibold text-foreground">
+            {config?.storeName ?? 'Store'} © {year}
+          </span>
 
           {/* Policy links */}
           <nav className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground">

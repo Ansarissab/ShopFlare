@@ -4,6 +4,7 @@ import { ShoppingCart } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useCart, useCartItemCount } from '@/hooks/useCart'
+import { useStoreConfig } from '@/hooks/useStoreConfig'
 import { CartSheet } from '@/components/store/cart/CartSheet'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
@@ -11,6 +12,7 @@ import { cn } from '@/lib/utils'
 export function StorefrontHeader() {
   const { openCart } = useCart()
   const itemCount = useCartItemCount()
+  const { config } = useStoreConfig()
 
   return (
     <>
@@ -18,7 +20,7 @@ export function StorefrontHeader() {
         <div className={cn(layout.bar, 'h-16 justify-between')}>
           {/* Store name */}
           <a href="/" className="text-lg font-semibold tracking-tight text-foreground hover:opacity-80 transition-opacity">
-            Store
+            {config?.storeName ?? 'Store'}
           </a>
 
           {/* Cart button */}
@@ -41,8 +43,11 @@ export function StorefrontHeader() {
         </div>
       </header>
 
-      {/* CartSheet available globally via header */}
-      <CartSheet />
+      {/* CartSheet wired with live shipping config */}
+      <CartSheet
+        flatRateCents={config?.flatShippingRateCents ?? 0}
+        thresholdCents={config?.freeShippingThresholdCents ?? 0}
+      />
     </>
   )
 }

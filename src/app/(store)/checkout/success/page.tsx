@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useEffect } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle2 } from 'lucide-react'
@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { en } from '@/lib/i18n/en'
 import { useCart } from '@/hooks/useCart'
+import { apiGet } from '@/lib/api'
 
 function SuccessContent() {
   const searchParams = useSearchParams()
@@ -17,9 +18,28 @@ function SuccessContent() {
   const method = searchParams.get('method')
   const orderId = searchParams.get('orderId')
   const sessionId = searchParams.get('session_id')
-  const displayOrderId = orderId ?? sessionId
+
+  // For Stripe sessions, resolve the orderNumber via the worker API.
+  const [resolvedOrderNumber, setResolvedOrderNumber] = useState<string | null>(null)
+  const [resolving, setResolving] = useState(false)
 
   useEffect(() => { clearCart() }, [clearCart])
+
+  useEffect(() => {
+    if (!sessionId || orderId) return
+    setResolving(true)
+    apiGet<{ orderNumber: string }>(`/api/orders/by-session/${sessionId}`)
+      .then(({ orderNumber }) => setResolvedOrderNumber(orderNumber))
+      .catch(() => {
+        // Gracefully handle: track link will just be hidden
+        setResolvedOrderNumber(null)
+      })
+      .finally(() => setResolving(false))
+  }, [sessionId, orderId])
+
+  // For COD: orderId param holds the orderNumber value (set by CODForm).
+  // For Stripe: use the resolved orderNumber from the API.
+  const trackOrderNumber = orderId ?? resolvedOrderNumber
 
   const paymentNote = method === 'cod'
     ? 'Your order will be confirmed by our team shortly.'
@@ -34,20 +54,22 @@ function SuccessContent() {
         <p className="text-muted-foreground">{en.checkout.thankYou}</p>
       </div>
 
-      {displayOrderId && (
+      {trackOrderNumber && (
         <p className="rounded-md bg-muted px-4 py-2 text-sm font-medium">
-          {en.checkout.orderNumber.replace('{number}', displayOrderId)}
+          {en.checkout.orderNumber.replace('{number}', trackOrderNumber)}
         </p>
       )}
 
       <p className="text-sm text-muted-foreground">{paymentNote}</p>
 
       <div className="mt-2 flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
-        {displayOrderId && (
-          <Link href={`/track/${displayOrderId}`} className={cn(buttonVariants({ size: 'lg' }))}>
+        {resolving ? (
+          <Skeleton className="h-11 w-full rounded-md sm:w-36" />
+        ) : trackOrderNumber ? (
+          <Link href={`/track/${trackOrderNumber}`} className={cn(buttonVariants({ size: 'lg' }))}>
             {en.tracking.track}
           </Link>
-        )}
+        ) : null}
         <Link href="/" className={cn(buttonVariants({ variant: 'outline', size: 'lg' }))}>
           {en.store.continueShopping}
         </Link>

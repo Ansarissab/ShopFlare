@@ -1,34 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { apiGet } from '@/lib/api'
+import { useApiResource } from '@/hooks/useApiResource'
 import type { StoreConfig } from '@/lib/types/store'
-
-interface UseStoreConfigResult {
-  config: StoreConfig | null
-  loading: boolean
-}
+import type { UseStoreConfigResult } from '@/lib/types/store'
 
 export function useStoreConfig(): UseStoreConfigResult {
-  const [config, setConfig] = useState<StoreConfig | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    let cancelled = false
-    apiGet<StoreConfig>('/api/config/store')
-      .then((data) => {
-        if (!cancelled) setConfig(data)
-      })
-      .catch(() => {
-        // Errors are swallowed — config stays null
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  return { config, loading }
+  const { data, loading, error } = useApiResource<StoreConfig>('/api/config/store')
+  return { config: data, loading, error }
 }

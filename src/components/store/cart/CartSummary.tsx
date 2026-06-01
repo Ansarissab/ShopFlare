@@ -55,7 +55,7 @@ export function CartSummary({
           aria-label={en.cart.couponPlaceholder}
           className={cn(
             couponApplied || couponState === 'applied'
-              ? 'border-green-500 focus-visible:ring-green-500/30'
+              ? 'border-success focus-visible:ring-success/30'
               : couponState === 'invalid'
                 ? 'aria-invalid'
                 : ''
@@ -75,7 +75,7 @@ export function CartSummary({
 
       {/* Feedback */}
       {(couponApplied || couponState === 'applied') && (
-        <p className="text-xs font-medium text-green-700 dark:text-green-400">
+        <p className="text-xs font-medium text-success">
           {en.cart.couponApplied}
         </p>
       )}
@@ -100,7 +100,7 @@ export function CartSummary({
           </span>
         </div>
         {discountCents > 0 && (
-          <div className="flex justify-between text-green-700 dark:text-green-400">
+          <div className="flex justify-between text-success">
             <span>{en.cart.couponApplied}</span>
             <span>-{formatPrice(discountCents)}</span>
           </div>

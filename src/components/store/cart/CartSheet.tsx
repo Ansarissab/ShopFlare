@@ -1,6 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
+import { toast } from 'sonner'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import {
@@ -12,6 +14,7 @@ import {
 import { en } from '@/lib/i18n/en'
 import { calculateShipping } from '@/lib/utils/index'
 import { useCart, useCartSubtotalCents } from '@/hooks/useCart'
+import { apiPost, ApiError } from '@/lib/api'
 import { CartItem } from '@/components/store/cart/CartItem'
 import { FreeShippingBar } from '@/components/store/cart/FreeShippingBar'
 import { CartSummary } from '@/components/store/cart/CartSummary'
@@ -22,9 +25,27 @@ export function CartSheet({ flatRateCents = 0, thresholdCents = 0 }: CartSheetPr
   const subtotalCents = useCartSubtotalCents()
   const shippingCents = calculateShipping(subtotalCents, flatRateCents, thresholdCents)
 
-  async function handleApplyCoupon(_code: string): Promise<boolean> {
-    // Coupon validation will be wired to the Worker API; return false for now
-    return false
+  const [discountCents, setDiscountCents] = useState(0)
+  const [couponApplied, setCouponApplied] = useState(false)
+
+  async function handleApplyCoupon(code: string): Promise<boolean> {
+    try {
+      const result = await apiPost<{ valid: boolean; discountCents: number; message?: string }>(
+        '/api/coupons/validate',
+        { code, subtotalCents },
+      )
+      if (result.valid) {
+        setDiscountCents(result.discountCents)
+        setCouponApplied(true)
+        return true
+      }
+      toast.error(result.message ?? en.cart.couponInvalid)
+      return false
+    } catch (err) {
+      const msg = err instanceof ApiError ? err.message : en.cart.couponInvalid
+      toast.error(msg)
+      return false
+    }
   }
 
   return (
@@ -73,6 +94,8 @@ export function CartSheet({ flatRateCents = 0, thresholdCents = 0 }: CartSheetPr
                 subtotalCents={subtotalCents}
                 shippingCents={shippingCents}
                 onApplyCoupon={handleApplyCoupon}
+                couponApplied={couponApplied}
+                discountCents={discountCents}
                 onClose={closeCart}
               />
             </div>

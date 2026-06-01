@@ -44,13 +44,13 @@ export function CODForm() {
     }
 
     try {
-      const { orderId } = await apiPost<{ orderId: string }>(
+      const { orderNumber } = await apiPost<{ orderId: string; orderNumber: string }>(
         '/api/orders/cod',
         payload,
         { headers: { 'X-Turnstile-Token': turnstileToken } },
       )
       clearCart()
-      router.push(`/checkout/success?method=cod&orderId=${orderId}`)
+      router.push(`/checkout/success?method=cod&orderId=${orderNumber}`)
     } catch {
       toast.error(en.errors.orderFailed)
     }
@@ -153,7 +153,7 @@ export function CODForm() {
         }}
       />
       {turnstileError && (
-        <p className="text-xs text-destructive">Security check failed. Please refresh and try again.</p>
+        <p className="text-xs text-destructive">{en.checkout.securityCheckFailed}</p>
       )}
 
       <Button

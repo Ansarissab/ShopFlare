@@ -6,6 +6,8 @@ import { useParams } from 'next/navigation'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import { Textarea } from '@/components/ui/textarea'
+import { Checkbox } from '@/components/ui/checkbox'
 import { en } from '@/lib/i18n/en'
 import { formatPrice } from '@/lib/utils/index'
 import { layout } from '@/lib/styles'
@@ -76,7 +78,7 @@ export default function CancelOrderPage() {
       <div className={cn(layout.centeredState, 'max-w-md')}>
         <h1 className="text-xl font-semibold">{en.tracking.notFound}</h1>
         <Link href="/track" className="text-sm text-primary underline-offset-4 hover:underline">
-          Back to tracking
+          {en.tracking.backToTracking}
         </Link>
       </div>
     )
@@ -89,14 +91,14 @@ export default function CancelOrderPage() {
         <h1 className="text-xl font-semibold">{en.checkout.cannotCancel}</h1>
         {order && (
           <p className="text-sm text-muted-foreground capitalize">
-            Current status: {order.status}
+            {en.tracking.status}: {en.orderStatusLabels[order.status as keyof typeof en.orderStatusLabels] ?? order.status}
           </p>
         )}
         <Link
           href={`/track/${params?.orderId}`}
           className="text-sm text-primary underline-offset-4 hover:underline"
         >
-          View order
+          {en.tracking.viewOrder}
         </Link>
       </div>
     )
@@ -131,7 +133,7 @@ export default function CancelOrderPage() {
       <div className={cn(layout.centeredState, 'max-w-md')}>
         <h1 className="text-xl font-semibold">{en.errors.networkError}</h1>
         <Button variant="outline" onClick={() => setPageState('ready')}>
-          Try again
+          {en.tracking.track}
         </Button>
       </div>
     )
@@ -161,24 +163,22 @@ export default function CancelOrderPage() {
           <label htmlFor="cancel-reason" className="text-sm font-medium">
             {en.checkout.cancelReason}
           </label>
-          <textarea
+          <Textarea
             id="cancel-reason"
             rows={3}
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            className="w-full resize-none rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            placeholder="Optional — tell us why you're cancelling"
+            className="resize-none"
+            placeholder={en.tracking.cancelReasonPlaceholder}
           />
         </div>
 
         {/* Confirm toggle */}
         <div className="flex items-center gap-2">
-          <input
+          <Checkbox
             id="cancel-confirm-check"
-            type="checkbox"
-            className="h-4 w-4 rounded border accent-(--accent)"
             checked={confirmed}
-            onChange={(e) => setConfirmed(e.target.checked)}
+            onCheckedChange={(val) => setConfirmed(val === true)}
           />
           <label htmlFor="cancel-confirm-check" className="text-sm cursor-pointer select-none">
             {en.checkout.cancelConfirm}
@@ -194,13 +194,13 @@ export default function CancelOrderPage() {
           disabled={!confirmed || submitting}
           onClick={handleCancel}
         >
-          {submitting ? 'Cancelling…' : en.checkout.cancelOrder}
+          {submitting ? en.tracking.cancelling : en.checkout.cancelOrder}
         </Button>
         <Link
           href={`/track/${params?.orderId}`}
-          className={buttonVariants({ variant: 'outline' }) + ' flex-1 justify-center'}
+          className={cn(buttonVariants({ variant: 'outline' }), 'flex-1 justify-center')}
         >
-          Keep Order
+          {en.tracking.keepOrder}
         </Link>
       </div>
     </div>
