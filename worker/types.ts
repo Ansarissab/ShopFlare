@@ -23,6 +23,15 @@ export type Bindings = {
   TURNSTILE_SITE_KEY: string
   TURNSTILE_SECRET_KEY: string
 
+  // Cloudflare Access (admin API auth — defense-in-depth on top of edge Access).
+  // CF_ACCESS_TEAM_DOMAIN: e.g. "myteam.cloudflareaccess.com" (no scheme).
+  // CF_ACCESS_AUD: the Access application's Audience (AUD) tag.
+  // When either is unset the middleware fails closed (403) in production but
+  // allows requests in local `wrangler dev` (ENVIRONMENT=development).
+  CF_ACCESS_TEAM_DOMAIN?: string
+  CF_ACCESS_AUD?: string
+  ENVIRONMENT?: string
+
   // Deployment
   FRONTEND_URL: string
 }
