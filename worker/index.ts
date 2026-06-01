@@ -7,9 +7,11 @@ type Bindings = {
   R2: R2Bucket
   STRIPE_SECRET_KEY: string
   STRIPE_WEBHOOK_SECRET: string
+  STRIPE_PUBLISHABLE_KEY: string
   RESEND_API_KEY: string
   VAPID_PRIVATE_KEY: string
   VAPID_PUBLIC_KEY: string
+  TURNSTILE_SITE_KEY: string
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
@@ -34,5 +36,6 @@ app.route('/api/products', (await import('./routes/products')).default)
 app.route('/api/orders', (await import('./routes/orders')).default)
 app.route('/api/config', (await import('./routes/config')).default)
 app.route('/api/push', (await import('./routes/push')).default)
+app.route('/api/notify', (await import('./routes/notify')).default)
 
 export default app
