@@ -2,7 +2,7 @@
 // ALL interfaces and prop types live here — never declare them per-file.
 
 import type * as React from 'react'
-import type { Product, Variant, SizeOption, ProductImage, Order } from 'worker/db/schema'
+import type { Product, Variant, SizeOption, ProductImage, Order, Coupon, Review } from 'worker/db/schema'
 import type { OrderStatus, CurrencyCode } from '@/lib/constants'
 import type { CartItem } from '@/hooks/useCart'
 import type { StoreConfigData } from '@/lib/schemas'
@@ -315,4 +315,113 @@ export interface AdminStatCardProps {
   label: string
   value: string | number
   sub?: string
+}
+
+// ─── Coupon types (Agent N) ───────────────────────────────────────────────────
+// AdminCoupon is the raw Drizzle row — never redeclare its fields.
+export type { Coupon }
+export type AdminCoupon = Coupon
+
+export interface CouponsResponse {
+  coupons: AdminCoupon[]
+}
+
+export interface CouponFormProps {
+  /** Existing coupon when editing; undefined when creating. */
+  coupon?: AdminCoupon
+  onSaved: () => void
+  onCancel: () => void
+}
+
+export interface CouponRowProps {
+  coupon: AdminCoupon
+  onEdit: (coupon: AdminCoupon) => void
+  onDeleted: () => void
+}
+
+export interface CouponsTableProps {
+  coupons: AdminCoupon[]
+  onEdit: (coupon: AdminCoupon) => void
+  onDeleted: () => void
+}
+
+// ─── Review types (Agent P) ───────────────────────────────────────────────────
+export type { Review }
+
+// Public, display-safe review (approved only; no order/PII linkage exposed).
+export interface ProductReview {
+  id: string
+  customerName: string
+  rating: number
+  body: string | null
+  createdAt: string
+}
+
+export interface ProductReviewsResponse {
+  reviews: ProductReview[]
+  average: number
+  count: number
+}
+
+// Admin moderation row — full row plus the resolved product name for display.
+export interface AdminReview extends Review {
+  productName: string
+}
+
+export interface AdminReviewsResponse {
+  reviews: AdminReview[]
+}
+
+export interface ReviewStarsProps {
+  rating: number
+  /** Interactive (clickable) when onChange is provided. */
+  onChange?: (rating: number) => void
+  className?: string
+}
+
+export interface ReviewsSectionProps {
+  productId: string
+  productName: string
+  className?: string
+}
+
+export interface ReviewFormProps {
+  productId: string
+  productName: string
+  onSubmitted: () => void
+}
+
+export interface AdminReviewRowProps {
+  review: AdminReview
+  onChanged: () => void
+}
+
+// ─── Notify-Me / restock types (Agent Q) ──────────────────────────────────────
+// Aggregated outstanding restock request for one size option.
+export interface NotifyRequest {
+  sizeOptionId: string
+  size: string
+  productName: string
+  variantLabel: string
+  waiting: number          // count of un-notified subscribers
+  lastRequestedAt: string
+  inStock: boolean         // current stock > 0 or unlimited
+}
+
+export interface NotifyRequestsResponse {
+  requests: NotifyRequest[]
+}
+
+export interface NotifyRequestRowProps {
+  request: NotifyRequest
+}
+
+// ─── SEO / structured data (Agent R) ──────────────────────────────────────────
+export interface ProductJsonLdProps {
+  item: ProductWithVariants
+  /** Optional aggregate rating, when reviews exist. */
+  rating?: { average: number; count: number }
+  /** Absolute store origin for canonical URLs. */
+  storeUrl?: string
+  storeName?: string
 }
