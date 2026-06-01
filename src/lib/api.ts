@@ -27,10 +27,19 @@ export type ApiOptions = {
 }
 
 async function request<T>(path: string, init?: RequestInit & { signal?: AbortSignal }): Promise<T> {
+  // Admin endpoints sit behind CF Access — send the CF_Authorization cookie so
+  // the edge can inject the assertion the worker verifies (requireAccess).
+  const credentials: RequestCredentials | undefined = path.startsWith('/api/admin')
+    ? 'include'
+    : undefined
+
   const res = await fetch(`${WORKER_URL}${path}`, {
+    credentials,
     ...init,
     headers: {
-      ...(init?.body ? { 'Content-Type': 'application/json' } : {}),
+      // FormData bodies set their own multipart Content-Type boundary — don't
+      // override. JSON string bodies get application/json.
+      ...(typeof init?.body === 'string' ? { 'Content-Type': 'application/json' } : {}),
       ...init?.headers,
     },
   })
@@ -62,4 +71,32 @@ export function apiPost<T>(path: string, body?: unknown, opts?: ApiOptions): Pro
     headers: opts?.headers,
     signal: opts?.signal,
   })
+}
+
+export function apiPut<T>(path: string, body?: unknown, opts?: ApiOptions): Promise<T> {
+  return request<T>(path, {
+    method: 'PUT',
+    body: body === undefined ? undefined : JSON.stringify(body),
+    headers: opts?.headers,
+    signal: opts?.signal,
+  })
+}
+
+export function apiDelete<T>(path: string, opts?: ApiOptions): Promise<T> {
+  return request<T>(path, { method: 'DELETE', headers: opts?.headers, signal: opts?.signal })
+}
+
+export function apiPatch<T>(path: string, body?: unknown, opts?: ApiOptions): Promise<T> {
+  return request<T>(path, {
+    method: 'PATCH',
+    body: body === undefined ? undefined : JSON.stringify(body),
+    headers: opts?.headers,
+    signal: opts?.signal,
+  })
+}
+
+// Multipart upload (FormData) — used for R2 image uploads. The browser sets the
+// multipart Content-Type/boundary itself, so we pass the FormData straight through.
+export function apiUpload<T>(path: string, form: FormData, opts?: ApiOptions): Promise<T> {
+  return request<T>(path, { method: 'POST', body: form, headers: opts?.headers, signal: opts?.signal })
 }
