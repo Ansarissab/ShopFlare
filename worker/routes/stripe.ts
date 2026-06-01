@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { createStripe } from '../lib/stripe'
 import { createDb } from '../db/index'
@@ -106,6 +106,13 @@ app.post('/checkout-session', async (c) => {
       ...(discounts ? { discounts } : {}),
     })
 
+    // Persist session id immediately so GET /by-session/:id works before the
+    // webhook fires (and so expired sessions can be matched for cancellation).
+    await db
+      .update(schema.orders)
+      .set({ stripeSessionId: session.id, updatedAt: new Date().toISOString() })
+      .where(eq(schema.orders.id, orderId))
+
     return c.json({ url: session.url })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Stripe error'
@@ -200,8 +207,53 @@ app.post('/webhook', async (c) => {
       break
     }
 
+    case 'checkout.session.expired': {
+      const session = event.data.object
+      const orderId = session.metadata?.orderId
+
+      if (!orderId) {
+        console.warn('[stripe/webhook] checkout.session.expired missing orderId', event.id)
+        break
+      }
+
+      // Idempotency guard — skip if already processed
+      const existingExpired = await db
+        .select()
+        .from(schema.stripeEvents)
+        .where(eq(schema.stripeEvents.eventId, event.id))
+        .get()
+
+      if (existingExpired) {
+        console.info('[stripe/webhook] duplicate event, skipping', event.id)
+        break
+      }
+
+      // Only cancel if still pending — do not overwrite a completed order
+      await db
+        .update(schema.orders)
+        .set({ status: 'cancelled', updatedAt: new Date().toISOString() })
+        .where(
+          and(
+            eq(schema.orders.id, orderId),
+            eq(schema.orders.status, 'pending'),
+          ),
+        )
+
+      await db.insert(schema.stripeEvents).values({
+        id: nanoid(),
+        eventId: event.id,
+        type: event.type,
+      })
+
+      console.info('[stripe/webhook] pending order cancelled (session expired)', { orderId, sessionId: session.id })
+      break
+    }
+
     case 'payment_intent.payment_failed': {
       const pi = event.data.object
+      // Note: payment_intent events carry no orderId in metadata; the order
+      // cannot be updated from here. The corresponding checkout.session.expired
+      // event (or manual admin action) handles order status.
       console.warn('[stripe/webhook] payment_intent.payment_failed', {
         id: pi.id,
         lastError: pi.last_payment_error?.message,

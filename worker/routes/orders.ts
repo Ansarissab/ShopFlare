@@ -24,6 +24,30 @@ app.get('/track/:orderNumber', async (c) => {
 
   if (!order) return c.json({ error: 'Order not found' }, 404)
 
+  // Best-effort contact verification.
+  // If `contact` is provided we verify it matches customerEmail (case-insensitive)
+  // or customerPhone (digits-only suffix match). If absent we allow — back-compat
+  // with post-checkout redirect links that don't carry a contact param.
+  // Note: this is best-effort; orderNumbers are random nanoids so guessing is
+  // infeasible. Full hard-gating would require always carrying the contact.
+  const contact = c.req.query('contact')
+  if (contact) {
+    const contactLower = contact.trim().toLowerCase()
+    const emailMatch =
+      order.customerEmail !== null &&
+      order.customerEmail.toLowerCase() === contactLower
+    const digitsOnly = (s: string) => s.replace(/\D/g, '')
+    const contactDigits = digitsOnly(contact)
+    const phoneMatch =
+      contactDigits.length > 0 &&
+      order.customerPhone !== null &&
+      digitsOnly(order.customerPhone).endsWith(contactDigits)
+
+    if (!emailMatch && !phoneMatch) {
+      return c.json({ error: 'Contact does not match this order' }, 403)
+    }
+  }
+
   const items = await db
     .select()
     .from(schema.orderItems)

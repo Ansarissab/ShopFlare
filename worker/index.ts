@@ -4,7 +4,21 @@ import type { Bindings } from './types'
 
 const app = new Hono<{ Bindings: Bindings }>()
 
-app.use('*', cors({ origin: '*' }))
+app.use(
+  '*',
+  cors({
+    // Allow the configured FRONTEND_URL plus any localhost origin (dev/preview).
+    // Falls back to '*' when FRONTEND_URL is not set (local wrangler dev without env).
+    origin: (origin, c) => {
+      const frontendUrl = c.env.FRONTEND_URL
+      if (!frontendUrl) return '*'
+      if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+        return origin
+      }
+      return origin === frontendUrl ? origin : null
+    },
+  }),
+)
 
 // Health check
 app.get('/api/ping', (c) => c.json({ ok: true }))

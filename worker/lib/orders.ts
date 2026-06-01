@@ -6,6 +6,41 @@ import { nanoid } from 'nanoid'
 import type { Database } from '../db/index'
 import * as schema from '../db/schema'
 
+// ─── Shipping config helper ────────────────────────────────────────────────────
+
+interface ShippingConfig {
+  flatRateCents: number
+  thresholdCents: number
+}
+
+/**
+ * Reads flatShippingRateCents and freeShippingThresholdCents from store_config.
+ * Mirrors the key-read approach in routes/config.ts; Number() converts the
+ * stored text value and falls back to 0 on missing / NaN.
+ */
+async function getShippingConfig(db: Database): Promise<ShippingConfig> {
+  const rows = await db
+    .select()
+    .from(schema.storeConfig)
+    .where(
+      inArray(schema.storeConfig.key, [
+        'flatShippingRateCents',
+        'freeShippingThresholdCents',
+      ]),
+    )
+    .all()
+
+  const kv: Record<string, string> = {}
+  for (const row of rows) {
+    kv[row.key] = row.value
+  }
+
+  return {
+    flatRateCents:   Math.max(0, Number(kv['flatShippingRateCents']      ?? '0') || 0),
+    thresholdCents:  Math.max(0, Number(kv['freeShippingThresholdCents'] ?? '0') || 0),
+  }
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type PaymentMethod = typeof schema.orders.$inferInsert['paymentMethod']
@@ -35,6 +70,7 @@ export interface CreateOrderResult {
   orderNumber: string
   subtotalCents: number
   discountCents: number
+  shippingCents: number
   totalCents: number
 }
 
@@ -259,7 +295,13 @@ export async function createOrder(
     discountCents = result.discountCents
   }
 
-  const totalCents = Math.max(0, subtotalCents - discountCents)
+  // ── 2b. Shipping — mirrors client's calculateShipping logic ───────────────
+  // Free if threshold is set AND subtotal (before discount) meets/exceeds it.
+  const { flatRateCents, thresholdCents } = await getShippingConfig(db)
+  const shippingCents =
+    thresholdCents > 0 && subtotalCents >= thresholdCents ? 0 : flatRateCents
+
+  const totalCents = Math.max(0, subtotalCents - discountCents + shippingCents)
   const orderId = nanoid()
   const orderNumber = generateOrderNumber()
 
@@ -276,7 +318,7 @@ export async function createOrder(
       ? JSON.stringify(shippingAddress)
       : null,
     subtotalCents,
-    shippingCents: 0,
+    shippingCents,
     discountCents,
     totalCents,
     couponCode: couponCode ?? null,
@@ -317,5 +359,5 @@ export async function createOrder(
       .where(eq(schema.coupons.id, couponRow.id))
   }
 
-  return { orderId, orderNumber, subtotalCents, discountCents, totalCents }
+  return { orderId, orderNumber, subtotalCents, discountCents, shippingCents, totalCents }
 }
