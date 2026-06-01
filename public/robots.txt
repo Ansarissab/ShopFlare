@@ -29,4 +29,5 @@ Disallow: /
 User-agent: DotBot
 Disallow: /
 
-Sitemap: https://YOURDOMAIN.com/sitemap.xml
+# Replace the URL below with your NEXT_PUBLIC_SITE_URL value before deploying.
+Sitemap: https://your-store.example.com/sitemap.xml
