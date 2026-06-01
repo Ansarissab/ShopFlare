@@ -3,20 +3,12 @@ import { eq, and } from 'drizzle-orm'
 import { createDb } from '../db/index'
 import * as schema from '../db/schema'
 import { codOrderSchema, cancelOrderSchema } from '@/lib/schemas'
-import { createOrder } from '../lib/orders'
+import { createOrder, CouponError } from '../lib/orders'
+import { parseBody } from '../lib/http'
+import { verifyTurnstile } from '../lib/turnstile'
 import type { Bindings } from '../types'
 
 const app = new Hono<{ Bindings: Bindings }>()
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-async function parseBody(c: { req: { json(): Promise<unknown> } }): Promise<[unknown, null] | [null, Response]> {
-  try {
-    return [await c.req.json(), null]
-  } catch {
-    return [null, new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400, headers: { 'Content-Type': 'application/json' } })]
-  }
-}
 
 // ─── GET /track/:orderNumber ──────────────────────────────────────────────────
 
@@ -64,9 +56,32 @@ app.get('/track/:orderNumber', async (c) => {
   })
 })
 
+// ─── GET /by-session/:sessionId ───────────────────────────────────────────────
+// Used by the frontend success page to build the track link after Stripe checkout.
+
+app.get('/by-session/:sessionId', async (c) => {
+  const { sessionId } = c.req.param()
+  const db = createDb(c.env.DB)
+
+  const order = await db
+    .select({ orderNumber: schema.orders.orderNumber })
+    .from(schema.orders)
+    .where(eq(schema.orders.stripeSessionId, sessionId))
+    .get()
+
+  if (!order) return c.json({ error: 'Order not found' }, 404)
+
+  return c.json({ orderNumber: order.orderNumber })
+})
+
 // ─── POST /cod ────────────────────────────────────────────────────────────────
 
 app.post('/cod', async (c) => {
+  // Security: verify Turnstile token before any DB work
+  const token = c.req.header('X-Turnstile-Token') ?? null
+  const valid = await verifyTurnstile(token, c.env.TURNSTILE_SECRET_KEY, c.req.header('CF-Connecting-IP'))
+  if (!valid) return c.json({ error: 'Security check failed' }, 403)
+
   const [body, errResp] = await parseBody(c)
   if (errResp) return errResp
 
@@ -95,23 +110,31 @@ app.post('/cod', async (c) => {
     }
   }
 
-  const { orderId, orderNumber } = await createOrder(db, {
-    paymentMethod: 'cod',
-    items,
-    customerName: shippingAddress.name,
-    customerEmail: shippingAddress.email,
-    customerPhone: shippingAddress.phone,
-    shippingAddress: shippingAddress as Record<string, unknown>,
-    couponCode,
-  })
+  try {
+    const { orderId, orderNumber } = await createOrder(db, {
+      paymentMethod: 'cod',
+      items,
+      customerName: shippingAddress.name,
+      customerEmail: shippingAddress.email,
+      customerPhone: shippingAddress.phone,
+      shippingAddress: shippingAddress as Record<string, unknown>,
+      couponCode,
+    })
 
-  return c.json({ orderId, orderNumber }, 201)
+    return c.json({ orderId, orderNumber }, 201)
+  } catch (err) {
+    if (err instanceof CouponError) {
+      return c.json({ error: err.message }, 422)
+    }
+    throw err
+  }
 })
 
-// ─── POST /:id/cancel ─────────────────────────────────────────────────────────
+// ─── POST /:orderNumber/cancel ────────────────────────────────────────────────
+// Resolves by orderNumber (the only identifier the public has access to).
 
-app.post('/:id/cancel', async (c) => {
-  const { id } = c.req.param()
+app.post('/:orderNumber/cancel', async (c) => {
+  const { orderNumber } = c.req.param()
 
   const [body] = await parseBody(c)
   const parsed = cancelOrderSchema.safeParse(body ?? {})
@@ -122,7 +145,7 @@ app.post('/:id/cancel', async (c) => {
   const order = await db
     .select()
     .from(schema.orders)
-    .where(eq(schema.orders.id, id))
+    .where(eq(schema.orders.orderNumber, orderNumber))
     .get()
 
   if (!order) return c.json({ error: 'Order not found' }, 404)
@@ -138,7 +161,7 @@ app.post('/:id/cancel', async (c) => {
       notes: reason ?? order.notes,
       updatedAt: new Date().toISOString(),
     })
-    .where(eq(schema.orders.id, id))
+    .where(eq(schema.orders.id, order.id))
 
   return c.json({ ok: true })
 })

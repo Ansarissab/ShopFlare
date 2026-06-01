@@ -1,21 +1,23 @@
 import { Hono } from 'hono'
-import { drizzle } from 'drizzle-orm/d1'
 import { eq, and, or } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
+import { createDb } from '../db/index'
 import * as schema from '../db/schema'
 import { notifyMeSchema } from '@/lib/schemas'
+import { parseBody } from '../lib/http'
+import { verifyTurnstile } from '../lib/turnstile'
 import type { Bindings } from '../types'
 
 const app = new Hono<{ Bindings: Bindings }>()
 
 app.post('/', async (c) => {
-  // Parse body
-  let body: unknown
-  try {
-    body = await c.req.json()
-  } catch {
-    return c.json({ error: 'Invalid JSON' }, 400)
-  }
+  // Security: verify Turnstile token before any DB work
+  const token = c.req.header('X-Turnstile-Token') ?? null
+  const valid = await verifyTurnstile(token, c.env.TURNSTILE_SECRET_KEY, c.req.header('CF-Connecting-IP'))
+  if (!valid) return c.json({ error: 'Security check failed' }, 403)
+
+  const [body, errResp] = await parseBody(c)
+  if (errResp) return errResp
 
   // Validate
   const result = notifyMeSchema.safeParse(body)
@@ -24,9 +26,12 @@ app.post('/', async (c) => {
   }
 
   const { sizeOptionId, email, phone } = result.data
-  const db = drizzle(c.env.DB, { schema })
+  const db = createDb(c.env.DB)
 
   // Check sizeOption exists and is OOS
+  // stock === 0  → truly OOS (allow subscribe)
+  // stock === -1 → unlimited (item IS available — reject)
+  // stock  > 0  → in stock (reject)
   const sizeOption = await db
     .select({ id: schema.sizeOptions.id, stock: schema.sizeOptions.stock })
     .from(schema.sizeOptions)
@@ -37,14 +42,12 @@ app.post('/', async (c) => {
     return c.json({ error: 'Size option not found' }, 404)
   }
 
-  if (sizeOption.stock > 0) {
+  if (sizeOption.stock !== 0) {
     return c.json({ error: 'Item is in stock' }, 400)
   }
 
   // Check for duplicate — same sizeOptionId + (same email OR same phone)
   try {
-    const conditions = [eq(schema.notifyMe.sizeOptionId, sizeOptionId)]
-
     if (email && phone) {
       const existing = await db
         .select({ id: schema.notifyMe.id })
@@ -64,14 +67,24 @@ app.post('/', async (c) => {
       const existing = await db
         .select({ id: schema.notifyMe.id })
         .from(schema.notifyMe)
-        .where(and(...conditions, eq(schema.notifyMe.email, email)))
+        .where(
+          and(
+            eq(schema.notifyMe.sizeOptionId, sizeOptionId),
+            eq(schema.notifyMe.email, email),
+          ),
+        )
         .get()
       if (existing) return c.json({ ok: true, duplicate: true })
     } else if (phone) {
       const existing = await db
         .select({ id: schema.notifyMe.id })
         .from(schema.notifyMe)
-        .where(and(...conditions, eq(schema.notifyMe.phone, phone)))
+        .where(
+          and(
+            eq(schema.notifyMe.sizeOptionId, sizeOptionId),
+            eq(schema.notifyMe.phone, phone),
+          ),
+        )
         .get()
       if (existing) return c.json({ ok: true, duplicate: true })
     }

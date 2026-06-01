@@ -1,12 +1,12 @@
 import { Hono } from 'hono'
 import { eq } from 'drizzle-orm'
-import { drizzle } from 'drizzle-orm/d1'
 import { nanoid } from 'nanoid'
 import { createStripe } from '../lib/stripe'
+import { createDb } from '../db/index'
 import * as schema from '../db/schema'
 import { createCheckoutSessionSchema } from '@/lib/schemas'
 import { createOrder } from '../lib/orders'
-import { createDb } from '../db/index'
+import { parseBody } from '../lib/http'
 import type { Bindings } from '../types'
 
 const app = new Hono<{ Bindings: Bindings }>()
@@ -22,12 +22,8 @@ const checkoutBodySchema = createCheckoutSessionSchema.omit({ orderId: true })
 
 app.post('/checkout-session', async (c) => {
   // 1. Parse + validate body
-  let body: unknown
-  try {
-    body = await c.req.json()
-  } catch {
-    return c.json({ error: 'Invalid JSON body' }, 400)
-  }
+  const [body, errResp] = await parseBody(c)
+  if (errResp) return errResp
 
   const parsed = checkoutBodySchema.safeParse(body)
   if (!parsed.success) {
@@ -92,7 +88,8 @@ app.post('/checkout-session', async (c) => {
   }
 
   // 4. Determine origin for success/cancel URLs
-  const origin = new URL(c.req.url).origin
+  //    Prefer FRONTEND_URL env var; fall back to worker origin (dev/preview).
+  const origin = c.env.FRONTEND_URL || new URL(c.req.url).origin
 
   // 5. Create Stripe Checkout session, passing orderId in metadata so the
   //    webhook can confirm the correct order row.
@@ -143,7 +140,7 @@ app.post('/webhook', async (c) => {
     return c.json({ error: message }, 400)
   }
 
-  const db = drizzle(c.env.DB, { schema })
+  const db = createDb(c.env.DB)
 
   // 4. Handle events
   switch (event.type) {

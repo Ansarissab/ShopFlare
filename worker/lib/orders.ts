@@ -1,7 +1,7 @@
 // Shared order-creation helper used by both COD and Stripe routes.
 // Extracted from routes/orders.ts so the logic lives in exactly one place.
 
-import { eq, and, inArray } from 'drizzle-orm'
+import { eq, and, inArray, sql } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import type { Database } from '../db/index'
 import * as schema from '../db/schema'
@@ -38,10 +38,78 @@ export interface CreateOrderResult {
   totalCents: number
 }
 
+/**
+ * Typed coupon-validation error returned by evaluateCoupon when the coupon
+ * cannot be applied. The route turns this into a 422 response.
+ *
+ * Design choice: evaluateCoupon uses a discriminated-union return value
+ * ({ ok: true, discountCents } | { ok: false, message }) rather than
+ * throwing.  The caller (createOrder / coupons route) maps the failure
+ * branch to a 422 without requiring a try/catch.  createOrder re-throws
+ * with a typed CouponError so the COD route can surface it cleanly.
+ */
+export class CouponError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'CouponError'
+  }
+}
+
+export type EvaluateCouponResult =
+  | { ok: true; discountCents: number }
+  | { ok: false; message: string }
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function generateOrderNumber(): string {
   return `ORD-${nanoid(6).toUpperCase()}`
+}
+
+/**
+ * evaluateCoupon — pure validation + discount computation.
+ *
+ * Checks all validity rules (active, not expired, min-order, usage-limit)
+ * and computes discountCents.  Does NOT write to the DB.
+ * Used by both createOrder and POST /api/coupons/validate.
+ *
+ * @param coupon - Row from the `coupons` table (null means not found).
+ * @param subtotalCents - Cart subtotal BEFORE discount.
+ * @param now - Injected timestamp string (ISO-8601) for testability.
+ */
+export function evaluateCoupon(
+  coupon: typeof schema.coupons.$inferSelect | null | undefined,
+  subtotalCents: number,
+  now: string,
+): EvaluateCouponResult {
+  if (!coupon || !coupon.active) {
+    return { ok: false, message: 'Coupon not found or inactive' }
+  }
+
+  if (coupon.expiresAt && coupon.expiresAt < now) {
+    return { ok: false, message: 'Coupon has expired' }
+  }
+
+  if (coupon.minOrderCents !== null && subtotalCents < coupon.minOrderCents) {
+    return {
+      ok: false,
+      message: `Minimum order of ${(coupon.minOrderCents / 100).toFixed(2)} required for this coupon`,
+    }
+  }
+
+  if (coupon.usageLimit !== null && coupon.usedCount >= coupon.usageLimit) {
+    return { ok: false, message: 'Coupon usage limit reached' }
+  }
+
+  let discountCents =
+    coupon.type === 'percentage'
+      ? Math.floor((subtotalCents * coupon.value) / 100)
+      : coupon.value
+
+  if (coupon.maxDiscountCents !== null) {
+    discountCents = Math.min(discountCents, coupon.maxDiscountCents)
+  }
+
+  return { ok: true, discountCents }
 }
 
 // ─── createOrder ─────────────────────────────────────────────────────────────
@@ -58,6 +126,9 @@ function generateOrderNumber(): string {
  *   2. inArray(variants, all variantIds from step 1)
  *   3. inArray(products, all productIds from step 2)
  *   4. inArray(productImages, all variantIds from step 1) — first image per variant
+ *
+ * Throws CouponError if the coupon fails validation — the COD route maps
+ * this to a 422 response.
  */
 export async function createOrder(
   db: Database,
@@ -167,30 +238,25 @@ export async function createOrder(
     })
   }
 
-  // ── 2. Coupon discount ─────────────────────────────────────────────────────
+  // ── 2. Coupon validation + discount ───────────────────────────────────────
   let discountCents = 0
+  let couponRow: typeof schema.coupons.$inferSelect | null = null
+
   if (couponCode) {
-    const coupon = await db
+    couponRow = await db
       .select()
       .from(schema.coupons)
-      .where(
-        and(
-          eq(schema.coupons.code, couponCode),
-          eq(schema.coupons.active, true),
-        ),
-      )
-      .get()
+      .where(eq(schema.coupons.code, couponCode))
+      .get() ?? null
 
-    if (coupon) {
-      if (coupon.type === 'percentage') {
-        discountCents = Math.floor((subtotalCents * coupon.value) / 100)
-      } else {
-        discountCents = coupon.value
-      }
-      if (coupon.maxDiscountCents) {
-        discountCents = Math.min(discountCents, coupon.maxDiscountCents)
-      }
+    const result = evaluateCoupon(couponRow, subtotalCents, new Date().toISOString())
+
+    if (!result.ok) {
+      // CouponError is caught by the COD route and mapped to 422
+      throw new CouponError(result.message)
     }
+
+    discountCents = result.discountCents
   }
 
   const totalCents = Math.max(0, subtotalCents - discountCents)
@@ -219,6 +285,36 @@ export async function createOrder(
   // ── 4. Insert order items ──────────────────────────────────────────────────
   for (const item of orderItemsToInsert) {
     await db.insert(schema.orderItems).values({ ...item, orderId })
+  }
+
+  // ── 5. Stock decrement — skip unlimited (-1) items ────────────────────────
+  for (const item of items) {
+    await db
+      .update(schema.sizeOptions)
+      .set({ stock: sql`stock - ${item.quantity}` })
+      .where(
+        and(
+          eq(schema.sizeOptions.id, item.sizeOptionId),
+          // Drizzle doesn't have sql != -1 shorthand; use ne via raw sql guard
+          sql`${schema.sizeOptions.stock} != -1`,
+        ),
+      )
+  }
+
+  // ── 6. Record coupon usage + increment usedCount ──────────────────────────
+  if (couponCode && couponRow) {
+    await db.insert(schema.couponUses).values({
+      id: nanoid(),
+      couponId: couponRow.id,
+      orderId,
+      customerEmail: customerEmail ?? null,
+      customerPhone: customerPhone ?? null,
+    })
+
+    await db
+      .update(schema.coupons)
+      .set({ usedCount: sql`used_count + 1` })
+      .where(eq(schema.coupons.id, couponRow.id))
   }
 
   return { orderId, orderNumber, subtotalCents, discountCents, totalCents }

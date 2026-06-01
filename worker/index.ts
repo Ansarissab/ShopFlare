@@ -25,5 +25,6 @@ app.route('/api/orders', (await import('./routes/orders')).default)
 app.route('/api/config', (await import('./routes/config')).default)
 app.route('/api/push', (await import('./routes/push')).default)
 app.route('/api/notify', (await import('./routes/notify')).default)
+app.route('/api/coupons', (await import('./routes/coupons')).default)
 
 export default app
