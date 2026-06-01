@@ -10,6 +10,7 @@ import { buildWhatsAppOrderUrl } from '@/lib/whatsapp'
 import { buildProductMaps } from '@/lib/utils/index'
 import { DEFAULT_CURRENCY } from '@/lib/constants'
 import { en } from '@/lib/i18n/en'
+import { apiPost } from '@/lib/api'
 import type { CartItem } from '@/hooks/useCart'
 import type { SizeOption, ProductHeroWrapperProps } from '@/lib/types/store'
 
@@ -55,7 +56,19 @@ export function ProductHeroWrapper({ item }: ProductHeroWrapperProps) {
   )
 
   const handleBuyNow = useCallback(
-    (size: SizeOption) => {
+    async (size: SizeOption) => {
+      if (size.stripePriceId) {
+        try {
+          const { url } = await apiPost<{ url: string }>('/api/stripe/checkout-session', {
+            items: [{ stripePriceId: size.stripePriceId, quantity: 1 }],
+          })
+          router.push(url)
+          return
+        } catch {
+          toast.error(en.errors.orderFailed)
+          // fall through to cart fallback
+        }
+      }
       addItem(buildCartItem(size))
       router.push('/checkout')
     },

@@ -1,7 +1,8 @@
 'use client'
 
+import { Suspense } from 'react'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
@@ -43,13 +44,31 @@ function TrackingSkeleton() {
   )
 }
 
-export default function OrderTrackingPage() {
+function OrderTrackingContent() {
   const params = useParams<{ orderId: string }>()
-  const { data, loading, notFound } = useApiResource<TrackingData>(
-    params?.orderId ? `/api/orders/track/${params.orderId}` : null,
-  )
+  const searchParams = useSearchParams()
+  const contact = searchParams.get('c') ?? ''
+
+  const apiPath = params?.orderId
+    ? `/api/orders/track/${params.orderId}${contact ? `?contact=${encodeURIComponent(contact)}` : ''}`
+    : null
+
+  const { data, loading, error, notFound } = useApiResource<TrackingData>(apiPath)
 
   if (loading) return <TrackingSkeleton />
+
+  // 403 — contact mismatch; surface the API error message rather than "not found"
+  if (error) {
+    return (
+      <div className={cn(layout.centeredState, 'max-w-2xl')}>
+        <h1 className="text-2xl font-semibold tracking-tight">{en.tracking.notFound}</h1>
+        <p className="text-sm text-muted-foreground">{error}</p>
+        <Link href="/track" className="text-sm text-primary underline-offset-4 hover:underline">
+          {en.tracking.backToTracking}
+        </Link>
+      </div>
+    )
+  }
 
   if (notFound || !data) {
     return (
@@ -150,5 +169,13 @@ export default function OrderTrackingPage() {
         </Link>
       )}
     </div>
+  )
+}
+
+export default function OrderTrackingPage() {
+  return (
+    <Suspense fallback={<TrackingSkeleton />}>
+      <OrderTrackingContent />
+    </Suspense>
   )
 }

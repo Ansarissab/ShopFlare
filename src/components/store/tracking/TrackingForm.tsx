@@ -27,7 +27,7 @@ export function TrackingForm() {
     }
 
     // Navigate to tracking page — Worker route validates contact
-    router.push(`/track/${orderNumber.trim()}`)
+    router.push(`/track/${orderNumber.trim()}?c=${encodeURIComponent(contact.trim())}`)
   }
 
   return (
