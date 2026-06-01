@@ -31,6 +31,8 @@ export const DEFAULT_CURRENCY: CurrencyCode = 'PKR'
 
 export const MAX_VARIANTS = 5
 export const MAX_IMAGES_PER_VARIANT = 5
+export const MAX_IMAGE_BYTES = 5 * 1024 * 1024 // 5 MB — server-side upload cap
+export const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'] as const
 export const MAX_COUPON_CODE_LENGTH = 20
 export const MIN_COUPON_CODE_LENGTH = 6
 export const FREE_SHIPPING_DEFAULT_THRESHOLD = 0  // 0 = disabled

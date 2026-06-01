@@ -55,6 +55,18 @@ export const updateTrackingSchema = z.object({
   carrier:        z.string().max(100).optional(),
 })
 
+// POS (point-of-sale) in-person order — admin-only. Prices/snapshots are
+// resolved server-side from sizeOptionId, so the client sends only id + qty.
+export const posOrderSchema = z.object({
+  items: z.array(
+    z.object({
+      sizeOptionId: idField,
+      quantity:     z.number().int().positive().max(999),
+    }),
+  ).min(1),
+  customerPhone: z.string().optional(),
+})
+
 // ─── Config admin ─────────────────────────────────────────────────────────────
 
 // Allow partial updates — merchant edits one section at a time
@@ -70,4 +82,5 @@ export type CreateSizeOptionInput  = z.infer<typeof createSizeOptionSchema>
 export type UpdateSizeOptionInput  = z.infer<typeof updateSizeOptionSchema>
 export type UpdateOrderStatusInput = z.infer<typeof updateOrderStatusSchema>
 export type UpdateTrackingInput    = z.infer<typeof updateTrackingSchema>
+export type PosOrderInput          = z.infer<typeof posOrderSchema>
 export type UpdateConfigInput      = z.infer<typeof updateConfigSchema>
