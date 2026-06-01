@@ -12,6 +12,7 @@ export class ApiError extends Error {
   constructor(
     public readonly status: number,
     message: string,
+    public readonly body?: unknown,
   ) {
     super(message)
     this.name = 'ApiError'
@@ -20,9 +21,12 @@ export class ApiError extends Error {
 
 // Per-call options. `headers` merges over the defaults (e.g. an
 // `X-Turnstile-Token` on protected POSTs) so callers never reach for raw fetch.
-export type ApiOptions = { headers?: Record<string, string> }
+export type ApiOptions = {
+  headers?: Record<string, string>
+  signal?: AbortSignal
+}
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+async function request<T>(path: string, init?: RequestInit & { signal?: AbortSignal }): Promise<T> {
   const res = await fetch(`${WORKER_URL}${path}`, {
     ...init,
     headers: {
@@ -32,7 +36,14 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   })
 
   if (!res.ok) {
-    throw new ApiError(res.status, `HTTP ${res.status}`)
+    const raw = await res.text()
+    let parsed: unknown
+    try { parsed = JSON.parse(raw) } catch { parsed = undefined }
+    const msg =
+      parsed && typeof parsed === 'object' && parsed !== null
+        ? ((parsed as Record<string, unknown>).error ?? (parsed as Record<string, unknown>).message ?? `HTTP ${res.status}`)
+        : `HTTP ${res.status}`
+    throw new ApiError(res.status, String(msg), parsed)
   }
 
   // Tolerate empty bodies (e.g. 204) without throwing on JSON.parse.
@@ -41,7 +52,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export function apiGet<T>(path: string, opts?: ApiOptions): Promise<T> {
-  return request<T>(path, { headers: opts?.headers })
+  return request<T>(path, { headers: opts?.headers, signal: opts?.signal })
 }
 
 export function apiPost<T>(path: string, body?: unknown, opts?: ApiOptions): Promise<T> {
@@ -49,5 +60,6 @@ export function apiPost<T>(path: string, body?: unknown, opts?: ApiOptions): Pro
     method: 'POST',
     body: body === undefined ? undefined : JSON.stringify(body),
     headers: opts?.headers,
+    signal: opts?.signal,
   })
 }

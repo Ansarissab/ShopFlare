@@ -1,17 +1,27 @@
 // Atomic field primitives — compose these into domain schemas.
 // Never use z.string().email() raw; use these named fields everywhere.
 import { z } from 'zod/v4'
+import { MIN_COUPON_CODE_LENGTH, MAX_COUPON_CODE_LENGTH } from '@/lib/constants'
 
 export const idField       = z.string().min(1)
 export const quantityField = z.number().int().positive().max(999)
 export const emailField    = z.string().email()
-export const phoneField    = z.string().min(7)
-export const couponField   = z.string().optional()
+export const phoneField    = z.string().regex(/^\+?[1-9]\d{6,14}$/)
+export const couponField   = z
+  .string()
+  .min(MIN_COUPON_CODE_LENGTH)
+  .max(MAX_COUPON_CODE_LENGTH)
+  .regex(/^[A-Z0-9_-]+$/i)
+  .optional()
 
-// Reusable cart line item (COD and Stripe share this shape, different ID key)
-export const orderItemSchema = z.object({
-  sizeOptionId: idField,
+// Base cart line item — quantity only; extended by order-domain item schemas
+export const baseItemSchema = z.object({
   quantity: quantityField,
+})
+
+// Reusable cart line item (COD path) — base + sizeOptionId
+export const orderItemSchema = baseItemSchema.extend({
+  sizeOptionId: idField,
 })
 
 // Base contact block — extended by shippingAddressSchema and notifyMeSchema

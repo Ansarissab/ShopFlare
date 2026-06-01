@@ -1,7 +1,8 @@
 // Central type definitions for the store frontend.
 // ALL interfaces and prop types live here — never declare them per-file.
 
-import type { Product, Variant, SizeOption, ProductImage } from 'worker/db/schema'
+import type * as React from 'react'
+import type { Product, Variant, SizeOption, ProductImage, Order } from 'worker/db/schema'
 import type { OrderStatus, CurrencyCode } from '@/lib/constants'
 import type { CartItem } from '@/hooks/useCart'
 import type { StoreConfigData } from '@/lib/schemas'
@@ -61,11 +62,40 @@ export interface TrackingData {
   items: TrackingItem[]
 }
 
-export interface CancelOrder {
-  orderNumber: string
-  status: OrderStatus
-  customerName: string
-  totalCents: number
+export type CancelOrder = Pick<Order, 'orderNumber' | 'status' | 'customerName' | 'totalCents'>
+
+// ─── Shared UI / utility types ────────────────────────────────────────────────
+
+export interface FieldProps {
+  label: string
+  htmlFor: string
+  optional?: boolean
+  error?: string
+  children: React.ReactNode
+}
+
+export interface WhatsAppOrderParams {
+  phoneNumber: string
+  productName: string
+  variantLabel: string
+  size: string
+  sku?: string
+  priceCents: number
+  currency: CurrencyCode
+  quantity: number
+}
+
+export interface ApiResourceState<T> {
+  data: T | null
+  loading: boolean
+  error: string | null
+  notFound: boolean
+}
+
+export interface UseStoreConfigResult {
+  config: StoreConfig | null
+  loading: boolean
+  error: string | null
 }
 
 // ─── Cart component props ─────────────────────────────────────────────────────

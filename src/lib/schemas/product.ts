@@ -20,8 +20,5 @@ export const notifyMeSchema = notifyMeBase.refine(
   { message: 'Email or phone required' },
 )
 
-// Plucked form schema — contact fields only, used in the dialog UI
-export const notifyMeFormSchema = notifyMeBase.pick({ email: true, phone: true })
-
 export type ReviewInput   = z.infer<typeof reviewSchema>
 export type NotifyMeInput = z.infer<typeof notifyMeSchema>

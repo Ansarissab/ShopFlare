@@ -35,3 +35,4 @@ export const MAX_COUPON_CODE_LENGTH = 20
 export const MIN_COUPON_CODE_LENGTH = 6
 export const FREE_SHIPPING_DEFAULT_THRESHOLD = 0  // 0 = disabled
 export const LOW_STOCK_THRESHOLD = 5
+export const MAX_CART_ITEMS = 50

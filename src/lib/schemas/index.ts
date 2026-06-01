@@ -9,7 +9,7 @@
 // Pattern cheat-sheet:
 //   Extend (inherit):  shippingAddressSchema = contactSchema.extend({...})
 //   Compose (merge):   codOrderSchema uses shippingAddressSchema as a field
-//   Pluck  (pick):     notifyMeFormSchema = notifyMeSchema.innerType().pick({...})
+//   Pluck  (pick):     someFormSchema = someBase.pick({ field: true })
 //   Omit   (project):  someSchema.omit({ sensitiveField: true })
 
 export * from './base'
