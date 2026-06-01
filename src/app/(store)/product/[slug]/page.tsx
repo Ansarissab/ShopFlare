@@ -6,6 +6,7 @@ import { ProductHeroWrapper } from '@/components/store/product/ProductHeroWrappe
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
 import type { ProductWithVariants } from '@/lib/types/store'
+import { en } from '@/lib/i18n/en'
 import { useApiResource } from '@/hooks/useApiResource'
 
 function ProductDetailSkeleton() {
@@ -53,12 +54,12 @@ export default function ProductDetailPage() {
   if (notFound || !item) {
     return (
       <div className={cn(layout.centeredState, 'max-w-7xl')}>
-        <h1>Product Not Found</h1>
+        <h1>{en.product.notFound}</h1>
         <p className="text-muted-foreground text-sm">
-          This product does not exist or may have been removed.
+          {en.product.notFoundBody}
         </p>
         <a href="/" className="text-sm text-primary underline-offset-4 hover:underline">
-          Back to store
+          {en.product.backToStore}
         </a>
       </div>
     )

@@ -48,7 +48,7 @@ export function NotifyMeDialog({
         ...(values.phone ? { phone: values.phone } : {}),
       })
 
-      toast.success("You'll be notified when it's back in stock!")
+      toast.success(en.store.notifySuccess)
       reset()
       onOpenChange(false)
     } catch {
@@ -68,16 +68,17 @@ export function NotifyMeDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-4 flex flex-col gap-4">
           <input type="hidden" {...register('sizeOptionId')} />
 
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <Label htmlFor="notify-email">{en.checkout.email}</Label>
             <Input
               id="notify-email"
               type="email"
               autoComplete="email"
               placeholder="you@example.com"
+              aria-invalid={!!errors.email}
               {...register('email')}
             />
             {errors.email && (
@@ -85,13 +86,14 @@ export function NotifyMeDialog({
             )}
           </div>
 
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <Label htmlFor="notify-phone">{en.checkout.phone}</Label>
             <Input
               id="notify-phone"
               type="tel"
               autoComplete="tel"
               placeholder="+1 555 000 0000"
+              aria-invalid={!!errors.phone}
               {...register('phone')}
             />
             {errors.phone && (

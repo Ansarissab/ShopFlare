@@ -3,7 +3,7 @@ import Image from 'next/image'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import { formatPrice } from '@/lib/utils/index'
+import { formatPrice, getPriceRange } from '@/lib/utils/index'
 import { en } from '@/lib/i18n/en'
 import type { ProductCardProps } from '@/lib/types/store'
 
@@ -15,10 +15,9 @@ export function ProductCard({
   isNew,
   className,
 }: ProductCardProps) {
-  // Derive min price from active sizes with positive stock
+  const { minPrice, maxPrice } = getPriceRange(sizes)
+  // activeSizes used to show out-of-stock message
   const activeSizes = sizes.filter((s) => s.active && s.stock !== 0)
-  const prices = activeSizes.map((s) => s.priceCents)
-  const minPrice = prices.length > 0 ? Math.min(...prices) : null
 
   // First image (lowest sortOrder across all variants)
   const firstImage = images
@@ -69,7 +68,7 @@ export function ProductCard({
           {minPrice !== null && (
             <p className="text-sm font-semibold text-primary">
               {formatPrice(minPrice)}
-              {prices.length > 1 && prices.some((p) => p !== minPrice) && '+'}
+              {maxPrice !== null && maxPrice !== minPrice && '+'}
             </p>
           )}
 

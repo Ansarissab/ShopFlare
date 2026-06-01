@@ -11,13 +11,9 @@
 
 import { useEffect, useState } from 'react'
 import { apiGet, ApiError } from '@/lib/api'
+import type { ApiResourceState } from '@/lib/types/store'
 
-export interface ApiResourceState<T> {
-  data: T | null
-  loading: boolean
-  error: string | null
-  notFound: boolean
-}
+export type { ApiResourceState }
 
 export function useApiResource<T>(path: string | null): ApiResourceState<T> {
   const [data, setData] = useState<T | null>(null)

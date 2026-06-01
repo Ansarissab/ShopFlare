@@ -48,7 +48,7 @@ export function CheckoutMethodSelector() {
       <TabsContent value="card" className="pt-4">
         <div className="flex flex-col gap-3">
           <p className="text-sm text-muted-foreground">
-            You will be redirected to Stripe&apos;s secure payment page.
+            {en.checkout.stripeRedirectNote}
           </p>
           <Button
             size="lg"

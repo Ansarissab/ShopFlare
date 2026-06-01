@@ -1,22 +1,10 @@
 'use client'
 
-// TODO: move FieldProps to lib/types/store.ts
-
-import type { ReactNode } from 'react'
 import { Label } from '@/components/ui/label'
+import { en } from '@/lib/i18n/en'
+import type { FieldProps } from '@/lib/types/store'
 
-export interface FieldProps {
-  /** Text content of the <label>. */
-  label: string
-  /** Passed to htmlFor on <Label> and expected as id on the child <Input>. */
-  htmlFor: string
-  /** When true, appends an "(optional)" muted span after the label text. */
-  optional?: boolean
-  /** Validation error message. When defined (non-empty) the error <p> renders. */
-  error?: string
-  /** The <Input> (or any input element) to render inside the field wrapper. */
-  children: ReactNode
-}
+export type { FieldProps }
 
 /**
  * Shared form-field wrapper: label + optional marker + input slot + error message.
@@ -28,8 +16,6 @@ export interface FieldProps {
  *     {children}
  *     {error && <p class="text-xs text-destructive">}
  *   </div>
- *
- * "(optional)" literal has no key in en.ts — kept inline until a key is added.
  */
 export function FormField({ label, htmlFor, optional = false, error, children }: FieldProps) {
   return (
@@ -39,7 +25,7 @@ export function FormField({ label, htmlFor, optional = false, error, children }:
         {optional && (
           <>
             {' '}
-            <span className="text-xs text-muted-foreground">(optional)</span>
+            <span className="text-xs text-muted-foreground">{en.common.optional}</span>
           </>
         )}
       </Label>

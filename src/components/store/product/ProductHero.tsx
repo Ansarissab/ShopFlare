@@ -4,7 +4,7 @@ import * as React from 'react'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import { formatPrice } from '@/lib/utils/index'
+import { formatPrice, getPriceRange } from '@/lib/utils/index'
 import { en } from '@/lib/i18n/en'
 import { ImageCarousel } from '@/components/store/product/ImageCarousel'
 import { VariantSelector } from '@/components/store/product/VariantSelector'
@@ -57,9 +57,7 @@ export function ProductHero({
   const currentVariant = variants.find((v) => v.id === selectedVariantId) ?? null
 
   // Price display: range across active sizes
-  const activePrices = currentSizes.filter((s) => s.stock !== 0).map((s) => s.priceCents)
-  const minPrice = activePrices.length > 0 ? Math.min(...activePrices) : null
-  const maxPrice = activePrices.length > 0 ? Math.max(...activePrices) : null
+  const { minPrice, maxPrice } = getPriceRange(currentSizes)
   const priceLabel =
     minPrice !== null
       ? minPrice === maxPrice

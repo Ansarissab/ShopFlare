@@ -23,18 +23,10 @@ function stepState(step: string, currentStatus: OrderStatus): StepState {
   return 'upcoming'
 }
 
-const STEP_LABELS: Record<Exclude<OrderStatus, 'cancelled'>, string> = {
-  pending: 'Pending',
-  confirmed: 'Confirmed',
-  processing: 'Processing',
-  shipped: 'Shipped',
-  delivered: 'Delivered',
-}
-
 // Simple icon paths — inline SVG for zero-dep
 function StepIcon({ step, state }: { step: string; state: StepState }) {
   const baseClass = cn(
-    'flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 transition-colors',
+    'flex size-8 shrink-0 items-center justify-center rounded-full border-2 transition-colors',
     {
       'border-(--success) bg-(--success) text-white': state === 'completed',
       'border-(--accent) bg-(--accent) text-(--accent-fg)': state === 'current',
@@ -44,23 +36,23 @@ function StepIcon({ step, state }: { step: string; state: StepState }) {
 
   const icons: Record<string, ReactElement> = {
     pending: (
-      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="10" strokeWidth="2" />
         <polyline points="12 6 12 12 16 14" strokeWidth="2" strokeLinecap="round" />
       </svg>
     ),
     confirmed: (
-      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <polyline points="20 6 9 17 4 12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
     processing: (
-      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" strokeWidth="2" strokeLinecap="round" />
       </svg>
     ),
     shipped: (
-      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <rect x="1" y="3" width="15" height="13" rx="1" strokeWidth="2" />
         <path d="M16 8h4l3 5v3h-7V8z" strokeWidth="2" strokeLinejoin="round" />
         <circle cx="5.5" cy="18.5" r="2.5" strokeWidth="2" />
@@ -68,7 +60,7 @@ function StepIcon({ step, state }: { step: string; state: StepState }) {
       </svg>
     ),
     delivered: (
-      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" strokeWidth="2" strokeLinejoin="round" />
         <polyline points="9 22 9 12 15 12 15 22" strokeWidth="2" strokeLinejoin="round" />
       </svg>
@@ -84,7 +76,7 @@ export function OrderTimeline({ status, trackingNumber, carrier }: OrderTimeline
       <div className="flex flex-col gap-3">
         <p className="text-sm font-medium text-muted-foreground">{en.tracking.status}</p>
         <Badge variant="destructive" className="w-fit text-sm px-3 py-1">
-          Cancelled
+          {en.orderStatusLabels.cancelled}
         </Badge>
       </div>
     )
@@ -124,7 +116,7 @@ export function OrderTimeline({ status, trackingNumber, carrier }: OrderTimeline
                     'text-(--muted-fg)': state === 'upcoming',
                   })}
                 >
-                  {STEP_LABELS[step]}
+                  {en.orderStatusLabels[step as keyof typeof en.orderStatusLabels]}
                 </span>
 
                 {/* Show tracking info under the 'shipped' step */}

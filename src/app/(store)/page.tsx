@@ -5,6 +5,7 @@ import { ProductHeroWrapper } from '@/components/store/product/ProductHeroWrappe
 import { ProductCard } from '@/components/store/product/ProductCard'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
+import { en } from '@/lib/i18n/en'
 import type { ProductWithVariants } from '@/lib/types/store'
 import { useApiResource } from '@/hooks/useApiResource'
 
@@ -41,8 +42,8 @@ export default function StorePage() {
   if (items.length === 0) {
     return (
       <div className={cn(layout.centeredState, 'max-w-7xl')}>
-        <h1>Coming Soon</h1>
-        <p className="text-muted-foreground">Check back soon for new products.</p>
+        <h1>{en.store.comingSoon}</h1>
+        <p className="text-muted-foreground">{en.store.comingSoonBody}</p>
       </div>
     )
   }
