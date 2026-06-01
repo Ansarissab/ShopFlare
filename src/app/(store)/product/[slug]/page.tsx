@@ -1,8 +1,11 @@
 'use client'
 
+import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ProductHeroWrapper } from '@/components/store/product/ProductHeroWrapper'
+import { ReviewsSection } from '@/components/store/product/ReviewsSection'
+import { ProductJsonLd } from '@/components/store/product/ProductJsonLd'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
 import type { ProductWithVariants } from '@/lib/types/store'
@@ -58,16 +61,22 @@ export default function ProductDetailPage() {
         <p className="text-muted-foreground text-sm">
           {en.product.notFoundBody}
         </p>
-        <a href="/" className="text-sm text-primary underline-offset-4 hover:underline">
+        <Link href="/" className="text-sm text-primary underline-offset-4 hover:underline">
           {en.product.backToStore}
-        </a>
+        </Link>
       </div>
     )
   }
 
   return (
     <div className={layout.page}>
+      <ProductJsonLd item={item} />
       <ProductHeroWrapper item={item} />
+      <ReviewsSection
+        productId={item.product.id}
+        productName={item.product.name}
+        className="mt-10"
+      />
     </div>
   )
 }
