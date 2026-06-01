@@ -29,6 +29,11 @@ Dynamic data fetched client-side from CF Worker endpoints.
 CF Access intercepts `/admin/*` at the edge.
 Merchant gets email OTP — no passwords, no auth code.
 
+The admin **API** is equally protected: all admin endpoints live under
+`/api/admin/*` (separate from public routes), covered by a second CF Access
+application, and the worker re-verifies the Access assertion JWT in
+`requireAccess` (defense-in-depth). See cloudflare-guide Step 8.
+
 ## Data flow for an order
 
 1. Customer selects product → adds to cart (localStorage)

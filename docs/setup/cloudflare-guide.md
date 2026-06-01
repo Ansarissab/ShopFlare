@@ -117,6 +117,11 @@ NEXT_PUBLIC_WORKER_URL=https://singlepage-ecomm-worker.YOUR.workers.dev
 
 ## Step 8 — Set Up CF Access (Admin Protection)
 
+Admin protection has **two** layers — the UI pages AND the worker admin API.
+Both must be covered or the API is publicly reachable on its origin.
+
+### 8a — Protect the admin UI
+
 1. Cloudflare Dashboard → Zero Trust → Access → Applications
 2. Add Application → Self-hosted
 3. Application domain: `yourdomain.com/admin*`
@@ -124,6 +129,29 @@ NEXT_PUBLIC_WORKER_URL=https://singlepage-ecomm-worker.YOUR.workers.dev
 5. Save
 
 Admin at `/admin` now requires email OTP. No passwords to manage.
+
+### 8b — Protect the admin API (`/api/admin/*`)
+
+The worker exposes all admin endpoints under `/api/admin/*` (separate from the
+public `/api/orders`, `/api/products`, `/api/config` routes). Protect that path:
+
+1. Add Application → Self-hosted
+2. Application domain: `<your-worker-host>/api/admin*`
+   (use the worker's custom domain so the browser sends the Access cookie
+   first-party; the bare `*.workers.dev` host works too)
+3. Policy: Allow → Email → your@email.com (same policy as the UI)
+4. Save, then open the application → copy its **Audience (AUD) tag**
+5. Set the worker vars so it re-verifies the assertion (defense-in-depth):
+
+   ```bash
+   npx wrangler secret put CF_ACCESS_AUD          # the AUD tag from step 4
+   npx wrangler secret put CF_ACCESS_TEAM_DOMAIN  # e.g. yourteam.cloudflareaccess.com
+   ```
+
+The worker's `requireAccess` middleware verifies the `Cf-Access-Jwt-Assertion`
+JWT (signature via the team JWKS, plus `aud`/`iss`/`exp`). If both vars are
+unset it fails closed in production (403) and bypasses only in local
+`wrangler dev` (ENVIRONMENT=development).
 
 ---
 
