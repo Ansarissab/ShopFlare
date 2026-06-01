@@ -14,7 +14,7 @@ import type { ProductWithVariants } from '@/lib/types/store'
 export default function EditProductPage() {
   const params = useParams<{ id: string }>()
   const { data, loading, notFound } = useApiResource<ProductWithVariants>(
-    params?.id ? `/api/products/${params.id}` : null,
+    params?.id ? `/api/admin/products/${params.id}` : null,
   )
 
   return (

@@ -16,14 +16,14 @@ import { cn } from '@/lib/utils'
 import { en } from '@/lib/i18n/en'
 import { formatPrice } from '@/lib/utils/index'
 import { ORDER_STATUSES } from '@/lib/constants'
-import { apiPost } from '@/lib/api'
+import { apiPatch } from '@/lib/api'
 import { useApiResource } from '@/hooks/useApiResource'
 import type { AdminOrderDetail } from '@/lib/types/store'
 
 export default function AdminOrderDetailPage() {
   const params = useParams<{ id: string }>()
   const { data, loading, notFound } = useApiResource<AdminOrderDetail>(
-    params?.id ? `/api/orders/${params.id}` : null,
+    params?.id ? `/api/admin/orders/${params.id}` : null,
   )
 
   const [newStatus, setNewStatus] = useState<string>('')
@@ -35,7 +35,7 @@ export default function AdminOrderDetailPage() {
     if (!newStatus || !params?.id) return
     setSaving(true)
     try {
-      await apiPost(`/api/orders/${params.id}/status`, { status: newStatus })
+      await apiPatch(`/api/admin/orders/${params.id}/status`, { status: newStatus })
       toast.success(en.admin.statusUpdated)
       window.location.reload()
     } catch {
@@ -49,7 +49,7 @@ export default function AdminOrderDetailPage() {
     if (!trackingNumber.trim() || !params?.id) return
     setSaving(true)
     try {
-      await apiPost(`/api/orders/${params.id}/tracking`, {
+      await apiPatch(`/api/admin/orders/${params.id}/tracking`, {
         trackingNumber: trackingNumber.trim(),
         carrier: carrier.trim() || undefined,
       })

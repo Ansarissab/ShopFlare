@@ -156,6 +156,7 @@ export const en = {
     sku: 'SKU',
     uploadImage: 'Upload Image',
     deleteImage: 'Delete Image',
+    save: 'Save',
     saving: 'Saving…',
     saved: 'Saved',
     productCreated: 'Product created',

@@ -7,7 +7,7 @@ import { toast } from 'sonner'
 import imageCompression from 'browser-image-compression'
 import { Button } from '@/components/ui/button'
 import { en } from '@/lib/i18n/en'
-import { WORKER_URL } from '@/lib/api'
+import { apiUpload, apiDelete } from '@/lib/api'
 import type { ProductImage } from '@/lib/types/store'
 
 interface ImageUploadProps {
@@ -38,17 +38,7 @@ export function ImageUpload({ variantId, images, onUploaded, onDeleted }: ImageU
       form.append('variantId', variantId)
       form.append('sortOrder', String(images.length))
 
-      const res = await fetch(`${WORKER_URL}/api/products/images/upload`, {
-        method: 'POST',
-        body: form,
-      })
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error((err as { error?: string }).error ?? 'Upload failed')
-      }
-
-      const image = await res.json() as ProductImage
+      const image = await apiUpload<ProductImage>('/api/admin/products/images/upload', form)
       onUploaded(image)
       toast.success(en.admin.imageUploaded)
     } catch (err) {
@@ -61,10 +51,7 @@ export function ImageUpload({ variantId, images, onUploaded, onDeleted }: ImageU
 
   async function handleDelete(imageId: string) {
     try {
-      const res = await fetch(`${WORKER_URL}/api/products/images/${imageId}`, {
-        method: 'DELETE',
-      })
-      if (!res.ok) throw new Error('Delete failed')
+      await apiDelete(`/api/admin/products/images/${imageId}`)
       onDeleted(imageId)
       toast.success(en.admin.imageDeleted)
     } catch {

@@ -13,7 +13,7 @@ export default function AdminOrdersPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
 
   const queryString = statusFilter !== 'all' ? `?status=${statusFilter}&limit=50` : '?limit=50'
-  const { data, loading } = useApiResource<AdminOrdersResponse>(`/api/orders${queryString}`)
+  const { data, loading } = useApiResource<AdminOrdersResponse>(`/api/admin/orders${queryString}`)
 
   return (
     <div className="flex flex-col gap-5">

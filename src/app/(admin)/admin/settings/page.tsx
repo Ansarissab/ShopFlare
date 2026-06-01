@@ -10,7 +10,7 @@ import { FormField } from '@/components/common/FormField'
 import { Skeleton } from '@/components/ui/skeleton'
 import { en } from '@/lib/i18n/en'
 import { CURRENCIES } from '@/lib/constants'
-import { apiPost } from '@/lib/api'
+import { apiPut } from '@/lib/api'
 import { useStoreConfig } from '@/hooks/useStoreConfig'
 
 export default function AdminSettingsPage() {
@@ -39,7 +39,7 @@ export default function AdminSettingsPage() {
   async function handleSave() {
     setSaving(true)
     try {
-      await apiPost('/api/config/store', {
+      await apiPut('/api/admin/config/store', {
         storeName: storeName.trim() || undefined,
         tagline: tagline.trim() || undefined,
         whatsappNumber: whatsappNumber.trim() || undefined,
@@ -120,7 +120,7 @@ export default function AdminSettingsPage() {
       <Separator />
 
       <Button onClick={handleSave} disabled={saving} className="w-fit">
-        {saving ? en.admin.saving : en.admin.settingsSaved.replace('d', '')}
+        {saving ? en.admin.saving : en.admin.save}
       </Button>
     </div>
   )

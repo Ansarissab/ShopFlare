@@ -12,8 +12,7 @@ import { Separator } from '@/components/ui/separator'
 import { FormField } from '@/components/common/FormField'
 import { ImageUpload } from '@/components/admin/products/ImageUpload'
 import { en } from '@/lib/i18n/en'
-import { apiPost } from '@/lib/api'
-import { WORKER_URL } from '@/lib/api'
+import { apiPost, apiPut, apiDelete } from '@/lib/api'
 import type { ProductWithVariants, VariantWithDetails, SizeOption, ProductImage } from '@/lib/types/store'
 
 interface ProductFormProps {
@@ -64,21 +63,10 @@ export function ProductForm({ initial }: ProductFormProps) {
       const productId = initial?.product.id
 
       if (productId) {
-        const res = await fetch(`${WORKER_URL}/api/products/${productId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, description, active }),
-        })
-        if (!res.ok) throw new Error('Save failed')
+        await apiPut(`/api/admin/products/${productId}`, { name, description, active })
         toast.success(en.admin.productUpdated)
       } else {
-        const res = await fetch(`${WORKER_URL}/api/products`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, description, active }),
-        })
-        if (!res.ok) throw new Error('Create failed')
-        const created = await res.json() as { id: string }
+        const created = await apiPost<{ id: string }>('/api/admin/products', { name, description, active })
         toast.success(en.admin.productCreated)
         router.push(`/admin/products/${created.id}`)
         return
@@ -98,17 +86,11 @@ export function ProductForm({ initial }: ProductFormProps) {
       return
     }
     try {
-      const res = await fetch(`${WORKER_URL}/api/products/variants`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          productId: initial.product.id,
-          label: 'New Variant',
-          sortOrder: variants.length,
-        }),
+      const newVariant = await apiPost<LocalVariant>('/api/admin/products/variants', {
+        productId: initial.product.id,
+        label: 'New Variant',
+        sortOrder: variants.length,
       })
-      if (!res.ok) throw new Error('Failed to add variant')
-      const newVariant = await res.json() as LocalVariant
       setVariants((prev) => [...prev, { ...newVariant, images: [], sizes: [] }])
       setExpandedVariant(newVariant.id)
       toast.success(en.admin.variantCreated)
@@ -127,12 +109,10 @@ export function ProductForm({ initial }: ProductFormProps) {
     const variant = variants.find((v) => v.id === variantId)
     if (!variant) return
     try {
-      const res = await fetch(`${WORKER_URL}/api/products/variants/${variantId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ label: variant.label, colorHex: variant.colorHex }),
+      await apiPut(`/api/admin/products/variants/${variantId}`, {
+        label: variant.label,
+        colorHex: variant.colorHex,
       })
-      if (!res.ok) throw new Error('Save failed')
       toast.success(en.admin.saved)
     } catch {
       toast.error(en.errors.networkError)
@@ -142,10 +122,7 @@ export function ProductForm({ initial }: ProductFormProps) {
   async function deleteVariant(variantId: string) {
     if (!confirm(en.admin.deleteProductConfirm)) return
     try {
-      const res = await fetch(`${WORKER_URL}/api/products/variants/${variantId}`, {
-        method: 'DELETE',
-      })
-      if (!res.ok) throw new Error('Delete failed')
+      await apiDelete(`/api/admin/products/variants/${variantId}`)
       setVariants((prev) => prev.filter((v) => v.id !== variantId))
       toast.success(en.admin.variantDeleted)
     } catch {
@@ -157,19 +134,13 @@ export function ProductForm({ initial }: ProductFormProps) {
 
   async function addSize(variantId: string) {
     try {
-      const res = await fetch(`${WORKER_URL}/api/products/sizes`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          variantId,
-          size: 'M',
-          priceCents: 0,
-          stock: 0,
-          active: true,
-        }),
+      const newSize = await apiPost<LocalSize>('/api/admin/products/sizes', {
+        variantId,
+        size: 'M',
+        priceCents: 0,
+        stock: 0,
+        active: true,
       })
-      if (!res.ok) throw new Error('Failed to add size')
-      const newSize = await res.json() as LocalSize
       setVariants((prev) =>
         prev.map((v) =>
           v.id === variantId ? { ...v, sizes: [...(v.sizes as LocalSize[]), newSize] } : v,
@@ -201,19 +172,14 @@ export function ProductForm({ initial }: ProductFormProps) {
     const size = (variant?.sizes as LocalSize[])?.find((s) => s.id === sizeId)
     if (!size) return
     try {
-      const res = await fetch(`${WORKER_URL}/api/products/sizes/${sizeId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          size: size.size,
-          sku: size.sku,
-          priceCents: size.priceCents,
-          stock: size.stock,
-          stripePriceId: size.stripePriceId,
-          active: size.active,
-        }),
+      await apiPut(`/api/admin/products/sizes/${sizeId}`, {
+        size: size.size,
+        sku: size.sku,
+        priceCents: size.priceCents,
+        stock: size.stock,
+        stripePriceId: size.stripePriceId,
+        active: size.active,
       })
-      if (!res.ok) throw new Error('Save failed')
       toast.success(en.admin.saved)
     } catch {
       toast.error(en.errors.networkError)
@@ -222,8 +188,7 @@ export function ProductForm({ initial }: ProductFormProps) {
 
   async function deleteSize(variantId: string, sizeId: string) {
     try {
-      const res = await fetch(`${WORKER_URL}/api/products/sizes/${sizeId}`, { method: 'DELETE' })
-      if (!res.ok) throw new Error('Delete failed')
+      await apiDelete(`/api/admin/products/sizes/${sizeId}`)
       setVariants((prev) =>
         prev.map((v) =>
           v.id === variantId
@@ -378,7 +343,7 @@ export function ProductForm({ initial }: ProductFormProps) {
                               />
                               {variant.colorHex && (
                                 <span
-                                  className="size-10 rounded-md border flex-shrink-0"
+                                  className="size-10 rounded-md border shrink-0"
                                   style={{ backgroundColor: variant.colorHex }}
                                   aria-hidden
                                 />
@@ -499,8 +464,7 @@ export function ProductForm({ initial }: ProductFormProps) {
             onClick={async () => {
               if (!confirm(en.admin.deleteProductConfirm)) return
               try {
-                const res = await fetch(`${WORKER_URL}/api/products/${initial.product.id}`, { method: 'DELETE' })
-                if (!res.ok) throw new Error('Delete failed')
+                await apiDelete(`/api/admin/products/${initial.product.id}`)
                 toast.success(en.admin.productDeleted)
                 router.push('/admin/products')
               } catch {

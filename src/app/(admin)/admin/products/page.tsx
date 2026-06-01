@@ -15,7 +15,7 @@ interface ProductsResponse {
 }
 
 export default function AdminProductsPage() {
-  const { data, loading } = useApiResource<ProductsResponse>('/api/products')
+  const { data, loading } = useApiResource<ProductsResponse>('/api/admin/products')
 
   return (
     <div className="flex flex-col gap-5">

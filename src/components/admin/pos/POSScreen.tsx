@@ -89,7 +89,7 @@ export function POSScreen() {
     setSubmitting(true)
     try {
       const { orderNumber } = await apiPost<{ orderId: string; orderNumber: string }>(
-        '/api/orders/pos',
+        '/api/admin/orders/pos',
         {
           items: saleItems.map((i) => ({ sizeOptionId: i.sizeOptionId, quantity: i.quantity })),
           customerPhone: customerPhone.trim() || undefined,

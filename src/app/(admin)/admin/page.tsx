@@ -28,7 +28,7 @@ function computeStats(data: AdminOrdersResponse | null): DashboardStats {
 }
 
 export default function AdminDashboardPage() {
-  const { data, loading } = useApiResource<AdminOrdersResponse>('/api/orders?limit=100')
+  const { data, loading } = useApiResource<AdminOrdersResponse>('/api/admin/orders?limit=100')
   const stats = computeStats(data)
 
   return (
