@@ -8,8 +8,15 @@
     "noEmit": true,
     "skipLibCheck": true,
     "isolatedModules": true,
-    "types": ["@cloudflare/workers-types"]
+    "types": ["@cloudflare/workers-types"],
+    "paths": {
+      "@/*": ["../src/*"]
+    }
   },
-  "include": ["**/*.ts"],
+  "include": [
+    "**/*.ts",
+    "../src/lib/schemas/**/*.ts",
+    "../src/lib/constants/**/*.ts"
+  ],
   "exclude": ["node_modules"]
 }

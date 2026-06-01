@@ -49,3 +49,4 @@ export const notifyMeSchema = z.object({
 export type ShippingAddress = z.infer<typeof shippingAddressSchema>
 export type CodOrder = z.infer<typeof codOrderSchema>
 export type ReviewInput = z.infer<typeof reviewSchema>
+export type NotifyMeInput = z.infer<typeof notifyMeSchema>

@@ -1,9 +1,9 @@
 import { Hono } from 'hono'
-import { z } from 'zod/v4'
 import { drizzle } from 'drizzle-orm/d1'
 import { eq, and, or } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import * as schema from '../db/schema'
+import { notifyMeSchema } from '@/lib/schemas'
 
 type Bindings = {
   DB: D1Database
@@ -18,12 +18,6 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>()
 
-const notifySchema = z.object({
-  sizeOptionId: z.string(),
-  email: z.string().email().optional(),
-  phone: z.string().min(7).optional(),
-}).refine(d => d.email || d.phone, { message: 'email or phone required' })
-
 app.post('/', async (c) => {
   // Parse body
   let body: unknown
@@ -34,7 +28,7 @@ app.post('/', async (c) => {
   }
 
   // Validate
-  const result = notifySchema.safeParse(body)
+  const result = notifyMeSchema.safeParse(body)
   if (!result.success) {
     return c.json({ error: 'Validation failed', issues: result.error.issues }, 400)
   }
