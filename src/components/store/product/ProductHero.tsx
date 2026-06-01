@@ -10,6 +10,7 @@ import { ImageCarousel } from '@/components/store/product/ImageCarousel'
 import { VariantSelector } from '@/components/store/product/VariantSelector'
 import { SizePicker } from '@/components/store/product/SizePicker'
 import { ProductActions } from '@/components/store/product/ProductActions'
+import { NotifyMeDialog } from '@/components/store/product/NotifyMeDialog'
 import type { ProductHeroProps } from '@/lib/types/store'
 
 export function ProductHero({
@@ -23,7 +24,6 @@ export function ProductHero({
   onBuyNow,
   onWhatsApp,
   onCOD,
-  onNotifyMe,
   isAddingToCart = false,
   className,
 }: ProductHeroProps) {
@@ -31,6 +31,7 @@ export function ProductHero({
     variants[0]?.id ?? '',
   )
   const [selectedSizeId, setSelectedSizeId] = React.useState<string | null>(null)
+  const [notifyOpen, setNotifyOpen] = React.useState(false)
 
   // Reset size selection when variant changes
   const handleVariantSelect = React.useCallback((id: string) => {
@@ -48,6 +49,12 @@ export function ProductHero({
   // All sizes OOS when every active size has stock === 0
   const allSizesOOS =
     currentSizes.length > 0 && currentSizes.every((s) => s.stock === 0)
+
+  // Target for Notify Me: first OOS size of current variant, fallback to first size
+  const notifyTarget =
+    currentSizes.find((s) => s.stock === 0) ?? currentSizes[0] ?? null
+
+  const currentVariant = variants.find((v) => v.id === selectedVariantId) ?? null
 
   // Price display: range across active sizes
   const activePrices = currentSizes.filter((s) => s.stock !== 0).map((s) => s.priceCents)
@@ -125,7 +132,7 @@ export function ProductHero({
         {/* Actions */}
         <ProductActions
           product={product}
-          selectedVariant={variants.find((v) => v.id === selectedVariantId) ?? null}
+          selectedVariant={currentVariant}
           selectedSize={selectedSize}
           allSizesOOS={allSizesOOS}
           isAddingToCart={isAddingToCart}
@@ -133,9 +140,21 @@ export function ProductHero({
           onBuyNow={() => selectedSize && onBuyNow(selectedSize)}
           onWhatsApp={() => selectedSize && onWhatsApp(selectedSize)}
           onCOD={() => selectedSize && onCOD(selectedSize)}
-          onNotifyMe={onNotifyMe}
+          onNotifyMe={() => setNotifyOpen(true)}
         />
       </div>
+
+      {/* Notify Me dialog — owned here because we know which size is OOS */}
+      {notifyTarget && currentVariant && (
+        <NotifyMeDialog
+          sizeOptionId={notifyTarget.id}
+          productName={product.name}
+          variantLabel={currentVariant.label}
+          size={notifyTarget.size}
+          open={notifyOpen}
+          onOpenChange={setNotifyOpen}
+        />
+      )}
     </div>
   )
 }
