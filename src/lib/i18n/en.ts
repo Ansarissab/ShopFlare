@@ -17,6 +17,9 @@ export const en = {
     price: '{currency}{amount}',
     originalPrice: 'Original: {currency}{amount}',
     discount: '{percent}% off',
+    comingSoon: 'Coming Soon',
+    comingSoonBody: 'Check back soon for new products.',
+    notifySuccess: "You'll be notified when it's back in stock!",
   },
   cart: {
     title: 'Your Cart',
@@ -53,6 +56,9 @@ export const en = {
     orderCancelled: 'Order Cancelled',
     cancelSuccess: 'Your order has been cancelled successfully.',
     cannotCancel: 'This order cannot be cancelled.',
+    stripeRedirectNote: "You will be redirected to Stripe's secure payment page.",
+    calculatedAtDelivery: 'Calculated at delivery',
+    securityCheckFailed: 'Security check failed. Please refresh and try again.',
   },
   tracking: {
     title: 'Track Your Order',
@@ -64,6 +70,12 @@ export const en = {
     trackingNumber: 'Tracking Number',
     carrier: 'Carrier',
     notFound: 'Order not found',
+    notFoundBody: 'Check your order number and try again.',
+    backToTracking: 'Back to tracking',
+    viewOrder: 'View order',
+    keepOrder: 'Keep Order',
+    cancelling: 'Cancelling…',
+    cancelReasonPlaceholder: "Optional — tell us why you're cancelling",
   },
   product: {
     features: 'Features',
@@ -79,6 +91,9 @@ export const en = {
     bestSeller: 'Best Seller',
     popularChoice: 'Popular Choice',
     new: 'New',
+    notFound: 'Product Not Found',
+    notFoundBody: 'This product does not exist or may have been removed.',
+    backToStore: 'Back to store',
   },
   policies: {
     shipping: 'Shipping Policy',
@@ -110,6 +125,33 @@ export const en = {
     totalRevenue: 'Total Revenue',
     pendingOrders: 'Pending Orders',
     lowStockAlert: 'Low Stock',
+  },
+  common: {
+    optional: '(optional)',
+  },
+  paymentMethodLabels: {
+    stripe_checkout: 'Card',
+    cod: 'Cash on Delivery',
+    whatsapp: 'WhatsApp',
+    in_person_cash: 'In-Person Cash',
+  },
+  orderStatusLabels: {
+    pending: 'Pending',
+    confirmed: 'Confirmed',
+    processing: 'Processing',
+    shipped: 'Shipped',
+    delivered: 'Delivered',
+    cancelled: 'Cancelled',
+  },
+  whatsapp: {
+    greeting: "Hi! I'd like to order:",
+    product: 'Product:',
+    variant: 'Color/Variant:',
+    size: 'Size:',
+    sku: 'SKU:',
+    qty: 'Qty:',
+    price: 'Price:',
+    footer: 'Please confirm availability and delivery details.',
   },
 } as const
 

@@ -1,32 +1,23 @@
 import { formatPrice } from '@/lib/utils/index'
-import type { CurrencyCode } from '@/lib/constants'
-
-export type WhatsAppOrderParams = {
-  phoneNumber: string
-  productName: string
-  variantLabel: string
-  size: string
-  sku?: string
-  priceCents: number
-  currency: CurrencyCode
-  quantity: number
-}
+import { en } from '@/lib/i18n/en'
+import type { WhatsAppOrderParams } from '@/lib/types/store'
 
 export function buildWhatsAppOrderUrl(params: WhatsAppOrderParams): string {
   const { phoneNumber, productName, variantLabel, size, sku, priceCents, currency, quantity } = params
 
   const formattedPrice = formatPrice(priceCents * quantity, currency)
+  const w = en.whatsapp
 
   const lines = [
-    "Hi! I'd like to order:",
-    `Product: ${productName}`,
-    `Color/Variant: ${variantLabel}`,
-    `Size: ${size}`,
-    ...(sku ? [`SKU: ${sku}`] : []),
-    `Qty: ${quantity}`,
-    `Price: ${formattedPrice}`,
+    w.greeting,
+    `${w.product} ${productName}`,
+    `${w.variant} ${variantLabel}`,
+    `${w.size} ${size}`,
+    ...(sku ? [`${w.sku} ${sku}`] : []),
+    `${w.qty} ${quantity}`,
+    `${w.price} ${formattedPrice}`,
     '',
-    'Please confirm availability and delivery details.',
+    w.footer,
   ]
 
   const message = lines.join('\n')
