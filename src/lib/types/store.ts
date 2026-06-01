@@ -225,3 +225,94 @@ export interface OrderTimelineProps {
   trackingNumber?: string
   carrier?: string
 }
+
+// ─── Admin types ──────────────────────────────────────────────────────────────
+
+import type { OrderItem } from 'worker/db/schema'
+export type { OrderItem }
+
+export interface AdminOrder {
+  id: string
+  orderNumber: string
+  status: OrderStatus
+  paymentMethod: string
+  customerName: string
+  customerEmail: string | null
+  customerPhone: string | null
+  totalCents: number
+  subtotalCents: number
+  shippingCents: number
+  discountCents: number
+  couponCode: string | null
+  trackingNumber: string | null
+  carrier: string | null
+  notes: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AdminOrderItem {
+  id: string
+  sizeOptionId: string
+  productId: string
+  variantId: string
+  quantity: number
+  priceCents: number
+  snapshot: {
+    productName: string
+    variantLabel: string
+    size: string
+    sku?: string
+    imageUrl: string
+  }
+}
+
+export interface AdminOrderDetail {
+  order: AdminOrder
+  items: AdminOrderItem[]
+  shippingAddress: Record<string, string> | null
+}
+
+export interface AdminOrdersResponse {
+  orders: AdminOrder[]
+  total: number
+  page: number
+  limit: number
+}
+
+export interface AdminProductListItem {
+  id: string
+  name: string
+  description: string
+  active: boolean
+  stripeProductId: string | null
+  variantCount: number
+  createdAt: string
+}
+
+// ─── POS types ────────────────────────────────────────────────────────────────
+
+export interface POSSaleItem {
+  sizeOptionId: string
+  productId: string
+  variantId: string
+  productName: string
+  variantLabel: string
+  size: string
+  sku?: string
+  priceCents: number
+  imageUrl: string
+  quantity: number
+}
+
+// ─── Admin component props ────────────────────────────────────────────────────
+
+export interface AdminOrderRowProps {
+  order: AdminOrder
+}
+
+export interface AdminStatCardProps {
+  label: string
+  value: string | number
+  sub?: string
+}
