@@ -1,33 +1,14 @@
 import { Hono } from 'hono'
-import { z } from 'zod/v4'
 import { eq, and } from 'drizzle-orm'
-import { nanoid } from 'nanoid'
 import { createDb } from '../db/index'
 import * as schema from '../db/schema'
-import { codOrderSchema } from '@/lib/schemas'
-
-type Bindings = {
-  DB: D1Database
-  KV: KVNamespace
-  R2: R2Bucket
-  STRIPE_SECRET_KEY: string
-  STRIPE_WEBHOOK_SECRET: string
-  RESEND_API_KEY: string
-  VAPID_PRIVATE_KEY: string
-  VAPID_PUBLIC_KEY: string
-}
+import { codOrderSchema, cancelOrderSchema } from '@/lib/schemas'
+import { createOrder } from '../lib/orders'
+import type { Bindings } from '../types'
 
 const app = new Hono<{ Bindings: Bindings }>()
 
-const cancelSchema = z.object({
-  reason: z.string().max(500).optional(),
-})
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function generateOrderNumber(): string {
-  return `ORD-${nanoid(6).toUpperCase()}`
-}
 
 async function parseBody(c: { req: { json(): Promise<unknown> } }): Promise<[unknown, null] | [null, Response]> {
   try {
@@ -97,7 +78,8 @@ app.post('/cod', async (c) => {
   const { items, shippingAddress, couponCode } = parsed.data
   const db = createDb(c.env.DB)
 
-  // Verify all sizeOptionIds exist and have sufficient stock
+  // Verify all sizeOptionIds exist and have sufficient stock (COD only —
+  // Stripe relies on its own inventory controls)
   for (const item of items) {
     const sizeOpt = await db
       .select()
@@ -113,100 +95,15 @@ app.post('/cod', async (c) => {
     }
   }
 
-  // Calculate subtotal
-  let subtotalCents = 0
-  const orderItemsToInsert: typeof schema.orderItems.$inferInsert[] = []
-
-  for (const item of items) {
-    const sizeOpt = await db
-      .select()
-      .from(schema.sizeOptions)
-      .where(eq(schema.sizeOptions.id, item.sizeOptionId))
-      .get()
-
-    if (!sizeOpt) continue
-
-    const variant = await db
-      .select()
-      .from(schema.variants)
-      .where(eq(schema.variants.id, sizeOpt.variantId))
-      .get()
-
-    const product = variant
-      ? await db.select().from(schema.products).where(eq(schema.products.id, variant.productId)).get()
-      : null
-
-    const firstImage = await db
-      .select()
-      .from(schema.productImages)
-      .where(eq(schema.productImages.variantId, sizeOpt.variantId))
-      .get()
-
-    subtotalCents += sizeOpt.priceCents * item.quantity
-
-    orderItemsToInsert.push({
-      id: nanoid(),
-      orderId: '',  // filled in below after order insert
-      sizeOptionId: item.sizeOptionId,
-      productId: product?.id ?? '',
-      variantId: sizeOpt.variantId,
-      quantity: item.quantity,
-      priceCents: sizeOpt.priceCents,
-      snapshot: JSON.stringify({
-        productName: product?.name ?? '',
-        variantLabel: variant?.label ?? '',
-        size: sizeOpt.size,
-        sku: sizeOpt.sku ?? undefined,
-        imageUrl: firstImage?.url ?? '',
-      }),
-    })
-  }
-
-  // Coupon discount
-  let discountCents = 0
-  if (couponCode) {
-    const coupon = await db
-      .select()
-      .from(schema.coupons)
-      .where(and(eq(schema.coupons.code, couponCode), eq(schema.coupons.active, true)))
-      .get()
-
-    if (coupon) {
-      if (coupon.type === 'percentage') {
-        discountCents = Math.floor(subtotalCents * coupon.value / 100)
-      } else {
-        discountCents = coupon.value
-      }
-      if (coupon.maxDiscountCents) {
-        discountCents = Math.min(discountCents, coupon.maxDiscountCents)
-      }
-    }
-  }
-
-  const totalCents = Math.max(0, subtotalCents - discountCents)
-  const orderId = nanoid()
-  const orderNumber = generateOrderNumber()
-
-  await db.insert(schema.orders).values({
-    id: orderId,
-    orderNumber,
-    status: 'pending',
+  const { orderId, orderNumber } = await createOrder(db, {
     paymentMethod: 'cod',
+    items,
     customerName: shippingAddress.name,
-    customerEmail: shippingAddress.email ?? null,
+    customerEmail: shippingAddress.email,
     customerPhone: shippingAddress.phone,
-    shippingAddress: JSON.stringify(shippingAddress),
-    subtotalCents,
-    shippingCents: 0,
-    discountCents,
-    totalCents,
-    couponCode: couponCode ?? null,
+    shippingAddress: shippingAddress as Record<string, unknown>,
+    couponCode,
   })
-
-  // Insert order items
-  for (const item of orderItemsToInsert) {
-    await db.insert(schema.orderItems).values({ ...item, orderId })
-  }
 
   return c.json({ orderId, orderNumber }, 201)
 })
@@ -217,7 +114,7 @@ app.post('/:id/cancel', async (c) => {
   const { id } = c.req.param()
 
   const [body] = await parseBody(c)
-  const parsed = cancelSchema.safeParse(body ?? {})
+  const parsed = cancelOrderSchema.safeParse(body ?? {})
   const reason = parsed.success ? (parsed.data.reason ?? null) : null
 
   const db = createDb(c.env.DB)

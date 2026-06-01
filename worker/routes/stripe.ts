@@ -1,33 +1,22 @@
 import { Hono } from 'hono'
-import { z } from 'zod/v4'
 import { eq } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/d1'
 import { nanoid } from 'nanoid'
 import { createStripe } from '../lib/stripe'
 import * as schema from '../db/schema'
-
-type Bindings = {
-  DB: D1Database
-  KV: KVNamespace
-  R2: R2Bucket
-  STRIPE_SECRET_KEY: string
-  STRIPE_WEBHOOK_SECRET: string
-}
+import { createCheckoutSessionSchema } from '@/lib/schemas'
+import { createOrder } from '../lib/orders'
+import { createDb } from '../db/index'
+import type { Bindings } from '../types'
 
 const app = new Hono<{ Bindings: Bindings }>()
 
 // ─── Validation schema ────────────────────────────────────────────────────────
 
-const checkoutItemSchema = z.object({
-  stripePriceId: z.string().min(1),
-  quantity: z.int().min(1).max(100),
-})
-
-const checkoutBodySchema = z.object({
-  items: z.array(checkoutItemSchema).min(1).max(50),
-  orderId: z.string().min(1).max(64),
-  couponCode: z.string().min(1).max(64).optional(),
-})
+// Client sends { items, couponCode? } — no orderId (we create the order here
+// before calling Stripe so the webhook has an order row to confirm).
+// Derive from the shared schema to stay DRY; just omit the now-server-side orderId.
+const checkoutBodySchema = createCheckoutSessionSchema.omit({ orderId: true })
 
 // ─── POST /checkout-session ───────────────────────────────────────────────────
 
@@ -45,12 +34,48 @@ app.post('/checkout-session', async (c) => {
     return c.json({ error: 'Validation error', issues: parsed.error.issues }, 400)
   }
 
-  const { items, orderId, couponCode } = parsed.data
+  const { items, couponCode } = parsed.data
 
   const stripe = createStripe(c.env.STRIPE_SECRET_KEY)
-  const db = drizzle(c.env.DB, { schema })
+  const db = createDb(c.env.DB)
 
-  // 2. Optionally look up coupon in D1
+  // 2. Create a PENDING order row BEFORE calling Stripe, so the webhook's
+  //    `UPDATE orders WHERE id = orderId` has a row to land on.
+  //
+  //    Stripe items only carry { stripePriceId, quantity } — no sizeOptionId.
+  //    We look up the sizeOption by stripePriceId so we can build proper
+  //    snapshots. Items whose stripePriceId has no matching sizeOption are
+  //    still included in the Stripe session but skipped in the order row
+  //    (snapshot data is unavailable); this is an edge case — all active
+  //    prices should have a matching sizeOption in D1.
+  const orderItems: Array<{ sizeOptionId: string; quantity: number }> = []
+
+  for (const item of items) {
+    const sizeOpt = await db
+      .select()
+      .from(schema.sizeOptions)
+      .where(eq(schema.sizeOptions.stripePriceId, item.stripePriceId))
+      .get()
+
+    if (sizeOpt) {
+      orderItems.push({ sizeOptionId: sizeOpt.id, quantity: item.quantity })
+    } else {
+      // stripePriceId not found in D1 — log and skip snapshot; order will
+      // still be created but without this line item in the snapshot.
+      console.warn('[stripe/checkout] stripePriceId not found in D1', item.stripePriceId)
+    }
+  }
+
+  const { orderId } = await createOrder(db, {
+    paymentMethod: 'stripe_checkout',
+    items: orderItems,
+    // customerName/email/phone are empty placeholders — the webhook fills
+    // them in from session.customer_details after checkout.session.completed.
+    customerName: '',
+    couponCode,
+  })
+
+  // 3. Optionally look up coupon in D1 for Stripe promotion code
   let discounts: Array<{ promotion_code: string }> | undefined
 
   if (couponCode) {
@@ -66,10 +91,11 @@ app.post('/checkout-session', async (c) => {
     // If coupon not found or inactive, silently ignore — Stripe will not apply a discount
   }
 
-  // 3. Determine origin for success/cancel URLs
+  // 4. Determine origin for success/cancel URLs
   const origin = new URL(c.req.url).origin
 
-  // 4. Create Stripe Checkout session
+  // 5. Create Stripe Checkout session, passing orderId in metadata so the
+  //    webhook can confirm the correct order row.
   try {
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
@@ -149,13 +175,19 @@ app.post('/webhook', async (c) => {
           ? session.payment_intent
           : (session.payment_intent?.id ?? null)
 
-      // Update order
+      // Populate customer details from Stripe session
+      const customerName = session.customer_details?.name ?? null
+      const customerEmail = session.customer_details?.email ?? null
+
+      // Update order — confirm payment and fill in customer details
       await db
         .update(schema.orders)
         .set({
           status: 'confirmed',
           stripeSessionId: session.id,
           stripePaymentIntentId,
+          ...(customerName ? { customerName } : {}),
+          ...(customerEmail ? { customerEmail } : {}),
           updatedAt: new Date().toISOString(),
         })
         .where(eq(schema.orders.id, orderId))
