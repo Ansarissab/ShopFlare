@@ -1,14 +1,52 @@
 import { Hono } from 'hono'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, desc, count, sql } from 'drizzle-orm'
+import { z } from 'zod/v4'
 import { createDb } from '../db/index'
 import * as schema from '../db/schema'
-import { codOrderSchema, cancelOrderSchema } from '@/lib/schemas'
+import { codOrderSchema, cancelOrderSchema, updateOrderStatusSchema, updateTrackingSchema } from '@/lib/schemas'
 import { createOrder, CouponError } from '../lib/orders'
 import { parseBody } from '../lib/http'
 import { verifyTurnstile } from '../lib/turnstile'
 import type { Bindings } from '../types'
 
 const app = new Hono<{ Bindings: Bindings }>()
+
+// ─── POST /pos — admin: point-of-sale in-person cash order ───────────────────
+// No Turnstile — admin-only route protected by CF Access.
+
+const posOrderSchema = z.object({
+  items: z.array(
+    z.object({ sizeOptionId: z.string().min(1), quantity: z.number().int().positive().max(999) }),
+  ).min(1),
+  customerPhone: z.string().optional(),
+})
+
+app.post('/pos', async (c) => {
+  const [body, errResp] = await parseBody(c)
+  if (errResp) return errResp
+
+  const parsed = posOrderSchema.safeParse(body)
+  if (!parsed.success) {
+    return c.json({ error: 'Validation failed', issues: parsed.error.issues }, 400)
+  }
+
+  const { items, customerPhone } = parsed.data
+  const db = createDb(c.env.DB)
+
+  try {
+    const { orderId, orderNumber } = await createOrder(db, {
+      paymentMethod: 'in_person_cash',
+      items,
+      customerName: 'In-Person Customer',
+      customerPhone,
+    })
+
+    return c.json({ orderId, orderNumber }, 201)
+  } catch (err) {
+    if (err instanceof CouponError) return c.json({ error: err.message }, 422)
+    throw err
+  }
+})
 
 // ─── GET /track/:orderNumber ──────────────────────────────────────────────────
 
@@ -190,11 +228,146 @@ app.post('/:orderNumber/cancel', async (c) => {
   return c.json({ ok: true })
 })
 
-// ─── Admin stubs (Phase 2) ────────────────────────────────────────────────────
+// ─── GET / — admin: list all orders (paginated, newest first) ─────────────────
 
-app.get('/', (c) => c.json({ todo: 'list orders — Phase 2' }))
-app.get('/:id', (c) => c.json({ todo: 'get order — Phase 2' }))
-app.patch('/:id/status', (c) => c.json({ todo: 'update status — Phase 2' }))
-app.patch('/:id/tracking', (c) => c.json({ todo: 'add tracking number — Phase 2' }))
+app.get('/', async (c) => {
+  const db = createDb(c.env.DB)
+  const page  = Math.max(1, Number(c.req.query('page')  ?? '1'))
+  const limit = Math.min(100, Math.max(1, Number(c.req.query('limit') ?? '20')))
+  const statusFilter = c.req.query('status')
+
+  const offset = (page - 1) * limit
+
+  const baseQuery = db.select().from(schema.orders)
+  const countQuery = db.select({ total: count() }).from(schema.orders)
+
+  const [orders, [{ total }]] = await Promise.all([
+    (statusFilter
+      ? baseQuery.where(eq(schema.orders.status, statusFilter as typeof schema.orders.$inferSelect['status']))
+      : baseQuery
+    )
+      .orderBy(desc(schema.orders.createdAt))
+      .limit(limit)
+      .offset(offset)
+      .all(),
+    (statusFilter
+      ? countQuery.where(eq(schema.orders.status, statusFilter as typeof schema.orders.$inferSelect['status']))
+      : countQuery
+    ).all(),
+  ])
+
+  return c.json({ orders, total, page, limit })
+})
+
+// ─── GET /:id — admin: get order with items + shipping address ────────────────
+
+app.get('/:id', async (c) => {
+  const { id } = c.req.param()
+  const db = createDb(c.env.DB)
+
+  // Accept both id (UUID) and orderNumber
+  const order = await db
+    .select()
+    .from(schema.orders)
+    .where(
+      sql`${schema.orders.id} = ${id} OR ${schema.orders.orderNumber} = ${id}`,
+    )
+    .get()
+
+  if (!order) return c.json({ error: 'Order not found' }, 404)
+
+  const items = await db
+    .select()
+    .from(schema.orderItems)
+    .where(eq(schema.orderItems.orderId, order.id))
+    .all()
+
+  const parsedItems = items.map((item) => ({
+    ...item,
+    snapshot: (() => { try { return JSON.parse(item.snapshot) } catch { return {} } })(),
+  }))
+
+  const shippingAddress = order.shippingAddress
+    ? (() => { try { return JSON.parse(order.shippingAddress) } catch { return null } })()
+    : null
+
+  return c.json({ order, items: parsedItems, shippingAddress })
+})
+
+// ─── PATCH /:id/status — admin: update order status ──────────────────────────
+
+app.patch('/:id/status', async (c) => {
+  const { id } = c.req.param()
+  const [body, errResp] = await parseBody(c)
+  if (errResp) return errResp
+
+  const parsed = updateOrderStatusSchema.safeParse(body)
+  if (!parsed.success) {
+    return c.json({ error: 'Validation failed', issues: parsed.error.issues }, 400)
+  }
+
+  const { status, notes } = parsed.data
+  const db = createDb(c.env.DB)
+
+  const order = await db
+    .select({ id: schema.orders.id, status: schema.orders.status })
+    .from(schema.orders)
+    .where(eq(schema.orders.id, id))
+    .get()
+
+  if (!order) return c.json({ error: 'Order not found' }, 404)
+
+  await db
+    .update(schema.orders)
+    .set({
+      status,
+      ...(notes !== undefined ? { notes } : {}),
+      updatedAt: new Date().toISOString(),
+    })
+    .where(eq(schema.orders.id, id))
+
+  return c.json({ ok: true, status })
+})
+
+// ─── PATCH /:id/tracking — admin: set tracking number ────────────────────────
+
+app.patch('/:id/tracking', async (c) => {
+  const { id } = c.req.param()
+  const [body, errResp] = await parseBody(c)
+  if (errResp) return errResp
+
+  const parsed = updateTrackingSchema.safeParse(body)
+  if (!parsed.success) {
+    return c.json({ error: 'Validation failed', issues: parsed.error.issues }, 400)
+  }
+
+  const { trackingNumber, carrier } = parsed.data
+  const db = createDb(c.env.DB)
+
+  const order = await db
+    .select({ id: schema.orders.id, status: schema.orders.status })
+    .from(schema.orders)
+    .where(eq(schema.orders.id, id))
+    .get()
+
+  if (!order) return c.json({ error: 'Order not found' }, 404)
+
+  // Auto-advance to shipped when tracking is first added
+  const newStatus = order.status === 'confirmed' || order.status === 'processing'
+    ? 'shipped'
+    : order.status
+
+  await db
+    .update(schema.orders)
+    .set({
+      trackingNumber,
+      carrier: carrier ?? null,
+      status: newStatus,
+      updatedAt: new Date().toISOString(),
+    })
+    .where(eq(schema.orders.id, id))
+
+  return c.json({ ok: true, trackingNumber, carrier, status: newStatus })
+})
 
 export default app
