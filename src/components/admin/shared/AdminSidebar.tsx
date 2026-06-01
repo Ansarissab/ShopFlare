@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Package, ShoppingCart, Tag, BarChart2, Settings, Monitor, Star } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingCart, Tag, BarChart2, Settings, Monitor, Star, BellRing } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { en } from '@/lib/i18n/en'
 
@@ -12,8 +12,9 @@ const navItems = [
   { href: '/admin/orders',   label: en.admin.orders,    icon: ShoppingCart },
   { href: '/admin/pos',      label: en.admin.pos,       icon: Monitor },
   { href: '/admin/coupons',  label: en.admin.coupons,   icon: Tag },
-  { href: '/admin/reviews',  label: en.admin.reviews,   icon: Star },
-  { href: '/admin/settings', label: en.admin.settings,  icon: Settings },
+  { href: '/admin/reviews',  label: en.admin.reviews,        icon: Star },
+  { href: '/admin/notify',   label: en.admin.notifyRequests, icon: BellRing },
+  { href: '/admin/settings', label: en.admin.settings,       icon: Settings },
   { href: '/admin/analytics',label: en.admin.analytics, icon: BarChart2 },
 ] as const
 
