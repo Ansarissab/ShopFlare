@@ -21,4 +21,8 @@ export type Bindings = {
 
   // Cloudflare Turnstile
   TURNSTILE_SITE_KEY: string
+  TURNSTILE_SECRET_KEY: string
+
+  // Deployment
+  FRONTEND_URL: string
 }
