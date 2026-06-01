@@ -11,44 +11,15 @@ import { Separator } from '@/components/ui/separator'
 import { OrderTimeline } from '@/components/store/tracking/OrderTimeline'
 import { en } from '@/lib/i18n/en'
 import { formatPrice } from '@/lib/utils/index'
-import type { OrderStatus } from '@/lib/constants'
+import { layout } from '@/lib/styles'
+import { cn } from '@/lib/utils'
+import type { TrackingData } from '@/lib/types/store'
 
 const WORKER_URL = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
 
-interface TrackingItem {
-  quantity: number
-  priceCents: number
-  snapshot: {
-    productName: string
-    variantLabel: string
-    size: string
-    sku?: string
-    imageUrl: string
-  }
-}
-
-interface TrackingOrder {
-  orderNumber: string
-  status: OrderStatus
-  paymentMethod: string
-  customerName: string
-  subtotalCents: number
-  shippingCents: number
-  totalCents: number
-  trackingNumber?: string
-  carrier?: string
-  createdAt: string
-  updatedAt: string
-}
-
-interface TrackingData {
-  order: TrackingOrder
-  items: TrackingItem[]
-}
-
 function TrackingSkeleton() {
   return (
-    <div className="mx-auto max-w-2xl px-4 py-10 flex flex-col gap-6">
+    <div className={layout.detailPage}>
       <Skeleton className="h-7 w-48" />
       <Skeleton className="h-4 w-32" />
       <div className="flex flex-col gap-3 rounded-lg border p-5">
@@ -117,7 +88,7 @@ export default function OrderTrackingPage() {
 
   if (notFound || !data) {
     return (
-      <div className="mx-auto flex min-h-[60vh] max-w-2xl flex-col items-center justify-center gap-3 px-4 text-center">
+      <div className={cn(layout.centeredState, 'max-w-2xl')}>
         <h1 className="text-2xl font-semibold tracking-tight">{en.tracking.notFound}</h1>
         <p className="text-sm text-muted-foreground">
           Check your order number and try again.
@@ -133,7 +104,7 @@ export default function OrderTrackingPage() {
   const canCancel = order.status === 'pending' || order.status === 'confirmed'
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-10 flex flex-col gap-6">
+    <div className={layout.detailPage}>
       {/* Header */}
       <div className="flex flex-col gap-1">
         <div className="flex items-center justify-between gap-3 flex-wrap">

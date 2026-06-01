@@ -11,7 +11,7 @@ import {
   type CarouselApi,
 } from '@/components/ui/carousel'
 import { cn } from '@/lib/utils'
-import type { ProductImage } from 'worker/db/schema'
+import type { ProductImage } from '@/lib/types/store'
 
 interface ImageCarouselProps {
   images: ProductImage[]

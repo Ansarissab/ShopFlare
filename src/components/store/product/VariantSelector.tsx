@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import { en } from '@/lib/i18n/en'
-import type { Variant } from 'worker/db/schema'
+import type { Variant } from '@/lib/types/store'
 
 interface VariantSelectorProps {
   variants: Variant[]

@@ -10,7 +10,7 @@ import { ImageCarousel } from '@/components/store/product/ImageCarousel'
 import { VariantSelector } from '@/components/store/product/VariantSelector'
 import { SizePicker } from '@/components/store/product/SizePicker'
 import { ProductActions } from '@/components/store/product/ProductActions'
-import type { Product, Variant, SizeOption, ProductImage } from 'worker/db/schema'
+import type { Product, Variant, SizeOption, ProductImage } from '@/lib/types/store'
 
 interface ProductHeroProps {
   product: Product

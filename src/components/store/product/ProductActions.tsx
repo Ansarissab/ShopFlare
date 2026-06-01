@@ -4,7 +4,7 @@ import { Loader2, ShoppingCart, Zap, MessageCircle, Banknote, Bell } from 'lucid
 import { Button } from '@/components/ui/button'
 import { en } from '@/lib/i18n/en'
 import { cn } from '@/lib/utils'
-import type { Product, Variant, SizeOption } from 'worker/db/schema'
+import type { Product, Variant, SizeOption } from '@/lib/types/store'
 
 interface ProductActionsProps {
   product: Product

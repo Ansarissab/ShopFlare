@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useCart, useCartItemCount } from '@/hooks/useCart'
 import { CartSheet } from '@/components/store/cart/CartSheet'
+import { layout } from '@/lib/styles'
+import { cn } from '@/lib/utils'
 
 export function StorefrontHeader() {
   const { openCart } = useCart()
@@ -13,7 +15,7 @@ export function StorefrontHeader() {
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b bg-background">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className={cn(layout.bar, 'h-16 justify-between')}>
           {/* Store name */}
           <a href="/" className="text-lg font-semibold tracking-tight text-foreground hover:opacity-80 transition-opacity">
             Store

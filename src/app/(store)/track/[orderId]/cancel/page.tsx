@@ -8,16 +8,11 @@ import { Button, buttonVariants } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { en } from '@/lib/i18n/en'
 import { formatPrice } from '@/lib/utils/index'
-import type { OrderStatus } from '@/lib/constants'
+import { layout } from '@/lib/styles'
+import { cn } from '@/lib/utils'
+import type { CancelOrder } from '@/lib/types/store'
 
 const WORKER_URL = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
-
-interface CancelOrder {
-  orderNumber: string
-  status: OrderStatus
-  customerName: string
-  totalCents: number
-}
 
 type PageState = 'loading' | 'ready' | 'not_found' | 'cannot_cancel' | 'success' | 'error'
 
@@ -78,7 +73,7 @@ export default function CancelOrderPage() {
   // ── Loading ──
   if (pageState === 'loading') {
     return (
-      <div className="mx-auto max-w-md px-4 py-12 flex flex-col gap-4">
+      <div className={cn(layout.formPage, 'gap-4')}>
         <Skeleton className="h-7 w-40" />
         <Skeleton className="h-4 w-56" />
         <Skeleton className="h-24 w-full rounded-lg" />
@@ -90,7 +85,7 @@ export default function CancelOrderPage() {
   // ── Not found ──
   if (pageState === 'not_found') {
     return (
-      <div className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center gap-3 px-4 text-center">
+      <div className={cn(layout.centeredState, 'max-w-md')}>
         <h1 className="text-xl font-semibold">{en.tracking.notFound}</h1>
         <Link href="/track" className="text-sm text-primary underline-offset-4 hover:underline">
           Back to tracking
@@ -102,7 +97,7 @@ export default function CancelOrderPage() {
   // ── Cannot cancel ──
   if (pageState === 'cannot_cancel') {
     return (
-      <div className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center gap-3 px-4 text-center">
+      <div className={cn(layout.centeredState, 'max-w-md')}>
         <h1 className="text-xl font-semibold">{en.checkout.cannotCancel}</h1>
         {order && (
           <p className="text-sm text-muted-foreground capitalize">
@@ -122,7 +117,7 @@ export default function CancelOrderPage() {
   // ── Success ──
   if (pageState === 'success') {
     return (
-      <div className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center gap-3 px-4 text-center">
+      <div className={cn(layout.centeredState, 'max-w-md')}>
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-(--success)/15">
           <svg
             className="h-7 w-7 text-(--success)"
@@ -145,7 +140,7 @@ export default function CancelOrderPage() {
   // ── Error ──
   if (pageState === 'error') {
     return (
-      <div className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center gap-3 px-4 text-center">
+      <div className={cn(layout.centeredState, 'max-w-md')}>
         <h1 className="text-xl font-semibold">{en.errors.networkError}</h1>
         <Button variant="outline" onClick={() => setPageState('ready')}>
           Try again
@@ -156,7 +151,7 @@ export default function CancelOrderPage() {
 
   // ── Ready: confirmation UI ──
   return (
-    <div className="mx-auto max-w-md px-4 py-12 flex flex-col gap-6">
+    <div className={layout.formPage}>
       <div className="flex flex-col gap-1">
         <h1 className="text-xl font-semibold">{en.checkout.cancelOrder}</h1>
         {order && (

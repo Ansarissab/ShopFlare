@@ -167,6 +167,7 @@ export type Product = typeof products.$inferSelect
 export type NewProduct = typeof products.$inferInsert
 export type Variant = typeof variants.$inferSelect
 export type SizeOption = typeof sizeOptions.$inferSelect
+export type ProductImage = typeof productImages.$inferSelect
 export type Order = typeof orders.$inferSelect
 export type NewOrder = typeof orders.$inferInsert
 export type OrderItem = typeof orderItems.$inferSelect
