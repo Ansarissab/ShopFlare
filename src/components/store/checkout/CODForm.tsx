@@ -7,13 +7,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { TurnstileWidget } from '@/components/store/checkout/TurnstileWidget'
-import { en } from '@/lib/i18n/en'
+import { FormField } from '@/components/common/FormField'
+import { en, requiredMsg } from '@/lib/i18n/en'
 import { codOrderSchema, type CodOrder } from '@/lib/schemas'
 import { useCart } from '@/hooks/useCart'
-
-const WORKER_URL = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
+import { apiPost } from '@/lib/api'
 
 type FormValues = CodOrder['shippingAddress']
 
@@ -35,7 +34,7 @@ export function CODForm() {
 
   async function onSubmit(shippingAddress: FormValues) {
     if (!turnstileToken) {
-      toast.error(en.errors.required.replace('{field}', 'Security check'))
+      toast.error(requiredMsg('Security check'))
       return
     }
 
@@ -45,21 +44,11 @@ export function CODForm() {
     }
 
     try {
-      const res = await fetch(`${WORKER_URL}/api/orders/cod`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Turnstile-Token': turnstileToken,
-        },
-        body: JSON.stringify(payload),
-      })
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        throw new Error((data as { message?: string }).message ?? 'Request failed')
-      }
-
-      const { orderId } = (await res.json()) as { orderId: string }
+      const { orderId } = await apiPost<{ orderId: string }>(
+        '/api/orders/cod',
+        payload,
+        { headers: { 'X-Turnstile-Token': turnstileToken } },
+      )
       clearCart()
       router.push(`/checkout/success?method=cod&orderId=${orderId}`)
     } catch {
@@ -70,24 +59,17 @@ export function CODForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
       {/* Full Name */}
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="cod-name">{en.checkout.name}</Label>
+      <FormField label={en.checkout.name} htmlFor="cod-name" error={errors.name ? requiredMsg(en.checkout.name) : undefined}>
         <Input
           id="cod-name"
           autoComplete="name"
           aria-invalid={!!errors.name}
           {...register('name')}
         />
-        {errors.name && (
-          <p className="text-xs text-destructive">
-            {en.errors.required.replace('{field}', en.checkout.name)}
-          </p>
-        )}
-      </div>
+      </FormField>
 
       {/* Phone */}
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="cod-phone">{en.checkout.phone}</Label>
+      <FormField label={en.checkout.phone} htmlFor="cod-phone" error={errors.phone ? en.errors.invalidPhone : undefined}>
         <Input
           id="cod-phone"
           type="tel"
@@ -95,17 +77,10 @@ export function CODForm() {
           aria-invalid={!!errors.phone}
           {...register('phone')}
         />
-        {errors.phone && (
-          <p className="text-xs text-destructive">{en.errors.invalidPhone}</p>
-        )}
-      </div>
+      </FormField>
 
       {/* Email (optional) */}
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="cod-email">
-          {en.checkout.email}{' '}
-          <span className="text-xs text-muted-foreground">(optional)</span>
-        </Label>
+      <FormField label={en.checkout.email} htmlFor="cod-email" optional error={errors.email ? en.errors.invalidEmail : undefined}>
         <Input
           id="cod-email"
           type="email"
@@ -113,73 +88,49 @@ export function CODForm() {
           aria-invalid={!!errors.email}
           {...register('email')}
         />
-        {errors.email && (
-          <p className="text-xs text-destructive">{en.errors.invalidEmail}</p>
-        )}
-      </div>
+      </FormField>
 
       {/* Street Address */}
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="cod-address">{en.checkout.address}</Label>
+      <FormField label={en.checkout.address} htmlFor="cod-address" error={errors.address ? requiredMsg(en.checkout.address) : undefined}>
         <Input
           id="cod-address"
           autoComplete="street-address"
           aria-invalid={!!errors.address}
           {...register('address')}
         />
-        {errors.address && (
-          <p className="text-xs text-destructive">
-            {en.errors.required.replace('{field}', en.checkout.address)}
-          </p>
-        )}
-      </div>
+      </FormField>
 
       {/* City + State row */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="cod-city">{en.checkout.city}</Label>
+        <FormField label={en.checkout.city} htmlFor="cod-city" error={errors.city ? requiredMsg(en.checkout.city) : undefined}>
           <Input
             id="cod-city"
             autoComplete="address-level2"
             aria-invalid={!!errors.city}
             {...register('city')}
           />
-          {errors.city && (
-            <p className="text-xs text-destructive">
-              {en.errors.required.replace('{field}', en.checkout.city)}
-            </p>
-          )}
-        </div>
+        </FormField>
 
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="cod-state">
-            {en.checkout.state}{' '}
-            <span className="text-xs text-muted-foreground">(optional)</span>
-          </Label>
+        <FormField label={en.checkout.state} htmlFor="cod-state" optional>
           <Input
             id="cod-state"
             autoComplete="address-level1"
             {...register('state')}
           />
-        </div>
+        </FormField>
       </div>
 
       {/* Postal Code + Country row */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="cod-postal">
-            {en.checkout.postalCode}{' '}
-            <span className="text-xs text-muted-foreground">(optional)</span>
-          </Label>
+        <FormField label={en.checkout.postalCode} htmlFor="cod-postal" optional>
           <Input
             id="cod-postal"
             autoComplete="postal-code"
             {...register('postalCode')}
           />
-        </div>
+        </FormField>
 
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="cod-country">{en.checkout.country}</Label>
+        <FormField label={en.checkout.country} htmlFor="cod-country" error={errors.country ? requiredMsg(en.checkout.country) : undefined}>
           <Input
             id="cod-country"
             autoComplete="country"
@@ -187,12 +138,7 @@ export function CODForm() {
             aria-invalid={!!errors.country}
             {...register('country')}
           />
-          {errors.country && (
-            <p className="text-xs text-destructive">
-              {en.errors.required.replace('{field}', en.checkout.country)}
-            </p>
-          )}
-        </div>
+        </FormField>
       </div>
 
       {/* Turnstile */}

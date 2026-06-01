@@ -47,6 +47,12 @@ export const en = {
     orderConfirmed: 'Order Confirmed!',
     orderNumber: 'Order #{number}',
     thankYou: 'Thank you for your order',
+    cancelOrder: 'Cancel Order',
+    cancelConfirm: 'Are you sure you want to cancel this order?',
+    cancelReason: 'Reason for cancellation (optional)',
+    orderCancelled: 'Order Cancelled',
+    cancelSuccess: 'Your order has been cancelled successfully.',
+    cannotCancel: 'This order cannot be cancelled.',
   },
   tracking: {
     title: 'Track Your Order',
@@ -108,3 +114,8 @@ export const en = {
 } as const
 
 export type TranslationKey = keyof typeof en
+
+/** Convenience helper — avoids repeating `.replace('{field}', x)` at call sites. */
+export function requiredMsg(field: string): string {
+  return en.errors.required.replace('{field}', field)
+}
