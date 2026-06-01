@@ -29,8 +29,12 @@ No API keys, no Meta account, no monthly fee.
 
 ## Merchant WhatsApp number
 
-Configure in Admin → Settings → Store → WhatsApp Number.
+The number is read from `store_config` (`whatsappNumber` key) at runtime — no redeployment needed to change it. Configure via Admin → Settings → Store → WhatsApp Number (Phase 2), or set directly in D1 after running `pnpm db:seed`.
 Format: country code + number, no spaces (e.g. `923001234567` for Pakistan).
+
+## Message content
+
+The pre-filled message is composed from i18n strings in `lib/i18n/en.ts` — never hardcoded in components. All labels (product, variant, size, SKU, qty, price, footer) come from `en.whatsapp.*`.
 
 ## POS WhatsApp receipt
 
