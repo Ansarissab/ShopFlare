@@ -22,12 +22,23 @@ See agents.md for parallel agent build orchestration plan.
 - Stripe Checkout, Resend (BCC), Web Push API (PWA)
 - Zod v4 (import from "zod/v4"), nanoid, browser-image-compression, @clack/prompts
 
-## DRY Rules — ALWAYS FOLLOW
+## DRY Rules — ALWAYS FOLLOW (ENFORCED — see docs/architecture/dry-conventions.md)
+
+Before writing code, check if a base/helper/type/schema/style already exists.
+If it almost exists, EXTEND it — do not copy-paste. No "shit code", DRY only.
 1. Colors: globals.css CSS vars only. Never hardcode hex in components.
 2. Strings: lib/i18n/en.ts only. Never hardcode UI text in JSX.
-3. Types: Infer from Drizzle schema. Never duplicate type definitions.
-4. Validation: lib/schemas/ Zod schemas. Same schema on client AND Worker.
+3. Types: Infer from Drizzle schema. ALL composite types + ALL component prop
+   interfaces live in lib/types/store.ts. Never declare `*Props` per-file.
+4. Validation: lib/schemas/ Zod, shared client + Worker. Use OOP — .extend()
+   (inherit), .merge()/compose, .pick() (form), .omit() (project). NEVER inline
+   a schema in a route or form; derive from the base instead.
 5. Constants: lib/constants/index.ts. Never inline ORDER_STATUSES etc.
+6. Network: lib/api.ts only (apiGet/apiPost). NEVER raw fetch() or a per-file
+   WORKER_URL. Custom headers via the { headers } option.
+7. Styles: repeated Tailwind layout combos → lib/styles.ts (layout.*). Helpers →
+   lib/utils. Backend order/product assembly → worker/lib (e.g. createOrder, used
+   by BOTH the COD and Stripe paths). Reusable UI → shared components, composed.
 
 ## Security Rules — NEVER VIOLATE
 - Secrets only in CF Worker env vars or .env.local (gitignored)

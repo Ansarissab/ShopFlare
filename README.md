@@ -52,14 +52,15 @@ See [docs/setup/quickstart.md](docs/setup/quickstart.md) for full guide.
 - [x] D1 database schema (Drizzle ORM)
 - [x] shadcn/ui + Tailwind theme (light/dark)
 - [x] lib/ skeleton (constants, i18n, schemas, utils)
-- [ ] Phase 0 complete
+- [x] Phase 0 complete
 
 ### Phase 1 — Store Frontend
 
-- [ ] Product catalog + variant selector
-- [ ] Cart (Zustand + localStorage)
-- [ ] Checkout flows (Stripe, COD, WhatsApp)
-- [ ] Order tracking page
+- [x] Product catalog + variant selector
+- [x] Cart (Zustand + localStorage)
+- [x] Checkout flows (Stripe, COD, WhatsApp)
+- [x] Order tracking page
+- [x] Phase 1 complete
 
 ### Phase 2 — Admin Dashboard
 
