@@ -16,8 +16,7 @@ import { Label } from '@/components/ui/label'
 import { notifyMeSchema, type NotifyMeInput } from '@/lib/schemas'
 import { en } from '@/lib/i18n/en'
 import type { NotifyMeDialogProps } from '@/lib/types/store'
-
-const WORKER_URL = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
+import { apiPost } from '@/lib/api'
 
 export function NotifyMeDialog({
   sizeOptionId,
@@ -43,17 +42,11 @@ export function NotifyMeDialog({
 
   async function onSubmit(values: NotifyMeInput) {
     try {
-      const res = await fetch(`${WORKER_URL}/api/notify`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sizeOptionId: values.sizeOptionId,
-          ...(values.email ? { email: values.email } : {}),
-          ...(values.phone ? { phone: values.phone } : {}),
-        }),
+      await apiPost('/api/notify', {
+        sizeOptionId: values.sizeOptionId,
+        ...(values.email ? { email: values.email } : {}),
+        ...(values.phone ? { phone: values.phone } : {}),
       })
-
-      if (!res.ok) throw new Error('non-2xx response')
 
       toast.success("You'll be notified when it's back in stock!")
       reset()

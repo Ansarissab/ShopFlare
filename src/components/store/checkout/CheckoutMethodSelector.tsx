@@ -8,8 +8,7 @@ import { CODForm } from '@/components/store/checkout/CODForm'
 import { en } from '@/lib/i18n/en'
 import { useCart } from '@/hooks/useCart'
 import { toast } from 'sonner'
-
-const WORKER_URL = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
+import { apiPost } from '@/lib/api'
 
 export function CheckoutMethodSelector() {
   const router = useRouter()
@@ -28,15 +27,7 @@ export function CheckoutMethodSelector() {
         return
       }
 
-      const res = await fetch(`${WORKER_URL}/api/stripe/checkout-session`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: stripeItems }),
-      })
-
-      if (!res.ok) throw new Error('Failed to create checkout session')
-
-      const { url } = (await res.json()) as { url: string }
+      const { url } = await apiPost<{ url: string }>('/api/stripe/checkout-session', { items: stripeItems })
       router.push(url)
     } catch {
       toast.error(en.errors.orderFailed)

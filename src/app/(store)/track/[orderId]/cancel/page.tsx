@@ -11,57 +11,45 @@ import { formatPrice } from '@/lib/utils/index'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
 import type { CancelOrder } from '@/lib/types/store'
-
-const WORKER_URL = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
+import { apiPost } from '@/lib/api'
+import { useApiResource } from '@/hooks/useApiResource'
 
 type PageState = 'loading' | 'ready' | 'not_found' | 'cannot_cancel' | 'success' | 'error'
 
 export default function CancelOrderPage() {
   const params = useParams<{ orderId: string }>()
+
+  // GET: load order via hook. The hook covers loading/notFound; we derive
+  // cannot_cancel from data.order.status once data arrives.
+  const { data: raw, loading: fetching, notFound: fetchNotFound } = useApiResource<{ order: CancelOrder }>(
+    params?.orderId ? `/api/orders/track/${params.orderId}` : null,
+  )
+
   const [order, setOrder] = useState<CancelOrder | null>(null)
   const [pageState, setPageState] = useState<PageState>('loading')
   const [reason, setReason] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [confirmed, setConfirmed] = useState(false)
 
+  // Translate hook state → pageState machine.
   useEffect(() => {
-    if (!params?.orderId) return
-
-    async function fetchOrder() {
-      try {
-        const res = await fetch(`${WORKER_URL}/api/orders/track/${params.orderId}`)
-        if (res.status === 404) {
-          setPageState('not_found')
-          return
-        }
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        const json = await res.json() as { order: CancelOrder }
-        const o = json.order
-        if (o.status !== 'pending' && o.status !== 'confirmed') {
-          setOrder(o)
-          setPageState('cannot_cancel')
-          return
-        }
-        setOrder(o)
-        setPageState('ready')
-      } catch {
-        setPageState('not_found')
-      }
+    if (fetching) { setPageState('loading'); return }
+    if (fetchNotFound) { setPageState('not_found'); return }
+    if (!raw) return
+    const o = raw.order
+    setOrder(o)
+    if (o.status !== 'pending' && o.status !== 'confirmed') {
+      setPageState('cannot_cancel')
+    } else {
+      setPageState('ready')
     }
-
-    fetchOrder()
-  }, [params?.orderId])
+  }, [fetching, fetchNotFound, raw])
 
   async function handleCancel() {
     if (!params?.orderId) return
     setSubmitting(true)
     try {
-      const res = await fetch(`${WORKER_URL}/api/orders/${params.orderId}/cancel`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason: reason.trim() || undefined }),
-      })
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      await apiPost(`/api/orders/${params.orderId}/cancel`, { reason: reason.trim() || undefined })
       setPageState('success')
     } catch {
       setPageState('error')

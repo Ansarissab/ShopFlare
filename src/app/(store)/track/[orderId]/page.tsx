@@ -2,7 +2,6 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
@@ -14,8 +13,7 @@ import { formatPrice } from '@/lib/utils/index'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
 import type { TrackingData } from '@/lib/types/store'
-
-const WORKER_URL = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
+import { useApiResource } from '@/hooks/useApiResource'
 
 function TrackingSkeleton() {
   return (
@@ -57,32 +55,9 @@ function paymentLabel(method: string): string {
 
 export default function OrderTrackingPage() {
   const params = useParams<{ orderId: string }>()
-  const [data, setData] = useState<TrackingData | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [notFound, setNotFound] = useState(false)
-
-  useEffect(() => {
-    if (!params?.orderId) return
-
-    async function fetchOrder() {
-      try {
-        const res = await fetch(`${WORKER_URL}/api/orders/track/${params.orderId}`)
-        if (res.status === 404) {
-          setNotFound(true)
-          return
-        }
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        const json = await res.json() as TrackingData
-        setData(json)
-      } catch {
-        setNotFound(true)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchOrder()
-  }, [params?.orderId])
+  const { data, loading, notFound } = useApiResource<TrackingData>(
+    params?.orderId ? `/api/orders/track/${params.orderId}` : null,
+  )
 
   if (loading) return <TrackingSkeleton />
 

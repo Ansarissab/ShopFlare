@@ -1,14 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ProductHeroWrapper } from '@/components/store/product/ProductHeroWrapper'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
 import type { ProductWithVariants } from '@/lib/types/store'
-
-const WORKER_URL = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
+import { useApiResource } from '@/hooks/useApiResource'
 
 function ProductDetailSkeleton() {
   return (
@@ -46,26 +44,9 @@ function ProductDetailSkeleton() {
 
 export default function ProductDetailPage() {
   const params = useParams<{ slug: string }>()
-  const [item, setItem] = useState<ProductWithVariants | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [notFound, setNotFound] = useState(false)
-
-  useEffect(() => {
-    if (!params?.slug) return
-    async function fetchProduct() {
-      try {
-        const res = await fetch(`${WORKER_URL}/api/products/${params.slug}`)
-        if (res.status === 404) { setNotFound(true); return }
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        setItem((await res.json()) as ProductWithVariants)
-      } catch {
-        setNotFound(true)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchProduct()
-  }, [params?.slug])
+  const { data: item, loading, notFound } = useApiResource<ProductWithVariants>(
+    params?.slug ? `/api/products/${params.slug}` : null,
+  )
 
   if (loading) return <ProductDetailSkeleton />
 

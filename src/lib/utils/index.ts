@@ -7,11 +7,6 @@ export function formatPrice(cents: number, currency: CurrencyCode = 'PKR'): stri
   return `${symbol}${amount.toLocaleString('en', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`
 }
 
-export function generateOrderNumber(): string {
-  // nanoid usage — called server-side in CF Worker
-  return `ORD-${Math.random().toString(36).slice(2, 8).toUpperCase()}`
-}
-
 export function calculateShipping(subtotalCents: number, flatRateCents: number, thresholdCents: number): number {
   if (thresholdCents > 0 && subtotalCents >= thresholdCents) return 0
   return flatRateCents

@@ -1,14 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ProductHeroWrapper } from '@/components/store/product/ProductHeroWrapper'
 import { ProductCard } from '@/components/store/product/ProductCard'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
 import type { ProductWithVariants } from '@/lib/types/store'
-
-const WORKER_URL = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
+import { useApiResource } from '@/hooks/useApiResource'
 
 function ProductListingSkeleton() {
   return (
@@ -27,25 +25,8 @@ function ProductListingSkeleton() {
 }
 
 export default function StorePage() {
-  const [items, setItems] = useState<ProductWithVariants[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    async function fetchProducts() {
-      try {
-        const res = await fetch(`${WORKER_URL}/api/products`)
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        const data = (await res.json()) as { products: ProductWithVariants[] }
-        setItems(data.products ?? [])
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load products')
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchProducts()
-  }, [])
+  const { data, loading, error } = useApiResource<{ products: ProductWithVariants[] }>('/api/products')
+  const items = data?.products ?? []
 
   if (loading) return <ProductListingSkeleton />
 
