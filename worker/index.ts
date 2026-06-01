@@ -1,18 +1,6 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-
-type Bindings = {
-  DB: D1Database
-  KV: KVNamespace
-  R2: R2Bucket
-  STRIPE_SECRET_KEY: string
-  STRIPE_WEBHOOK_SECRET: string
-  STRIPE_PUBLISHABLE_KEY: string
-  RESEND_API_KEY: string
-  VAPID_PRIVATE_KEY: string
-  VAPID_PUBLIC_KEY: string
-  TURNSTILE_SITE_KEY: string
-}
+import type { Bindings } from './types'
 
 const app = new Hono<{ Bindings: Bindings }>()
 
@@ -25,7 +13,7 @@ app.get('/api/ping', (c) => c.json({ ok: true }))
 app.get('/api/public-config', async (c) => {
   return c.json({
     stripePublishableKey: c.env.STRIPE_PUBLISHABLE_KEY ?? '',
-    turnstiteSiteKey: c.env.TURNSTILE_SITE_KEY ?? '',
+    turnstileSiteKey: c.env.TURNSTILE_SITE_KEY ?? '',
     vapidPublicKey: c.env.VAPID_PUBLIC_KEY ?? '',
   })
 })

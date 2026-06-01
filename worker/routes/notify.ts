@@ -4,17 +4,7 @@ import { eq, and, or } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import * as schema from '../db/schema'
 import { notifyMeSchema } from '@/lib/schemas'
-
-type Bindings = {
-  DB: D1Database
-  KV: KVNamespace
-  R2: R2Bucket
-  STRIPE_SECRET_KEY: string
-  STRIPE_WEBHOOK_SECRET: string
-  RESEND_API_KEY: string
-  VAPID_PRIVATE_KEY: string
-  VAPID_PUBLIC_KEY: string
-}
+import type { Bindings } from '../types'
 
 const app = new Hono<{ Bindings: Bindings }>()
 
