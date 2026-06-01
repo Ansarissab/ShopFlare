@@ -4,19 +4,7 @@ import { MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { en } from '@/lib/i18n/en'
 import { buildWhatsAppOrderUrl } from '@/lib/whatsapp'
-import type { CurrencyCode } from '@/lib/constants'
-
-interface WhatsAppButtonProps {
-  phoneNumber: string
-  productName: string
-  variantLabel: string
-  size: string
-  sku?: string
-  priceCents: number
-  currency: CurrencyCode
-  quantity?: number
-  disabled?: boolean
-}
+import type { WhatsAppButtonProps } from '@/lib/types/store'
 
 export function WhatsAppButton({
   phoneNumber,

@@ -4,14 +4,9 @@ import { Progress } from '@/components/ui/progress'
 import { en } from '@/lib/i18n/en'
 import { formatPrice } from '@/lib/utils/index'
 import { cn } from '@/lib/utils'
+import type { FreeShippingBarProps } from '@/lib/types/store'
 
-type Props = {
-  subtotalCents: number
-  thresholdCents: number
-  flatRateCents: number
-}
-
-export function FreeShippingBar({ subtotalCents, thresholdCents }: Props) {
+export function FreeShippingBar({ subtotalCents, thresholdCents }: FreeShippingBarProps) {
   if (thresholdCents === 0) return null
 
   const qualified = subtotalCents >= thresholdCents

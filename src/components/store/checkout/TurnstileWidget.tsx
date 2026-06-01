@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import type { TurnstileWidgetProps } from '@/lib/types/store'
 
 const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ''
 
@@ -24,12 +25,7 @@ declare global {
   }
 }
 
-type Props = {
-  onVerify: (token: string) => void
-  onError?: () => void
-}
-
-export function TurnstileWidget({ onVerify, onError }: Props) {
+export function TurnstileWidget({ onVerify, onError }: TurnstileWidgetProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const widgetIdRef = useRef<string | null>(null)
 

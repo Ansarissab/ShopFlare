@@ -5,16 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { formatPrice } from '@/lib/utils/index'
 import { en } from '@/lib/i18n/en'
-import type { Product, Variant, SizeOption, ProductImage } from '@/lib/types/store'
-
-interface ProductCardProps {
-  product: Product
-  variants: Variant[]
-  sizes: SizeOption[]          // all sizes across all variants of this product
-  images: ProductImage[]       // all images across all variants
-  isNew?: boolean
-  className?: string
-}
+import type { ProductCardProps } from '@/lib/types/store'
 
 export function ProductCard({
   product,

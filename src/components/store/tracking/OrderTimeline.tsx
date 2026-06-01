@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { en } from '@/lib/i18n/en'
 import { ORDER_STATUSES, type OrderStatus } from '@/lib/constants'
 import { cn } from '@/lib/utils'
+import type { OrderTimelineProps } from '@/lib/types/store'
 
 // Timeline steps — exclude 'cancelled' (shown separately)
 const TIMELINE_STEPS = ORDER_STATUSES.filter(
@@ -75,12 +76,6 @@ function StepIcon({ step, state }: { step: string; state: StepState }) {
   }
 
   return <div className={baseClass}>{icons[step]}</div>
-}
-
-interface OrderTimelineProps {
-  status: OrderStatus
-  trackingNumber?: string
-  carrier?: string
 }
 
 export function OrderTimeline({ status, trackingNumber, carrier }: OrderTimelineProps) {

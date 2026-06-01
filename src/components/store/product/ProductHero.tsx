@@ -10,25 +10,7 @@ import { ImageCarousel } from '@/components/store/product/ImageCarousel'
 import { VariantSelector } from '@/components/store/product/VariantSelector'
 import { SizePicker } from '@/components/store/product/SizePicker'
 import { ProductActions } from '@/components/store/product/ProductActions'
-import type { Product, Variant, SizeOption, ProductImage } from '@/lib/types/store'
-
-interface ProductHeroProps {
-  product: Product
-  variants: Variant[]
-  /** All size options, keyed by variantId */
-  sizesByVariant: Record<string, SizeOption[]>
-  /** All images, keyed by variantId */
-  imagesByVariant: Record<string, ProductImage[]>
-  isNew?: boolean
-  isPopular?: boolean
-  onAddToCart: (sizeOption: SizeOption) => void
-  onBuyNow: (sizeOption: SizeOption) => void
-  onWhatsApp: (sizeOption: SizeOption) => void
-  onCOD: (sizeOption: SizeOption) => void
-  onNotifyMe: () => void
-  isAddingToCart?: boolean
-  className?: string
-}
+import type { ProductHeroProps } from '@/lib/types/store'
 
 export function ProductHero({
   product,

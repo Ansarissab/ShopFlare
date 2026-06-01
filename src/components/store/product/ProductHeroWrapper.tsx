@@ -4,13 +4,9 @@ import { useState, useCallback } from 'react'
 import { ProductHero } from '@/components/store/product/ProductHero'
 import { useCart } from '@/hooks/useCart'
 import { buildProductMaps } from '@/lib/utils/index'
-import type { ProductWithVariants, SizeOption } from '@/lib/types/store'
+import type { SizeOption, ProductHeroWrapperProps } from '@/lib/types/store'
 
-interface Props {
-  item: ProductWithVariants
-}
-
-export function ProductHeroWrapper({ item }: Props) {
+export function ProductHeroWrapper({ item }: ProductHeroWrapperProps) {
   const { addItem, openCart } = useCart()
   const [isAddingToCart, setIsAddingToCart] = useState(false)
 

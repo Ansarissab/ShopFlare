@@ -4,21 +4,7 @@ import { Loader2, ShoppingCart, Zap, MessageCircle, Banknote, Bell } from 'lucid
 import { Button } from '@/components/ui/button'
 import { en } from '@/lib/i18n/en'
 import { cn } from '@/lib/utils'
-import type { Product, Variant, SizeOption } from '@/lib/types/store'
-
-interface ProductActionsProps {
-  product: Product
-  selectedVariant: Variant | null
-  selectedSize: SizeOption | null
-  allSizesOOS: boolean
-  isAddingToCart: boolean
-  onAddToCart: () => void
-  onBuyNow: () => void
-  onWhatsApp: () => void
-  onCOD: () => void
-  onNotifyMe: () => void
-  className?: string
-}
+import type { ProductActionsProps } from '@/lib/types/store'
 
 export function ProductActions({
   selectedSize,

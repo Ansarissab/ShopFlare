@@ -2,7 +2,6 @@
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod/v4'
 import { toast } from 'sonner'
 import {
   Dialog,
@@ -14,19 +13,9 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { notifyMeSchema } from '@/lib/schemas'
+import { notifyMeSchema, type NotifyMeInput } from '@/lib/schemas'
 import { en } from '@/lib/i18n/en'
-
-type NotifyMeFormValues = z.infer<typeof notifyMeSchema>
-
-interface NotifyMeDialogProps {
-  sizeOptionId: string
-  productName: string
-  size: string
-  variantLabel: string
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}
+import type { NotifyMeDialogProps } from '@/lib/types/store'
 
 const WORKER_URL = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
 
@@ -43,7 +32,7 @@ export function NotifyMeDialog({
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-  } = useForm<NotifyMeFormValues>({
+  } = useForm<NotifyMeInput>({
     resolver: zodResolver(notifyMeSchema),
     defaultValues: {
       sizeOptionId,
@@ -52,7 +41,7 @@ export function NotifyMeDialog({
     },
   })
 
-  async function onSubmit(values: NotifyMeFormValues) {
+  async function onSubmit(values: NotifyMeInput) {
     try {
       const res = await fetch(`${WORKER_URL}/api/notify`, {
         method: 'POST',

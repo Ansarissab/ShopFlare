@@ -2,14 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import { en } from '@/lib/i18n/en'
-import type { Variant } from '@/lib/types/store'
-
-interface VariantSelectorProps {
-  variants: Variant[]
-  selectedVariantId: string
-  onSelect: (id: string) => void
-  className?: string
-}
+import type { Variant, VariantSelectorProps } from '@/lib/types/store'
 
 export function VariantSelector({
   variants,

@@ -15,15 +15,9 @@ import { useCart, useCartSubtotalCents } from '@/hooks/useCart'
 import { CartItem } from '@/components/store/cart/CartItem'
 import { FreeShippingBar } from '@/components/store/cart/FreeShippingBar'
 import { CartSummary } from '@/components/store/cart/CartSummary'
+import type { CartSheetProps } from '@/lib/types/store'
 
-type Props = {
-  /** flat-rate shipping in cents — pass from store config */
-  flatRateCents?: number
-  /** free-shipping threshold in cents — pass 0 if unconfigured */
-  thresholdCents?: number
-}
-
-export function CartSheet({ flatRateCents = 0, thresholdCents = 0 }: Props) {
+export function CartSheet({ flatRateCents = 0, thresholdCents = 0 }: CartSheetProps) {
   const { items, isOpen, closeCart } = useCart()
   const subtotalCents = useCartSubtotalCents()
   const shippingCents = calculateShipping(subtotalCents, flatRateCents, thresholdCents)

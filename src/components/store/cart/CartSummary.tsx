@@ -8,15 +8,7 @@ import { Separator } from '@/components/ui/separator'
 import { en } from '@/lib/i18n/en'
 import { cn } from '@/lib/utils'
 import { formatPrice } from '@/lib/utils/index'
-
-type Props = {
-  subtotalCents: number
-  shippingCents: number
-  onApplyCoupon: (code: string) => Promise<boolean>
-  couponApplied?: boolean
-  discountCents?: number
-  onClose: () => void
-}
+import type { CartSummaryProps } from '@/lib/types/store'
 
 export function CartSummary({
   subtotalCents,
@@ -25,7 +17,7 @@ export function CartSummary({
   couponApplied = false,
   discountCents = 0,
   onClose,
-}: Props) {
+}: CartSummaryProps) {
   const router = useRouter()
   const [couponCode, setCouponCode] = useState('')
   const [couponState, setCouponState] = useState<'idle' | 'applied' | 'invalid'>('idle')
