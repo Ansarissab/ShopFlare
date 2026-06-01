@@ -19,6 +19,7 @@ import {
 } from '@/lib/schemas'
 import { MAX_IMAGES_PER_VARIANT, MAX_IMAGE_BYTES, ALLOWED_IMAGE_TYPES } from '@/lib/constants'
 import type { AdminEnv } from '../../lib/access'
+import { dispatchRestockAlerts } from '../../lib/notify'
 
 const app = new Hono<AdminEnv>()
 
@@ -282,12 +283,16 @@ app.put('/sizes/:sizeId', async (c) => {
   }
 
   const db = createDb(c.env.DB)
-  const sizeOption = await db
-    .select({ id: schema.sizeOptions.id })
+
+  // Read current stock BEFORE update so we can detect a restock transition.
+  const current = await db
+    .select({ id: schema.sizeOptions.id, stock: schema.sizeOptions.stock })
     .from(schema.sizeOptions)
     .where(eq(schema.sizeOptions.id, sizeId))
     .get()
-  if (!sizeOption) return c.json({ error: 'Size option not found' }, 404)
+  if (!current) return c.json({ error: 'Size option not found' }, 404)
+
+  const oldStock = current.stock
 
   const { size, sku, priceCents, stock, stripePriceId, active } = parsed.data
   await db
@@ -307,6 +312,25 @@ app.put('/sizes/:sizeId', async (c) => {
     .from(schema.sizeOptions)
     .where(eq(schema.sizeOptions.id, sizeId))
     .get()
+
+  // ── Restock-alert dispatch ─────────────────────────────────────────────────
+  // Trigger only when old stock was 0 (OOS) and the new stock is available
+  // (>0 or -1 unlimited). Use waitUntil so dispatch never blocks the response.
+  const newStock = updated?.stock ?? oldStock
+  const wasOOS      = oldStock === 0
+  const nowAvailable = newStock > 0 || newStock === -1
+  if (wasOOS && nowAvailable) {
+    try {
+      c.executionCtx.waitUntil(
+        dispatchRestockAlerts(db, c.env, sizeId),
+      )
+    } catch (err) {
+      // Defensive: executionCtx.waitUntil should never throw synchronously,
+      // but guard so the PUT response is never affected.
+      console.error('restock dispatch schedule error', err)
+    }
+  }
+
   return c.json(updated)
 })
 
