@@ -15,3 +15,4 @@
 export * from './base'
 export * from './order'
 export * from './product'
+export * from './config'

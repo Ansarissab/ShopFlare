@@ -4,9 +4,17 @@
 import type { Product, Variant, SizeOption, ProductImage } from 'worker/db/schema'
 import type { OrderStatus, CurrencyCode } from '@/lib/constants'
 import type { CartItem } from '@/hooks/useCart'
+import type { StoreConfigData } from '@/lib/schemas'
 
 // Re-export base types so callers import from one place
 export type { Product, Variant, SizeOption, ProductImage }
+
+// ─── Store config ───────────────────────────────────────────────────────────
+// Precise client-side type: currency narrowed to CurrencyCode (the Zod schema
+// validates at the boundary; this is the authoritative TS shape).
+export type StoreConfig = Omit<StoreConfigData, 'currency'> & {
+  currency: CurrencyCode
+}
 
 // ─── Product composite types ──────────────────────────────────────────────────
 
@@ -141,7 +149,9 @@ export interface ProductHeroProps {
   onBuyNow: (sizeOption: SizeOption) => void
   onWhatsApp: (sizeOption: SizeOption) => void
   onCOD: (sizeOption: SizeOption) => void
-  onNotifyMe: () => void
+  // NOTE: Notify-Me is handled internally by ProductHero (it owns the
+  // variant/size selection that determines which OOS size to notify about),
+  // so it is intentionally NOT a prop here.
   isAddingToCart?: boolean
   className?: string
 }
