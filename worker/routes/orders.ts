@@ -5,21 +5,27 @@
 
 import { Hono } from 'hono'
 import { eq, and, inArray } from 'drizzle-orm'
-import { createDb } from '../db/index'
-import * as schema from '../db/schema'
+import { createDb } from 'worker/db/index'
+import * as schema from 'worker/db/schema'
 import { codOrderSchema, cancelOrderSchema } from '@/lib/schemas'
-import { createOrder, assertItemsAvailable, releaseOrderInventory, CouponError, StockError } from '../lib/orders'
-import { parseBody } from '../lib/http'
-import { verifyTurnstile } from '../lib/turnstile'
-import { rateLimit } from '../lib/ratelimit'
-import { notifyNewOrder } from '../lib/notify'
-import type { Bindings } from '../types'
+import { createOrder, assertItemsAvailable, releaseOrderInventory, CouponError, StockError } from 'worker/lib/orders'
+import { parseBody } from 'worker/lib/http'
+import { verifyTurnstile } from 'worker/lib/turnstile'
+import { rateLimit } from 'worker/lib/ratelimit'
+import { notifyNewOrder } from 'worker/lib/notify'
+import type { Bindings } from 'worker/types'
 
 const app = new Hono<{ Bindings: Bindings }>()
 
 // ─── GET /track/:orderNumber ──────────────────────────────────────────────────
 
 app.get('/track/:orderNumber', async (c) => {
+  // Throttle per IP — order numbers are unguessable, but a throttle removes any
+  // brute-force enumeration angle on this PII-bearing lookup.
+  if (!(await rateLimit(c.env, 'track', c.req.header('CF-Connecting-IP'), { limit: 30, windowSeconds: 60 }))) {
+    return c.json({ error: 'Too many requests' }, 429)
+  }
+
   const { orderNumber } = c.req.param()
   const db = createDb(c.env.DB)
 
@@ -164,6 +170,12 @@ app.post('/cod', async (c) => {
 // Resolves by orderNumber (the only identifier the public has access to).
 
 app.post('/:orderNumber/cancel', async (c) => {
+  // Throttle per IP — cancellation is a state-changing action keyed only on the
+  // (unguessable) order number, so a throttle blocks any mass-cancel attempt.
+  if (!(await rateLimit(c.env, 'cancel', c.req.header('CF-Connecting-IP'), { limit: 10, windowSeconds: 60 }))) {
+    return c.json({ error: 'Too many requests' }, 429)
+  }
+
   const { orderNumber } = c.req.param()
 
   const [body] = await parseBody(c)
