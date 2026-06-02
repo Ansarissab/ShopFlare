@@ -341,6 +341,7 @@ export interface AdminStatCardProps {
   label: string
   value: string | number
   sub?: string
+  href?: string
 }
 
 // ─── Coupon types (Agent N) ───────────────────────────────────────────────────

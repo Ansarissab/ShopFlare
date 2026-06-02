@@ -14,17 +14,21 @@ import type { AdminOrdersResponse } from '@/lib/types/store'
 interface DashboardStats {
   total: number
   pending: number
+  cancelled: number
+  delivered: number
   revenueCents: number
   lowStock: number
 }
 
 function computeStats(data: AdminOrdersResponse | null): DashboardStats {
-  if (!data) return { total: 0, pending: 0, revenueCents: 0, lowStock: 0 }
-  const pending = data.orders.filter((o) => o.status === 'pending').length
+  if (!data) return { total: 0, pending: 0, cancelled: 0, delivered: 0, revenueCents: 0, lowStock: 0 }
+  const pending   = data.orders.filter((o) => o.status === 'pending').length
+  const cancelled = data.orders.filter((o) => o.status === 'cancelled').length
+  const delivered = data.orders.filter((o) => o.status === 'delivered').length
   const revenueCents = data.orders
     .filter((o) => o.status !== 'cancelled')
     .reduce((sum, o) => sum + o.totalCents, 0)
-  return { total: data.total, pending, revenueCents, lowStock: 0 }
+  return { total: data.total, pending, cancelled, delivered, revenueCents, lowStock: 0 }
 }
 
 export default function AdminDashboardPage() {
@@ -56,11 +60,12 @@ export default function AdminDashboardPage() {
           <StatCard
             label={en.admin.totalOrders}
             value={stats.total}
-            sub="all time"
+            sub={`${stats.cancelled} cancelled · ${stats.delivered} delivered`}
           />
           <StatCard
             label={en.admin.totalRevenue}
             value={formatPrice(stats.revenueCents)}
+            sub="excl. cancelled"
           />
           <StatCard
             label={en.admin.pendingOrders}
@@ -70,6 +75,7 @@ export default function AdminDashboardPage() {
             label={en.admin.lowStockAlert}
             value={stats.lowStock}
             sub="variants below threshold"
+            href="/admin/products"
           />
         </div>
       )}
