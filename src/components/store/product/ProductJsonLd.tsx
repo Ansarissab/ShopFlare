@@ -6,11 +6,12 @@
 // Renders null until data is ready; never throws.
 
 import { useEffect, useState } from 'react'
-import type { ProductJsonLdProps, ProductReviewsResponse, StoreConfig } from '@/lib/types/store'
+import type { ProductJsonLdProps, ProductJsonLdOffer, ProductReviewsResponse, StoreConfig, SizeOption } from '@/lib/types/store'
 import { apiGet } from '@/lib/api'
+// getPriceRange lives in the utils/ directory module; `@/lib/utils` resolves to
+// the sibling utils.ts (cn only), so the explicit /index path is required.
 import { getPriceRange } from '@/lib/utils/index'
 import { DEFAULT_CURRENCY, CURRENCIES } from '@/lib/constants'
-import type { SizeOption } from '@/lib/types/store'
 
 export function ProductJsonLd({ item, rating: ratingProp, storeUrl, storeName }: ProductJsonLdProps) {
   const [currency, setCurrency] = useState<string>(DEFAULT_CURRENCY)
@@ -75,12 +76,7 @@ export function ProductJsonLd({ item, rating: ratingProp, storeUrl, storeName }:
     : 'https://schema.org/OutOfStock'
 
   // Build Offers block. Use AggregateOffer when a price range exists.
-  type OfferBlock =
-    | { '@type': 'AggregateOffer'; lowPrice: number; highPrice: number; offerCount: number; priceCurrency: string; availability: string; url?: string }
-    | { '@type': 'Offer'; price: number; priceCurrency: string; availability: string; url?: string }
-    | { '@type': 'Offer'; priceCurrency: string; availability: string; url?: string }
-
-  let offers: OfferBlock
+  let offers: ProductJsonLdOffer
   const productUrl = storeUrl ? `${storeUrl}/product/${item.product.id}` : undefined
 
   if (minPrice !== null && maxPrice !== null) {

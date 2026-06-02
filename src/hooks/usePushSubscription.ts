@@ -16,21 +16,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { apiGet, apiPost } from '@/lib/api'
-
-interface PublicConfig {
-  vapidPublicKey: string
-  stripePublishableKey: string
-  turnstileSiteKey: string
-}
-
-export interface UsePushSubscriptionReturn {
-  supported: boolean
-  permission: NotificationPermission
-  enabled: boolean
-  /** Resolves true only when the subscription was created + persisted. */
-  enable: () => Promise<boolean>
-  loading: boolean
-}
+import type { PublicConfigResponse, UsePushSubscriptionReturn } from '@/lib/types/store'
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
@@ -94,7 +80,7 @@ export function usePushSubscription(): UsePushSubscriptionReturn {
       if (perm !== 'granted') return false
 
       // 2. Fetch VAPID public key
-      const config = await apiGet<PublicConfig>('/api/public-config')
+      const config = await apiGet<PublicConfigResponse>('/api/public-config')
       if (!config.vapidPublicKey) return false
 
       // 3. Register service worker (idempotent — no-op if already registered)
