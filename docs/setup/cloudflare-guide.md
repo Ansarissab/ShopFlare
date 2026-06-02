@@ -98,7 +98,7 @@ pnpm worker:deploy
 Copy the Worker URL → set in `.env.local`:
 
 ```
-NEXT_PUBLIC_WORKER_URL=https://singlepage-ecomm-worker.YOUR.workers.dev
+NEXT_PUBLIC_WORKER_URL=https://shopflare-worker.YOUR.workers.dev
 ```
 
 ---

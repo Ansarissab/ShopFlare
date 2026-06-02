@@ -20,7 +20,7 @@ Only non-sensitive values. Never commit this file.
 
 | Variable | Description |
 | --- | --- |
-| `NEXT_PUBLIC_WORKER_URL` | Deployed CF Worker URL (e.g. `https://singlepage-ecomm-worker.YOUR.workers.dev`) |
+| `NEXT_PUBLIC_WORKER_URL` | Deployed CF Worker URL (e.g. `https://shopflare-worker.YOUR.workers.dev`) |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | CF Turnstile site key — used to render the Turnstile widget on public forms |
 
 > **Note:** `TURNSTILE_SITE_KEY` is also set as a Worker secret so it can be served via `GET /api/public-config`. The `NEXT_PUBLIC_TURNSTILE_SITE_KEY` in `.env.local` is the same value but baked into the Next.js bundle at build time for the client widget.

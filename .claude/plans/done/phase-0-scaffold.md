@@ -45,7 +45,7 @@ npm install @cloudflare/workers-types --save-dev
 ```
 Create `wrangler.toml`:
 ```toml
-name = "singlepage-ecomm-worker"
+name = "shopflare-worker"
 main = "worker/index.ts"
 compatibility_date = "2026-05-31"
 compatibility_flags = ["nodejs_compat"]
