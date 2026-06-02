@@ -5,12 +5,10 @@ import { createStripe } from '../lib/stripe'
 import { createDb } from '../db/index'
 import * as schema from '../db/schema'
 import { createCheckoutSessionSchema } from '@/lib/schemas'
-import { createOrder } from '../lib/orders'
+import { createOrder, releaseOrderInventory } from '../lib/orders'
 import { parseBody } from '../lib/http'
-import { sendOrderEmails } from '../lib/email'
-import { sendPushToAll } from '../lib/push'
+import { notifyNewOrder } from '../lib/notify'
 import type { Bindings } from '../types'
-import { en } from '@/lib/i18n/en'
 
 const app = new Hono<{ Bindings: Bindings }>()
 
@@ -186,54 +184,45 @@ app.post('/webhook', async (c) => {
       const customerName = session.customer_details?.name ?? null
       const customerEmail = session.customer_details?.email ?? null
 
-      // Update order — confirm payment and fill in customer details
-      await db
-        .update(schema.orders)
-        .set({
-          status: 'confirmed',
-          stripeSessionId: session.id,
-          stripePaymentIntentId,
-          ...(customerName ? { customerName } : {}),
-          ...(customerEmail ? { customerEmail } : {}),
-          updatedAt: new Date().toISOString(),
-        })
-        .where(eq(schema.orders.id, orderId))
-
-      // Record event for idempotency
-      await db.insert(schema.stripeEvents).values({
-        id: nanoid(),
-        eventId: event.id,
-        type: event.type,
-      })
+      // Confirm the order and record the idempotency row atomically (a D1 batch
+      // is one transaction). A retry after a mid-handler crash re-runs the batch;
+      // a retry after success short-circuits at the idempotency check above — so
+      // the notifications below fire exactly once.
+      await db.batch([
+        db
+          .update(schema.orders)
+          .set({
+            status: 'confirmed',
+            stripeSessionId: session.id,
+            stripePaymentIntentId,
+            ...(customerName ? { customerName } : {}),
+            ...(customerEmail ? { customerEmail } : {}),
+            updatedAt: new Date().toISOString(),
+          })
+          .where(eq(schema.orders.id, orderId)),
+        db.insert(schema.stripeEvents).values({
+          id: nanoid(),
+          eventId: event.id,
+          type: event.type,
+        }),
+      ])
 
       console.info('[stripe/webhook] order confirmed', { orderId, sessionId: session.id })
 
-      // Fire notifications — wrapped in waitUntil so they never block the webhook ack.
-      // The order's customerEmail may have just been populated above; sendOrderEmails
-      // re-reads from D1 so it always sees the latest row.
+      // Fire notifications post-ack (waitUntil never blocks the webhook ack).
+      // Re-read the order number from D1 — customer details may have just been
+      // populated above. notifyNewOrder never throws.
       const orderIdForNotify = orderId
       c.executionCtx.waitUntil(
         (async () => {
-          try {
-            const notifyDb = createDb(c.env.DB)
-            const confirmOrder = await notifyDb
-              .select({ orderNumber: schema.orders.orderNumber })
-              .from(schema.orders)
-              .where(eq(schema.orders.id, orderIdForNotify))
-              .get()
-            await sendOrderEmails(notifyDb, c.env, orderIdForNotify)
-            if (confirmOrder) {
-              // Payload-less tickle (see worker/lib/push.ts): the SW shows a
-              // generic notification, so we pass only the order number for the
-              // (currently non-transmitted) body — no price formatting needed.
-              await sendPushToAll(notifyDb, c.env, {
-                title: en.notifications.newOrderTitle,
-                body: confirmOrder.orderNumber,
-                url: `${c.env.FRONTEND_URL || ''}/admin/orders`,
-              })
-            }
-          } catch (err) {
-            console.warn('[stripe/webhook] post-confirm notify error', err)
+          const notifyDb = createDb(c.env.DB)
+          const confirmOrder = await notifyDb
+            .select({ orderNumber: schema.orders.orderNumber })
+            .from(schema.orders)
+            .where(eq(schema.orders.id, orderIdForNotify))
+            .get()
+          if (confirmOrder) {
+            await notifyNewOrder(notifyDb, c.env, orderIdForNotify, confirmOrder.orderNumber)
           }
         })(),
       )
@@ -262,8 +251,11 @@ app.post('/webhook', async (c) => {
         break
       }
 
-      // Only cancel if still pending — do not overwrite a completed order
-      await db
+      // Only cancel if still pending — do not overwrite a completed order.
+      // D1 reports meta.changes: exactly one caller wins the pending→cancelled
+      // transition, so the non-idempotent inventory release runs once even if
+      // Stripe redelivers the event before the idempotency row commits.
+      const cancelRes = await db
         .update(schema.orders)
         .set({ status: 'cancelled', updatedAt: new Date().toISOString() })
         .where(
@@ -272,6 +264,12 @@ app.post('/webhook', async (c) => {
             eq(schema.orders.status, 'pending'),
           ),
         )
+
+      if ((cancelRes as unknown as D1Result).meta?.changes === 1) {
+        // Return the stock + coupon quota reserved at checkout creation to the
+        // pool — otherwise every abandoned Stripe checkout leaks inventory.
+        await releaseOrderInventory(db, orderId)
+      }
 
       await db.insert(schema.stripeEvents).values({
         id: nanoid(),
@@ -285,9 +283,11 @@ app.post('/webhook', async (c) => {
 
     case 'payment_intent.payment_failed': {
       const pi = event.data.object
-      // Note: payment_intent events carry no orderId in metadata; the order
-      // cannot be updated from here. The corresponding checkout.session.expired
-      // event (or manual admin action) handles order status.
+      // Log-only by design. A failed payment attempt does NOT mean the checkout
+      // is abandoned — the Checkout Session stays open for retry, so cancelling
+      // here would be premature. When the session is truly abandoned Stripe
+      // fires checkout.session.expired, which cancels the order AND releases the
+      // reserved stock + coupon quota (see that handler above).
       console.warn('[stripe/webhook] payment_intent.payment_failed', {
         id: pi.id,
         lastError: pi.last_payment_error?.message,
