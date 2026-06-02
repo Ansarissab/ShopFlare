@@ -10,16 +10,28 @@ import * as schema from '../db/schema'
 import { submitReviewSchema } from '@/lib/schemas'
 import { parseBody } from '../lib/http'
 import { verifyTurnstile } from '../lib/turnstile'
+import { rateLimit } from '../lib/ratelimit'
 import type { Bindings } from '../types'
 
 const app = new Hono<{ Bindings: Bindings }>()
 
 // ─── POST / — submit a verified-purchase review ───────────────────────────────
 
+// Single generic message for every verification failure (order missing, not
+// delivered, contact mismatch, product not in order). Distinct codes/messages
+// would let an attacker probe order existence + state by guessing order numbers.
+const VERIFY_FAILED = "We couldn't verify a delivered order matching those details"
+
 app.post('/', async (c) => {
-  // 1. Turnstile gate — before any DB work
+  // 1. Per-IP throttle, then Turnstile gate — before any DB work
+  const ip = c.req.header('CF-Connecting-IP')
+  if (!(await rateLimit(c.env, 'review', ip, { limit: 10, windowSeconds: 60 }))) {
+    return c.json({ error: 'Too many requests' }, 429)
+  }
   const token = c.req.header('X-Turnstile-Token') ?? null
-  const valid = await verifyTurnstile(token, c.env.TURNSTILE_SECRET_KEY, c.req.header('CF-Connecting-IP'))
+  const valid = await verifyTurnstile(token, c.env.TURNSTILE_SECRET_KEY, ip, {
+    isDevelopment: c.env.ENVIRONMENT === 'development',
+  })
   if (!valid) return c.json({ error: 'Security check failed' }, 403)
 
   // 2. Parse + validate body
@@ -41,14 +53,13 @@ app.post('/', async (c) => {
     .where(eq(schema.orders.orderNumber, orderNumber))
     .get()
 
-  if (!order) return c.json({ error: 'Order not found' }, 404)
-
-  // 4. Require delivered status
-  if (order.status !== 'delivered') {
-    return c.json({ error: 'Only delivered orders can be reviewed' }, 422)
+  // 4-6. Verify the order exists, is delivered, the contact matches, and the
+  // product was actually in it. All failures return the SAME 403 so the
+  // endpoint can't be used to probe order existence/state (see VERIFY_FAILED).
+  if (!order || order.status !== 'delivered') {
+    return c.json({ error: VERIFY_FAILED }, 403)
   }
 
-  // 5. Verify contact matches (email case-insensitive OR phone digits-suffix)
   const digitsOnly = (s: string) => s.replace(/\D/g, '')
   const contactLower = contact.trim().toLowerCase()
   const contactDigits = digitsOnly(contact)
@@ -63,10 +74,9 @@ app.post('/', async (c) => {
     digitsOnly(order.customerPhone).endsWith(contactDigits)
 
   if (!emailMatch && !phoneMatch) {
-    return c.json({ error: "We couldn't verify a delivered order matching those details" }, 403)
+    return c.json({ error: VERIFY_FAILED }, 403)
   }
 
-  // 6. Verify the product was actually in this order
   const orderItem = await db
     .select({ id: schema.orderItems.id })
     .from(schema.orderItems)
@@ -79,7 +89,7 @@ app.post('/', async (c) => {
     .get()
 
   if (!orderItem) {
-    return c.json({ error: 'Product not found in this order' }, 403)
+    return c.json({ error: VERIFY_FAILED }, 403)
   }
 
   // 7. Reject duplicate (same orderId + productId)
