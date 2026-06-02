@@ -25,7 +25,6 @@ type FormValues = CodOrder['shippingAddress']
 export function ManualOrderForm({ endpoint, successMethod, submitLabel }: ManualOrderFormProps) {
   const router = useRouter()
   const items = useCart((s) => s.items)
-  const clearCart = useCart((s) => s.clearCart)
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
   const [turnstileError, setTurnstileError] = useState(false)
 
@@ -55,7 +54,9 @@ export function ManualOrderForm({ endpoint, successMethod, submitLabel }: Manual
         payload,
         { headers: { 'X-Turnstile-Token': turnstileToken } },
       )
-      clearCart()
+      // clearCart is called by the success page via useEffect — calling it here first
+      // empties the cart and triggers CheckoutPage's empty-cart redirect to /, which
+      // races with router.push and can land the user on the homepage.
       router.push(`/checkout/success?method=${successMethod}&orderId=${orderNumber}`)
     } catch {
       toast.error(en.errors.orderFailed)
