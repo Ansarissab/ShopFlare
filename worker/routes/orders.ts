@@ -4,17 +4,16 @@
 // edge Access guard the admin surface without blocking public checkout.
 
 import { Hono } from 'hono'
-import { eq } from 'drizzle-orm'
+import { eq, and, inArray } from 'drizzle-orm'
 import { createDb } from '../db/index'
 import * as schema from '../db/schema'
 import { codOrderSchema, cancelOrderSchema } from '@/lib/schemas'
-import { createOrder, assertItemsAvailable, CouponError, StockError } from '../lib/orders'
+import { createOrder, assertItemsAvailable, releaseOrderInventory, CouponError, StockError } from '../lib/orders'
 import { parseBody } from '../lib/http'
 import { verifyTurnstile } from '../lib/turnstile'
-import { sendOrderEmails } from '../lib/email'
-import { sendPushToAll } from '../lib/push'
+import { rateLimit } from '../lib/ratelimit'
+import { notifyNewOrder } from '../lib/notify'
 import type { Bindings } from '../types'
-import { en } from '@/lib/i18n/en'
 
 const app = new Hono<{ Bindings: Bindings }>()
 
@@ -109,9 +108,15 @@ app.get('/by-session/:sessionId', async (c) => {
 // ─── POST /cod ────────────────────────────────────────────────────────────────
 
 app.post('/cod', async (c) => {
-  // Security: verify Turnstile token before any DB work
+  // Security: per-IP throttle, then verify Turnstile token before any DB work.
+  const ip = c.req.header('CF-Connecting-IP')
+  if (!(await rateLimit(c.env, 'cod', ip, { limit: 10, windowSeconds: 60 }))) {
+    return c.json({ error: 'Too many requests' }, 429)
+  }
   const token = c.req.header('X-Turnstile-Token') ?? null
-  const valid = await verifyTurnstile(token, c.env.TURNSTILE_SECRET_KEY, c.req.header('CF-Connecting-IP'))
+  const valid = await verifyTurnstile(token, c.env.TURNSTILE_SECRET_KEY, ip, {
+    isDevelopment: c.env.ENVIRONMENT === 'development',
+  })
   if (!valid) return c.json({ error: 'Security check failed' }, 403)
 
   const [body, errResp] = await parseBody(c)
@@ -141,22 +146,9 @@ app.post('/cod', async (c) => {
     })
 
     // Fire notifications via waitUntil — never blocks the 201 response.
+    // Fresh D1 handle for post-response work (mirrors stripe.ts).
     c.executionCtx.waitUntil(
-      (async () => {
-        try {
-          // Fresh D1 handle for post-response work (mirrors stripe.ts).
-          const notifyDb = createDb(c.env.DB)
-          await sendOrderEmails(notifyDb, c.env, orderId)
-          // Payload-less tickle (see worker/lib/push.ts) — SW shows generic copy.
-          await sendPushToAll(notifyDb, c.env, {
-            title: en.notifications.newOrderTitle,
-            body: orderNumber,
-            url: `${c.env.FRONTEND_URL || ''}/admin/orders`,
-          })
-        } catch (err) {
-          console.warn('[orders/cod] post-create notify error', err)
-        }
-      })(),
+      notifyNewOrder(createDb(c.env.DB), c.env, orderId, orderNumber),
     )
 
     return c.json({ orderId, orderNumber }, 201)
@@ -192,14 +184,27 @@ app.post('/:orderNumber/cancel', async (c) => {
     return c.json({ error: 'Order cannot be cancelled', status: order.status }, 422)
   }
 
-  await db
+  // Flip status with a guard on the cancellable states. D1 reports meta.changes:
+  // exactly one request wins the transition, so the non-idempotent inventory
+  // release (below) runs once even under a concurrent double-cancel.
+  const cancelRes = await db
     .update(schema.orders)
     .set({
       status: 'cancelled',
       notes: reason ?? order.notes,
       updatedAt: new Date().toISOString(),
     })
-    .where(eq(schema.orders.id, order.id))
+    .where(
+      and(
+        eq(schema.orders.id, order.id),
+        inArray(schema.orders.status, ['pending', 'confirmed']),
+      ),
+    )
+
+  if ((cancelRes as unknown as D1Result).meta?.changes === 1) {
+    // Return the reserved stock + coupon quota to the pool.
+    await releaseOrderInventory(db, order.id)
+  }
 
   return c.json({ ok: true })
 })

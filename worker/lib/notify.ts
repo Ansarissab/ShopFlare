@@ -12,8 +12,38 @@
 import { eq, and, isNotNull, inArray } from 'drizzle-orm'
 import type { Database } from '../db/index'
 import * as schema from '../db/schema'
-import { sendRestockEmail } from './email'
+import { sendRestockEmail, sendOrderEmails } from './email'
+import { sendPushToAll } from './push'
 import type { Bindings } from '../types'
+import { en } from '@/lib/i18n/en'
+
+/**
+ * Fires the post-order notifications (customer/merchant email + merchant push
+ * tickle) for a newly created/confirmed order. Shared by the COD and Stripe
+ * paths so the dispatch lives in exactly one place (DRY rule 7).
+ *
+ * NEVER throws — errors are logged. Intended to be wrapped in
+ * executionCtx.waitUntil by the caller so it never blocks the response/ack.
+ */
+export async function notifyNewOrder(
+  db: Database,
+  env: Bindings,
+  orderId: string,
+  orderNumber: string,
+): Promise<void> {
+  try {
+    await sendOrderEmails(db, env, orderId)
+    // Payload-less tickle (see worker/lib/push.ts) — SW shows generic copy, so
+    // only the order number is passed for the (currently non-transmitted) body.
+    await sendPushToAll(db, env, {
+      title: en.notifications.newOrderTitle,
+      body: orderNumber,
+      url: `${env.FRONTEND_URL || ''}/admin/orders`,
+    })
+  } catch (err) {
+    console.warn('[notify] notifyNewOrder error', err)
+  }
+}
 
 export async function dispatchRestockAlerts(
   db: Database,

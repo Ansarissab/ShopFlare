@@ -1,24 +1,29 @@
 // Shared order-creation helper used by both COD and Stripe routes.
 // Extracted from routes/orders.ts so the logic lives in exactly one place.
 
-import { eq, and, inArray, sql } from 'drizzle-orm'
+import { eq, and, or, inArray, sql } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import type { Database } from '../db/index'
 import * as schema from '../db/schema'
+import { DEFAULT_CURRENCY } from '@/lib/constants'
+import type { CurrencyCode } from '@/lib/constants'
+import { formatCents } from './money'
 
 // ─── Shipping config helper ────────────────────────────────────────────────────
 
-interface ShippingConfig {
+interface OrderConfig {
   flatRateCents: number
   thresholdCents: number
+  currency: CurrencyCode
 }
 
 /**
- * Reads flatShippingRateCents and freeShippingThresholdCents from store_config.
+ * Reads shipping config + currency from store_config in one query.
  * Mirrors the key-read approach in routes/config.ts; Number() converts the
- * stored text value and falls back to 0 on missing / NaN.
+ * stored text value and falls back to 0 on missing / NaN. Currency drives the
+ * coupon min-order message formatting (0-decimal currencies like PKR/BDT).
  */
-async function getShippingConfig(db: Database): Promise<ShippingConfig> {
+async function getOrderConfig(db: Database): Promise<OrderConfig> {
   const rows = await db
     .select()
     .from(schema.storeConfig)
@@ -26,6 +31,7 @@ async function getShippingConfig(db: Database): Promise<ShippingConfig> {
       inArray(schema.storeConfig.key, [
         'flatShippingRateCents',
         'freeShippingThresholdCents',
+        'currency',
       ]),
     )
     .all()
@@ -35,9 +41,12 @@ async function getShippingConfig(db: Database): Promise<ShippingConfig> {
     kv[row.key] = row.value
   }
 
+  const currency = (kv['currency'] as CurrencyCode | undefined) ?? DEFAULT_CURRENCY
+
   return {
     flatRateCents:   Math.max(0, Number(kv['flatShippingRateCents']      ?? '0') || 0),
     thresholdCents:  Math.max(0, Number(kv['freeShippingThresholdCents'] ?? '0') || 0),
+    currency,
   }
 }
 
@@ -154,11 +163,14 @@ function generateOrderNumber(): string {
  * @param coupon - Row from the `coupons` table (null means not found).
  * @param subtotalCents - Cart subtotal BEFORE discount.
  * @param now - Injected timestamp string (ISO-8601) for testability.
+ * @param currency - Store currency, used only to format the min-order message
+ *   (0-decimal currencies like PKR/BDT must not be divided by 100).
  */
 export function evaluateCoupon(
   coupon: typeof schema.coupons.$inferSelect | null | undefined,
   subtotalCents: number,
   now: string,
+  currency: CurrencyCode = DEFAULT_CURRENCY,
 ): EvaluateCouponResult {
   if (!coupon || !coupon.active) {
     return { ok: false, message: 'Coupon not found or inactive' }
@@ -171,7 +183,7 @@ export function evaluateCoupon(
   if (coupon.minOrderCents !== null && subtotalCents < coupon.minOrderCents) {
     return {
       ok: false,
-      message: `Minimum order of ${(coupon.minOrderCents / 100).toFixed(2)} required for this coupon`,
+      message: `Minimum order of ${formatCents(coupon.minOrderCents, currency)} required for this coupon`,
     }
   }
 
@@ -317,7 +329,10 @@ export async function createOrder(
     })
   }
 
-  // ── 2. Coupon validation + discount ───────────────────────────────────────
+  // ── 2. Store config (currency + shipping) — one query, reused below ───────
+  const { flatRateCents, thresholdCents, currency } = await getOrderConfig(db)
+
+  // ── 2a. Coupon validation + discount ──────────────────────────────────────
   let discountCents = 0
   let couponRow: typeof schema.coupons.$inferSelect | null = null
 
@@ -328,11 +343,32 @@ export async function createOrder(
       .where(eq(schema.coupons.code, couponCode))
       .get() ?? null
 
-    const result = evaluateCoupon(couponRow, subtotalCents, new Date().toISOString())
+    const result = evaluateCoupon(couponRow, subtotalCents, new Date().toISOString(), currency)
 
     if (!result.ok) {
       // CouponError is caught by the COD route and mapped to 422
       throw new CouponError(result.message)
+    }
+
+    // Per-customer usage limit. Only enforceable when we know the customer's
+    // contact at creation time (COD/POS). The Stripe path creates the order with
+    // empty contact — its per-customer cap is enforced by the Stripe promotion
+    // code's own limits instead.
+    if (couponRow && (customerEmail || customerPhone)) {
+      const contactConds = [
+        customerEmail ? eq(schema.couponUses.customerEmail, customerEmail) : undefined,
+        customerPhone ? eq(schema.couponUses.customerPhone, customerPhone) : undefined,
+      ].filter(Boolean) as ReturnType<typeof eq>[]
+
+      const prior = await db
+        .select({ n: sql<number>`count(*)` })
+        .from(schema.couponUses)
+        .where(and(eq(schema.couponUses.couponId, couponRow.id), or(...contactConds)))
+        .get()
+
+      if ((prior?.n ?? 0) >= couponRow.perCustomerLimit) {
+        throw new CouponError('Coupon usage limit reached for this customer')
+      }
     }
 
     discountCents = result.discountCents
@@ -340,7 +376,6 @@ export async function createOrder(
 
   // ── 2b. Shipping — mirrors client's calculateShipping logic ───────────────
   // Free if threshold is set AND subtotal (before discount) meets/exceeds it.
-  const { flatRateCents, thresholdCents } = await getShippingConfig(db)
   const shippingCents =
     thresholdCents > 0 && subtotalCents >= thresholdCents ? 0 : flatRateCents
 
@@ -403,4 +438,66 @@ export async function createOrder(
   }
 
   return { orderId, orderNumber, subtotalCents, discountCents, shippingCents, totalCents }
+}
+
+// ─── releaseOrderInventory ─────────────────────────────────────────────────────
+
+/**
+ * Reverses the stock reservation + coupon usage that createOrder recorded for
+ * one order. Called when a reserved order is cancelled (Stripe checkout expired,
+ * or a public/COD cancellation) so the held inventory + coupon quota return to
+ * the pool — otherwise abandoned checkouts permanently leak stock and burn
+ * usage limits.
+ *
+ * NOT idempotent: it adds stock back unconditionally, so callers MUST invoke it
+ * exactly once, gated on a real (still-reserved → cancelled) status transition.
+ * The Stripe webhook gates on the cancel UPDATE's `meta.changes`; the public
+ * cancel route gates on the pre-read order status.
+ */
+export async function releaseOrderInventory(
+  db: Database,
+  orderId: string,
+): Promise<void> {
+  // 1. Restore stock for each line item (skip unlimited -1, mirroring createOrder).
+  const itemRows = await db
+    .select({
+      sizeOptionId: schema.orderItems.sizeOptionId,
+      quantity: schema.orderItems.quantity,
+    })
+    .from(schema.orderItems)
+    .where(eq(schema.orderItems.orderId, orderId))
+    .all()
+
+  for (const item of itemRows) {
+    await db
+      .update(schema.sizeOptions)
+      .set({ stock: sql`${schema.sizeOptions.stock} + ${item.quantity}` })
+      .where(
+        and(
+          eq(schema.sizeOptions.id, item.sizeOptionId),
+          sql`${schema.sizeOptions.stock} != -1`,
+        ),
+      )
+  }
+
+  // 2. Reverse coupon usage — decrement usedCount (floor 0) per recorded use,
+  //    then delete the coupon_uses rows for this order.
+  const useRows = await db
+    .select({ couponId: schema.couponUses.couponId })
+    .from(schema.couponUses)
+    .where(eq(schema.couponUses.orderId, orderId))
+    .all()
+
+  for (const use of useRows) {
+    await db
+      .update(schema.coupons)
+      .set({ usedCount: sql`MAX(0, used_count - 1)` })
+      .where(eq(schema.coupons.id, use.couponId))
+  }
+
+  if (useRows.length > 0) {
+    await db
+      .delete(schema.couponUses)
+      .where(eq(schema.couponUses.orderId, orderId))
+  }
 }
