@@ -69,6 +69,35 @@ function tableRow(cells: string[], header = false): string {
   return `<tr>${cells.map((c) => `<${tag} ${style}>${c}</${tag}>`).join('')}</tr>`
 }
 
+/**
+ * Bank-transfer instructions block for the confirmation email. Renders the
+ * merchant's configured account details (escaped) + the order number as the
+ * payment reference. Copy comes from the shared en.bankTransfer strings.
+ */
+function buildBankBlock(cfg: Record<string, string>, orderNumber: string, amount: string): string {
+  const t = en.bankTransfer
+  const row = (label: string, value?: string) =>
+    value
+      ? `<tr><td style="padding:6px 0;font-size:13px;color:#888;width:140px;">${escHtml(label)}</td><td style="padding:6px 0;font-size:13px;color:#111;font-weight:bold;">${escHtml(value)}</td></tr>`
+      : ''
+  const instructions = cfg['bankInstructions']
+    ? `<p style="margin:12px 0 0;color:#444;font-size:13px;">${escHtml(cfg['bankInstructions'])}</p>`
+    : ''
+  return `
+  <div style="border:1px solid #eee;border-radius:8px;padding:16px 20px;margin:8px 0 4px;background:#fafafa;">
+    <h2 style="margin:0 0 8px;font-size:15px;color:#111;">${t.heading}</h2>
+    <p style="margin:0 0 4px;color:#444;font-size:13px;">${t.intro.replace('{amount}', `<strong>${amount}</strong>`)}</p>
+    <p style="margin:0 0 12px;color:#444;font-size:13px;">${t.reference.replace('{orderNumber}', `<strong>${escHtml(orderNumber)}</strong>`)}</p>
+    <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
+      ${row(t.bankName, cfg['bankName'])}
+      ${row(t.accountTitle, cfg['bankAccountTitle'])}
+      ${row(t.accountNumber, cfg['bankAccountNumber'])}
+      ${row(t.iban, cfg['bankIban'])}
+    </table>
+    ${instructions}
+  </div>`
+}
+
 function buildOrderEmailHtml(opts: {
   heading: string
   body: string
@@ -80,8 +109,10 @@ function buildOrderEmailHtml(opts: {
   totalCents: number
   currency: CurrencyCode
   trackUrl: string
+  /** Pre-rendered bank-transfer instructions block (HTML), inserted before the CTA. */
+  bankBlock?: string
 }): string {
-  const { heading, body, orderNumber, items, subtotalCents, shippingCents, discountCents, totalCents, currency, trackUrl } = opts
+  const { heading, body, orderNumber, items, subtotalCents, shippingCents, discountCents, totalCents, currency, trackUrl, bankBlock } = opts
   const fmt = (c: number) => formatCents(c, currency)
 
   const itemRows = items
@@ -120,6 +151,7 @@ function buildOrderEmailHtml(opts: {
             ${tableRow([`<strong>${en.email.labelShipping}</strong>`, '', '', shippingCents === 0 ? 'Free' : fmt(shippingCents)])}
             ${tableRow([`<strong>${en.email.labelTotal}</strong>`, '', '', `<strong>${fmt(totalCents)}</strong>`])}
           </table>
+          ${bankBlock ?? ''}
           <p style="text-align:center;margin:24px 0 0;">
             <a href="${trackUrl}"
                style="display:inline-block;background:#111;color:#fff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:14px;font-weight:bold;">
@@ -214,8 +246,12 @@ export async function sendOrderEmails(db: Database, env: Bindings, orderId: stri
       .where(eq(schema.orderItems.orderId, orderId))
       .all()
 
-    // Load store config: currency + contactEmail (BCC + reply-to) + senderEmail (from)
-    const cfg = await getStoreConfigValues(db, ['currency', 'contactEmail', 'senderEmail'])
+    // Load store config: currency + contactEmail (BCC + reply-to) + senderEmail
+    // (from) + bank-transfer details (only used for bank_transfer orders).
+    const cfg = await getStoreConfigValues(db, [
+      'currency', 'contactEmail', 'senderEmail',
+      'bankName', 'bankAccountTitle', 'bankAccountNumber', 'bankIban', 'bankInstructions',
+    ])
 
     const currency = (cfg['currency'] as CurrencyCode | undefined) ?? DEFAULT_CURRENCY
     // Validate the currency code is known; fall back to default if not.
@@ -225,6 +261,13 @@ export async function sendOrderEmails(db: Database, env: Bindings, orderId: stri
     const from = cfg['senderEmail'] || undefined
 
     const trackUrl = `${env.FRONTEND_URL || ''}/track/${order.orderNumber}`
+
+    // Bank-transfer instructions — only when this order is paid by bank transfer
+    // and an account number is configured. Reuses the shared en.bankTransfer copy.
+    const bankBlock =
+      order.paymentMethod === 'bank_transfer' && cfg['bankAccountNumber']
+        ? buildBankBlock(cfg, order.orderNumber, formatCents(order.totalCents, validCurrency))
+        : undefined
 
     // Parse item snapshots
     const emailItems = items.map((item) => {
@@ -256,6 +299,7 @@ export async function sendOrderEmails(db: Database, env: Bindings, orderId: stri
       totalCents: order.totalCents,
       currency: validCurrency,
       trackUrl,
+      bankBlock,
     })
 
     await sendEmail(env, {

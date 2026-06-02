@@ -31,7 +31,14 @@ INSERT OR IGNORE INTO store_config (key, value) VALUES
   ('senderEmail',                ''),               -- verified Resend sender (falls back to RESEND_FROM)
   ('currency',                   'PKR'),            -- one of CURRENCIES in src/lib/constants
   ('freeShippingThresholdCents', '5000'),           -- free shipping at/above ₨5,000 (0 = disabled)
-  ('flatShippingRateCents',      '250');            -- flat rate below threshold
+  ('flatShippingRateCents',      '250'),            -- flat rate below threshold
+  -- Bank-transfer details: when bankAccountNumber is set, the Bank Transfer
+  -- checkout option appears and these show on the thank-you/track page + email.
+  ('bankName',          'Demo Bank'),
+  ('bankAccountTitle',  'ShopFlare Demo Store'),
+  ('bankAccountNumber', '0000-1234567-8'),
+  ('bankIban',          'PK00DEMO0000123456780000'),
+  ('bankInstructions',  'Transfer the exact total and use your order number as the payment reference. We confirm within a few hours.');
 
 -- ─── Products ────────────────────────────────────────────────────────────────
 INSERT OR IGNORE INTO products (id, name, description, active) VALUES

@@ -11,6 +11,7 @@ export type OrderStatus = (typeof ORDER_STATUSES)[number]
 export const PAYMENT_METHODS = [
   'stripe_checkout',
   'cod',
+  'bank_transfer',
   'whatsapp',
   'in_person_cash',
 ] as const

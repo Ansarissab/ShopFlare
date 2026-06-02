@@ -4,6 +4,7 @@
 // edge Access guard the admin surface without blocking public checkout.
 
 import { Hono } from 'hono'
+import type { Context } from 'hono'
 import { eq, and, inArray } from 'drizzle-orm'
 import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
@@ -111,60 +112,69 @@ app.get('/by-session/:sessionId', async (c) => {
   return c.json({ orderNumber: order.orderNumber })
 })
 
-// ─── POST /cod ────────────────────────────────────────────────────────────────
+// ─── POST /cod  +  POST /bank-transfer ─────────────────────────────────────────
+// Both are "manual" payment paths: no online capture, the order is created
+// `pending`, and the merchant confirms it later (COD on delivery, bank transfer
+// once the money lands). Identical request shape + flow, so they share one
+// handler — only the stored paymentMethod and the rate-limit bucket differ.
 
-app.post('/cod', async (c) => {
-  // Security: per-IP throttle, then verify Turnstile token before any DB work.
-  const ip = c.req.header('CF-Connecting-IP')
-  if (!(await rateLimit(c.env, 'cod', ip, { limit: 10, windowSeconds: 60 }))) {
-    return c.json({ error: 'Too many requests' }, 429)
-  }
-  const token = c.req.header('X-Turnstile-Token') ?? null
-  const valid = await verifyTurnstile(token, c.env.TURNSTILE_SECRET_KEY, ip, {
-    isDevelopment: c.env.ENVIRONMENT === 'development',
-  })
-  if (!valid) return c.json({ error: 'Security check failed' }, 403)
-
-  const [body, errResp] = await parseBody(c)
-  if (errResp) return errResp
-
-  const parsed = codOrderSchema.safeParse(body)
-  if (!parsed.success) {
-    return c.json({ error: 'Validation failed', issues: parsed.error.issues }, 400)
-  }
-
-  const { items, shippingAddress, couponCode } = parsed.data
-  const db = createDb(c.env.DB)
-
-  try {
-    // Verify all sizeOptionIds exist, are active, and have sufficient stock
-    // (COD only — Stripe relies on its own inventory controls).
-    await assertItemsAvailable(db, items)
-
-    const { orderId, orderNumber } = await createOrder(db, {
-      paymentMethod: 'cod',
-      items,
-      customerName: shippingAddress.name,
-      customerEmail: shippingAddress.email,
-      customerPhone: shippingAddress.phone,
-      shippingAddress: shippingAddress as Record<string, unknown>,
-      couponCode,
-    })
-
-    // Fire notifications via waitUntil — never blocks the 201 response.
-    // Fresh D1 handle for post-response work (mirrors stripe.ts).
-    c.executionCtx.waitUntil(
-      notifyNewOrder(createDb(c.env.DB), c.env, orderId, orderNumber),
-    )
-
-    return c.json({ orderId, orderNumber }, 201)
-  } catch (err) {
-    if (err instanceof StockError || err instanceof CouponError) {
-      return c.json({ error: err.message }, 422)
+function manualOrderHandler(paymentMethod: 'cod' | 'bank_transfer', bucket: string) {
+  return async (c: Context<{ Bindings: Bindings }>) => {
+    // Security: per-IP throttle, then verify Turnstile token before any DB work.
+    const ip = c.req.header('CF-Connecting-IP')
+    if (!(await rateLimit(c.env, bucket, ip, { limit: 10, windowSeconds: 60 }))) {
+      return c.json({ error: 'Too many requests' }, 429)
     }
-    throw err
+    const token = c.req.header('X-Turnstile-Token') ?? null
+    const valid = await verifyTurnstile(token, c.env.TURNSTILE_SECRET_KEY, ip, {
+      isDevelopment: c.env.ENVIRONMENT === 'development',
+    })
+    if (!valid) return c.json({ error: 'Security check failed' }, 403)
+
+    const [body, errResp] = await parseBody(c)
+    if (errResp) return errResp
+
+    const parsed = codOrderSchema.safeParse(body)
+    if (!parsed.success) {
+      return c.json({ error: 'Validation failed', issues: parsed.error.issues }, 400)
+    }
+
+    const { items, shippingAddress, couponCode } = parsed.data
+    const db = createDb(c.env.DB)
+
+    try {
+      // Verify all sizeOptionIds exist, are active, and have sufficient stock.
+      // createOrder then reserves stock atomically; this is the friendly pre-check.
+      await assertItemsAvailable(db, items)
+
+      const { orderId, orderNumber } = await createOrder(db, {
+        paymentMethod,
+        items,
+        customerName: shippingAddress.name,
+        customerEmail: shippingAddress.email,
+        customerPhone: shippingAddress.phone,
+        shippingAddress: shippingAddress as Record<string, unknown>,
+        couponCode,
+      })
+
+      // Fire notifications via waitUntil — never blocks the 201 response.
+      // Fresh D1 handle for post-response work (mirrors stripe.ts).
+      c.executionCtx.waitUntil(
+        notifyNewOrder(createDb(c.env.DB), c.env, orderId, orderNumber),
+      )
+
+      return c.json({ orderId, orderNumber }, 201)
+    } catch (err) {
+      if (err instanceof StockError || err instanceof CouponError) {
+        return c.json({ error: err.message }, 422)
+      }
+      throw err
+    }
   }
-})
+}
+
+app.post('/cod', manualOrderHandler('cod', 'cod'))
+app.post('/bank-transfer', manualOrderHandler('bank_transfer', 'bank-transfer'))
 
 // ─── POST /:orderNumber/cancel ────────────────────────────────────────────────
 // Resolves by orderNumber (the only identifier the public has access to).
