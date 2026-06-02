@@ -25,6 +25,7 @@ type FormValues = CodOrder['shippingAddress']
 export function ManualOrderForm({ endpoint, successMethod, submitLabel }: ManualOrderFormProps) {
   const router = useRouter()
   const items = useCart((s) => s.items)
+  const couponCode = useCart((s) => s.couponCode)
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
   const [turnstileError, setTurnstileError] = useState(false)
 
@@ -46,6 +47,7 @@ export function ManualOrderForm({ endpoint, successMethod, submitLabel }: Manual
     const payload: CodOrder = {
       items: items.map((i) => ({ sizeOptionId: i.sizeOptionId, quantity: i.quantity })),
       shippingAddress,
+      ...(couponCode ? { couponCode } : {}),
     }
 
     try {
