@@ -35,7 +35,7 @@ export function StorefrontHeader() {
             <ShoppingCart className="h-5 w-5" />
             {itemCount > 0 && (
               <Badge
-                className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full p-0 text-xs"
+                className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full p-0 text-[10px]"
               >
                 {itemCount > 99 ? '99+' : itemCount}
               </Badge>
