@@ -21,7 +21,7 @@ export function StorefrontHeader() {
         <div className={cn(layout.bar, 'h-16 justify-between')}>
           {/* Store name */}
           <Link href="/" className="text-lg font-semibold tracking-tight text-foreground hover:opacity-80 transition-opacity">
-            {config?.storeName ?? 'Store'}
+            {config?.storeName ?? 'ShopFlare'}
           </Link>
 
           {/* Cart button */}

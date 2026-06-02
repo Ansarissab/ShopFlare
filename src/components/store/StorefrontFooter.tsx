@@ -16,7 +16,7 @@ export function StorefrontFooter() {
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
           {/* Store name + year */}
           <span className="text-sm font-semibold text-foreground">
-            {config?.storeName ?? 'Store'} © {year}
+            {config?.storeName ?? 'ShopFlare'} © {year}
           </span>
 
           {/* Policy links */}
