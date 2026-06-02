@@ -440,6 +440,19 @@ export interface NotifyRequestRowProps {
   request: NotifyRequest
 }
 
+// ─── Policy pages ─────────────────────────────────────────────────────────────
+
+export interface StorePage {
+  slug: string
+  title: string
+  content: string
+  updatedAt: string
+}
+
+export interface AdminPagesResponse {
+  pages: StorePage[]
+}
+
 // ─── SEO / structured data (Agent R) ──────────────────────────────────────────
 export interface ProductJsonLdProps {
   item: ProductWithVariants

@@ -115,6 +115,11 @@ export const en = {
     returns: 'Return Policy',
     privacy: 'Privacy Policy',
     terms: 'Terms of Service',
+    notFound: 'Page Not Found',
+    notFoundBody: 'This policy page could not be found.',
+    backToStore: 'Back to store',
+    lastUpdated: 'Last updated: {date}',
+    empty: 'No content has been added to this page yet.',
   },
   errors: {
     required: '{field} is required',
@@ -131,6 +136,7 @@ export const en = {
     coupons: 'Coupons',
     analytics: 'Analytics',
     settings: 'Settings',
+    pages: 'Pages',
     pos: 'Point of Sale',
     reviews: 'Reviews',
     addProduct: 'Add Product',
@@ -255,6 +261,13 @@ export const en = {
     notifyDispatched: 'Alerts sent: {count}',
     notifyInStock: 'In stock',
     notifyOutOfStock: 'Out of stock',
+    // policy pages
+    policyPages: 'Policy Pages',
+    editPage: 'Edit',
+    pageTitle: 'Page Title',
+    pageContent: 'Content',
+    pageContentHint: 'Plain text shown to customers. Use blank lines to separate paragraphs.',
+    pageSaved: 'Page saved',
     // shared admin chrome
     cancel: 'Cancel',
     stripeColumn: 'Stripe',
