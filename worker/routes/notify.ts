@@ -6,14 +6,21 @@ import * as schema from '../db/schema'
 import { notifyMeSchema } from '@/lib/schemas'
 import { parseBody } from '../lib/http'
 import { verifyTurnstile } from '../lib/turnstile'
+import { rateLimit } from '../lib/ratelimit'
 import type { Bindings } from '../types'
 
 const app = new Hono<{ Bindings: Bindings }>()
 
 app.post('/', async (c) => {
-  // Security: verify Turnstile token before any DB work
+  // Security: per-IP throttle, then verify Turnstile token before any DB work.
+  const ip = c.req.header('CF-Connecting-IP')
+  if (!(await rateLimit(c.env, 'notify', ip, { limit: 10, windowSeconds: 60 }))) {
+    return c.json({ error: 'Too many requests' }, 429)
+  }
   const token = c.req.header('X-Turnstile-Token') ?? null
-  const valid = await verifyTurnstile(token, c.env.TURNSTILE_SECRET_KEY, c.req.header('CF-Connecting-IP'))
+  const valid = await verifyTurnstile(token, c.env.TURNSTILE_SECRET_KEY, ip, {
+    isDevelopment: c.env.ENVIRONMENT === 'development',
+  })
   if (!valid) return c.json({ error: 'Security check failed' }, 403)
 
   const [body, errResp] = await parseBody(c)

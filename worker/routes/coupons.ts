@@ -5,6 +5,9 @@ import { createDb } from '../db/index'
 import * as schema from '../db/schema'
 import { parseBody } from '../lib/http'
 import { evaluateCoupon } from '../lib/orders'
+import { rateLimit } from '../lib/ratelimit'
+import { DEFAULT_CURRENCY } from '@/lib/constants'
+import type { CurrencyCode } from '@/lib/constants'
 import type { Bindings } from '../types'
 
 const app = new Hono<{ Bindings: Bindings }>()
@@ -30,6 +33,14 @@ const validateCouponSchema = z.object({
  * discountCents is 0 when valid is false.
  */
 app.post('/validate', async (c) => {
+  // Per-IP throttle — this endpoint reveals whether a code is valid + its
+  // discount, so without a throttle it enables coupon-code enumeration.
+  // (Turnstile is intentionally NOT required here: coupon-apply happens in the
+  // cart, before the Turnstile-gated checkout form mounts.)
+  if (!(await rateLimit(c.env, 'coupon-validate', c.req.header('CF-Connecting-IP'), { limit: 20, windowSeconds: 60 }))) {
+    return c.json({ error: 'Too many requests' }, 429)
+  }
+
   const [body, errResp] = await parseBody(c)
   if (errResp) return errResp
 
@@ -41,13 +52,21 @@ app.post('/validate', async (c) => {
   const { code, subtotalCents } = parsed.data
   const db = createDb(c.env.DB)
 
+  // Currency drives the min-order message formatting (0-decimal currencies).
+  const currencyRow = await db
+    .select({ value: schema.storeConfig.value })
+    .from(schema.storeConfig)
+    .where(eq(schema.storeConfig.key, 'currency'))
+    .get()
+  const currency = (currencyRow?.value as CurrencyCode | undefined) ?? DEFAULT_CURRENCY
+
   const coupon = await db
     .select()
     .from(schema.coupons)
     .where(eq(schema.coupons.code, code))
     .get() ?? null
 
-  const result = evaluateCoupon(coupon, subtotalCents, new Date().toISOString())
+  const result = evaluateCoupon(coupon, subtotalCents, new Date().toISOString(), currency)
 
   if (!result.ok) {
     return c.json({ valid: false, discountCents: 0, message: result.message })
