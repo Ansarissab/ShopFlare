@@ -27,19 +27,22 @@ app.get('/store', async (c) => {
   }
 
   // Assemble StoreConfigData with fallbacks
+  // Use `|| undefined` for optional fields so an EMPTY stored value ('') reads
+  // as "unset" rather than failing the optional phone/email/string validators
+  // (an empty whatsappNumber/contactEmail is not a malformed one).
   const assembled: StoreConfigData = {
-    storeName:                  kv['storeName']  ?? 'Store',
-    tagline:                    kv['tagline']     ?? undefined,
-    whatsappNumber:             kv['whatsappNumber'] ?? undefined,
-    contactEmail:               kv['contactEmail']   ?? undefined,
-    currency:                   (kv['currency'] as StoreConfigData['currency']) ?? 'PKR',
+    storeName:                  kv['storeName']  || 'ShopFlare',
+    tagline:                    kv['tagline']     || undefined,
+    whatsappNumber:             kv['whatsappNumber'] || undefined,
+    contactEmail:               kv['contactEmail']   || undefined,
+    currency:                   (kv['currency'] as StoreConfigData['currency']) || 'PKR',
     freeShippingThresholdCents: Number(kv['freeShippingThresholdCents'] ?? '0'),
     flatShippingRateCents:      Number(kv['flatShippingRateCents']      ?? '0'),
-    bankName:          kv['bankName']          ?? undefined,
-    bankAccountTitle:  kv['bankAccountTitle']  ?? undefined,
-    bankAccountNumber: kv['bankAccountNumber'] ?? undefined,
-    bankIban:          kv['bankIban']          ?? undefined,
-    bankInstructions:  kv['bankInstructions']  ?? undefined,
+    bankName:          kv['bankName']          || undefined,
+    bankAccountTitle:  kv['bankAccountTitle']  || undefined,
+    bankAccountNumber: kv['bankAccountNumber'] || undefined,
+    bankIban:          kv['bankIban']          || undefined,
+    bankInstructions:  kv['bankInstructions']  || undefined,
   }
 
   // Validate — log on failure but still return best-effort data
