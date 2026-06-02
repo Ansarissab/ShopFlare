@@ -2,11 +2,11 @@
 // The public, read-only GET /api/config/store lives in routes/config.ts.
 
 import { Hono } from 'hono'
-import { createDb } from '../../db/index'
-import * as schema from '../../db/schema'
+import { createDb } from 'worker/db/index'
+import * as schema from 'worker/db/schema'
 import { updateConfigSchema } from '@/lib/schemas'
-import { parseBody } from '../../lib/http'
-import type { AdminEnv } from '../../lib/access'
+import { parseBody } from 'worker/lib/http'
+import type { AdminEnv } from 'worker/lib/access'
 
 const app = new Hono<AdminEnv>()
 

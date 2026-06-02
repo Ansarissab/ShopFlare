@@ -1,13 +1,13 @@
 import { Hono } from 'hono'
 import { eq, and, or } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
-import { createDb } from '../db/index'
-import * as schema from '../db/schema'
+import { createDb } from 'worker/db/index'
+import * as schema from 'worker/db/schema'
 import { notifyMeSchema } from '@/lib/schemas'
-import { parseBody } from '../lib/http'
-import { verifyTurnstile } from '../lib/turnstile'
-import { rateLimit } from '../lib/ratelimit'
-import type { Bindings } from '../types'
+import { parseBody } from 'worker/lib/http'
+import { verifyTurnstile } from 'worker/lib/turnstile'
+import { rateLimit } from 'worker/lib/ratelimit'
+import type { Bindings } from 'worker/types'
 
 const app = new Hono<{ Bindings: Bindings }>()
 

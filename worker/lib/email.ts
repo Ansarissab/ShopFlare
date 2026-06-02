@@ -12,9 +12,9 @@
 // Bindings key, so no fallback needed — contactEmail is the only source).
 
 import { eq, inArray } from 'drizzle-orm'
-import type { Bindings } from '../types'
-import type { Database } from '../db/index'
-import * as schema from '../db/schema'
+import type { Bindings } from 'worker/types'
+import type { Database } from 'worker/db/index'
+import * as schema from 'worker/db/schema'
 import { en } from '@/lib/i18n/en'
 import { DEFAULT_CURRENCY, CURRENCIES } from '@/lib/constants'
 import type { CurrencyCode } from '@/lib/constants'

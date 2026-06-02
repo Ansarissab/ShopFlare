@@ -1,14 +1,14 @@
 import { Hono } from 'hono'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod/v4'
-import { createDb } from '../db/index'
-import * as schema from '../db/schema'
-import { parseBody } from '../lib/http'
-import { evaluateCoupon } from '../lib/orders'
-import { rateLimit } from '../lib/ratelimit'
+import { createDb } from 'worker/db/index'
+import * as schema from 'worker/db/schema'
+import { parseBody } from 'worker/lib/http'
+import { evaluateCoupon } from 'worker/lib/orders'
+import { rateLimit } from 'worker/lib/ratelimit'
 import { DEFAULT_CURRENCY } from '@/lib/constants'
 import type { CurrencyCode } from '@/lib/constants'
-import type { Bindings } from '../types'
+import type { Bindings } from 'worker/types'
 
 const app = new Hono<{ Bindings: Bindings }>()
 

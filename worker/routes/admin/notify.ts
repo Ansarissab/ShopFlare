@@ -4,9 +4,9 @@
 
 import { Hono } from 'hono'
 import { eq, and, count, max, desc, sql } from 'drizzle-orm'
-import { createDb } from '../../db/index'
-import * as schema from '../../db/schema'
-import type { AdminEnv } from '../../lib/access'
+import { createDb } from 'worker/db/index'
+import * as schema from 'worker/db/schema'
+import type { AdminEnv } from 'worker/lib/access'
 
 // The response shape is the client-side NotifyRequest contract (see
 // src/lib/types/store.ts). Worker routes return structurally-typed objects

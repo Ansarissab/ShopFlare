@@ -4,13 +4,13 @@
 import { Hono } from 'hono'
 import { eq, desc } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
-import { createDb } from '../../db/index'
-import * as schema from '../../db/schema'
+import { createDb } from 'worker/db/index'
+import * as schema from 'worker/db/schema'
 import { createCouponSchema, updateCouponSchema } from '@/lib/schemas'
 import { CURRENCIES } from '@/lib/constants'
-import { parseBody } from '../../lib/http'
-import { createStripe } from '../../lib/stripe'
-import type { AdminEnv } from '../../lib/access'
+import { parseBody } from 'worker/lib/http'
+import { createStripe } from 'worker/lib/stripe'
+import type { AdminEnv } from 'worker/lib/access'
 
 const app = new Hono<AdminEnv>()
 
