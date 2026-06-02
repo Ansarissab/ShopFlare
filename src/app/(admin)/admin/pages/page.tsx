@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Skeleton } from '@/components/ui/skeleton'
 import { FormField } from '@/components/common/FormField'
+import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { en } from '@/lib/i18n/en'
 import { apiGet, apiPut } from '@/lib/api'
 import { formatDate } from '@/lib/utils/index'
@@ -96,7 +97,7 @@ export default function AdminPagesPage() {
 
   return (
     <div className="flex flex-col gap-6 max-w-2xl">
-      <h1 className="text-2xl font-bold tracking-tight">{en.admin.policyPages}</h1>
+      <AdminPageHeader title={en.admin.policyPages} />
 
       {POLICY_SLUGS.map((slug) => {
         const saved = pages.find((p) => p.slug === slug)

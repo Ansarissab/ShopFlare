@@ -2,10 +2,8 @@
 
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { ArrowLeft } from 'lucide-react'
-import { buttonVariants } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
+import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { ProductForm } from '@/components/admin/products/ProductForm'
 import { en } from '@/lib/i18n/en'
 import { useApiResource } from '@/hooks/useApiResource'
@@ -19,12 +17,7 @@ export default function EditProductPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-center gap-3">
-        <Link href="/admin/products" className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}>
-          <ArrowLeft className="size-4" />
-        </Link>
-        <h1 className="text-2xl font-bold tracking-tight">{en.admin.editProduct}</h1>
-      </div>
+      <AdminPageHeader title={en.admin.editProduct} backHref="/admin/products" />
 
       {loading ? (
         <div className="flex flex-col gap-4 max-w-3xl">

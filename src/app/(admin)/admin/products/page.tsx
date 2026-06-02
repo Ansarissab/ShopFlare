@@ -2,10 +2,11 @@
 
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
+import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { en } from '@/lib/i18n/en'
 import { useApiResource } from '@/hooks/useApiResource'
 import type { ProductWithVariants } from '@/lib/types/store'
@@ -19,13 +20,15 @@ export default function AdminProductsPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">{en.admin.products}</h1>
-        <Link href="/admin/products/new" className={cn(buttonVariants({ size: 'sm' }))}>
-          <Plus className="size-4 mr-1.5" aria-hidden />
-          {en.admin.addProduct}
-        </Link>
-      </div>
+      <AdminPageHeader
+        title={en.admin.products}
+        actions={
+          <Link href="/admin/products/new" className={cn(buttonVariants({ size: 'sm' }))}>
+            <Plus className="size-4 mr-1.5" aria-hidden />
+            {en.admin.addProduct}
+          </Link>
+        }
+      />
 
       {loading ? (
         <div className="flex flex-col gap-3">

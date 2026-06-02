@@ -327,6 +327,12 @@ export interface POSSaleItem {
 
 // ─── Admin component props ────────────────────────────────────────────────────
 
+export interface AdminPageHeaderProps {
+  title: string
+  actions?: React.ReactNode
+  backHref?: string
+}
+
 export interface AdminOrderRowProps {
   order: AdminOrder
 }
