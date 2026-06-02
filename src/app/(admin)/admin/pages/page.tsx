@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { FormField } from '@/components/common/FormField'
 import { en } from '@/lib/i18n/en'
 import { apiGet, apiPut } from '@/lib/api'
+import { formatDate } from '@/lib/utils/index'
 import { POLICY_SLUGS } from '@/lib/constants'
 import type { AdminPagesResponse, StorePage } from '@/lib/types/store'
 
@@ -110,9 +111,7 @@ export default function AdminPagesPage() {
                   <span className="text-xs text-muted-foreground">
                     {en.policies.lastUpdated.replace(
                       '{date}',
-                      new Date(saved.updatedAt).toLocaleDateString(undefined, {
-                        year: 'numeric', month: 'short', day: 'numeric',
-                      }),
+                      formatDate(saved.updatedAt, { year: 'numeric', month: 'short', day: 'numeric' }, undefined),
                     )}
                   </span>
                 )}

@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import { Skeleton } from '@/components/ui/skeleton'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
+import { formatDate } from '@/lib/utils/index'
 import { en } from '@/lib/i18n/en'
 import { useApiResource } from '@/hooks/useApiResource'
 import type { StorePage } from '@/lib/types/store'
@@ -43,9 +44,7 @@ export default function PolicyPage() {
     )
   }
 
-  const updatedDate = new Date(page.updatedAt).toLocaleDateString(undefined, {
-    year: 'numeric', month: 'long', day: 'numeric',
-  })
+  const updatedDate = formatDate(page.updatedAt, { year: 'numeric', month: 'long', day: 'numeric' }, undefined)
 
   return (
     <div className={cn(layout.detailPage, 'max-w-3xl')}>
