@@ -8,11 +8,15 @@ const workerUrl = process.env.NEXT_PUBLIC_WORKER_URL?.replace(/\/$/, "") ?? "";
 //  - 'unsafe-inline' on script/style is required by Next's inline bootstrap +
 //    Tailwind's injected styles (tightening to nonces needs middleware — a
 //    follow-up, not a blocker).
+//  - 'unsafe-eval' is dev-only: React/Turbopack use eval() for debugging features
+//    (e.g. reconstructing callstacks). React never uses eval() in production, so
+//    we keep it out of the prod policy to stay locked down.
 //  - Stripe.js + Turnstile are allow-listed for both script and frame.
 //  - img-src stays broad (https:) because product images can be any merchant URL.
+const isDev = process.env.NODE_ENV !== "production";
 const csp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' https://js.stripe.com https://challenges.cloudflare.com",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://js.stripe.com https://challenges.cloudflare.com`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
