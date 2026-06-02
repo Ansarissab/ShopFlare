@@ -3,7 +3,12 @@
 import { useEffect, useRef } from 'react'
 import type { TurnstileWidgetProps } from '@/lib/types/store'
 
-const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ''
+// Cloudflare's always-passing test key — safe to use when no real key is set
+// because the worker already bypasses server-side verification in dev mode
+// (TURNSTILE_SECRET_KEY unset → verifyTurnstile returns true).
+const SITE_KEY =
+  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||
+  (process.env.NODE_ENV !== 'production' ? '1x00000000000000000000AA' : '')
 
 declare global {
   interface Window {

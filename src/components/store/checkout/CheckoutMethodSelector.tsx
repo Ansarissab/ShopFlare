@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { ManualOrderForm } from '@/components/store/checkout/ManualOrderForm'
@@ -14,7 +13,6 @@ import { apiPost } from '@/lib/api'
 import { cn } from '@/lib/utils'
 
 export function CheckoutMethodSelector() {
-  const router = useRouter()
   const items = useCart((s) => s.items)
   const { config } = useStoreConfig()
   const [stripeLoading, setStripeLoading] = useState(false)
@@ -47,7 +45,8 @@ export function CheckoutMethodSelector() {
         { items: stripeItems },
         { headers: { 'X-Turnstile-Token': turnstileToken } },
       )
-      router.push(url)
+      // Stripe checkout URL is external — router.push() only handles internal routes.
+      window.location.href = url
     } catch {
       toast.error(en.errors.orderFailed)
     } finally {

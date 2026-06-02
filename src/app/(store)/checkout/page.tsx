@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { CheckoutMethodSelector } from '@/components/store/checkout/CheckoutMethodSelector'
 import { OrderSummary } from '@/components/store/checkout/OrderSummary'
@@ -10,15 +10,18 @@ import { useCart } from '@/hooks/useCart'
 export default function CheckoutPage() {
   const router = useRouter()
   const items = useCart((s) => s.items)
+  // Guard against Zustand persist hydration race: items is [] on the first
+  // render before localStorage is read. Without this, the empty-cart redirect
+  // fires immediately on every hard reload, sending users back to the homepage.
+  const [hydrated, setHydrated] = useState(false)
+  useEffect(() => { setHydrated(true) }, [])
 
-  // Redirect to home if cart is empty
   useEffect(() => {
-    if (items.length === 0) {
-      router.replace('/')
-    }
-  }, [items.length, router])
+    if (!hydrated) return
+    if (items.length === 0) router.replace('/')
+  }, [hydrated, items.length, router])
 
-  if (items.length === 0) return null
+  if (!hydrated || items.length === 0) return null
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8 md:py-12">
