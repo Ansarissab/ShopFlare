@@ -218,6 +218,25 @@ export interface TurnstileWidgetProps {
   onError?: () => void
 }
 
+// Shared shipping-address order form, used by both the COD and Bank Transfer
+// checkout tabs (manual payment paths — same fields + Turnstile, different
+// endpoint + success route).
+export interface ManualOrderFormProps {
+  /** Worker endpoint to POST the order to, e.g. '/api/orders/cod'. */
+  endpoint: string
+  /** `method` query value on the success redirect (drives the thank-you copy). */
+  successMethod: string
+  /** Submit button label. */
+  submitLabel: string
+}
+
+// Bank-transfer instructions card, shown on the thank-you + tracking pages for a
+// bank_transfer order. Reads the merchant's bank details from store config.
+export interface BankTransferInstructionsProps {
+  orderNumber: string
+  totalCents: number
+}
+
 // ─── Tracking component props ─────────────────────────────────────────────────
 
 export interface OrderTimelineProps {
