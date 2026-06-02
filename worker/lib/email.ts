@@ -18,14 +18,7 @@ import * as schema from '../db/schema'
 import { en } from '@/lib/i18n/en'
 import { DEFAULT_CURRENCY, CURRENCIES } from '@/lib/constants'
 import type { CurrencyCode } from '@/lib/constants'
-
-// Worker-local money formatter — mirrors @/lib/utils/index formatPrice without
-// pulling the client util graph into the worker.
-function formatCents(cents: number, currency: CurrencyCode): string {
-  const { symbol, decimals } = CURRENCIES[currency]
-  const amount = cents / Math.pow(10, decimals)
-  return `${symbol}${amount.toLocaleString('en', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`
-}
+import { formatCents } from './money'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
