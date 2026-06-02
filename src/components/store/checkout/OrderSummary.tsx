@@ -2,13 +2,21 @@
 
 import { Separator } from '@/components/ui/separator'
 import { en } from '@/lib/i18n/en'
-import { formatPrice } from '@/lib/utils/index'
+import { formatPrice, calculateShipping } from '@/lib/utils/index'
 import { useCart, useCartSubtotalCents } from '@/hooks/useCart'
+import { useStoreConfig } from '@/hooks/useStoreConfig'
 import { OrderLineItem } from '@/components/common/OrderLineItem'
 
 export function OrderSummary() {
   const items = useCart((s) => s.items)
+  const discountCents = useCart((s) => s.discountCents)
   const subtotalCents = useCartSubtotalCents()
+  const { config } = useStoreConfig()
+
+  const flatRateCents = config?.flatShippingRateCents ?? 29900
+  const thresholdCents = config?.freeShippingThresholdCents ?? 0
+  const shippingCents = calculateShipping(subtotalCents, flatRateCents, thresholdCents)
+  const totalCents = subtotalCents + shippingCents - discountCents
 
   return (
     <div className="flex flex-col gap-4 rounded-lg border bg-card p-5 text-card-foreground">
@@ -37,12 +45,18 @@ export function OrderSummary() {
         </div>
         <div className="flex justify-between">
           <span className="text-muted-foreground">{en.cart.shipping}</span>
-          <span className="text-muted-foreground italic text-xs">{en.checkout.calculatedAtDelivery}</span>
+          <span>{shippingCents === 0 ? en.cart.shippingFree : formatPrice(shippingCents)}</span>
         </div>
+        {discountCents > 0 && (
+          <div className="flex justify-between text-success">
+            <span>{en.cart.couponApplied}</span>
+            <span>-{formatPrice(discountCents)}</span>
+          </div>
+        )}
         <Separator />
         <div className="flex justify-between font-semibold">
           <span>{en.cart.total}</span>
-          <span>{formatPrice(subtotalCents)}</span>
+          <span>{formatPrice(totalCents)}</span>
         </div>
       </div>
     </div>
