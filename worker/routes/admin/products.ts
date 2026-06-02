@@ -20,6 +20,7 @@ import {
 import { MAX_IMAGES_PER_VARIANT, MAX_IMAGE_BYTES, ALLOWED_IMAGE_TYPES } from '@/lib/constants'
 import type { AdminEnv } from 'worker/lib/access'
 import { dispatchRestockAlerts } from 'worker/lib/notify'
+import { bumpDataVersion } from 'worker/lib/version'
 
 const app = new Hono<AdminEnv>()
 
@@ -74,7 +75,10 @@ app.post('/', async (c) => {
     updatedAt: now,
   })
 
-  const product = await db.select().from(schema.products).where(eq(schema.products.id, id)).get()
+  const [product] = await Promise.all([
+    db.select().from(schema.products).where(eq(schema.products.id, id)).get(),
+    bumpDataVersion(db),
+  ])
   return c.json(product, 201)
 })
 
@@ -110,7 +114,10 @@ app.put('/:id', async (c) => {
     })
     .where(eq(schema.products.id, id))
 
-  const updated = await db.select().from(schema.products).where(eq(schema.products.id, id)).get()
+  const [updated] = await Promise.all([
+    db.select().from(schema.products).where(eq(schema.products.id, id)).get(),
+    bumpDataVersion(db),
+  ])
   return c.json(updated)
 })
 
@@ -132,6 +139,7 @@ app.delete('/:id', async (c) => {
     .set({ active: false, updatedAt: new Date().toISOString() })
     .where(eq(schema.products.id, id))
 
+  await bumpDataVersion(db)
   return c.json({ ok: true })
 })
 
@@ -163,7 +171,10 @@ app.post('/variants', async (c) => {
     sortOrder: parsed.data.sortOrder,
   })
 
-  const variant = await db.select().from(schema.variants).where(eq(schema.variants.id, id)).get()
+  const [variant] = await Promise.all([
+    db.select().from(schema.variants).where(eq(schema.variants.id, id)).get(),
+    bumpDataVersion(db),
+  ])
   return c.json(variant, 201)
 })
 
@@ -197,11 +208,10 @@ app.put('/variants/:variantId', async (c) => {
     })
     .where(eq(schema.variants.id, variantId))
 
-  const updated = await db
-    .select()
-    .from(schema.variants)
-    .where(eq(schema.variants.id, variantId))
-    .get()
+  const [updated] = await Promise.all([
+    db.select().from(schema.variants).where(eq(schema.variants.id, variantId)).get(),
+    bumpDataVersion(db),
+  ])
   return c.json(updated)
 })
 
@@ -228,6 +238,7 @@ app.delete('/variants/:variantId', async (c) => {
   await Promise.all(images.map((img) => c.env.R2.delete(img.r2Key)))
   await db.delete(schema.variants).where(eq(schema.variants.id, variantId))
 
+  await bumpDataVersion(db)
   return c.json({ ok: true })
 })
 
@@ -262,11 +273,10 @@ app.post('/sizes', async (c) => {
     active: parsed.data.active,
   })
 
-  const sizeOption = await db
-    .select()
-    .from(schema.sizeOptions)
-    .where(eq(schema.sizeOptions.id, id))
-    .get()
+  const [sizeOption] = await Promise.all([
+    db.select().from(schema.sizeOptions).where(eq(schema.sizeOptions.id, id)).get(),
+    bumpDataVersion(db),
+  ])
   return c.json(sizeOption, 201)
 })
 
@@ -331,6 +341,7 @@ app.put('/sizes/:sizeId', async (c) => {
     }
   }
 
+  await bumpDataVersion(db)
   return c.json(updated)
 })
 
@@ -348,6 +359,7 @@ app.delete('/sizes/:sizeId', async (c) => {
   if (!sizeOption) return c.json({ error: 'Size option not found' }, 404)
 
   await db.delete(schema.sizeOptions).where(eq(schema.sizeOptions.id, sizeId))
+  await bumpDataVersion(db)
   return c.json({ ok: true })
 })
 
@@ -406,11 +418,10 @@ app.post('/images/upload', async (c) => {
 
   await db.insert(schema.productImages).values({ id: imageId, variantId, url, r2Key, sortOrder })
 
-  const image = await db
-    .select()
-    .from(schema.productImages)
-    .where(eq(schema.productImages.id, imageId))
-    .get()
+  const [image] = await Promise.all([
+    db.select().from(schema.productImages).where(eq(schema.productImages.id, imageId)).get(),
+    bumpDataVersion(db),
+  ])
   return c.json(image, 201)
 })
 
@@ -430,6 +441,7 @@ app.delete('/images/:imageId', async (c) => {
   await c.env.R2.delete(image.r2Key)
   await db.delete(schema.productImages).where(eq(schema.productImages.id, imageId))
 
+  await bumpDataVersion(db)
   return c.json({ ok: true })
 })
 

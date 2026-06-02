@@ -6,6 +6,7 @@ import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import { updatePageSchema } from '@/lib/schemas'
 import { parseBody } from 'worker/lib/http'
+import { bumpDataVersion } from 'worker/lib/version'
 import type { AdminEnv } from 'worker/lib/access'
 import { POLICY_SLUGS } from '@/lib/constants'
 
@@ -46,6 +47,8 @@ app.put('/:slug', async (c) => {
       target: schema.pages.slug,
       set: { title: parsed.data.title, content: parsed.data.content, updatedAt: now },
     })
+
+  await bumpDataVersion(db)
 
   return c.json({ ok: true, slug })
 })
