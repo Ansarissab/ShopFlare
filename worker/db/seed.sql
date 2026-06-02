@@ -24,7 +24,7 @@
 
 -- ─── Store config ────────────────────────────────────────────────────────────
 INSERT OR IGNORE INTO store_config (key, value) VALUES
-  ('storeName',                  'ShopFlare Demo Store'),
+  ('storeName',                  'ShopFlare'),
   ('tagline',                    'Quality goods, fair prices'),
   ('whatsappNumber',             ''),               -- e.g. 923001234567 (no +, country code first)
   ('contactEmail',               ''),               -- merchant inbox; also BCC for order emails
