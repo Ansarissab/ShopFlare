@@ -9,6 +9,11 @@
 # web    = Next.js storefront + admin  (http://localhost:3000)
 # worker = Cloudflare Worker API       (http://localhost:8787)
 # The frontend defaults to the worker on :8787, so no .env.local is needed locally.
+#
+# NOTE: ports are pinned explicitly. foreman/overmind inject a $PORT env var
+# (base 5000) into each process, and Next.js honors $PORT — without this the app
+# would silently start on 5000 instead of 3000. Setting PORT=3000 inline on the
+# web line overrides foreman's injected value (and beats any flag-vs-env quirk).
 
-web: pnpm dev
-worker: pnpm worker:dev
+web: PORT=3000 pnpm exec next dev
+worker: pnpm exec wrangler dev worker/index.ts --port 8787
