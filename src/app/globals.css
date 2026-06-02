@@ -6,8 +6,9 @@
 @theme {
   --color-bg:           var(--bg);
   --color-fg:           var(--fg);
-  --color-primary:      var(--primary);
-  --color-primary-fg:   var(--primary-fg);
+  --color-primary:             var(--primary);
+  --color-primary-fg:          var(--primary-fg);
+  --color-primary-foreground:  var(--primary-fg);
   --color-accent:       var(--accent);
   --color-accent-fg:    var(--accent-fg);
   --color-muted:        var(--muted);
