@@ -1,4 +1,4 @@
-# SinglePageEcomm
+# ShopFlare
 
 > White-label serverless ecommerce for small businesses. **$0 hosting cost.**
 
