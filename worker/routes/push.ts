@@ -18,7 +18,8 @@ import { eq } from 'drizzle-orm'
 import { createDb } from '../db/index'
 import * as schema from '../db/schema'
 import { parseBody } from '../lib/http'
-import { sendPushToAll, type PushPayload } from '../lib/push'
+import { sendPushToAll } from '../lib/push'
+import { pushSubscriptionSchema, pushUnsubscribeSchema, pushSendSchema } from '@/lib/schemas'
 import type { AdminEnv } from '../lib/access'
 import { en } from '@/lib/i18n/en'
 
@@ -30,17 +31,12 @@ app.post('/subscribe', async (c) => {
   const [body, errResp] = await parseBody(c)
   if (errResp) return errResp
 
-  if (
-    !body ||
-    typeof body !== 'object' ||
-    typeof (body as Record<string, unknown>).endpoint !== 'string' ||
-    typeof (body as Record<string, unknown>).auth !== 'string' ||
-    typeof (body as Record<string, unknown>).p256dh !== 'string'
-  ) {
-    return c.json({ error: 'endpoint, auth, and p256dh are required' }, 400)
+  const parsed = pushSubscriptionSchema.safeParse(body)
+  if (!parsed.success) {
+    return c.json({ error: 'Validation failed', issues: parsed.error.issues }, 400)
   }
 
-  const { endpoint, auth, p256dh } = body as { endpoint: string; auth: string; p256dh: string }
+  const { endpoint, auth, p256dh } = parsed.data
 
   const db = createDb(c.env.DB)
 
@@ -61,15 +57,12 @@ app.post('/unsubscribe', async (c) => {
   const [body, errResp] = await parseBody(c)
   if (errResp) return errResp
 
-  if (
-    !body ||
-    typeof body !== 'object' ||
-    typeof (body as Record<string, unknown>).endpoint !== 'string'
-  ) {
-    return c.json({ error: 'endpoint is required' }, 400)
+  const parsed = pushUnsubscribeSchema.safeParse(body)
+  if (!parsed.success) {
+    return c.json({ error: 'Validation failed', issues: parsed.error.issues }, 400)
   }
 
-  const { endpoint } = body as { endpoint: string }
+  const { endpoint } = parsed.data
   const db = createDb(c.env.DB)
 
   await db
@@ -87,15 +80,18 @@ app.post('/send', async (c) => {
   const [body, errResp] = await parseBody(c)
   if (errResp) return errResp
 
-  const b = (body ?? {}) as Partial<PushPayload>
-  const payload: PushPayload = {
-    title: typeof b.title === 'string' ? b.title : en.notifications.newOrderTitle,
-    body: typeof b.body === 'string' ? b.body : '',
-    url: typeof b.url === 'string' ? b.url : undefined,
+  // Body is optional — an empty trigger sends a generic "new order" tickle.
+  const parsed = pushSendSchema.safeParse(body ?? {})
+  if (!parsed.success) {
+    return c.json({ error: 'Validation failed', issues: parsed.error.issues }, 400)
   }
 
   const db = createDb(c.env.DB)
-  const count = await sendPushToAll(db, c.env, payload)
+  const count = await sendPushToAll(db, c.env, {
+    title: parsed.data.title || en.notifications.newOrderTitle,
+    body: parsed.data.body ?? '',
+    url: parsed.data.url,
+  })
 
   return c.json({ ok: true, sent: count })
 })
