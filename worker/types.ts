@@ -30,10 +30,13 @@ export type Bindings = {
   // CF_ACCESS_TEAM_DOMAIN: e.g. "myteam.cloudflareaccess.com" (no scheme).
   // CF_ACCESS_AUD: the Access application's Audience (AUD) tag.
   // When either is unset the middleware fails closed (403) in production but
-  // allows requests in local `wrangler dev` (ENVIRONMENT=development).
+  // allows requests in local `wrangler dev` when ADMIN_DEV_BYPASS=1 (explicit,
+  // never set in production).
   CF_ACCESS_TEAM_DOMAIN?: string
   CF_ACCESS_AUD?: string
   ENVIRONMENT?: string
+  // Must be '1' together with ENVIRONMENT=development to bypass auth locally.
+  ADMIN_DEV_BYPASS?: string
 
   // Deployment
   FRONTEND_URL: string
