@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -25,8 +24,9 @@ export function CartSheet({ flatRateCents = 0, thresholdCents = 0 }: CartSheetPr
   const subtotalCents = useCartSubtotalCents()
   const shippingCents = calculateShipping(subtotalCents, flatRateCents, thresholdCents)
 
-  const [discountCents, setDiscountCents] = useState(0)
-  const [couponApplied, setCouponApplied] = useState(false)
+  const discountCents = useCart((s) => s.discountCents)
+  const couponApplied = useCart((s) => s.couponCode !== null)
+  const applyCoupon = useCart((s) => s.applyCoupon)
 
   async function handleApplyCoupon(code: string): Promise<boolean> {
     try {
@@ -35,8 +35,7 @@ export function CartSheet({ flatRateCents = 0, thresholdCents = 0 }: CartSheetPr
         { code, subtotalCents },
       )
       if (result.valid) {
-        setDiscountCents(result.discountCents)
-        setCouponApplied(true)
+        applyCoupon(code, result.discountCents)
         return true
       }
       toast.error(result.message ?? en.cart.couponInvalid)
