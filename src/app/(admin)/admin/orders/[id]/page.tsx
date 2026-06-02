@@ -179,6 +179,7 @@ export default function AdminOrderDetailPage() {
             size="sm"
             onClick={handleStatusUpdate}
             disabled={!newStatus || saving}
+            className="mt-auto"
           >
             {saving ? en.admin.saving : en.admin.updateStatus}
           </Button>
@@ -201,6 +202,7 @@ export default function AdminOrderDetailPage() {
             size="sm"
             onClick={handleTrackingUpdate}
             disabled={!trackingNumber.trim() || saving}
+            className="mt-auto"
           >
             {saving ? en.admin.saving : en.admin.addTracking}
           </Button>
