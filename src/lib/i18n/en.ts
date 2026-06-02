@@ -273,6 +273,10 @@ export const en = {
     stripeColumn: 'Stripe',
     reviewStatus: 'Status',
     reviewDate: 'Date',
+    // unauthorized page
+    unauthorizedTitle: 'Access Denied',
+    unauthorizedMessage: 'You need a valid Cloudflare Access identity to view the admin panel.',
+    unauthorizedBack: 'Back to store',
   },
   pos: {
     title: 'Point of Sale',
