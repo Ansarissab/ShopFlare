@@ -102,3 +102,75 @@ VALUES
 INSERT OR IGNORE INTO reviews (id, order_id, product_id, customer_name, rating, body, approved) VALUES
   ('demo_review_1', 'demo_order_1', 'demo_tshirt', 'Sample Customer', 5,
    'Great quality and a perfect fit — exactly what I expected. Will order again!', 1);
+
+-- ─── Policy pages ─────────────────────────────────────────────────────────────
+-- Editable from Admin → Pages. INSERT OR IGNORE so admin edits are never clobbered.
+INSERT OR IGNORE INTO pages (slug, title, content) VALUES
+  ('shipping', 'Shipping Policy',
+   'We process and dispatch orders within 1–2 business days of payment confirmation.
+
+Standard Delivery: 3–5 business days after dispatch. Delivery times may vary depending on your location and courier availability.
+
+Free Shipping: Orders above the free-shipping threshold qualify for free standard delivery. The threshold is shown at checkout.
+
+Flat-Rate Shipping: Orders below the threshold are charged a flat shipping fee, calculated at checkout.
+
+Once your order has been dispatched you will receive a tracking number via email or SMS (if provided). You can track your shipment on the carrier''s website or via the order-tracking page on our store.
+
+We currently ship within the country only. International shipping is not available at this time.
+
+If your order has not arrived within the estimated timeframe, please contact us and we will investigate with the courier.'),
+
+  ('returns', 'Return Policy',
+   'We want you to be completely satisfied with your purchase. If you are not happy with your order, we accept returns under the following conditions:
+
+Eligibility: Items must be returned within 7 days of delivery. Products must be unused, unwashed, and in their original condition with all tags attached.
+
+Non-returnable items: Sale items, personalised products, and items marked as final sale cannot be returned or exchanged.
+
+How to return: Contact us via WhatsApp or email with your order number and the reason for return. We will provide you with return instructions. You are responsible for the cost of return shipping unless the item arrived damaged or incorrect.
+
+Refunds: Once we receive and inspect the returned item, we will process your refund within 3–5 business days. Refunds are issued to the original payment method. Cash-on-delivery orders are refunded via bank transfer.
+
+Exchanges: If you would like to exchange an item for a different size or colour, please contact us. Exchanges are subject to stock availability.
+
+Damaged or incorrect items: If you received a damaged or wrong item, please contact us within 48 hours of delivery with photos and we will resolve it promptly at no cost to you.'),
+
+  ('privacy', 'Privacy Policy',
+   'Your privacy is important to us. This policy explains what personal information we collect, how we use it, and how we protect it.
+
+Information we collect: When you place an order we collect your name, email address, phone number, and shipping address. We also collect order and payment details necessary to fulfil your purchase.
+
+How we use your information: We use your information to process and deliver your orders, send order confirmations and shipping updates, respond to your enquiries, and improve our store.
+
+Payment security: We do not store your card details. Payments are processed securely through Stripe. For bank transfers, only your order number is used as a reference.
+
+Sharing your information: We do not sell or rent your personal information to third parties. We share only what is necessary with service providers (courier companies, payment processors) to fulfil your order.
+
+Data retention: We retain your order information for accounting and legal compliance purposes. You may request deletion of your personal data at any time by contacting us, subject to our legal obligations.
+
+Cookies: Our store may use essential cookies to maintain your shopping cart session. No tracking or advertising cookies are used without your consent.
+
+Contact: If you have any questions about this policy or your personal data, please contact us via the email or WhatsApp number listed on our store.'),
+
+  ('terms', 'Terms of Service',
+   'By accessing and using this store you agree to the following terms and conditions. Please read them carefully before placing an order.
+
+Use of the store: You may use this store only for lawful purposes and in accordance with these terms. You agree not to use the store in any way that could damage, disable, or impair the service.
+
+Products and pricing: We reserve the right to modify product descriptions, prices, and availability at any time without prior notice. All prices are inclusive of applicable taxes unless stated otherwise.
+
+Orders: Placing an order constitutes an offer to purchase. We reserve the right to refuse or cancel any order at our discretion, including cases of pricing errors or suspected fraud. You will be notified and any payment received will be refunded.
+
+Payment: We accept the payment methods listed at checkout. For bank transfers, your order is confirmed only after payment is received and verified. For card payments, your card is charged at the time of checkout.
+
+Shipping and delivery: Delivery timeframes are estimates and not guaranteed. We are not responsible for delays caused by couriers or circumstances beyond our control.
+
+Returns and refunds: Returns and refunds are subject to our Return Policy, available on this store.
+
+Limitation of liability: To the fullest extent permitted by law, we are not liable for any indirect, incidental, or consequential damages arising from your use of the store or products purchased.
+
+Changes to terms: We may update these terms from time to time. Continued use of the store after changes are posted constitutes acceptance of the revised terms.
+
+Contact: For any questions about these terms, please reach out to us via the contact details listed on our store.');
+
