@@ -18,6 +18,7 @@ export function ProductHero({
   variants,
   sizesByVariant,
   imagesByVariant,
+  currency,
   isNew,
   isPopular,
   onAddToCart,
@@ -61,8 +62,8 @@ export function ProductHero({
   const priceLabel =
     minPrice !== null
       ? minPrice === maxPrice
-        ? formatPrice(minPrice)
-        : `${formatPrice(minPrice)} – ${formatPrice(maxPrice!)}`
+        ? formatPrice(minPrice, currency)
+        : `${formatPrice(minPrice, currency)} – ${formatPrice(maxPrice!, currency)}`
       : null
 
   return (

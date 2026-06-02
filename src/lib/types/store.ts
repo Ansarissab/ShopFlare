@@ -173,6 +173,7 @@ export interface ProductHeroProps {
   variants: Variant[]
   sizesByVariant: Record<string, SizeOption[]>
   imagesByVariant: Record<string, ProductImage[]>
+  currency: CurrencyCode
   isNew?: boolean
   isPopular?: boolean
   onAddToCart: (sizeOption: SizeOption) => void

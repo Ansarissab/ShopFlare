@@ -113,6 +113,7 @@ export function ProductHeroWrapper({ item }: ProductHeroWrapperProps) {
       variants={item.variants}
       sizesByVariant={sizesByVariant}
       imagesByVariant={imagesByVariant}
+      currency={config?.currency ?? DEFAULT_CURRENCY}
       isAddingToCart={isAddingToCart}
       onAddToCart={handleAddToCart}
       onBuyNow={handleBuyNow}

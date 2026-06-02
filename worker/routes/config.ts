@@ -51,7 +51,9 @@ app.get('/store', async (c) => {
     console.warn('[config/store] assembled config failed validation', result.error.issues)
   }
 
-  return c.json(assembled)
+  return c.json(assembled, 200, {
+    'Cache-Control': 'no-store',
+  })
 })
 
 export default app
