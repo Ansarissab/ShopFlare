@@ -2,9 +2,9 @@
 // Extracted from routes/orders.ts so the logic lives in exactly one place.
 
 import { eq, and, or, inArray, sql } from 'drizzle-orm'
-import { nanoid } from 'nanoid'
-import type { Database } from '../db/index'
-import * as schema from '../db/schema'
+import { nanoid, customAlphabet } from 'nanoid'
+import type { Database } from 'worker/db/index'
+import * as schema from 'worker/db/schema'
 import { DEFAULT_CURRENCY } from '@/lib/constants'
 import type { CurrencyCode } from '@/lib/constants'
 import { formatCents } from './money'
@@ -149,8 +149,14 @@ export type EvaluateCouponResult =
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+// Crockford-style uppercase alphabet (no I/O/0/1/U to avoid ambiguity and
+// accidental words). 8 chars over 31 symbols ≈ 8.5e11 keyspace — human-readable
+// AND infeasible to enumerate, unlike `nanoid(6).toUpperCase()` whose
+// upper-casing collapsed the alphabet to ~38 symbols (~3e9).
+const orderNumberId = customAlphabet('ABCDEFGHJKMNPQRSTVWXYZ23456789', 8)
+
 function generateOrderNumber(): string {
-  return `ORD-${nanoid(6).toUpperCase()}`
+  return `ORD-${orderNumberId()}`
 }
 
 /**
@@ -407,18 +413,43 @@ export async function createOrder(
     await db.insert(schema.orderItems).values({ ...item, orderId })
   }
 
-  // ── 5. Stock decrement — skip unlimited (-1) items, floor at 0 ────────────
+  // ── 5. Stock decrement — ATOMIC conditional reserve (prevents oversell) ───
+  // The decrement only succeeds where `stock >= quantity`, so two orders racing
+  // for the last units can't both win: the loser's UPDATE matches 0 rows
+  // (meta.changes !== 1). On a loss we roll back the units already reserved in
+  // this call plus the half-written order rows, then surface a StockError.
+  // Unlimited (-1) items are skipped — they never need reserving.
+  const reserved: Array<{ sizeOptionId: string; quantity: number }> = []
   for (const item of items) {
-    await db
+    const so = sizeOptionMap.get(item.sizeOptionId)
+    if (!so || so.stock === -1) continue
+
+    const res = await db
       .update(schema.sizeOptions)
-      .set({ stock: sql`MAX(0, ${schema.sizeOptions.stock} - ${item.quantity})` })
+      .set({ stock: sql`${schema.sizeOptions.stock} - ${item.quantity}` })
       .where(
         and(
           eq(schema.sizeOptions.id, item.sizeOptionId),
-          // Drizzle doesn't have sql != -1 shorthand; use ne via raw sql guard
           sql`${schema.sizeOptions.stock} != -1`,
+          sql`${schema.sizeOptions.stock} >= ${item.quantity}`,
         ),
       )
+
+    if ((res as unknown as D1Result).meta?.changes === 1) {
+      reserved.push({ sizeOptionId: item.sizeOptionId, quantity: item.quantity })
+      continue
+    }
+
+    // Lost the race — restore what we reserved, delete the order, then throw.
+    for (const r of reserved) {
+      await db
+        .update(schema.sizeOptions)
+        .set({ stock: sql`${schema.sizeOptions.stock} + ${r.quantity}` })
+        .where(eq(schema.sizeOptions.id, r.sizeOptionId))
+    }
+    await db.delete(schema.orderItems).where(eq(schema.orderItems.orderId, orderId))
+    await db.delete(schema.orders).where(eq(schema.orders.id, orderId))
+    throw new StockError(`Insufficient stock for size: ${so.size}`)
   }
 
   // ── 6. Record coupon usage + increment usedCount ──────────────────────────
