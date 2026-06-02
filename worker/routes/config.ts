@@ -35,6 +35,11 @@ app.get('/store', async (c) => {
     currency:                   (kv['currency'] as StoreConfigData['currency']) ?? 'PKR',
     freeShippingThresholdCents: Number(kv['freeShippingThresholdCents'] ?? '0'),
     flatShippingRateCents:      Number(kv['flatShippingRateCents']      ?? '0'),
+    bankName:          kv['bankName']          ?? undefined,
+    bankAccountTitle:  kv['bankAccountTitle']  ?? undefined,
+    bankAccountNumber: kv['bankAccountNumber'] ?? undefined,
+    bankIban:          kv['bankIban']          ?? undefined,
+    bankInstructions:  kv['bankInstructions']  ?? undefined,
   }
 
   // Validate — log on failure but still return best-effort data

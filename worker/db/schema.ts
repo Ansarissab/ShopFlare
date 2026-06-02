@@ -48,7 +48,7 @@ export const orders = sqliteTable('orders', {
     enum: ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled']
   }).notNull().default('pending'),
   paymentMethod: text('payment_method', {
-    enum: ['stripe_checkout', 'cod', 'whatsapp', 'in_person_cash']
+    enum: ['stripe_checkout', 'cod', 'bank_transfer', 'whatsapp', 'in_person_cash']
   }).notNull(),
   customerName: text('customer_name').notNull(),
   customerEmail: text('customer_email'),

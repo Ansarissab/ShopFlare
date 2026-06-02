@@ -57,8 +57,23 @@ export const en = {
     cancelSuccess: 'Your order has been cancelled successfully.',
     cannotCancel: 'This order cannot be cancelled.',
     stripeRedirectNote: "You will be redirected to Stripe's secure payment page.",
+    bankTransfer: 'Bank Transfer',
+    bankTransferNote: 'Place your order, then transfer the total to our bank account using your order number as the reference. We confirm your order once the payment arrives.',
     calculatedAtDelivery: 'Calculated at delivery',
     securityCheckFailed: 'Security check failed. Please refresh and try again.',
+  },
+  // Reusable bank-transfer copy — shared by the checkout success page, the order
+  // tracking page, and the confirmation email (worker imports `en`). DRY.
+  bankTransfer: {
+    heading: 'Bank Transfer Instructions',
+    intro: 'Transfer {amount} to the account below to complete your order.',
+    reference: 'Use your order number {orderNumber} as the payment reference.',
+    awaitingPayment: 'Awaiting your bank transfer',
+    bankName: 'Bank',
+    accountTitle: 'Account Title',
+    accountNumber: 'Account Number',
+    iban: 'IBAN',
+    whatsappProof: 'Already paid? Message us on WhatsApp with your order number to speed up confirmation.',
   },
   tracking: {
     title: 'Track Your Order',
@@ -181,6 +196,16 @@ export const en = {
     freeShippingThreshold: 'Free Shipping Threshold (cents)',
     flatShippingRate: 'Flat Shipping Rate (cents)',
     settingsSaved: 'Settings saved',
+    // bank transfer details (shown to customers paying by bank transfer)
+    bankSectionTitle: 'Bank Transfer Details',
+    bankSectionHint: 'Shown to customers who choose Bank Transfer at checkout. Leave the account number empty to hide that option.',
+    bankName: 'Bank Name',
+    bankAccountTitle: 'Account Title',
+    bankAccountNumber: 'Account Number',
+    bankIban: 'IBAN (optional)',
+    bankInstructions: 'Extra Instructions (optional)',
+    paymentReceived: 'Mark Payment Received',
+    paymentConfirmed: 'Payment confirmed',
     // coupons (Agent N)
     addCoupon: 'Add Coupon',
     editCoupon: 'Edit Coupon',
@@ -258,6 +283,7 @@ export const en = {
   paymentMethodLabels: {
     stripe_checkout: 'Card',
     cod: 'Cash on Delivery',
+    bank_transfer: 'Bank Transfer',
     whatsapp: 'WhatsApp',
     in_person_cash: 'In-Person Cash',
   },
