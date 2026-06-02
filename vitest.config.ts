@@ -12,7 +12,11 @@ export default defineConfig({
     },
   },
   test: {
+    name: 'unit',
     environment: 'node',
     include: ['{src,worker}/**/*.{test,spec}.ts'],
+    // Integration tests run in the workers pool (vitest.integration.config.ts),
+    // not the node pool — keep them out of the unit project.
+    exclude: ['worker/test/**', '**/node_modules/**'],
   },
 })
