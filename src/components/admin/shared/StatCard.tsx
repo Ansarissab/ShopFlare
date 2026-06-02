@@ -1,9 +1,10 @@
+import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { AdminStatCardProps } from '@/lib/types/store'
 
-export function StatCard({ label, value, sub }: AdminStatCardProps) {
-  return (
-    <Card>
+export function StatCard({ label, value, sub, href }: AdminStatCardProps) {
+  const content = (
+    <Card className={href ? 'transition-colors hover:bg-muted/50 cursor-pointer' : undefined}>
       <CardHeader className="pb-1">
         <CardTitle className="text-sm font-medium text-muted-foreground">{label}</CardTitle>
       </CardHeader>
@@ -13,4 +14,7 @@ export function StatCard({ label, value, sub }: AdminStatCardProps) {
       </CardContent>
     </Card>
   )
+
+  if (href) return <Link href={href}>{content}</Link>
+  return content
 }
