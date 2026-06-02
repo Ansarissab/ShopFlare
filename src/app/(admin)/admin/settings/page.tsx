@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { FormField } from '@/components/common/FormField'
@@ -23,6 +24,11 @@ export default function AdminSettingsPage() {
   const [currency, setCurrency] = useState('PKR')
   const [flatShipping, setFlatShipping] = useState('0')
   const [freeThreshold, setFreeThreshold] = useState('0')
+  const [bankName, setBankName] = useState('')
+  const [bankAccountTitle, setBankAccountTitle] = useState('')
+  const [bankAccountNumber, setBankAccountNumber] = useState('')
+  const [bankIban, setBankIban] = useState('')
+  const [bankInstructions, setBankInstructions] = useState('')
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -34,6 +40,11 @@ export default function AdminSettingsPage() {
     setCurrency(config.currency)
     setFlatShipping(String(config.flatShippingRateCents))
     setFreeThreshold(String(config.freeShippingThresholdCents))
+    setBankName(config.bankName ?? '')
+    setBankAccountTitle(config.bankAccountTitle ?? '')
+    setBankAccountNumber(config.bankAccountNumber ?? '')
+    setBankIban(config.bankIban ?? '')
+    setBankInstructions(config.bankInstructions ?? '')
   }, [config])
 
   async function handleSave() {
@@ -47,6 +58,13 @@ export default function AdminSettingsPage() {
         currency,
         flatShippingRateCents: Number(flatShipping),
         freeShippingThresholdCents: Number(freeThreshold),
+        // Send trimmed values (incl. empty) so the merchant can CLEAR a field —
+        // emptying the account number hides the Bank Transfer option at checkout.
+        bankName: bankName.trim(),
+        bankAccountTitle: bankAccountTitle.trim(),
+        bankAccountNumber: bankAccountNumber.trim(),
+        bankIban: bankIban.trim(),
+        bankInstructions: bankInstructions.trim(),
       })
       toast.success(en.admin.settingsSaved)
     } catch {
@@ -114,6 +132,29 @@ export default function AdminSettingsPage() {
         </FormField>
         <FormField label={en.admin.freeShippingThreshold} htmlFor="s-threshold">
           <Input id="s-threshold" type="number" min={0} value={freeThreshold} onChange={(e) => setFreeThreshold(e.target.value)} />
+        </FormField>
+      </div>
+
+      {/* Bank Transfer Details */}
+      <div className="flex flex-col gap-4 rounded-lg border p-5">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-sm font-semibold">{en.admin.bankSectionTitle}</h2>
+          <p className="text-xs text-muted-foreground">{en.admin.bankSectionHint}</p>
+        </div>
+        <FormField label={en.admin.bankName} htmlFor="s-bank-name">
+          <Input id="s-bank-name" value={bankName} onChange={(e) => setBankName(e.target.value)} placeholder="Meezan Bank" />
+        </FormField>
+        <FormField label={en.admin.bankAccountTitle} htmlFor="s-bank-title">
+          <Input id="s-bank-title" value={bankAccountTitle} onChange={(e) => setBankAccountTitle(e.target.value)} />
+        </FormField>
+        <FormField label={en.admin.bankAccountNumber} htmlFor="s-bank-acct">
+          <Input id="s-bank-acct" value={bankAccountNumber} onChange={(e) => setBankAccountNumber(e.target.value)} />
+        </FormField>
+        <FormField label={en.admin.bankIban} htmlFor="s-bank-iban">
+          <Input id="s-bank-iban" value={bankIban} onChange={(e) => setBankIban(e.target.value)} placeholder="PK00MEZN..." />
+        </FormField>
+        <FormField label={en.admin.bankInstructions} htmlFor="s-bank-note">
+          <Textarea id="s-bank-note" rows={2} value={bankInstructions} onChange={(e) => setBankInstructions(e.target.value)} className="resize-none" />
         </FormField>
       </div>
 

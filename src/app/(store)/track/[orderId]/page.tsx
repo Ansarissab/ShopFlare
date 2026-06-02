@@ -9,6 +9,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { OrderTimeline } from '@/components/store/tracking/OrderTimeline'
 import { OrderLineItem } from '@/components/common/OrderLineItem'
+import { BankTransferInstructions } from '@/components/store/checkout/BankTransferInstructions'
 import { en } from '@/lib/i18n/en'
 import { formatPrice } from '@/lib/utils/index'
 import { layout } from '@/lib/styles'
@@ -158,6 +159,11 @@ function OrderTrackingContent() {
           <span>{formatPrice(order.totalCents)}</span>
         </div>
       </div>
+
+      {/* Bank-transfer instructions — only while payment is still awaited */}
+      {order.paymentMethod === 'bank_transfer' && order.status === 'pending' && (
+        <BankTransferInstructions orderNumber={order.orderNumber} totalCents={order.totalCents} />
+      )}
 
       {/* Cancel button */}
       {canCancel && (
