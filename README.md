@@ -257,14 +257,23 @@ Run a security review with the project's tooling before each release.
 
 ## Testing & CI
 
-- **Vitest** unit tests cover the money formatter, coupon evaluation, and order-schema
-  validation — `pnpm test`.
-- **GitHub Actions** ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs lint, typecheck
-  (app + Worker), tests, and a production build on every push / PR to `main`.
+Two Vitest projects (a workspace), both run by `pnpm test`:
+
+- **unit** (node) — pure logic: money formatter, coupon evaluation, order-schema validation.
+- **integration** (workers pool via `@cloudflare/vitest-pool-workers`) — the **real Worker**
+  running in `workerd` against an ephemeral D1/KV/R2 with the migrations applied. Drives the
+  money paths end-to-end through `fetch`: product listing, COD + bank-transfer checkout, stock
+  decrement, **concurrent oversell protection**, coupon validation, cancel + stock restore,
+  the review verified-purchase gate, Stripe webhook signature rejection, and admin CRUD.
 
 ```bash
+pnpm test            # all projects (31 tests)
+pnpm test:coverage   # unit coverage report
 pnpm typecheck && pnpm test && pnpm build
 ```
+
+**GitHub Actions** ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs lint, typecheck
+(app + Worker), tests, and a production build on every push / PR to `main`.
 
 ---
 
