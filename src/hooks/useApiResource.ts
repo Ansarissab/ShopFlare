@@ -15,10 +15,17 @@ import type { ApiResourceState } from '@/lib/types/store'
 
 export type { ApiResourceState }
 
+// Shared BroadcastChannel name for cross-tab data invalidation.
+// Post any message to this channel to trigger a silent re-fetch in all
+// subscribers (useApiResource with refetchOnChannel + useStoreConfig).
+export const DATA_UPDATED_CHANNEL = 'shopflare:data-updated'
+
 export interface UseApiResourceOptions {
   // Re-fetch silently when the browser tab regains focus. Use for data that
   // can change in another tab or context (e.g. store config).
   refetchOnFocus?: boolean
+  // Re-fetch silently whenever a message arrives on DATA_UPDATED_CHANNEL.
+  refetchOnChannel?: boolean
 }
 
 export function useApiResource<T>(path: string | null, opts?: UseApiResourceOptions): ApiResourceState<T> {
@@ -37,6 +44,14 @@ export function useApiResource<T>(path: string | null, opts?: UseApiResourceOpti
     document.addEventListener('visibilitychange', onVisible)
     return () => document.removeEventListener('visibilitychange', onVisible)
   }, [opts?.refetchOnFocus])
+
+  useEffect(() => {
+    if (!opts?.refetchOnChannel) return
+    if (typeof BroadcastChannel === 'undefined') return
+    const ch = new BroadcastChannel(DATA_UPDATED_CHANNEL)
+    ch.onmessage = () => setRefetchKey(k => k + 1)
+    return () => ch.close()
+  }, [opts?.refetchOnChannel])
 
   useEffect(() => {
     // No path yet (route param not ready) — stay in loading idle.

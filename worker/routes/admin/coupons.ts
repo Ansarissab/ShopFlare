@@ -10,6 +10,7 @@ import { createCouponSchema, updateCouponSchema } from '@/lib/schemas'
 import { CURRENCIES } from '@/lib/constants'
 import { parseBody } from 'worker/lib/http'
 import { createStripe } from 'worker/lib/stripe'
+import { bumpDataVersion } from 'worker/lib/version'
 import type { AdminEnv } from 'worker/lib/access'
 
 const app = new Hono<AdminEnv>()
@@ -141,11 +142,10 @@ app.post('/', async (c) => {
     createdAt: now,
   })
 
-  const coupon = await db
-    .select()
-    .from(schema.coupons)
-    .where(eq(schema.coupons.id, id))
-    .get()
+  const [coupon] = await Promise.all([
+    db.select().from(schema.coupons).where(eq(schema.coupons.id, id)).get(),
+    bumpDataVersion(db),
+  ])
 
   return c.json(coupon, 201)
 })
@@ -200,11 +200,10 @@ app.put('/:id', async (c) => {
 
   await db.update(schema.coupons).set(set).where(eq(schema.coupons.id, id))
 
-  const updated = await db
-    .select()
-    .from(schema.coupons)
-    .where(eq(schema.coupons.id, id))
-    .get()
+  const [updated] = await Promise.all([
+    db.select().from(schema.coupons).where(eq(schema.coupons.id, id)).get(),
+    bumpDataVersion(db),
+  ])
 
   return c.json(updated)
 })
@@ -236,6 +235,8 @@ app.delete('/:id', async (c) => {
     .update(schema.coupons)
     .set({ active: false })
     .where(eq(schema.coupons.id, id))
+
+  await bumpDataVersion(db)
 
   return c.json({ ok: true })
 })

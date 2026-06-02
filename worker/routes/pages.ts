@@ -5,6 +5,8 @@ import { Hono } from 'hono'
 import { eq } from 'drizzle-orm'
 import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
+import { etagFor } from 'worker/lib/fingerprint'
+import { getDataVersion } from 'worker/lib/version'
 import type { Bindings } from 'worker/types'
 import { POLICY_SLUGS } from '@/lib/constants'
 
@@ -25,7 +27,17 @@ app.get('/:slug', async (c) => {
 
   if (!page) return c.notFound()
 
-  return c.json(page)
+  const version = await getDataVersion(db)
+  const etag = etagFor({ count: 1, maxUpdatedAt: page.updatedAt, version })
+
+  if (c.req.header('If-None-Match') === etag) {
+    return c.newResponse(null, 304)
+  }
+
+  return c.json(page, 200, {
+    'Cache-Control': 'no-cache',
+    'ETag': etag,
+  })
 })
 
 export default app

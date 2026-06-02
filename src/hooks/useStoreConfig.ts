@@ -2,11 +2,11 @@
 
 import { useEffect, useCallback, useState } from 'react'
 import { apiGet } from '@/lib/api'
+import { DATA_UPDATED_CHANNEL } from '@/hooks/useApiResource'
 import type { StoreConfig, UseStoreConfigResult } from '@/lib/types/store'
 
-// Channel name shared with the admin settings save — when admin saves config,
-// it posts 'config-updated' here so all open store tabs refetch immediately.
-export const CONFIG_BROADCAST_CHANNEL = 'shopflare:config'
+// Kept for backward compatibility — aliased to the shared DATA_UPDATED_CHANNEL.
+export const CONFIG_BROADCAST_CHANNEL = DATA_UPDATED_CHANNEL
 
 export function useStoreConfig(): UseStoreConfigResult {
   const [config, setConfig] = useState<StoreConfig | null>(null)
@@ -41,8 +41,8 @@ export function useStoreConfig(): UseStoreConfigResult {
   // Refetch when admin saves config in any tab via BroadcastChannel
   useEffect(() => {
     if (typeof BroadcastChannel === 'undefined') return
-    const ch = new BroadcastChannel(CONFIG_BROADCAST_CHANNEL)
-    ch.onmessage = (e) => { if (e.data === 'config-updated') fetchConfig() }
+    const ch = new BroadcastChannel(DATA_UPDATED_CHANNEL)
+    ch.onmessage = () => fetchConfig()
     return () => ch.close()
   }, [fetchConfig])
 

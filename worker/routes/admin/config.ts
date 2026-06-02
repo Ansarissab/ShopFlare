@@ -6,6 +6,7 @@ import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import { updateConfigSchema } from '@/lib/schemas'
 import { parseBody } from 'worker/lib/http'
+import { bumpDataVersion } from 'worker/lib/version'
 import type { AdminEnv } from 'worker/lib/access'
 
 const app = new Hono<AdminEnv>()
@@ -32,6 +33,8 @@ app.put('/store', async (c) => {
       .values({ key, value: String(value), updatedAt: now })
       .onConflictDoUpdate({ target: schema.storeConfig.key, set: { value: String(value), updatedAt: now } })
   }
+
+  await bumpDataVersion(db)
 
   return c.json({ ok: true, updated: updates.map(([k]) => k) })
 })

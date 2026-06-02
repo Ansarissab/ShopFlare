@@ -6,13 +6,14 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Separator } from '@/components/ui/separator'
 import { FormField } from '@/components/common/FormField'
 import { Skeleton } from '@/components/ui/skeleton'
+import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { en } from '@/lib/i18n/en'
 import { CURRENCIES } from '@/lib/constants'
 import { apiPut } from '@/lib/api'
-import { useStoreConfig, CONFIG_BROADCAST_CHANNEL } from '@/hooks/useStoreConfig'
+import { useStoreConfig } from '@/hooks/useStoreConfig'
+import { DATA_UPDATED_CHANNEL } from '@/hooks/useApiResource'
 
 export default function AdminSettingsPage() {
   const { config, loading } = useStoreConfig()
@@ -68,7 +69,7 @@ export default function AdminSettingsPage() {
       })
       toast.success(en.admin.settingsSaved)
       if (typeof BroadcastChannel !== 'undefined') {
-        new BroadcastChannel(CONFIG_BROADCAST_CHANNEL).postMessage('config-updated')
+        new BroadcastChannel(DATA_UPDATED_CHANNEL).postMessage('config-updated')
       }
     } catch {
       toast.error(en.errors.networkError)
@@ -89,7 +90,10 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="flex flex-col gap-6 max-w-lg">
-      <h1 className="text-2xl font-bold tracking-tight">{en.admin.storeSettings}</h1>
+      <AdminPageHeader
+        title={en.admin.storeSettings}
+        actions={<Button onClick={handleSave} disabled={saving}>{saving ? en.admin.saving : en.admin.save}</Button>}
+      />
 
       {/* Identity */}
       <div className="flex flex-col gap-4 rounded-lg border p-5">
@@ -161,11 +165,6 @@ export default function AdminSettingsPage() {
         </FormField>
       </div>
 
-      <Separator />
-
-      <Button onClick={handleSave} disabled={saving} className="w-fit">
-        {saving ? en.admin.saving : en.admin.save}
-      </Button>
     </div>
   )
 }
