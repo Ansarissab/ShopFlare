@@ -105,7 +105,7 @@ INSERT OR IGNORE INTO reviews (id, order_id, product_id, customer_name, rating, 
 
 -- ─── Policy pages ─────────────────────────────────────────────────────────────
 -- Editable from Admin → Pages. INSERT OR IGNORE so admin edits are never clobbered.
-INSERT OR IGNORE INTO pages (slug, title, content) VALUES
+INSERT OR IGNORE INTO pages (slug, title, content, updated_at) VALUES
   ('shipping', 'Shipping Policy',
    'We process and dispatch orders within 1–2 business days of payment confirmation.
 
@@ -119,7 +119,7 @@ Once your order has been dispatched you will receive a tracking number via email
 
 We currently ship within the country only. International shipping is not available at this time.
 
-If your order has not arrived within the estimated timeframe, please contact us and we will investigate with the courier.'),
+If your order has not arrived within the estimated timeframe, please contact us and we will investigate with the courier.', datetime('now')),
 
   ('returns', 'Return Policy',
    'We want you to be completely satisfied with your purchase. If you are not happy with your order, we accept returns under the following conditions:
@@ -134,7 +134,7 @@ Refunds: Once we receive and inspect the returned item, we will process your ref
 
 Exchanges: If you would like to exchange an item for a different size or colour, please contact us. Exchanges are subject to stock availability.
 
-Damaged or incorrect items: If you received a damaged or wrong item, please contact us within 48 hours of delivery with photos and we will resolve it promptly at no cost to you.'),
+Damaged or incorrect items: If you received a damaged or wrong item, please contact us within 48 hours of delivery with photos and we will resolve it promptly at no cost to you.', datetime('now')),
 
   ('privacy', 'Privacy Policy',
    'Your privacy is important to us. This policy explains what personal information we collect, how we use it, and how we protect it.
@@ -151,7 +151,7 @@ Data retention: We retain your order information for accounting and legal compli
 
 Cookies: Our store may use essential cookies to maintain your shopping cart session. No tracking or advertising cookies are used without your consent.
 
-Contact: If you have any questions about this policy or your personal data, please contact us via the email or WhatsApp number listed on our store.'),
+Contact: If you have any questions about this policy or your personal data, please contact us via the email or WhatsApp number listed on our store.', datetime('now')),
 
   ('terms', 'Terms of Service',
    'By accessing and using this store you agree to the following terms and conditions. Please read them carefully before placing an order.
@@ -172,5 +172,5 @@ Limitation of liability: To the fullest extent permitted by law, we are not liab
 
 Changes to terms: We may update these terms from time to time. Continued use of the store after changes are posted constitutes acceptance of the revised terms.
 
-Contact: For any questions about these terms, please reach out to us via the contact details listed on our store.');
+Contact: For any questions about these terms, please reach out to us via the contact details listed on our store.', datetime('now'));
 
