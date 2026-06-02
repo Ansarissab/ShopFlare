@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
+import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { CouponsTable } from '@/components/admin/coupons/CouponsTable'
 import { CouponForm } from '@/components/admin/coupons/CouponForm'
 import { en } from '@/lib/i18n/en'
@@ -53,16 +54,15 @@ export default function AdminCouponsPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">{en.admin.coupons}</h1>
-        {!showForm && (
+      <AdminPageHeader
+        title={en.admin.coupons}
+        actions={!showForm ? (
           <Button size="sm" onClick={handleAdd}>
             <Plus className="size-3.5 mr-1" aria-hidden />
             {en.admin.addCoupon}
           </Button>
-        )}
-      </div>
+        ) : undefined}
+      />
 
       {/* Inline create/edit form */}
       {showForm && (
