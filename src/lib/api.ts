@@ -6,7 +6,12 @@
 //
 // 404 / status-specific handling: catch `ApiError` and inspect `.status`.
 
-export const WORKER_URL = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
+// Base URL of the CF Worker. In production this MUST be set (Pages build-time
+// env). In local dev it defaults to the standard `wrangler dev` port so the
+// store works out-of-the-box without an .env.local.
+export const WORKER_URL =
+  process.env.NEXT_PUBLIC_WORKER_URL ||
+  (process.env.NODE_ENV === 'development' ? 'http://localhost:8787' : '')
 
 export class ApiError extends Error {
   constructor(

@@ -1,0 +1,14 @@
+# ShopFlare — local dev services. Run all with one of:
+#   pnpm dev:all          (cross-platform, uses `concurrently` — no extra tools)
+#   overmind start -f Procfile.dev
+#   foreman start -f Procfile.dev
+#
+# First-time / reset DB:  pnpm dev:setup   (migrate + seed local D1)
+# One shot (seed + run):  pnpm dev:fresh
+#
+# web    = Next.js storefront + admin  (http://localhost:3000)
+# worker = Cloudflare Worker API       (http://localhost:8787)
+# The frontend defaults to the worker on :8787, so no .env.local is needed locally.
+
+web: pnpm dev
+worker: pnpm worker:dev

@@ -149,14 +149,24 @@ pnpm install
 # 2. Run the interactive setup wizard — provisions/guides CF + Stripe config
 pnpm setup
 
-# 3. Apply migrations + seed demo data to your LOCAL D1
-pnpm db:migrate:local
-pnpm db:seed:local
+# 3. Seed the local D1 and run EVERYTHING (worker + web) with one command
+pnpm dev:fresh       # = migrate + seed local D1, then run both services
+```
 
-# 4. Run the Worker (API) and the Next.js app in two terminals
+`dev:fresh` runs the migrations, seeds the demo data, and starts both services together.
+Equivalent split commands:
+
+```bash
+pnpm dev:setup       # migrate + seed local D1 (first run / reset)
+pnpm dev:all         # run web (:3000) + worker (:8787) together
+# or, individually, in two terminals:
 pnpm worker:dev      # http://localhost:8787
 pnpm dev             # http://localhost:3000
 ```
+
+`pnpm dev:all` uses `concurrently`; a `Procfile.dev` is also provided for
+foreman/overmind. The frontend defaults `NEXT_PUBLIC_WORKER_URL` to
+`http://localhost:8787` in dev, so **no `.env.local` is needed locally**.
 
 Open http://localhost:3000 — the seeded demo store (3 products, 2 coupons, a sample
 review) loads immediately. The admin dashboard is at `/admin`.
