@@ -2,39 +2,70 @@
 
 ## Cache layers
 
-```
+```text
 Request
-  → Cloudflare CDN (static assets: JS, CSS, images)
-    → CF KV (product catalog, theme, config)
-      → CF Worker
-        → CF D1 (source of truth)
+  → Cloudflare CDN (static JS/CSS/Next.js chunks — long-lived, immutable)
+    → Cloudflare CDN (R2 product images — immutable per content-addressed key)
+      → CF Worker + D1 (dynamic API — always fresh via ETag/304)
 ```
 
-## What gets cached in KV
+## Static assets
 
-| Key | TTL | Content |
-|---|---|---|
-| `products:all` | 10min | Full product catalog with variants |
-| `product:{id}` | 10min | Single product |
-| `config:store` | 1hr | Store name, logo, contact |
-| `config:theme` | 1hr | Primary/accent colors |
-| `config:shipping` | 1hr | Shipping rates |
-| `order:{id}:status` | 30s | Order status for tracking page |
+Next.js generates hashed chunk filenames. Served by Cloudflare Pages CDN with
+`Cache-Control: public, max-age=31536000, immutable`. A new deploy invalidates these
+automatically because the hash changes.
 
-## Cache invalidation
+## Product images (R2)
 
-Product updated in admin → CF Worker deletes `products:all` and `product:{id}` from KV.
-Store config updated → CF Worker deletes `config:store` and `config:theme`.
+Images are stored in R2 under a `nanoid` key (`products/{productId}/{variantId}/{imageId}.{ext}`).
+The key never changes for the same image. The Worker serves them with:
 
-## Image caching
-
-R2 images served with:
-```
+```http
 Cache-Control: public, max-age=31536000, immutable
 ```
-Images use versioned URLs (`product-v2.webp`) — change version on update.
 
-## Cache miss rate
+Deleting and re-uploading creates a new key, so old cached URLs stay valid and new ones are
+fresh immediately.
 
-Expected: <1% during normal operations.
-Cold start (first request after deploy): single cache miss per key.
+## Dynamic API responses (ETags)
+
+Public read endpoints use `Cache-Control: no-cache` (not `no-store`) + `ETag`. The browser
+revalidates on every load with `If-None-Match`; the Worker returns `304 Not Modified` when
+nothing changed (cheap — no body sent). When data changes the Worker returns `200` with a
+fresh body.
+
+| Endpoint | ETag inputs |
+| --- | --- |
+| `GET /api/config/store` | `COUNT(*)` + `MAX(updated_at)` of `store_config` rows |
+| `GET /api/products` | `COUNT(*)` + `MAX(updated_at)` of active products + `dataVersion` |
+| `GET /api/products/:id` | product `updated_at` + `dataVersion` |
+| `GET /api/pages/:slug` | page `updated_at` + `dataVersion` |
+
+### Data version bump
+
+Every admin write route (product CRUD, variant/size/image CRUD, config, coupons, pages) calls
+`bumpDataVersion()` (`worker/lib/version.ts`) after a successful mutation. This increments a
+`dataVersion` counter in `store_config` and updates its `updated_at`. The version is included
+in ETag fingerprints so **deletes also invalidate** ETags (deleting a row doesn't update any
+surviving row's `updated_at`, but it bumps `dataVersion`).
+
+### Cross-tab invalidation (BroadcastChannel)
+
+When an admin save succeeds on the client, it posts to `shopflare:data-updated`
+(`DATA_UPDATED_CHANNEL`). Hooks that subscribe to this channel (`useStoreConfig`,
+`useApiResource` with `refetchOnChannel: true`) silently refetch in all open tabs — so the
+storefront reflects changes made in the admin tab immediately without a full page reload.
+
+## CF Access JWKS
+
+The admin JWT verification (`worker/lib/access-core.ts`) fetches the team's public keys once
+from `https://{teamDomain}/cdn-cgi/access/certs`. The Worker caches these in KV for 1 hour
+(`access:jwks`). The Next.js middleware uses a module-level in-memory Map with the same 1-hour
+TTL (persists across requests in the same edge instance). Access rotates keys roughly every
+6 weeks, so a 1-hour cache is a safe middle ground.
+
+## What is NOT cached in KV
+
+Unlike early drafts, the product catalog and store config are **not** cached in KV.
+
+The ETag + `no-cache` + D1 approach is simpler, avoids stale-read windows after admin writes, and D1 latency is well within acceptable limits for the expected request volume.

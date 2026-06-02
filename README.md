@@ -171,9 +171,10 @@ foreman/overmind. The frontend defaults `NEXT_PUBLIC_WORKER_URL` to
 Open http://localhost:3000 — the seeded demo store (3 products, 2 coupons, a sample
 review) loads immediately. The admin dashboard is at `/admin`.
 
-> In local dev, when Cloudflare Access and Turnstile are unconfigured the Worker logs a
-> loud warning and bypasses them so you can work without a tunnel. Both **fail closed in
-> production** (a deployed Worker forces `ENVIRONMENT=production`).
+> In local dev, add `ENVIRONMENT=development` and `ADMIN_DEV_BYPASS=1` to `.env.local`
+> to bypass CF Access JWT verification and reach `/admin` without a tunnel. Both flags are
+> required together — neither alone is sufficient. Turnstile is also bypassed in dev.
+> Both **fail closed in production**.
 
 ---
 
