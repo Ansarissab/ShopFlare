@@ -147,6 +147,10 @@ export const en = {
     totalRevenue: 'Total Revenue',
     pendingOrders: 'Pending Orders',
     lowStockAlert: 'Low Stock',
+    recentOrders: 'Recent Orders',
+    revenueChart: 'Revenue — Last 14 Days',
+    ordersChart: 'Order Status',
+    noOrdersYet: 'No orders yet',
     // orders
     updateStatus: 'Update Status',
     addTracking: 'Add Tracking',
@@ -296,6 +300,7 @@ export const en = {
   },
   common: {
     optional: '(optional)',
+    viewAll: 'View all',
   },
   paymentMethodLabels: {
     stripe_checkout: 'Card',
