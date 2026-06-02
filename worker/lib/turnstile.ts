@@ -5,7 +5,9 @@ let _warnedOnce = false
 /**
  * verifyTurnstile — server-side Cloudflare Turnstile token verification.
  *
- * - Returns `true` immediately when `secret` is empty (dev bypass; warns once).
+ * - When `secret` is empty: bypasses ONLY in local development
+ *   (opts.isDevelopment), otherwise FAILS CLOSED (returns false) so a
+ *   production worker deployed without the secret rejects unverified requests.
  * - Returns `false` when `token` is falsy.
  * - POSTs to the Turnstile siteverify endpoint and returns `response.success`.
  * - Returns `false` on any network/parse error (fail-closed).
@@ -14,14 +16,19 @@ export async function verifyTurnstile(
   token: string | null | undefined,
   secret: string,
   remoteIp?: string,
+  opts?: { isDevelopment?: boolean },
 ): Promise<boolean> {
-  // Dev bypass — no secret configured
+  // No secret configured.
   if (!secret) {
-    if (!_warnedOnce) {
-      console.warn('[turnstile] TURNSTILE_SECRET_KEY is not configured — skipping verification (dev mode)')
-      _warnedOnce = true
+    if (opts?.isDevelopment) {
+      if (!_warnedOnce) {
+        console.warn('[turnstile] TURNSTILE_SECRET_KEY is not configured — skipping verification (dev mode)')
+        _warnedOnce = true
+      }
+      return true
     }
-    return true
+    console.warn('[turnstile] TURNSTILE_SECRET_KEY unset in production — failing closed')
+    return false
   }
 
   // No token submitted → reject

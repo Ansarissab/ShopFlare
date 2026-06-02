@@ -148,8 +148,14 @@ export const requireAccess: MiddlewareHandler<AdminEnv> = async (c, next) => {
 
   // Local dev convenience: if Access is unconfigured and we're in development,
   // skip verification so the admin UI works without a Cloudflare tunnel.
+  // Deployed workers run with ENVIRONMENT=production (forced by the
+  // `worker:deploy` script's --var override), so this branch CANNOT open the
+  // admin API in production even if the Access vars are forgotten.
   if (!teamDomain || !aud) {
-    if (c.env.ENVIRONMENT === 'development') return next()
+    if (c.env.ENVIRONMENT === 'development') {
+      console.warn('[access] INSECURE: admin auth bypassed — CF Access unconfigured + ENVIRONMENT=development')
+      return next()
+    }
     return c.json({ error: 'Admin access is not configured' }, 403)
   }
 
