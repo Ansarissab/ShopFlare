@@ -11,7 +11,7 @@ import { OrderTimeline } from '@/components/store/tracking/OrderTimeline'
 import { OrderLineItem } from '@/components/common/OrderLineItem'
 import { BankTransferInstructions } from '@/components/store/checkout/BankTransferInstructions'
 import { en } from '@/lib/i18n/en'
-import { formatPrice } from '@/lib/utils/index'
+import { formatPrice, formatDate } from '@/lib/utils/index'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
 import type { TrackingData } from '@/lib/types/store'
@@ -101,11 +101,7 @@ function OrderTrackingContent() {
           </Badge>
         </div>
         <p className="text-sm text-muted-foreground">
-          {new Date(order.createdAt).toLocaleDateString('en', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
+          {formatDate(order.createdAt, { year: 'numeric', month: 'long', day: 'numeric' })}
         </p>
         <p className="text-sm text-muted-foreground">{order.customerName}</p>
       </div>
