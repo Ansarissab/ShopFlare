@@ -12,7 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { en } from '@/lib/i18n/en'
 import { CURRENCIES } from '@/lib/constants'
 import { apiPut } from '@/lib/api'
-import { useStoreConfig } from '@/hooks/useStoreConfig'
+import { useStoreConfig, CONFIG_BROADCAST_CHANNEL } from '@/hooks/useStoreConfig'
 
 export default function AdminSettingsPage() {
   const { config, loading } = useStoreConfig()
@@ -67,6 +67,9 @@ export default function AdminSettingsPage() {
         bankInstructions: bankInstructions.trim(),
       })
       toast.success(en.admin.settingsSaved)
+      if (typeof BroadcastChannel !== 'undefined') {
+        new BroadcastChannel(CONFIG_BROADCAST_CHANNEL).postMessage('config-updated')
+      }
     } catch {
       toast.error(en.errors.networkError)
     } finally {
