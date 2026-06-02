@@ -1,14 +1,16 @@
 import { Hono } from 'hono'
 import { eq, and } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
-import { createStripe } from '../lib/stripe'
-import { createDb } from '../db/index'
-import * as schema from '../db/schema'
+import { createStripe } from 'worker/lib/stripe'
+import { createDb } from 'worker/db/index'
+import * as schema from 'worker/db/schema'
 import { createCheckoutSessionSchema } from '@/lib/schemas'
-import { createOrder, releaseOrderInventory } from '../lib/orders'
-import { parseBody } from '../lib/http'
-import { notifyNewOrder } from '../lib/notify'
-import type { Bindings } from '../types'
+import { createOrder, releaseOrderInventory, StockError, CouponError } from 'worker/lib/orders'
+import { parseBody } from 'worker/lib/http'
+import { verifyTurnstile } from 'worker/lib/turnstile'
+import { rateLimit } from 'worker/lib/ratelimit'
+import { notifyNewOrder } from 'worker/lib/notify'
+import type { Bindings } from 'worker/types'
 
 const app = new Hono<{ Bindings: Bindings }>()
 
@@ -22,6 +24,21 @@ const checkoutBodySchema = createCheckoutSessionSchema.omit({ orderId: true })
 // ─── POST /checkout-session ───────────────────────────────────────────────────
 
 app.post('/checkout-session', async (c) => {
+  // 0. Abuse controls — creating a session reserves stock + coupon quota (the
+  //    pending order is created below), so this endpoint must be throttled and
+  //    Turnstile-gated exactly like the COD path. Without it, an anonymous
+  //    caller could loop here to drain inventory / burn coupon limits before
+  //    any session expires. Mirrors routes/orders.ts POST /cod.
+  const ip = c.req.header('CF-Connecting-IP')
+  if (!(await rateLimit(c.env, 'checkout', ip, { limit: 10, windowSeconds: 60 }))) {
+    return c.json({ error: 'Too many requests' }, 429)
+  }
+  const token = c.req.header('X-Turnstile-Token') ?? null
+  const valid = await verifyTurnstile(token, c.env.TURNSTILE_SECRET_KEY, ip, {
+    isDevelopment: c.env.ENVIRONMENT === 'development',
+  })
+  if (!valid) return c.json({ error: 'Security check failed' }, 403)
+
   // 1. Parse + validate body
   const [body, errResp] = await parseBody(c)
   if (errResp) return errResp
@@ -63,14 +80,25 @@ app.post('/checkout-session', async (c) => {
     }
   }
 
-  const { orderId } = await createOrder(db, {
-    paymentMethod: 'stripe_checkout',
-    items: orderItems,
-    // customerName/email/phone are empty placeholders — the webhook fills
-    // them in from session.customer_details after checkout.session.completed.
-    customerName: '',
-    couponCode,
-  })
+  // createOrder atomically reserves stock; it throws StockError if an item sold
+  // out between catalogue render and checkout, or CouponError if the coupon is
+  // invalid. Map both to a 422 instead of a 500.
+  let orderId: string
+  try {
+    ;({ orderId } = await createOrder(db, {
+      paymentMethod: 'stripe_checkout',
+      items: orderItems,
+      // customerName/email/phone are empty placeholders — the webhook fills
+      // them in from session.customer_details after checkout.session.completed.
+      customerName: '',
+      couponCode,
+    }))
+  } catch (err) {
+    if (err instanceof StockError || err instanceof CouponError) {
+      return c.json({ error: err.message }, 422)
+    }
+    throw err
+  }
 
   // 3. Optionally look up coupon in D1 for Stripe promotion code
   let discounts: Array<{ promotion_code: string }> | undefined
