@@ -103,6 +103,13 @@ export const updateCouponSchema = z.object({
   active:           z.boolean(),
 }).partial()
 
+// ─── Policy pages admin ───────────────────────────────────────────────────────
+
+export const updatePageSchema = z.object({
+  title:   z.string().min(1).max(200),
+  content: z.string().default(''),
+})
+
 // ─── Config admin ─────────────────────────────────────────────────────────────
 
 // Allow partial updates — merchant edits one section at a time
@@ -122,3 +129,4 @@ export type PosOrderInput          = z.infer<typeof posOrderSchema>
 export type UpdateConfigInput      = z.infer<typeof updateConfigSchema>
 export type CreateCouponInput      = z.infer<typeof createCouponSchema>
 export type UpdateCouponInput      = z.infer<typeof updateCouponSchema>
+export type UpdatePageInput        = z.infer<typeof updatePageSchema>
