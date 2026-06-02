@@ -115,7 +115,7 @@ export default function AdminSettingsPage() {
         <h2 className="text-sm font-semibold">Payments &amp; Shipping</h2>
         <FormField label={en.admin.currency} htmlFor="s-currency">
           <Select value={currency} onValueChange={(v) => setCurrency(v ?? 'PKR')}>
-            <SelectTrigger id="s-currency">
+            <SelectTrigger id="s-currency" className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
