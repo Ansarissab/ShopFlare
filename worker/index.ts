@@ -8,16 +8,22 @@ app.use(
   '*',
   cors({
     // Allow the configured FRONTEND_URL plus any localhost origin (dev/preview).
-    // Echoes the request origin when FRONTEND_URL is unset (local wrangler dev).
-    // Never '*': admin requests send the CF Access cookie (credentials), which
-    // browsers reject against a wildcard origin.
+    // Credentials are enabled (admin requests carry the CF Access cookie), so we
+    // must NEVER reflect an arbitrary origin or '*' — that would let any site
+    // make credentialed cross-origin calls to /api/admin.
     origin: (origin, c) => {
-      const frontendUrl = c.env.FRONTEND_URL
-      if (!frontendUrl) return origin || '*'
+      // Localhost is always allowed (dev/preview).
       if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
         return origin
       }
-      return origin === frontendUrl ? origin : null
+
+      const frontendUrl = c.env.FRONTEND_URL
+      if (frontendUrl) return origin === frontendUrl ? origin : null
+
+      // No FRONTEND_URL configured: echo the origin ONLY in local development.
+      // In production fail closed — deny cross-origin rather than reflect it.
+      if (c.env.ENVIRONMENT === 'development') return origin || null
+      return null
     },
     // Send the Access assertion header / CF_Authorization cookie through to the
     // worker so requireAccess can verify it.
