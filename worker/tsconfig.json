@@ -10,7 +10,8 @@
     "isolatedModules": true,
     "types": ["@cloudflare/workers-types"],
     "paths": {
-      "@/*": ["../src/*"]
+      "@/*": ["../src/*"],
+      "worker/*": ["./*"]
     }
   },
   "include": [

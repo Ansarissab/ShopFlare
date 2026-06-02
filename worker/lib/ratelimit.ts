@@ -10,7 +10,7 @@
 // precise quota. It FAILS OPEN: any KV error allows the request, so a degraded
 // limiter never blocks legitimate checkout/review traffic.
 
-import type { Bindings } from '../types'
+import type { Bindings } from 'worker/types'
 
 const KV_MIN_TTL = 60 // Cloudflare KV rejects expirationTtl < 60
 

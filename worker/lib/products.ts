@@ -2,9 +2,9 @@
 // from D1 for use by GET /products and GET /products/:id.
 
 import { eq, inArray } from 'drizzle-orm'
-import type { Database } from '../db/index'
-import * as schema from '../db/schema'
-import type { Product, Variant, ProductImage, SizeOption } from '../db/schema'
+import type { Database } from 'worker/db/index'
+import * as schema from 'worker/db/schema'
+import type { Product, Variant, ProductImage, SizeOption } from 'worker/db/schema'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

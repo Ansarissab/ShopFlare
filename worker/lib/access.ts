@@ -19,7 +19,7 @@
 // are allowed through so the admin UI is usable without a tunnel.
 
 import type { MiddlewareHandler } from 'hono'
-import type { Bindings } from '../types'
+import type { Bindings } from 'worker/types'
 
 // Hono context variables set by requireAccess — admin routers use this env shape.
 export type AccessVariables = { accessEmail: string }

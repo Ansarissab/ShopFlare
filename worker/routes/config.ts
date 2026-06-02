@@ -2,11 +2,11 @@
 // PUT /store (config editor) lives on /api/admin/config behind CF Access.
 
 import { Hono } from 'hono'
-import { createDb } from '../db/index'
-import * as schema from '../db/schema'
+import { createDb } from 'worker/db/index'
+import * as schema from 'worker/db/schema'
 import { storeConfigSchema } from '@/lib/schemas'
 import type { StoreConfigData } from '@/lib/schemas'
-import type { Bindings } from '../types'
+import type { Bindings } from 'worker/types'
 
 const app = new Hono<{ Bindings: Bindings }>()
 

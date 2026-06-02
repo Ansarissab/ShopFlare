@@ -4,15 +4,15 @@
 // /api/orders, /api/products, /api/config routers that checkout depends on.
 
 import { Hono } from 'hono'
-import { requireAccess } from '../../lib/access'
-import type { AdminEnv } from '../../lib/access'
+import { requireAccess } from 'worker/lib/access'
+import type { AdminEnv } from 'worker/lib/access'
 import orders from './orders'
 import products from './products'
 import config from './config'
 import coupons from './coupons'
 import reviews from './reviews'
 import notify from './notify'
-import push from '../push'
+import push from 'worker/routes/push'
 
 const app = new Hono<AdminEnv>()
 

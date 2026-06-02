@@ -5,10 +5,10 @@
 import { Hono } from 'hono'
 import { eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
-import { createDb } from '../../db/index'
-import * as schema from '../../db/schema'
-import { assembleProduct, assembleProductList } from '../../lib/products'
-import { parseBody } from '../../lib/http'
+import { createDb } from 'worker/db/index'
+import * as schema from 'worker/db/schema'
+import { assembleProduct, assembleProductList } from 'worker/lib/products'
+import { parseBody } from 'worker/lib/http'
 import {
   createProductSchema,
   updateProductSchema,
@@ -18,8 +18,8 @@ import {
   updateSizeOptionSchema,
 } from '@/lib/schemas'
 import { MAX_IMAGES_PER_VARIANT, MAX_IMAGE_BYTES, ALLOWED_IMAGE_TYPES } from '@/lib/constants'
-import type { AdminEnv } from '../../lib/access'
-import { dispatchRestockAlerts } from '../../lib/notify'
+import type { AdminEnv } from 'worker/lib/access'
+import { dispatchRestockAlerts } from 'worker/lib/notify'
 
 const app = new Hono<AdminEnv>()
 

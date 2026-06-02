@@ -4,10 +4,10 @@
 
 import { Hono } from 'hono'
 import { eq } from 'drizzle-orm'
-import { createDb } from '../db/index'
-import * as schema from '../db/schema'
-import { assembleProduct, assembleProductList } from '../lib/products'
-import type { Bindings } from '../types'
+import { createDb } from 'worker/db/index'
+import * as schema from 'worker/db/schema'
+import { assembleProduct, assembleProductList } from 'worker/lib/products'
+import type { Bindings } from 'worker/types'
 
 const app = new Hono<{ Bindings: Bindings }>()
 

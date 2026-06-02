@@ -10,11 +10,11 @@
 // NEVER throws — wrapped in try/catch; errors are logged and 0 is returned.
 
 import { eq, and, isNotNull, inArray } from 'drizzle-orm'
-import type { Database } from '../db/index'
-import * as schema from '../db/schema'
+import type { Database } from 'worker/db/index'
+import * as schema from 'worker/db/schema'
 import { sendRestockEmail, sendOrderEmails } from './email'
 import { sendPushToAll } from './push'
-import type { Bindings } from '../types'
+import type { Bindings } from 'worker/types'
 import { en } from '@/lib/i18n/en'
 
 /**
