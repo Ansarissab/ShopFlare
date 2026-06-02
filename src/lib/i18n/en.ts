@@ -187,6 +187,7 @@ export const en = {
     deleteCoupon: 'Delete Coupon',
     deleteCouponConfirm: 'Deactivate this coupon? It will stop accepting orders immediately.',
     couponCode: 'Code',
+    couponCodePlaceholder: 'SAVE20',
     couponType: 'Type',
     couponTypePercentage: 'Percentage',
     couponTypeFixed: 'Fixed amount',
@@ -303,6 +304,14 @@ export const en = {
     ratingRequired: 'Please select a rating',
     submitFailed: 'Could not submit review. Please try again.',
     cancel: 'Cancel',
+    // Accessibility labels (ReviewStars)
+    selectRating: 'Select rating',
+    starsAriaLabel: '{rating} out of 5 stars',
+    starLabel: '{count} star',
+    starLabelPlural: '{count} stars',
+    // Verify-purchase form placeholders (ReviewForm)
+    orderNumberPlaceholder: 'ORD-…',
+    contactPlaceholder: 'you@example.com or +1 555…',
   },
   // Transactional email copy (Agent O) — sent from the CF Worker via Resend.
   email: {
@@ -329,6 +338,7 @@ export const en = {
     newOrderTitle: 'New order received',
     newOrderBody: 'Order {orderNumber} — {total}',
     enablePush: 'Enable order notifications',
+    enabling: 'Enabling…',
     pushEnabled: 'Notifications enabled',
     pushBlocked: 'Notifications are blocked in your browser settings.',
     pushUnsupported: 'Push notifications are not supported on this device.',

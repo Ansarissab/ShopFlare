@@ -396,6 +396,11 @@ export interface AdminReviewRowProps {
   onChanged: () => void
 }
 
+export interface ReviewTableProps {
+  reviews: AdminReview[]
+  onChanged: () => void
+}
+
 // ─── Notify-Me / restock types (Agent Q) ──────────────────────────────────────
 // Aggregated outstanding restock request for one size option.
 export interface NotifyRequest {
@@ -424,4 +429,28 @@ export interface ProductJsonLdProps {
   /** Absolute store origin for canonical URLs. */
   storeUrl?: string
   storeName?: string
+}
+
+// schema.org offer block emitted in the Product JSON-LD — AggregateOffer for a
+// price range, Offer for a single/known price, Offer (no price) as a fallback.
+export type ProductJsonLdOffer =
+  | { '@type': 'AggregateOffer'; lowPrice: number; highPrice: number; offerCount: number; priceCurrency: string; availability: string; url?: string }
+  | { '@type': 'Offer'; price: number; priceCurrency: string; availability: string; url?: string }
+  | { '@type': 'Offer'; priceCurrency: string; availability: string; url?: string }
+
+// ─── Web Push (Agent O) ────────────────────────────────────────────────────────
+// Response shape of GET /api/public-config (non-secret keys served to the client).
+export interface PublicConfigResponse {
+  vapidPublicKey: string
+  stripePublishableKey: string
+  turnstileSiteKey: string
+}
+
+export interface UsePushSubscriptionReturn {
+  supported: boolean
+  permission: NotificationPermission
+  enabled: boolean
+  /** Resolves true only when the subscription was created + persisted. */
+  enable: () => Promise<boolean>
+  loading: boolean
 }

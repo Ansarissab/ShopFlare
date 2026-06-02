@@ -2,6 +2,7 @@
 
 import { Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { en } from '@/lib/i18n/en'
 import type { ReviewStarsProps } from '@/lib/types/store'
 
 /**
@@ -15,7 +16,11 @@ export function ReviewStars({ rating, onChange, className }: ReviewStarsProps) {
     <div
       className={cn('flex items-center gap-0.5', className)}
       role={interactive ? 'radiogroup' : undefined}
-      aria-label={interactive ? 'Select rating' : `${rating} out of 5 stars`}
+      aria-label={
+        interactive
+          ? en.reviews.selectRating
+          : en.reviews.starsAriaLabel.replace('{rating}', String(rating))
+      }
     >
       {[1, 2, 3, 4, 5].map((star) => {
         const filled = star <= rating
@@ -24,7 +29,7 @@ export function ReviewStars({ rating, onChange, className }: ReviewStarsProps) {
             key={star}
             type="button"
             onClick={() => onChange(star)}
-            aria-label={`${star} star${star !== 1 ? 's' : ''}`}
+            aria-label={(star === 1 ? en.reviews.starLabel : en.reviews.starLabelPlural).replace('{count}', String(star))}
             className="focus-visible:outline-none"
           >
             <Star

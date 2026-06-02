@@ -5,17 +5,11 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { AdminReviewRow } from '@/components/admin/reviews/AdminReviewRow'
 import { useApiResource } from '@/hooks/useApiResource'
 import { en } from '@/lib/i18n/en'
-import type { AdminReviewsResponse, AdminReview } from '@/lib/types/store'
+import type { AdminReviewsResponse, ReviewTableProps } from '@/lib/types/store'
 
 // ─── Inner table ──────────────────────────────────────────────────────────────
 
-function ReviewTable({
-  reviews,
-  onChanged,
-}: {
-  reviews: AdminReview[]
-  onChanged: () => void
-}) {
+function ReviewTable({ reviews, onChanged }: ReviewTableProps) {
   return (
     <div className="overflow-x-auto rounded-lg border">
       <table className="w-full text-sm">

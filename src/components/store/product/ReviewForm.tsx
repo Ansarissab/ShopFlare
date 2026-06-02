@@ -88,7 +88,7 @@ export function ReviewForm({ productId, onSubmitted }: ReviewFormProps) {
             id="review-order-number"
             type="text"
             autoComplete="off"
-            placeholder="ORD-…"
+            placeholder={en.reviews.orderNumberPlaceholder}
             aria-invalid={!!errors.orderNumber}
             {...register('orderNumber')}
           />
@@ -103,7 +103,7 @@ export function ReviewForm({ productId, onSubmitted }: ReviewFormProps) {
             id="review-contact"
             type="text"
             autoComplete="email"
-            placeholder="you@example.com or +1 555…"
+            placeholder={en.reviews.contactPlaceholder}
             aria-invalid={!!errors.contact}
             {...register('contact')}
           />

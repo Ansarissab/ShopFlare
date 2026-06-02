@@ -89,7 +89,7 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
             id="coupon-code"
             value={code}
             onChange={(e) => setCode(e.target.value.toUpperCase())}
-            placeholder="SAVE20"
+            placeholder={en.admin.couponCodePlaceholder}
             disabled={isEdit}
           />
         </FormField>

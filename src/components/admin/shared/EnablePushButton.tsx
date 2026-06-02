@@ -51,7 +51,7 @@ export function EnablePushButton() {
       onClick={handleClick}
       disabled={loading}
     >
-      {loading ? '…' : en.notifications.enablePush}
+      {loading ? en.notifications.enabling : en.notifications.enablePush}
     </Button>
   )
 }

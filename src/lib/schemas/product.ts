@@ -2,27 +2,29 @@
 import { z } from 'zod/v4'
 import { idField, contactSchema } from './base'
 
-// Review — verified purchase, rating 1-5
-export const reviewSchema = z.object({
-  orderId:      idField,
+// Shared review fields — the rating + content common to both the internal
+// (orderId-keyed) and public (orderNumber+contact) review shapes. Compose, never
+// copy-paste (DRY rule 4).
+const reviewBase = z.object({
   productId:    idField,
-  customerName: z.string().min(1),
+  customerName: z.string().min(1).max(120),
   rating:       z.number().int().min(1).max(5),
   body:         z.string().max(1000).optional(),
+})
+
+// Review — verified purchase, keyed by internal orderId.
+export const reviewSchema = reviewBase.extend({
+  orderId: idField,
 })
 
 // Public review submission — the customer supplies the human-facing orderNumber
 // + contact (email/phone). The Worker resolves these to an order, verifies it is
 // `delivered` and contains productId, then inserts a review with approved=false.
-export const submitReviewSchema = z.object({
+export const submitReviewSchema = reviewBase.extend({
   orderNumber:  z.string().min(1).max(40),
   // min 4 chars: prevents a 1-2 digit `contact` from matching any order via the
   // phone digits-suffix check in the Worker (see worker/routes/reviews.ts).
   contact:      z.string().min(4).max(160),
-  productId:    idField,
-  customerName: z.string().min(1).max(120),
-  rating:       z.number().int().min(1).max(5),
-  body:         z.string().max(1000).optional(),
 })
 
 // Admin moderation — approve / unapprove a review.
