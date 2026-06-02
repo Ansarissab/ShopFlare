@@ -39,3 +39,6 @@ export const MIN_COUPON_CODE_LENGTH = 6
 export const FREE_SHIPPING_DEFAULT_THRESHOLD = 0  // 0 = disabled
 export const LOW_STOCK_THRESHOLD = 5
 export const MAX_CART_ITEMS = 50
+
+export const POLICY_SLUGS = ['shipping', 'returns', 'privacy', 'terms'] as const
+export type PolicySlug = (typeof POLICY_SLUGS)[number]

@@ -151,6 +151,15 @@ export const stripeEvents = sqliteTable('stripe_events', {
   processedAt: text('processed_at').notNull().default("(datetime('now'))"),
 })
 
+// ─── Policy Pages ────────────────────────────────────────────────────────────
+
+export const pages = sqliteTable('pages', {
+  slug: text('slug').primaryKey(),   // shipping | returns | privacy | terms
+  title: text('title').notNull(),
+  content: text('content').notNull().default(''),
+  updatedAt: text('updated_at').notNull().default("(datetime('now'))"),
+})
+
 // ─── Push Subscriptions ──────────────────────────────────────────────────────
 
 export const pushSubscriptions = sqliteTable('push_subscriptions', {
@@ -174,3 +183,4 @@ export type OrderItem = typeof orderItems.$inferSelect
 export type Coupon = typeof coupons.$inferSelect
 export type Review = typeof reviews.$inferSelect
 export type StoreConfig = typeof storeConfig.$inferSelect
+export type Page = typeof pages.$inferSelect
