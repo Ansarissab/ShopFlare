@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { CODForm } from '@/components/store/checkout/CODForm'
-import { en } from '@/lib/i18n/en'
+import { TurnstileWidget } from '@/components/store/checkout/TurnstileWidget'
+import { en, requiredMsg } from '@/lib/i18n/en'
 import { useCart } from '@/hooks/useCart'
 import { toast } from 'sonner'
 import { apiPost } from '@/lib/api'
@@ -14,8 +15,16 @@ export function CheckoutMethodSelector() {
   const router = useRouter()
   const items = useCart((s) => s.items)
   const [stripeLoading, setStripeLoading] = useState(false)
+  // Stripe checkout-session is Turnstile-gated server-side (it reserves stock),
+  // so the card tab carries its own token just like the COD form.
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
+  const [turnstileError, setTurnstileError] = useState(false)
 
   async function handleStripeCheckout() {
+    if (!turnstileToken) {
+      toast.error(requiredMsg('Security check'))
+      return
+    }
     setStripeLoading(true)
     try {
       const stripeItems = items
@@ -27,7 +36,11 @@ export function CheckoutMethodSelector() {
         return
       }
 
-      const { url } = await apiPost<{ url: string }>('/api/stripe/checkout-session', { items: stripeItems })
+      const { url } = await apiPost<{ url: string }>(
+        '/api/stripe/checkout-session',
+        { items: stripeItems },
+        { headers: { 'X-Turnstile-Token': turnstileToken } },
+      )
       router.push(url)
     } catch {
       toast.error(en.errors.orderFailed)
@@ -50,11 +63,24 @@ export function CheckoutMethodSelector() {
           <p className="text-sm text-muted-foreground">
             {en.checkout.stripeRedirectNote}
           </p>
+          <TurnstileWidget
+            onVerify={(token) => {
+              setTurnstileToken(token)
+              setTurnstileError(false)
+            }}
+            onError={() => {
+              setTurnstileToken(null)
+              setTurnstileError(true)
+            }}
+          />
+          {turnstileError && (
+            <p className="text-xs text-destructive">{en.checkout.securityCheckFailed}</p>
+          )}
           <Button
             size="lg"
             className="w-full"
             onClick={handleStripeCheckout}
-            disabled={stripeLoading}
+            disabled={stripeLoading || !turnstileToken}
           >
             {stripeLoading ? '...' : en.checkout.payWithCard}
           </Button>
