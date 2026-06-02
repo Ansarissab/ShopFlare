@@ -26,14 +26,14 @@ export function ProductJsonLd({ item, rating: ratingProp, storeUrl, storeName }:
     async function load() {
       // Fetch store config + reviews concurrently. Failures are silently swallowed.
       const [configResult, reviewsResult] = await Promise.allSettled([
-        apiGet<{ config: StoreConfig }>('/api/config/store'),
+        apiGet<StoreConfig>('/api/config/store'),
         apiGet<ProductReviewsResponse>(`/api/reviews/product/${item.product.id}`),
       ])
 
       if (cancelled) return
 
       if (configResult.status === 'fulfilled') {
-        setCurrency(configResult.value.config.currency ?? DEFAULT_CURRENCY)
+        setCurrency(configResult.value.currency ?? DEFAULT_CURRENCY)
       }
 
       // Only set rating from API if caller didn't pass one in as prop.
