@@ -18,7 +18,7 @@ function layer2Label(stage: string): string {
     case 'product_view':   return en.admin.analyticsFunnelViews
     case 'add_to_cart':    return en.admin.analyticsFunnelAddToCart
     case 'checkout_start': return en.admin.analyticsFunnelCheckoutStart
-    case 'purchased':      return en.admin.analyticsFunnelPurchased
+    case 'purchase':       return en.admin.analyticsFunnelPurchased
     default:               return stage
   }
 }

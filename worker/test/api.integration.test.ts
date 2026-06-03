@@ -45,7 +45,7 @@ const stockOf = async (id: string) =>
 const TABLES = [
   'coupon_uses', 'reviews', 'notify_me', 'order_items', 'orders', 'coupons',
   'size_options', 'product_images', 'variants', 'products', 'store_config',
-  'stripe_events', 'push_subscriptions',
+  'stripe_events', 'push_subscriptions', 'analytics_daily', 'carts',
 ]
 beforeEach(async () => {
   for (const t of TABLES) await env.DB.prepare(`DELETE FROM ${t}`).run()

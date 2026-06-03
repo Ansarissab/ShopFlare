@@ -3,7 +3,7 @@ import { sql } from 'drizzle-orm'
 import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import type { AdminEnv } from 'worker/lib/access'
-import { sinceDate, periodFilter, ABANDONMENT_HOURS } from 'worker/lib/analytics'
+import { sinceDate, periodFilter, ABANDONMENT_HOURS, EVENT_SAMPLE_RATE } from 'worker/lib/analytics'
 const FUNNEL_METRICS = ['product_view', 'add_to_cart', 'checkout_start', 'purchase'] as const
 
 const app = new Hono<AdminEnv>()
@@ -105,7 +105,7 @@ app.get('/', async (c) => {
     abandonedCheckouts,
     layer2Enabled,
     layer2Stages,
-    sampleRate: 0.2,
+    sampleRate: EVENT_SAMPLE_RATE,
   })
 })
 

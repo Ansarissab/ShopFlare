@@ -100,7 +100,7 @@ app.get('/', async (c) => {
             ${since ? sql`AND o.created_at >= ${since}` : sql``}
         )`
     )
-    .where(sql`${schema.products.active} = 1`)
+    .where(eq(schema.products.active, true))
     .groupBy(schema.products.id)
     .orderBy(sql`COALESCE(SUM(${schema.orderItems.quantity}), 0) ASC`)
     .limit(SLOW_MOVERS_LIMIT)
