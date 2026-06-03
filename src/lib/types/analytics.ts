@@ -83,6 +83,7 @@ export interface AnalyticsProductsResponse {
 
 export interface AnalyticsProductDetail {
   productId: string
+  period: string
   unitsSold: number
   orders: number
   revenueCents: number
