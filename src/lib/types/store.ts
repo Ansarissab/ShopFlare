@@ -412,6 +412,50 @@ export interface ReviewsSectionProps {
   className?: string
 }
 
+// ─── Analytics types ──────────────────────────────────────────────────────────
+
+export interface AnalyticsSummary {
+  totalOrders: number
+  totalRevenueCents: number
+  cancelledOrders: number
+  deliveredOrders: number
+  totalDiscountCents: number
+}
+
+export interface AnalyticsRevenueDay {
+  day: string
+  revenueCents: number
+  orderCount: number
+}
+
+export interface AnalyticsPaymentMethod {
+  method: string
+  count: number
+  revenueCents: number
+}
+
+export interface AnalyticsTopProduct {
+  productId: string
+  productName: string
+  unitsSold: number
+  revenueCents: number
+}
+
+export interface AnalyticsCoupon {
+  couponCode: string | null
+  uses: number
+  totalDiscountCents: number
+}
+
+export interface AnalyticsResponse {
+  period: string
+  summary: AnalyticsSummary
+  revenueByDay: AnalyticsRevenueDay[]
+  paymentMethods: AnalyticsPaymentMethod[]
+  topProducts: AnalyticsTopProduct[]
+  couponStats: AnalyticsCoupon[]
+}
+
 export interface ReviewFormProps {
   productId: string
   productName: string
