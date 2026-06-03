@@ -64,3 +64,33 @@ export const RFM_FREQUENCY_MED     = 2
 
 export const FUNNEL_METRICS = ['product_view', 'add_to_cart', 'checkout_start', 'purchase'] as const
 export type FunnelMetric = (typeof FUNNEL_METRICS)[number]
+
+// ─── Appearance / Theme ───────────────────────────────────────────────────────
+
+export const RADIUS_PRESETS = {
+  none: '0rem',
+  sm:   '0.25rem',
+  md:   '0.5rem',
+  lg:   '0.75rem',
+  full: '1.5rem',
+} as const
+export type RadiusPreset = keyof typeof RADIUS_PRESETS
+
+// key maps to the CSS variable emitted by next/font in the root layout
+export const FONT_PRESETS = {
+  sans:    'var(--font-geist-sans)',
+  serif:   'var(--font-merriweather)',
+  mono:    'var(--font-geist-mono)',
+  rounded: 'var(--font-nunito)',
+} as const
+export type FontPreset = keyof typeof FONT_PRESETS
+
+export const COLOR_MODES = ['light', 'dark', 'system'] as const
+export type ColorMode = (typeof COLOR_MODES)[number]
+
+export const THEME_PRESETS = [
+  { name: 'Midnight', primaryColor: '#18181b', accentColor: '#6366f1' },
+  { name: 'Emerald',  primaryColor: '#065f46', accentColor: '#10b981' },
+  { name: 'Sunset',   primaryColor: '#9a3412', accentColor: '#f97316' },
+  { name: 'Ocean',    primaryColor: '#0c4a6e', accentColor: '#0ea5e9' },
+] as const
