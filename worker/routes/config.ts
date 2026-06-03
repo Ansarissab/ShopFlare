@@ -59,6 +59,17 @@ app.get('/store', async (c) => {
     bankAccountNumber: kv['bankAccountNumber'] || undefined,
     bankIban:          kv['bankIban']          || undefined,
     bankInstructions:  kv['bankInstructions']  || undefined,
+    primaryColor:   kv['primaryColor']   || '#18181b',
+    primaryColorFg: kv['primaryColorFg'] || undefined,
+    accentColor:    kv['accentColor']    || '#6366f1',
+    accentColorFg:  kv['accentColorFg']  || undefined,
+    radius:         (kv['radius']        as StoreConfigData['radius'])     || 'md',
+    fontFamily:     (kv['fontFamily']    as StoreConfigData['fontFamily']) || 'sans',
+    colorMode:      (kv['colorMode']     as StoreConfigData['colorMode'])  || 'light',
+    logoUrl:        kv['logoUrl']        || undefined,
+    logoR2Key:      kv['logoR2Key']      || undefined,
+    faviconUrl:     kv['faviconUrl']     || undefined,
+    faviconR2Key:   kv['faviconR2Key']   || undefined,
   }
 
   const validation = storeConfigSchema.safeParse(assembled)
@@ -67,7 +78,7 @@ app.get('/store', async (c) => {
   }
 
   return c.json(assembled, 200, {
-    'Cache-Control': 'no-cache',
+    'Cache-Control': 'no-cache, stale-while-revalidate=60',
     'ETag': etag,
   })
 })
