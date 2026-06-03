@@ -91,6 +91,8 @@ export const en = {
     keepOrder: 'Keep Order',
     cancelling: 'Cancelling…',
     cancelReasonPlaceholder: "Optional — tell us why you're cancelling",
+    verifyContactPrompt: 'Enter the email or phone number used when placing this order.',
+    contactPlaceholder: 'you@example.com or +1 555…',
   },
   product: {
     features: 'Features',
