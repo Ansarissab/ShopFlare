@@ -15,5 +15,5 @@
 # would silently start on 5000 instead of 3000. Setting PORT=3000 inline on the
 # web line overrides foreman's injected value (and beats any flag-vs-env quirk).
 
-web: PORT=3000 pnpm exec next dev
+web: PORT=5000 pnpm exec next dev
 worker: pnpm exec wrangler dev worker/index.ts --port 8787
