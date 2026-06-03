@@ -31,3 +31,5 @@ export const contactSchema = z.object({
 })
 
 export type OrderItem = z.infer<typeof orderItemSchema>
+
+export const hexColorField = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a 6-digit hex color (#rrggbb)')
