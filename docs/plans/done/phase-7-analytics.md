@@ -1,5 +1,7 @@
 # Plan 7 — Advanced Product & Customer Analytics
 
+> **Status: DONE** — Implemented + audited. Commits: `94a8b88` (implementation), `227ecff` (audit fixes).
+
 **Maps to:** AGENTS.md Phase 5 (after Phase 4 / current `feat(admin/analytics)` dashboard).
 **Implementer:** Sonnet. **Constraint:** **$0 infra** — D1 / KV / R2 free tiers only. No Analytics Engine paid usage, no new third-party service.
 
