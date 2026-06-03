@@ -47,7 +47,7 @@ export interface TrackingOrder {
   orderNumber: string
   status: OrderStatus
   paymentMethod: string
-  customerName: string
+  customerName?: string
   subtotalCents: number
   shippingCents: number
   totalCents: number
@@ -62,7 +62,7 @@ export interface TrackingData {
   items: TrackingItem[]
 }
 
-export type CancelOrder = Pick<Order, 'orderNumber' | 'status' | 'customerName' | 'totalCents'>
+export type CancelOrder = Omit<Pick<Order, 'orderNumber' | 'status' | 'customerName' | 'totalCents'>, 'customerName'> & { customerName?: string }
 
 // ─── Shared UI / utility types ────────────────────────────────────────────────
 
