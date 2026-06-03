@@ -91,6 +91,7 @@
   }
 
   body {
+    font-family: var(--store-font, var(--font-geist-sans));
     background-color: var(--bg);
     color: var(--fg);
     font-synthesis: none;
