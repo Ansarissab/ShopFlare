@@ -38,13 +38,9 @@ app.get('/track/:orderNumber', async (c) => {
 
   if (!order) return c.json({ error: 'Order not found' }, 404)
 
-  // Best-effort contact verification.
-  // If `contact` is provided we verify it matches customerEmail (case-insensitive)
-  // or customerPhone (digits-only suffix match). If absent we allow — back-compat
-  // with post-checkout redirect links that don't carry a contact param.
-  // Note: this is best-effort; orderNumbers are random nanoids so guessing is
-  // infeasible. Full hard-gating would require always carrying the contact.
   const contact = c.req.query('contact')
+  let contactVerified = false
+
   if (contact) {
     const contactLower = contact.trim().toLowerCase()
     const emailMatch =
@@ -60,6 +56,7 @@ app.get('/track/:orderNumber', async (c) => {
     if (!emailMatch && !phoneMatch) {
       return c.json({ error: 'Contact does not match this order' }, 403)
     }
+    contactVerified = true
   }
 
   const items = await db
@@ -81,7 +78,8 @@ app.get('/track/:orderNumber', async (c) => {
       orderNumber: order.orderNumber,
       status: order.status,
       paymentMethod: order.paymentMethod,
-      customerName: order.customerName,
+      // Only expose PII when the caller proved they own the order.
+      ...(contactVerified ? { customerName: order.customerName } : {}),
       subtotalCents: order.subtotalCents,
       shippingCents: order.shippingCents,
       totalCents: order.totalCents,
@@ -98,6 +96,10 @@ app.get('/track/:orderNumber', async (c) => {
 // Used by the frontend success page to build the track link after Stripe checkout.
 
 app.get('/by-session/:sessionId', async (c) => {
+  if (!(await rateLimit(c.env, 'by-session', c.req.header('CF-Connecting-IP'), { limit: 30, windowSeconds: 60 }))) {
+    return c.json({ error: 'Too many requests' }, 429)
+  }
+
   const { sessionId } = c.req.param()
   const db = createDb(c.env.DB)
 
@@ -188,9 +190,15 @@ app.post('/:orderNumber/cancel', async (c) => {
 
   const { orderNumber } = c.req.param()
 
-  const [body] = await parseBody(c)
+  const [body, errResp] = await parseBody(c)
+  if (errResp) return errResp
+
   const parsed = cancelOrderSchema.safeParse(body ?? {})
-  const reason = parsed.success ? (parsed.data.reason ?? null) : null
+  if (!parsed.success) {
+    return c.json({ error: 'Validation failed', issues: parsed.error.issues }, 400)
+  }
+
+  const { contact, reason } = parsed.data
 
   const db = createDb(c.env.DB)
 
@@ -201,6 +209,22 @@ app.post('/:orderNumber/cancel', async (c) => {
     .get()
 
   if (!order) return c.json({ error: 'Order not found' }, 404)
+
+  // Verify the caller owns the order before allowing cancellation.
+  const contactLower = contact.trim().toLowerCase()
+  const digitsOnly = (s: string) => s.replace(/\D/g, '')
+  const emailMatch =
+    order.customerEmail !== null &&
+    order.customerEmail.toLowerCase() === contactLower
+  const contactDigits = digitsOnly(contact)
+  const phoneMatch =
+    contactDigits.length > 0 &&
+    order.customerPhone !== null &&
+    digitsOnly(order.customerPhone).endsWith(contactDigits)
+
+  if (!emailMatch && !phoneMatch) {
+    return c.json({ error: 'Contact does not match this order' }, 403)
+  }
 
   if (order.status !== 'pending' && order.status !== 'confirmed') {
     return c.json({ error: 'Order cannot be cancelled', status: order.status }, 422)
