@@ -19,6 +19,8 @@ function SuccessContent() {
   const method = searchParams.get('method')
   const orderId = searchParams.get('orderId')
   const sessionId = searchParams.get('session_id')
+  // Ownership token — phone for COD/bank orders, absent for Stripe.
+  const contactParam = searchParams.get('c')
 
   // For Stripe sessions, resolve the orderNumber via the worker API.
   const [resolvedOrderNumber, setResolvedOrderNumber] = useState<string | null>(null)
@@ -83,7 +85,10 @@ function SuccessContent() {
         {resolving ? (
           <Skeleton className="h-11 w-full rounded-md sm:w-36" />
         ) : trackOrderNumber ? (
-          <Link href={`/track/${trackOrderNumber}`} className={cn(buttonVariants({ size: 'lg' }))}>
+          <Link
+            href={`/track/${trackOrderNumber}${contactParam ? `?c=${encodeURIComponent(contactParam)}` : ''}`}
+            className={cn(buttonVariants({ size: 'lg' }))}
+          >
             {en.tracking.track}
           </Link>
         ) : null}

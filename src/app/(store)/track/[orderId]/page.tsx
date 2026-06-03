@@ -164,7 +164,7 @@ function OrderTrackingContent() {
       {/* Cancel button */}
       {canCancel && (
         <Link
-          href={`/track/${params.orderId}/cancel`}
+          href={`/track/${params.orderId}/cancel${contact ? `?c=${encodeURIComponent(contact)}` : ''}`}
           className={buttonVariants({ variant: 'outline' }) + ' w-full border-destructive text-destructive hover:bg-destructive/10 justify-center'}
         >
           {en.checkout.cancelOrder}

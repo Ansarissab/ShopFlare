@@ -59,7 +59,10 @@ export function ManualOrderForm({ endpoint, successMethod, submitLabel }: Manual
       // clearCart is called by the success page via useEffect — calling it here first
       // empties the cart and triggers CheckoutPage's empty-cart redirect to /, which
       // races with router.push and can land the user on the homepage.
-      router.push(`/checkout/success?method=${successMethod}&orderId=${orderNumber}`)
+      // Pass phone (or email) as ?c so the track → cancel flow can verify ownership.
+      const contactHint = shippingAddress.phone ?? shippingAddress.email
+      const cParam = contactHint ? `&c=${encodeURIComponent(contactHint)}` : ''
+      router.push(`/checkout/success?method=${successMethod}&orderId=${orderNumber}${cParam}`)
     } catch {
       toast.error(en.errors.orderFailed)
     }

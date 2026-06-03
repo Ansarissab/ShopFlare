@@ -2,11 +2,13 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
+import { Suspense } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
+import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { en } from '@/lib/i18n/en'
 import { formatPrice } from '@/lib/utils/index'
@@ -16,27 +18,37 @@ import type { CancelOrder } from '@/lib/types/store'
 import { apiPost } from '@/lib/api'
 import { useApiResource } from '@/hooks/useApiResource'
 
-type PageState = 'loading' | 'ready' | 'not_found' | 'cannot_cancel' | 'success' | 'error'
+type PageState = 'loading' | 'verify_contact' | 'ready' | 'not_found' | 'cannot_cancel' | 'success' | 'error'
 
-export default function CancelOrderPage() {
+function CancelOrderContent() {
   const params = useParams<{ orderId: string }>()
+  const searchParams = useSearchParams()
 
-  // GET: load order via hook. The hook covers loading/notFound; we derive
-  // cannot_cancel from data.order.status once data arrives.
-  const { data: raw, loading: fetching, notFound: fetchNotFound } = useApiResource<{ order: CancelOrder }>(
-    params?.orderId ? `/api/orders/track/${params.orderId}` : null,
-  )
+  // ?c carries the phone/email forwarded from the track page.
+  const [contact, setContact] = useState(searchParams.get('c') ?? '')
+  const [contactInput, setContactInput] = useState('')
+
+  // Only fetch once we have a contact — avoids a no-contact fetch that returns
+  // an order without PII, then a second fetch after the user enters contact.
+  const [fetchContact, setFetchContact] = useState(searchParams.get('c') ?? '')
+
+  const apiPath = params?.orderId && fetchContact
+    ? `/api/orders/track/${params.orderId}?contact=${encodeURIComponent(fetchContact)}`
+    : null
+
+  const { data: raw, loading: fetching, notFound: fetchNotFound, error: fetchError } = useApiResource<{ order: CancelOrder }>(apiPath)
 
   const [order, setOrder] = useState<CancelOrder | null>(null)
-  const [pageState, setPageState] = useState<PageState>('loading')
+  const [pageState, setPageState] = useState<PageState>(!contact ? 'verify_contact' : 'loading')
   const [reason, setReason] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [confirmed, setConfirmed] = useState(false)
 
   // Translate hook state → pageState machine.
   useEffect(() => {
+    if (pageState === 'verify_contact') return
     if (fetching) { setPageState('loading'); return }
-    if (fetchNotFound) { setPageState('not_found'); return }
+    if (fetchNotFound || fetchError) { setPageState('not_found'); return }
     if (!raw) return
     const o = raw.order
     setOrder(o)
@@ -45,19 +57,53 @@ export default function CancelOrderPage() {
     } else {
       setPageState('ready')
     }
-  }, [fetching, fetchNotFound, raw])
+  }, [fetching, fetchNotFound, fetchError, raw, pageState])
+
+  function submitContact() {
+    const val = contactInput.trim()
+    if (!val) return
+    setContact(val)
+    setFetchContact(val)
+    setPageState('loading')
+  }
 
   async function handleCancel() {
     if (!params?.orderId) return
     setSubmitting(true)
     try {
-      await apiPost(`/api/orders/${params.orderId}/cancel`, { reason: reason.trim() || undefined })
+      await apiPost(`/api/orders/${params.orderId}/cancel`, {
+        contact,
+        reason: reason.trim() || undefined,
+      })
       setPageState('success')
     } catch {
       setPageState('error')
     } finally {
       setSubmitting(false)
     }
+  }
+
+  // ── Verify contact ──
+  if (pageState === 'verify_contact') {
+    return (
+      <div className={cn(layout.formPage, 'max-w-md')}>
+        <div className="flex flex-col gap-1">
+          <h1 className="text-xl font-semibold">{en.checkout.cancelOrder}</h1>
+          <p className="text-sm text-muted-foreground">{en.tracking.verifyContactPrompt}</p>
+        </div>
+        <Input
+          type="text"
+          autoComplete="email tel"
+          placeholder={en.tracking.contactPlaceholder}
+          value={contactInput}
+          onChange={(e) => setContactInput(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && submitContact()}
+        />
+        <Button onClick={submitContact} disabled={!contactInput.trim()}>
+          {en.tracking.track}
+        </Button>
+      </div>
+    )
   }
 
   // ── Loading ──
@@ -204,5 +250,13 @@ export default function CancelOrderPage() {
         </Link>
       </div>
     </div>
+  )
+}
+
+export default function CancelOrderPage() {
+  return (
+    <Suspense fallback={<Skeleton className="h-64 w-full max-w-md rounded-xl" />}>
+      <CancelOrderContent />
+    </Suspense>
   )
 }
