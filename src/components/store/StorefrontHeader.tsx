@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { ShoppingCart } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -21,7 +22,21 @@ export function StorefrontHeader() {
         <div className={cn(layout.bar, 'h-16 justify-between')}>
           {/* Store name */}
           <Link href="/" className="text-lg font-semibold tracking-tight text-foreground hover:opacity-80 transition-opacity">
-            {config?.storeName ?? 'ShopFlare'}
+            {config?.logoUrl ? (
+              <span className="relative block h-8 w-32">
+                <Image
+                  src={config.logoUrl}
+                  alt={config.storeName ?? 'Store logo'}
+                  fill
+                  priority
+                  sizes="128px"
+                  className="object-contain object-left"
+                  unoptimized
+                />
+              </span>
+            ) : (
+              config?.storeName ?? 'ShopFlare'
+            )}
           </Link>
 
           {/* Cart button */}
