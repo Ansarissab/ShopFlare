@@ -10,7 +10,7 @@ import { CouponsTable } from '@/components/admin/coupons/CouponsTable'
 import { CouponForm } from '@/components/admin/coupons/CouponForm'
 import { en } from '@/lib/i18n/en'
 import { useApiResource } from '@/hooks/useApiResource'
-import type { CouponsResponse, AdminCoupon } from '@/lib/types/store'
+import type { CouponsResponse, AdminCoupon } from '@/lib/types/admin'
 
 export default function AdminCouponsPage() {
   const [formKey, setFormKey] = useState(0)

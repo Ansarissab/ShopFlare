@@ -3,7 +3,7 @@
 import { Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { en } from '@/lib/i18n/en'
-import type { ReviewStarsProps } from '@/lib/types/store'
+import type { ReviewStarsProps } from '@/lib/types/product'
 
 /**
  * ReviewStars — star rating display (read-only) or interactive input.

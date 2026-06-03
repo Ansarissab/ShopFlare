@@ -8,7 +8,7 @@ import { ReviewsSection } from '@/components/store/product/ReviewsSection'
 import { ProductJsonLd } from '@/components/store/product/ProductJsonLd'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
-import type { ProductWithVariants } from '@/lib/types/store'
+import type { ProductWithVariants } from '@/lib/types/product'
 import { en } from '@/lib/i18n/en'
 import { useApiResource } from '@/hooks/useApiResource'
 

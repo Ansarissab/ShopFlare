@@ -12,7 +12,7 @@ import { en } from '@/lib/i18n/en'
 import { apiGet, apiPut } from '@/lib/api'
 import { formatDate } from '@/lib/utils/index'
 import { POLICY_SLUGS } from '@/lib/constants'
-import type { AdminPagesResponse, StorePage } from '@/lib/types/store'
+import type { AdminPagesResponse, StorePage } from '@/lib/types/admin'
 
 const POLICY_LABELS: Record<string, string> = {
   shipping: en.policies.shipping,

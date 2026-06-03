@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator'
 import { FormField } from '@/components/common/FormField'
 import { en } from '@/lib/i18n/en'
 import { apiPost, apiPut } from '@/lib/api'
-import type { CouponFormProps, AdminCoupon } from '@/lib/types/store'
+import type { CouponFormProps, AdminCoupon } from '@/lib/types/admin'
 
 // Convert a stored UTC ISO timestamp to the `datetime-local` input value
 // (local wall-clock), so what the merchant sees matches what they saved.

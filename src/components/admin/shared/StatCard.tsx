@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import type { AdminStatCardProps } from '@/lib/types/store'
+import type { AdminStatCardProps } from '@/lib/types/admin'
 
 export function StatCard({ label, value, sub, href }: AdminStatCardProps) {
   const content = (

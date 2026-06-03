@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { notifyMeSchema, type NotifyMeInput } from '@/lib/schemas'
 import { en } from '@/lib/i18n/en'
-import type { NotifyMeDialogProps } from '@/lib/types/store'
+import type { NotifyMeDialogProps } from '@/lib/types/product'
 import { apiPost } from '@/lib/api'
 
 export function NotifyMeDialog({

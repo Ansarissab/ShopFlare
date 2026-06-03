@@ -13,7 +13,7 @@ import { en, requiredMsg } from '@/lib/i18n/en'
 import { codOrderSchema, type CodOrder } from '@/lib/schemas'
 import { useCart } from '@/hooks/useCart'
 import { apiPost } from '@/lib/api'
-import type { ManualOrderFormProps } from '@/lib/types/store'
+import type { ManualOrderFormProps } from '@/lib/types/checkout'
 
 type FormValues = CodOrder['shippingAddress']
 

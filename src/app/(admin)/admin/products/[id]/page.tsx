@@ -7,7 +7,7 @@ import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { ProductForm } from '@/components/admin/products/ProductForm'
 import { en } from '@/lib/i18n/en'
 import { useApiResource } from '@/hooks/useApiResource'
-import type { ProductWithVariants } from '@/lib/types/store'
+import type { ProductWithVariants } from '@/lib/types/product'
 
 export default function EditProductPage() {
   const params = useParams<{ id: string }>()

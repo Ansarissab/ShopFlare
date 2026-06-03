@@ -25,7 +25,7 @@ app.get('/', async (c) => {
         maxUpdatedAt: sql<string>`MAX(updated_at)`,
       })
       .from(schema.products)
-      .where(eq(schema.products.active, 1))
+      .where(eq(schema.products.active, true))
       .get(),
     getDataVersion(db),
   ])

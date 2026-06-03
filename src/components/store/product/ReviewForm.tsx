@@ -13,7 +13,7 @@ import { ReviewStars } from '@/components/store/product/ReviewStars'
 import { submitReviewSchema, type SubmitReviewInput } from '@/lib/schemas'
 import { apiPost, ApiError } from '@/lib/api'
 import { en } from '@/lib/i18n/en'
-import type { ReviewFormProps } from '@/lib/types/store'
+import type { ReviewFormProps } from '@/lib/types/product'
 
 export function ReviewForm({ productId, onSubmitted }: ReviewFormProps) {
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null)

@@ -2,7 +2,7 @@
 
 import { Badge } from '@/components/ui/badge'
 import { en } from '@/lib/i18n/en'
-import type { NotifyRequestRowProps } from '@/lib/types/store'
+import type { NotifyRequestRowProps } from '@/lib/types/admin'
 import { formatDate } from '@/lib/utils/index'
 
 export function NotifyRequestRow({ request }: NotifyRequestRowProps) {

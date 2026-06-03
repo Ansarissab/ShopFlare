@@ -3,7 +3,7 @@
 import { en } from '@/lib/i18n/en'
 import { formatPrice } from '@/lib/utils/index'
 import { useStoreConfig } from '@/hooks/useStoreConfig'
-import type { BankTransferInstructionsProps } from '@/lib/types/store'
+import type { BankTransferInstructionsProps } from '@/lib/types/checkout'
 
 /**
  * Bank-transfer payment instructions for a placed order. Shown on the thank-you

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { en } from '@/lib/i18n/en'
 import { apiDelete } from '@/lib/api'
 import { formatDate } from '@/lib/utils/index'
-import type { CouponRowProps, CouponsTableProps } from '@/lib/types/store'
+import type { CouponRowProps, CouponsTableProps } from '@/lib/types/admin'
 
 // ─── CouponRow ───────────────────────────────────────────────────────────────
 

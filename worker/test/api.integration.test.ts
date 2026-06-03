@@ -176,7 +176,7 @@ describe('cancellation', () => {
     ).json()) as { orderNumber: string }
     expect(await stockOf('s1')).toBe(3)
 
-    const cancel = await post(`/api/orders/${orderNumber}/cancel`, { reason: 'changed mind' })
+    const cancel = await post(`/api/orders/${orderNumber}/cancel`, { contact: ADDRESS.email, reason: 'changed mind' })
     expect(cancel.status).toBe(200)
     expect(await stockOf('s1')).toBe(5) // restored
 

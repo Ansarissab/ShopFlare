@@ -42,3 +42,25 @@ export const MAX_CART_ITEMS = 50
 
 export const POLICY_SLUGS = ['shipping', 'returns', 'privacy', 'terms'] as const
 export type PolicySlug = (typeof POLICY_SLUGS)[number]
+
+// ─── Analytics ────────────────────────────────────────────────────────────────
+
+export const ANALYTICS_PERIODS = ['7d', '30d', '90d', 'all'] as const
+export type AnalyticsPeriod = (typeof ANALYTICS_PERIODS)[number]
+
+export const ANALYTICS_TABS = ['overview', 'products', 'customers', 'funnel'] as const
+export type AnalyticsTab = (typeof ANALYTICS_TABS)[number]
+
+export const ABANDONMENT_HOURS = 24
+export const AFFINITY_PAIR_LIMIT = 20
+export const SLOW_MOVERS_LIMIT = 10
+export const TOP_CUSTOMERS_LIMIT = 20
+export const EVENT_SAMPLE_RATE = 0.2
+
+export const RFM_RECENCY_DAYS_HIGH = 30
+export const RFM_RECENCY_DAYS_MED  = 90
+export const RFM_FREQUENCY_HIGH    = 3
+export const RFM_FREQUENCY_MED     = 2
+
+export const FUNNEL_METRICS = ['product_view', 'add_to_cart', 'checkout_start', 'purchase'] as const
+export type FunnelMetric = (typeof FUNNEL_METRICS)[number]

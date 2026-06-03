@@ -17,7 +17,7 @@ import { apiPost, ApiError } from '@/lib/api'
 import { CartItem } from '@/components/store/cart/CartItem'
 import { FreeShippingBar } from '@/components/store/cart/FreeShippingBar'
 import { CartSummary } from '@/components/store/cart/CartSummary'
-import type { CartSheetProps } from '@/lib/types/store'
+import type { CartSheetProps } from '@/lib/types/cart'
 
 export function CartSheet({ flatRateCents = 0, thresholdCents = 0 }: CartSheetProps) {
   const { items, isOpen, closeCart } = useCart()

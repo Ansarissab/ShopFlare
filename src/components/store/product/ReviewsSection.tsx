@@ -8,7 +8,7 @@ import { ReviewStars } from '@/components/store/product/ReviewStars'
 import { ReviewForm } from '@/components/store/product/ReviewForm'
 import { useApiResource } from '@/hooks/useApiResource'
 import { en } from '@/lib/i18n/en'
-import type { ReviewsSectionProps, ProductReviewsResponse } from '@/lib/types/store'
+import type { ReviewsSectionProps, ProductReviewsResponse } from '@/lib/types/product'
 import { formatDate } from '@/lib/utils/index'
 
 export function ReviewsSection({ productId, productName, className }: ReviewsSectionProps) {

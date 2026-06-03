@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { en } from '@/lib/i18n/en'
 import { ORDER_STATUSES } from '@/lib/constants'
 import { useApiResource } from '@/hooks/useApiResource'
-import type { AdminOrdersResponse } from '@/lib/types/store'
+import type { AdminOrdersResponse } from '@/lib/types/admin'
 
 export default function AdminOrdersPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all')

@@ -9,7 +9,7 @@ import { ReviewStars } from '@/components/store/product/ReviewStars'
 import { apiPatch, apiDelete } from '@/lib/api'
 import { formatDate } from '@/lib/utils/index'
 import { en } from '@/lib/i18n/en'
-import type { AdminReviewRowProps } from '@/lib/types/store'
+import type { AdminReviewRowProps } from '@/lib/types/admin'
 
 export function AdminReviewRow({ review, onChanged }: AdminReviewRowProps) {
   const [busy, setBusy] = useState(false)

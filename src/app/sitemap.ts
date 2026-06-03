@@ -4,7 +4,7 @@
 
 import type { MetadataRoute } from 'next'
 import { WORKER_URL } from '@/lib/api'
-import type { ProductWithVariants } from '@/lib/types/store'
+import type { ProductWithVariants } from '@/lib/types/product'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://your-store.example.com'
 

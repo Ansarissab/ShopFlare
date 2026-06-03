@@ -17,7 +17,8 @@ import { buildWhatsAppOrderUrl } from '@/lib/whatsapp'
 import { apiPost } from '@/lib/api'
 import { useApiResource } from '@/hooks/useApiResource'
 import { useStoreConfig } from '@/hooks/useStoreConfig'
-import type { ProductWithVariants, VariantWithDetails, SizeOption, POSSaleItem } from '@/lib/types/store'
+import type { ProductWithVariants, VariantWithDetails, SizeOption } from '@/lib/types/product'
+import type { POSSaleItem } from '@/lib/types/admin'
 
 interface ProductsResponse {
   products: ProductWithVariants[]
