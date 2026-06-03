@@ -6,6 +6,12 @@ export type StoreConfig = Omit<StoreConfigData, 'currency'> & {
   currency: CurrencyCode
 }
 
+export type ThemeSnapshot = Pick<StoreConfig,
+  'primaryColor' | 'primaryColorFg' | 'accentColor' | 'accentColorFg' |
+  'radius' | 'fontFamily' | 'colorMode'> & {
+  logoUrl?: string
+}
+
 export interface FieldProps {
   label: string
   htmlFor: string
