@@ -2,8 +2,8 @@
 // validation) and the client (useStoreConfig). Composed so Admin forms (Phase 2)
 // can .pick()/.partial() individual slices instead of redefining fields.
 import { z } from 'zod/v4'
-import { CURRENCIES } from '@/lib/constants'
-import { emailField, phoneField } from './base'
+import { CURRENCIES, RADIUS_PRESETS, FONT_PRESETS, COLOR_MODES } from '@/lib/constants'
+import { emailField, phoneField, hexColorField } from './base'
 
 // Derive the currency enum from the single CURRENCIES source (DRY).
 const currencyCodes = Object.keys(CURRENCIES) as [string, ...string[]]
@@ -11,6 +11,21 @@ export const currencyCodeSchema = z.enum(currencyCodes)
 
 // Monetary amounts are always integer cents, never negative.
 const centsField = z.number().int().nonnegative()
+
+export const appearanceSchema = z.object({
+  primaryColor:   hexColorField.optional(),
+  primaryColorFg: hexColorField.optional(),
+  accentColor:    hexColorField.optional(),
+  accentColorFg:  hexColorField.optional(),
+  radius:     z.enum(Object.keys(RADIUS_PRESETS) as [string, ...string[]]).optional(),
+  fontFamily: z.enum(Object.keys(FONT_PRESETS)  as [string, ...string[]]).optional(),
+  colorMode:  z.enum(COLOR_MODES).optional(),
+  logoUrl:    z.string().url().optional(),
+  logoR2Key:  z.string().optional(),
+  faviconUrl:   z.string().url().optional(),
+  faviconR2Key: z.string().optional(),
+})
+export type AppearanceData = z.infer<typeof appearanceSchema>
 
 export const storeConfigSchema = z.object({
   storeName:                  z.string().min(1),
@@ -29,6 +44,6 @@ export const storeConfigSchema = z.object({
   bankAccountNumber:  z.string().optional(),
   bankIban:           z.string().optional(),
   bankInstructions:   z.string().optional(),
-})
+}).merge(appearanceSchema)
 
 export type StoreConfigData = z.infer<typeof storeConfigSchema>
