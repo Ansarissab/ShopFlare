@@ -27,11 +27,11 @@ export interface VerifyResult {
   email?: string
 }
 
-function base64UrlToBytes(input: string): Uint8Array {
+function base64UrlToBytes(input: string): Uint8Array<ArrayBuffer> {
   const b64 = input.replace(/-/g, '+').replace(/_/g, '/')
   const padded = b64 + '='.repeat((4 - (b64.length % 4)) % 4)
   const bin = atob(padded)
-  const bytes = new Uint8Array(bin.length)
+  const bytes = new Uint8Array(new ArrayBuffer(bin.length))
   for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i)
   return bytes
 }
@@ -87,7 +87,7 @@ export async function verifyAccessJwt(
     'RSASSA-PKCS1-v1_5',
     key,
     base64UrlToBytes(signatureB64),
-    new TextEncoder().encode(`${headerB64}.${payloadB64}`),
+    new TextEncoder().encode(`${headerB64}.${payloadB64}`).buffer as ArrayBuffer,
   )
 
   return verified ? { ok: true, email: payload.email } : { ok: false }

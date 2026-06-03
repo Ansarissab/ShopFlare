@@ -1,5 +1,5 @@
 import { CURRENCIES, DEFAULT_CURRENCY, type CurrencyCode } from '@/lib/constants'
-import type { VariantWithDetails, SizeOption, ProductImage } from '@/lib/types/store'
+import type { VariantWithDetails, SizeOption, ProductImage } from '@/lib/types/product'
 
 export function formatPrice(cents: number, currency: CurrencyCode = DEFAULT_CURRENCY): string {
   const { symbol, decimals } = CURRENCIES[currency]

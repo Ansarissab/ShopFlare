@@ -18,7 +18,7 @@ import { formatPrice } from '@/lib/utils/index'
 import { ORDER_STATUSES } from '@/lib/constants'
 import { apiPatch } from '@/lib/api'
 import { useApiResource } from '@/hooks/useApiResource'
-import type { AdminOrderDetail } from '@/lib/types/store'
+import type { AdminOrderDetail } from '@/lib/types/admin'
 
 export default function AdminOrderDetailPage() {
   const params = useParams<{ id: string }>()

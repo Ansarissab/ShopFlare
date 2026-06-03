@@ -161,6 +161,23 @@ export const pages = sqliteTable('pages', {
   updatedAt: text('updated_at').notNull().default(sql`(datetime('now'))`),
 })
 
+// ─── Analytics daily rollups (funnel layer 2, $0 D1 upsert counters) ─────────
+
+export const analyticsDaily = sqliteTable('analytics_daily', {
+  date:   text('date').notNull(),
+  metric: text('metric').notNull(),
+  count:  integer('count').notNull().default(0),
+})
+
+// ─── Carts (funnel layer 2 — snapshot written on checkout_start only) ─────────
+
+export const carts = sqliteTable('carts', {
+  sessionId:  text('session_id').primaryKey(),
+  items:      text('items').notNull(),             // JSON: CartItem[]
+  updatedAt:  text('updated_at').notNull().default(sql`(datetime('now'))`),
+  recovered:  integer('recovered', { mode: 'boolean' }).notNull().default(false),
+})
+
 // ─── Push Subscriptions ──────────────────────────────────────────────────────
 
 export const pushSubscriptions = sqliteTable('push_subscriptions', {
@@ -185,3 +202,5 @@ export type Coupon = typeof coupons.$inferSelect
 export type Review = typeof reviews.$inferSelect
 export type StoreConfig = typeof storeConfig.$inferSelect
 export type Page = typeof pages.$inferSelect
+export type AnalyticsDaily = typeof analyticsDaily.$inferSelect
+export type Cart = typeof carts.$inferSelect

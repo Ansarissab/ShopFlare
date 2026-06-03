@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import type { AdminPageHeaderProps } from '@/lib/types/store'
+import type { AdminPageHeaderProps } from '@/lib/types/admin'
 
 export function AdminPageHeader({ title, actions, backHref }: AdminPageHeaderProps) {
   return (

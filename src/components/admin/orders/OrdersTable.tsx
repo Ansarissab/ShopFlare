@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { formatPrice, formatDate } from '@/lib/utils/index'
 import { en } from '@/lib/i18n/en'
-import type { AdminOrder } from '@/lib/types/store'
+import type { AdminOrder } from '@/lib/types/admin'
 
 const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   pending:    'outline',

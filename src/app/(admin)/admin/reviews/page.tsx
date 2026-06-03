@@ -6,7 +6,7 @@ import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { AdminReviewRow } from '@/components/admin/reviews/AdminReviewRow'
 import { useApiResource } from '@/hooks/useApiResource'
 import { en } from '@/lib/i18n/en'
-import type { AdminReviewsResponse, ReviewTableProps } from '@/lib/types/store'
+import type { AdminReviewsResponse, ReviewTableProps } from '@/lib/types/admin'
 
 // ─── Inner table ──────────────────────────────────────────────────────────────
 

@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils'
 import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { en } from '@/lib/i18n/en'
 import { useApiResource } from '@/hooks/useApiResource'
-import type { ProductWithVariants } from '@/lib/types/store'
+import type { ProductWithVariants } from '@/lib/types/product'
 
 interface ProductsResponse {
   products: ProductWithVariants[]

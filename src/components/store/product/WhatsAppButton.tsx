@@ -4,7 +4,7 @@ import { MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { en } from '@/lib/i18n/en'
 import { buildWhatsAppOrderUrl } from '@/lib/whatsapp'
-import type { WhatsAppButtonProps } from '@/lib/types/store'
+import type { WhatsAppButtonProps } from '@/lib/types/product'
 
 export function WhatsAppButton({
   phoneNumber,

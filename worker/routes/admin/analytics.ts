@@ -1,25 +1,26 @@
 import { Hono } from 'hono'
-import { eq, ne, gte, and, sql } from 'drizzle-orm'
+import { eq, ne, and, sql } from 'drizzle-orm'
 import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import type { AdminEnv } from 'worker/lib/access'
+import { sinceDate, periodFilter, activeOrdersFilter } from 'worker/lib/analytics'
+import products from './analytics/products'
+import customers from './analytics/customers'
+import funnel from './analytics/funnel'
 
 const app = new Hono<AdminEnv>()
 
-function sinceDate(period: string): string | undefined {
-  const days: Record<string, number> = { '7d': 7, '30d': 30, '90d': 90 }
-  const d = days[period]
-  if (!d) return undefined
-  return new Date(Date.now() - d * 86_400_000).toISOString()
-}
+app.route('/products', products)
+app.route('/customers', customers)
+app.route('/funnel', funnel)
 
 app.get('/', async (c) => {
   const period = c.req.query('period') ?? '30d'
   const db = createDb(c.env.DB)
   const since = sinceDate(period)
 
-  const inPeriod = since ? gte(schema.orders.createdAt, since) : sql`1 = 1`
-  const active = and(ne(schema.orders.status, 'cancelled'), inPeriod)
+  const inPeriod  = periodFilter(since)
+  const active    = activeOrdersFilter(since)
 
   // ─── Summary ────────────────────────────────────────────────────────────────
   const [summary] = await db
@@ -60,9 +61,9 @@ app.get('/', async (c) => {
   // ─── Top products ────────────────────────────────────────────────────────────
   const topProducts = await db
     .select({
-      productId:   schema.orderItems.productId,
-      productName: sql<string>`MIN(${schema.products.name})`,
-      unitsSold:   sql<number>`SUM(${schema.orderItems.quantity})`,
+      productId:    schema.orderItems.productId,
+      productName:  sql<string>`MIN(${schema.products.name})`,
+      unitsSold:    sql<number>`SUM(${schema.orderItems.quantity})`,
       revenueCents: sql<number>`SUM(${schema.orderItems.quantity} * ${schema.orderItems.priceCents})`,
     })
     .from(schema.orderItems)
@@ -76,8 +77,8 @@ app.get('/', async (c) => {
   // ─── Coupon stats ────────────────────────────────────────────────────────────
   const couponStats = await db
     .select({
-      couponCode:        schema.orders.couponCode,
-      uses:              sql<number>`COUNT(*)`,
+      couponCode:         schema.orders.couponCode,
+      uses:               sql<number>`COUNT(*)`,
       totalDiscountCents: sql<number>`SUM(${schema.orders.discountCents})`,
     })
     .from(schema.orders)

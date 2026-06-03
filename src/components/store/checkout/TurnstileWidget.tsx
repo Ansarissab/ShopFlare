@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import type { TurnstileWidgetProps } from '@/lib/types/store'
+import type { TurnstileWidgetProps } from '@/lib/types/checkout'
 
 // Cloudflare's always-passing test key — safe to use when no real key is set
 // because the worker already bypasses server-side verification in dev mode

@@ -6,7 +6,8 @@
 // Renders null until data is ready; never throws.
 
 import { useEffect, useState } from 'react'
-import type { ProductJsonLdProps, ProductJsonLdOffer, ProductReviewsResponse, StoreConfig, SizeOption } from '@/lib/types/store'
+import type { ProductJsonLdProps, ProductJsonLdOffer, ProductReviewsResponse, SizeOption } from '@/lib/types/product'
+import type { StoreConfig } from '@/lib/types/common'
 import { apiGet } from '@/lib/api'
 // getPriceRange lives in the utils/ directory module; `@/lib/utils` resolves to
 // the sibling utils.ts (cn only), so the explicit /index path is required.

@@ -11,7 +11,7 @@
 
 import { useEffect, useState } from 'react'
 import { apiGet, ApiError } from '@/lib/api'
-import type { ApiResourceState } from '@/lib/types/store'
+import type { ApiResourceState } from '@/lib/types/common'
 
 export type { ApiResourceState }
 

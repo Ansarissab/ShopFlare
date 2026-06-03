@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 import { formatDate } from '@/lib/utils/index'
 import { en } from '@/lib/i18n/en'
 import { useApiResource } from '@/hooks/useApiResource'
-import type { StorePage } from '@/lib/types/store'
+import type { StorePage } from '@/lib/types/admin'
 
 function PolicySkeleton() {
   return (

@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { en } from '@/lib/i18n/en'
 import { ORDER_STATUSES, type OrderStatus } from '@/lib/constants'
 import { cn } from '@/lib/utils'
-import type { OrderTimelineProps } from '@/lib/types/store'
+import type { OrderTimelineProps } from '@/lib/types/order'
 
 // Timeline steps — exclude 'cancelled' (shown separately)
 const TIMELINE_STEPS = ORDER_STATUSES.filter(

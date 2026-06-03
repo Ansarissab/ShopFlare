@@ -1,6 +1,6 @@
 import { formatPrice } from '@/lib/utils/index'
 import { en } from '@/lib/i18n/en'
-import type { WhatsAppOrderParams } from '@/lib/types/store'
+import type { WhatsAppOrderParams } from '@/lib/types/product'
 
 export function buildWhatsAppOrderUrl(params: WhatsAppOrderParams): string {
   const { phoneNumber, productName, variantLabel, size, sku, priceCents, currency, quantity } = params

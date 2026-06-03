@@ -14,7 +14,7 @@ import { en } from '@/lib/i18n/en'
 import { formatPrice, formatDate } from '@/lib/utils/index'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
-import type { TrackingData } from '@/lib/types/store'
+import type { TrackingData } from '@/lib/types/order'
 import { useApiResource } from '@/hooks/useApiResource'
 
 function TrackingSkeleton() {

@@ -4,7 +4,7 @@ import { Progress } from '@/components/ui/progress'
 import { en } from '@/lib/i18n/en'
 import { formatPrice } from '@/lib/utils/index'
 import { cn } from '@/lib/utils'
-import type { FreeShippingBarProps } from '@/lib/types/store'
+import type { FreeShippingBarProps } from '@/lib/types/cart'
 
 export function FreeShippingBar({ subtotalCents, thresholdCents }: FreeShippingBarProps) {
   if (thresholdCents === 0) return null

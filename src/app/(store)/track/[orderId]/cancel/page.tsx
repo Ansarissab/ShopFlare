@@ -14,7 +14,7 @@ import { en } from '@/lib/i18n/en'
 import { formatPrice } from '@/lib/utils/index'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
-import type { CancelOrder } from '@/lib/types/store'
+import type { CancelOrder } from '@/lib/types/order'
 import { apiPost } from '@/lib/api'
 import { useApiResource } from '@/hooks/useApiResource'
 

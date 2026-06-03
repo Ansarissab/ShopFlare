@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils'
 import { en } from '@/lib/i18n/en'
 import { formatPrice } from '@/lib/utils/index'
 import { useApiResource } from '@/hooks/useApiResource'
-import type { AdminOrdersResponse } from '@/lib/types/store'
+import type { AdminOrdersResponse } from '@/lib/types/admin'
 
 // ─── Chart helpers ────────────────────────────────────────────────────────────
 
@@ -208,7 +208,7 @@ export default function AdminDashboardPage() {
                     tickFormatter={v => (v === 0 ? '0' : `${v}`)}
                   />
                   <Tooltip
-                    formatter={(val: number) => [formatPrice(val * 100), 'Revenue']}
+                    formatter={(val) => [formatPrice(Number(val) * 100), 'Revenue']}
                     contentStyle={{
                       fontSize: 12,
                       border: '1px solid #e4e4e7',
@@ -250,7 +250,7 @@ export default function AdminDashboardPage() {
                       ))}
                     </Pie>
                     <Tooltip
-                      formatter={(val: number, name: string) => [val, name]}
+                      formatter={(val, name) => [val, name]}
                       contentStyle={{
                         fontSize: 12,
                         border: '1px solid #e4e4e7',

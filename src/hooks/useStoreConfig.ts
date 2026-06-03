@@ -3,7 +3,7 @@
 import { useEffect, useCallback, useState } from 'react'
 import { apiGet } from '@/lib/api'
 import { DATA_UPDATED_CHANNEL } from '@/hooks/useApiResource'
-import type { StoreConfig, UseStoreConfigResult } from '@/lib/types/store'
+import type { StoreConfig, UseStoreConfigResult } from '@/lib/types/common'
 
 // Kept for backward compatibility — aliased to the shared DATA_UPDATED_CHANNEL.
 export const CONFIG_BROADCAST_CHANNEL = DATA_UPDATED_CHANNEL
