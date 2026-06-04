@@ -1,0 +1,28 @@
+{
+  "packageId": "com.yourstore.twa",
+  "host": "your-store.pages.dev",
+  "name": "Your Store",
+  "launcherName": "Store",
+  "display": "standalone",
+  "orientation": "portrait",
+  "themeColor": "#18181b",
+  "navigationColor": "#18181b",
+  "backgroundColor": "#09090b",
+  "startUrl": "/?source=twa",
+  "iconUrl": "/icon-512.png",
+  "maskableIconUrl": "/icon-maskable-512.png",
+  "signingKey": {
+    "path": "./release.keystore",
+    "alias": "release"
+  },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [
+    {
+      "name": "Track Order",
+      "shortName": "Track",
+      "url": "/track",
+      "iconUrl": "/icon-192.png"
+    }
+  ]
+}
