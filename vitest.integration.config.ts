@@ -33,6 +33,7 @@ export default defineWorkersConfig(async () => {
             // signature check runs (and rejects a forged signature with 400).
             bindings: {
               ENVIRONMENT: 'development',
+              ADMIN_DEV_BYPASS: '1',
               STRIPE_SECRET_KEY: 'sk_test_dummy',
               STRIPE_WEBHOOK_SECRET: 'whsec_dummy',
               TEST_MIGRATIONS: migrations,
