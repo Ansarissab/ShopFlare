@@ -11,6 +11,7 @@ import { createOrder, assertItemsAvailable, CouponError, StockError } from 'work
 import { parseBody } from 'worker/lib/http'
 import { posOrderSchema } from '@/lib/schemas'
 import type { AdminEnv } from 'worker/lib/access'
+import { notifyOrderStatusChange } from 'worker/lib/notify'
 
 const app = new Hono<AdminEnv>()
 
@@ -117,7 +118,7 @@ app.patch('/:id/status', async (c) => {
   const db = createDb(c.env.DB)
 
   const order = await db
-    .select({ id: schema.orders.id })
+    .select({ id: schema.orders.id, orderNumber: schema.orders.orderNumber })
     .from(schema.orders)
     .where(byIdOrNumber(id))
     .get()
@@ -131,6 +132,11 @@ app.patch('/:id/status', async (c) => {
       updatedAt: new Date().toISOString(),
     })
     .where(eq(schema.orders.id, order.id))
+
+  // Notify customer via push when status reaches shipped/delivered
+  c.executionCtx?.waitUntil(
+    notifyOrderStatusChange(db, c.env, order.orderNumber, status),
+  )
 
   return c.json({ ok: true, status })
 })

@@ -189,6 +189,21 @@ export const pushSubscriptions = sqliteTable('push_subscriptions', {
   createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),
 })
 
+// ─── Customer Push Subscriptions ─────────────────────────────────────────────
+
+export const customerPushSubscriptions = sqliteTable('customer_push_subscriptions', {
+  id: text('id').primaryKey(),
+  endpoint: text('endpoint').notNull().unique(),
+  auth: text('auth').notNull(),
+  p256dh: text('p256dh').notNull(),
+  orderNumber: text('order_number'),
+  customerEmail: text('customer_email'),
+  customerPhone: text('customer_phone'),
+  kind: text('kind', { enum: ['order', 'restock'] }).notNull().default('order'),
+  sizeOptionId: text('size_option_id'),
+  createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),
+})
+
 // ─── Type exports ────────────────────────────────────────────────────────────
 
 export type Product = typeof products.$inferSelect
@@ -205,3 +220,5 @@ export type StoreConfig = typeof storeConfig.$inferSelect
 export type Page = typeof pages.$inferSelect
 export type AnalyticsDaily = typeof analyticsDaily.$inferSelect
 export type Cart = typeof carts.$inferSelect
+export type CustomerPushSubscription = typeof customerPushSubscriptions.$inferSelect
+export type NewCustomerPushSubscription = typeof customerPushSubscriptions.$inferInsert

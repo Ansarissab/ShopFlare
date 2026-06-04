@@ -13,7 +13,7 @@ import { eq, and, isNotNull, inArray } from 'drizzle-orm'
 import type { Database } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import { sendRestockEmail, sendOrderEmails } from './email'
-import { sendPushToAll } from './push'
+import { sendPushToAll, sendPushToCustomers, sendPushToRestockSubscribers } from './push'
 import type { Bindings } from 'worker/types'
 import { en } from '@/lib/i18n/en'
 
@@ -131,9 +131,44 @@ export async function dispatchRestockAlerts(
         .where(inArray(schema.notifyMe.id, notifiedIds))
     }
 
+    // ── 5. Push to restock push subscribers (fire-and-forget, NEVER throws) ──
+    await sendPushToRestockSubscribers(db, env, sizeOptionId, {
+      title: en.pwa.restockPushTitle.replace('{productName}', product.name),
+      body: en.pwa.restockPushBody.replace('{size}', sizeOption.size),
+      url: productUrl,
+    })
+
     return notifiedIds.length
   } catch (err) {
     console.error('dispatchRestockAlerts: unexpected error', err)
     return 0
+  }
+}
+
+/**
+ * Fires customer push when admin updates order status to 'shipped' or 'delivered'.
+ * Called from PATCH /:id/status in admin orders route.
+ * NEVER throws.
+ */
+export async function notifyOrderStatusChange(
+  db: Database,
+  env: Bindings,
+  orderNumber: string,
+  newStatus: string,
+): Promise<void> {
+  try {
+    if (newStatus !== 'shipped' && newStatus !== 'delivered') return
+
+    const frontendUrl = env.FRONTEND_URL ? env.FRONTEND_URL.replace(/\/$/, '') : ''
+    const trackUrl = `${frontendUrl}/track/${orderNumber}`
+
+    const title = en.pwa.orderPushTitle
+    const body = newStatus === 'shipped'
+      ? en.pwa.orderStatusShipped.replace('{orderNumber}', orderNumber)
+      : en.pwa.orderStatusDelivered.replace('{orderNumber}', orderNumber)
+
+    await sendPushToCustomers(db, env, orderNumber, { title, body, url: trackUrl })
+  } catch (err) {
+    console.warn('[notify] notifyOrderStatusChange error', err)
   }
 }
