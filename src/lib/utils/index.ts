@@ -12,6 +12,43 @@ export function calculateShipping(subtotalCents: number, flatRateCents: number, 
   return flatRateCents
 }
 
+export interface TaxCalculationInput {
+  subtotalCents: number
+  shippingCents: number
+  discountCents: number
+  taxRate:       number
+  taxInclusive:  boolean
+  taxBasis:      string
+}
+
+export function calculateTax(input: TaxCalculationInput): number {
+  const { subtotalCents, shippingCents, discountCents, taxRate, taxInclusive, taxBasis } = input
+  if (taxRate <= 0) return 0
+
+  if (taxInclusive) {
+    const base = Math.max(0, subtotalCents - discountCents)
+    return Math.round(base - base / (1 + taxRate / 100))
+  }
+
+  const taxableBase =
+    taxBasis === 'subtotal_and_shipping'
+      ? Math.max(0, subtotalCents - discountCents) + shippingCents
+      : Math.max(0, subtotalCents - discountCents)
+
+  return Math.round(taxableBase * taxRate / 100)
+}
+
+export function calculateGrandTotal(
+  subtotalCents: number,
+  shippingCents: number,
+  discountCents: number,
+  taxCents:      number,
+  taxInclusive:  boolean,
+): number {
+  if (taxInclusive) return Math.max(0, subtotalCents + shippingCents - discountCents)
+  return Math.max(0, subtotalCents + shippingCents - discountCents + taxCents)
+}
+
 /** Builds per-variant lookup maps for images and sizes. */
 export function buildProductMaps(variants: VariantWithDetails[]): {
   sizesByVariant: Record<string, SizeOption[]>
