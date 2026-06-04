@@ -94,3 +94,11 @@ export const THEME_PRESETS = [
   { name: 'Sunset',   primaryColor: '#9a3412', accentColor: '#f97316' },
   { name: 'Ocean',    primaryColor: '#0c4a6e', accentColor: '#0ea5e9' },
 ] as const
+
+// ─── Tax ─────────────────────────────────────────────────────────────────────
+
+export const TAX_BASIS = {
+  subtotal:             'subtotal',
+  subtotalAndShipping:  'subtotal_and_shipping',
+} as const
+export type TaxBasis = keyof typeof TAX_BASIS
