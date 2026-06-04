@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono, Merriweather, Nunito } from 'next/font/google'
 import '@/app/globals.css'
+import { ServiceWorkerProvider } from '@/components/pwa/ServiceWorkerProvider'
 
 const geistSans    = Geist({ variable: '--font-geist-sans', subsets: ['latin'], display: 'swap' })
 const geistMono    = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'], display: 'swap' })
@@ -75,9 +76,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {workerOrigin && <link rel="dns-prefetch" href={workerOrigin} />}
         <link rel="preconnect" href="https://js.stripe.com" />
         <link rel="preconnect" href="https://challenges.cloudflare.com" />
+        {/* PWA viewport and Apple Web App meta */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#18181b" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
       {/* suppressHydrationWarning: browser extensions inject attrs before React hydrates */}
-      <body className="min-h-full flex flex-col" suppressHydrationWarning>{children}</body>
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+        <ServiceWorkerProvider>
+          {children}
+        </ServiceWorkerProvider>
+      </body>
     </html>
   )
 }

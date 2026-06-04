@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense } from 'react'
+import { Suspense, useEffect } from 'react'
 import Link from 'next/link'
 import { useParams, useSearchParams } from 'next/navigation'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -16,6 +16,7 @@ import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
 import type { TrackingData } from '@/lib/types/order'
 import { useApiResource } from '@/hooks/useApiResource'
+import { OrderPushOptIn } from '@/components/pwa/OrderPushOptIn'
 
 function TrackingSkeleton() {
   return (
@@ -48,6 +49,13 @@ function TrackingSkeleton() {
 function OrderTrackingContent() {
   const params = useParams<{ orderId: string }>()
   const searchParams = useSearchParams()
+
+  // Clear app badge when user views their order
+  useEffect(() => {
+    if ('clearAppBadge' in navigator) {
+      (navigator as Navigator & { clearAppBadge(): Promise<void> }).clearAppBadge().catch(() => {})
+    }
+  }, [])
   const contact = searchParams.get('c') ?? ''
 
   const apiPath = params?.orderId
@@ -107,6 +115,9 @@ function OrderTrackingContent() {
       </div>
 
       <Separator />
+
+      {/* Push notification opt-in */}
+      <OrderPushOptIn orderNumber={order.orderNumber} />
 
       {/* Timeline */}
       <div className="rounded-lg border bg-card p-5 text-card-foreground">

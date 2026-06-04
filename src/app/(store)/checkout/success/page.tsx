@@ -11,6 +11,7 @@ import { en } from '@/lib/i18n/en'
 import { useCart } from '@/hooks/useCart'
 import { apiGet } from '@/lib/api'
 import { BankTransferInstructions } from '@/components/store/checkout/BankTransferInstructions'
+import { OrderPushOptIn } from '@/components/pwa/OrderPushOptIn'
 
 function SuccessContent() {
   const searchParams = useSearchParams()
@@ -79,6 +80,10 @@ function SuccessContent() {
 
       {method === 'bank_transfer' && trackOrderNumber && bankTotalCents !== null && (
         <BankTransferInstructions orderNumber={trackOrderNumber} totalCents={bankTotalCents} />
+      )}
+
+      {trackOrderNumber && (
+        <OrderPushOptIn orderNumber={trackOrderNumber} />
       )}
 
       <div className="mt-2 flex w-full flex-col gap-3 sm:flex-row sm:justify-center">

@@ -1,5 +1,10 @@
+import type { Metadata } from 'next'
 import { AdminSidebar } from '@/components/admin/shared/AdminSidebar'
 import type { ReactNode } from 'react'
+
+export const metadata: Metadata = {
+  manifest: '/admin-manifest.webmanifest',
+}
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
