@@ -4,7 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { NotifyRequestRow } from '@/components/admin/notify/NotifyRequestRow'
 import { useApiResource } from '@/hooks/useApiResource'
 import { en } from '@/lib/i18n/en'
-import type { NotifyRequestsResponse } from '@/lib/types/store'
+import type { NotifyRequestsResponse } from '@/lib/types/admin'
 
 export default function AdminNotifyPage() {
   const { data, loading, error } = useApiResource<NotifyRequestsResponse>('/api/admin/notify')

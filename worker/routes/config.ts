@@ -2,11 +2,13 @@
 // PUT /store (config editor) lives on /api/admin/config behind CF Access.
 
 import { Hono } from 'hono'
-import { createDb } from '../db/index'
-import * as schema from '../db/schema'
+import { sql } from 'drizzle-orm'
+import { createDb } from 'worker/db/index'
+import * as schema from 'worker/db/schema'
 import { storeConfigSchema } from '@/lib/schemas'
 import type { StoreConfigData } from '@/lib/schemas'
-import type { Bindings } from '../types'
+import type { Bindings } from 'worker/types'
+import { etagFor } from 'worker/lib/fingerprint'
 
 const app = new Hono<{ Bindings: Bindings }>()
 
@@ -15,35 +17,70 @@ const app = new Hono<{ Bindings: Bindings }>()
 app.get('/store', async (c) => {
   const db = createDb(c.env.DB)
 
-  const rows = await db
-    .select()
+  // ETag: count + max(updated_at) of store_config rows.
+  // bumpDataVersion() updates the dataVersion row's updated_at on every admin
+  // write, so this fingerprint changes whenever config OR any data changes.
+  const stats = await db
+    .select({
+      count: sql<number>`COUNT(*)`,
+      maxUpdatedAt: sql<string>`MAX(updated_at)`,
+    })
     .from(schema.storeConfig)
-    .all()
+    .get()
 
-  // Build a key→value map from rows
+  const etag = etagFor({
+    count: stats?.count ?? 0,
+    maxUpdatedAt: stats?.maxUpdatedAt ?? '',
+  })
+
+  if (c.req.header('If-None-Match') === etag) {
+    return c.newResponse(null, 304)
+  }
+
+  const rows = await db.select().from(schema.storeConfig).all()
+
   const kv: Record<string, string> = {}
   for (const row of rows) {
     kv[row.key] = row.value
   }
 
-  // Assemble StoreConfigData with fallbacks
+  // Use `|| undefined` for optional fields so an EMPTY stored value ('') reads
+  // as "unset" rather than failing the optional phone/email/string validators.
   const assembled: StoreConfigData = {
-    storeName:                  kv['storeName']  ?? 'Store',
-    tagline:                    kv['tagline']     ?? undefined,
-    whatsappNumber:             kv['whatsappNumber'] ?? undefined,
-    contactEmail:               kv['contactEmail']   ?? undefined,
-    currency:                   (kv['currency'] as StoreConfigData['currency']) ?? 'PKR',
+    storeName:                  kv['storeName']  || 'ShopFlare',
+    tagline:                    kv['tagline']     || undefined,
+    whatsappNumber:             kv['whatsappNumber'] || undefined,
+    contactEmail:               kv['contactEmail']   || undefined,
+    currency:                   (kv['currency'] as StoreConfigData['currency']) || 'PKR',
     freeShippingThresholdCents: Number(kv['freeShippingThresholdCents'] ?? '0'),
     flatShippingRateCents:      Number(kv['flatShippingRateCents']      ?? '0'),
+    bankName:          kv['bankName']          || undefined,
+    bankAccountTitle:  kv['bankAccountTitle']  || undefined,
+    bankAccountNumber: kv['bankAccountNumber'] || undefined,
+    bankIban:          kv['bankIban']          || undefined,
+    bankInstructions:  kv['bankInstructions']  || undefined,
+    primaryColor:   kv['primaryColor']   || '#18181b',
+    primaryColorFg: kv['primaryColorFg'] || undefined,
+    accentColor:    kv['accentColor']    || '#6366f1',
+    accentColorFg:  kv['accentColorFg']  || undefined,
+    radius:         (kv['radius']        as StoreConfigData['radius'])     || 'md',
+    fontFamily:     (kv['fontFamily']    as StoreConfigData['fontFamily']) || 'sans',
+    colorMode:      (kv['colorMode']     as StoreConfigData['colorMode'])  || 'light',
+    logoUrl:        kv['logoUrl']        || undefined,
+    logoR2Key:      kv['logoR2Key']      || undefined,
+    faviconUrl:     kv['faviconUrl']     || undefined,
+    faviconR2Key:   kv['faviconR2Key']   || undefined,
   }
 
-  // Validate — log on failure but still return best-effort data
-  const result = storeConfigSchema.safeParse(assembled)
-  if (!result.success) {
-    console.warn('[config/store] assembled config failed validation', result.error.issues)
+  const validation = storeConfigSchema.safeParse(assembled)
+  if (!validation.success) {
+    console.warn('[config/store] assembled config failed validation', validation.error.issues)
   }
 
-  return c.json(assembled)
+  return c.json(assembled, 200, {
+    'Cache-Control': 'no-cache, stale-while-revalidate=60',
+    'ETag': etag,
+  })
 })
 
 export default app

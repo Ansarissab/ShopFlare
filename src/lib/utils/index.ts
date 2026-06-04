@@ -1,5 +1,5 @@
 import { CURRENCIES, DEFAULT_CURRENCY, type CurrencyCode } from '@/lib/constants'
-import type { VariantWithDetails, SizeOption, ProductImage } from '@/lib/types/store'
+import type { VariantWithDetails, SizeOption, ProductImage } from '@/lib/types/product'
 
 export function formatPrice(cents: number, currency: CurrencyCode = DEFAULT_CURRENCY): string {
   const { symbol, decimals } = CURRENCIES[currency]
@@ -43,3 +43,18 @@ export function getPriceRange(sizes: SizeOption[]): { minPrice: number | null; m
 
 // NOTE: cn() lives in @/lib/utils (shadcn root) — re-exported here for convenience
 export { cn } from '@/lib/utils'
+
+// SQLite datetime('now') returns 'YYYY-MM-DD HH:MM:SS' — space separator, no T,
+// no Z. Safari rejects this as invalid; Chrome/Firefox are lenient. Normalize to
+// strict ISO 8601 UTC before constructing a Date so all browsers agree.
+export function formatDate(
+  val: string | null | undefined,
+  opts: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' },
+  locale: string | undefined = 'en',
+): string {
+  if (!val) return ''
+  const iso = val.includes('T') ? val : val.replace(' ', 'T') + 'Z'
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return ''
+  return d.toLocaleDateString(locale, opts)
+}

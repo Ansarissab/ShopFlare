@@ -6,11 +6,14 @@
     "moduleResolution": "bundler",
     "strict": true,
     "noEmit": true,
+    "incremental": true,
+    "tsBuildInfoFile": "../.tscache/worker.tsbuildinfo",
     "skipLibCheck": true,
     "isolatedModules": true,
-    "types": ["@cloudflare/workers-types"],
+    "types": ["@cloudflare/workers-types", "@cloudflare/vitest-pool-workers"],
     "paths": {
-      "@/*": ["../src/*"]
+      "@/*": ["../src/*"],
+      "worker/*": ["./*"]
     }
   },
   "include": [

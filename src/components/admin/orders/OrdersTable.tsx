@@ -2,9 +2,9 @@
 
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
-import { formatPrice } from '@/lib/utils/index'
+import { formatPrice, formatDate } from '@/lib/utils/index'
 import { en } from '@/lib/i18n/en'
-import type { AdminOrder } from '@/lib/types/store'
+import type { AdminOrder } from '@/lib/types/admin'
 
 const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   pending:    'outline',
@@ -60,7 +60,7 @@ export function OrdersTable({ orders }: OrdersTableProps) {
               </td>
               <td className="px-4 py-3 font-medium">{formatPrice(order.totalCents)}</td>
               <td className="px-4 py-3 text-muted-foreground text-xs">
-                {new Date(order.createdAt).toLocaleDateString('en', { year: 'numeric', month: 'short', day: 'numeric' })}
+                {formatDate(order.createdAt)}
               </td>
             </tr>
           ))}

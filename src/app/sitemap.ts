@@ -1,49 +1,40 @@
-// Dynamic sitemap (Agent R).
-// Fetches active products from the CF Worker and emits one URL per product.
-// Falls back to static routes only if the fetch fails.
-
 import type { MetadataRoute } from 'next'
-import { WORKER_URL } from '@/lib/api'
-import type { ProductWithVariants } from '@/lib/types/store'
+import { POLICY_SLUGS } from '@/lib/constants'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://your-store.example.com'
-
-// Static routes that are always included.
-const STATIC_ROUTES: MetadataRoute.Sitemap = [
-  {
-    url: SITE_URL,
-    changeFrequency: 'daily',
-    priority: 1.0,
-    lastModified: new Date(),
-  },
-  {
-    url: `${SITE_URL}/track`,
-    changeFrequency: 'monthly',
-    priority: 0.3,
-  },
-]
+export const revalidate = 3600
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  let productEntries: MetadataRoute.Sitemap = []
+  const workerUrl = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
+    ?? (workerUrl ? workerUrl.replace(/\/api$/, '') : '')
 
-  try {
-    const data = await fetch(`${WORKER_URL}/api/products`, {
-      next: { revalidate: 3600 }, // revalidate hourly
-    }).then(r => {
-      if (!r.ok) throw new Error(`HTTP ${r.status}`)
-      return r.json() as Promise<{ products: ProductWithVariants[] }>
-    })
+  const staticRoutes: MetadataRoute.Sitemap = [
+    { url: siteUrl || '/', changeFrequency: 'daily', priority: 1 },
+    ...POLICY_SLUGS.map((slug) => ({
+      url: `${siteUrl}/policy/${slug}`,
+      changeFrequency: 'monthly' as const,
+      priority: 0.3,
+    })),
+  ]
 
-    productEntries = data.products.map(({ product }) => ({
-      url: `${SITE_URL}/product/${product.id}`,
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-      lastModified: new Date(),
-    }))
-  } catch {
-    // Worker unavailable at build time — degrade to static-only sitemap.
-    productEntries = []
+  let productRoutes: MetadataRoute.Sitemap = []
+  if (workerUrl) {
+    try {
+      const res = await fetch(`${workerUrl}/api/products`, { next: { revalidate: 3600 } })
+      if (res.ok) {
+        const products = (await res.json()) as Array<{ slug?: string; id: string }>
+        productRoutes = products
+          .filter((p) => p.slug)
+          .map((p) => ({
+            url: `${siteUrl}/product/${p.slug}`,
+            changeFrequency: 'weekly' as const,
+            priority: 0.8,
+          }))
+      }
+    } catch {
+      // worker unavailable at build time — only static routes included
+    }
   }
 
-  return [...STATIC_ROUTES, ...productEntries]
+  return [...staticRoutes, ...productRoutes]
 }

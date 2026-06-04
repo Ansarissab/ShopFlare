@@ -8,7 +8,8 @@ import { ReviewStars } from '@/components/store/product/ReviewStars'
 import { ReviewForm } from '@/components/store/product/ReviewForm'
 import { useApiResource } from '@/hooks/useApiResource'
 import { en } from '@/lib/i18n/en'
-import type { ReviewsSectionProps, ProductReviewsResponse } from '@/lib/types/store'
+import type { ReviewsSectionProps, ProductReviewsResponse } from '@/lib/types/product'
+import { formatDate } from '@/lib/utils/index'
 
 export function ReviewsSection({ productId, productName, className }: ReviewsSectionProps) {
   const [showForm, setShowForm] = useState(false)
@@ -96,11 +97,7 @@ export function ReviewsSection({ productId, productName, className }: ReviewsSec
                         dateTime={review.createdAt}
                         className="text-xs text-muted-foreground"
                       >
-                        {new Date(review.createdAt).toLocaleDateString('en', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                        })}
+                        {formatDate(review.createdAt)}
                       </time>
                     </div>
                     <ReviewStars rating={review.rating} />

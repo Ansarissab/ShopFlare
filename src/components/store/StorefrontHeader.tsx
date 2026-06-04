@@ -1,5 +1,7 @@
 'use client'
 
+import Link from 'next/link'
+import Image from 'next/image'
 import { ShoppingCart } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -19,9 +21,23 @@ export function StorefrontHeader() {
       <header className="sticky top-0 z-40 w-full border-b bg-background">
         <div className={cn(layout.bar, 'h-16 justify-between')}>
           {/* Store name */}
-          <a href="/" className="text-lg font-semibold tracking-tight text-foreground hover:opacity-80 transition-opacity">
-            {config?.storeName ?? 'Store'}
-          </a>
+          <Link href="/" className="text-lg font-semibold tracking-tight text-foreground hover:opacity-80 transition-opacity">
+            {config?.logoUrl ? (
+              <span className="relative block h-8 w-32">
+                <Image
+                  src={config.logoUrl}
+                  alt={config.storeName ?? 'Store logo'}
+                  fill
+                  priority
+                  sizes="128px"
+                  className="object-contain object-left"
+                  unoptimized
+                />
+              </span>
+            ) : (
+              config?.storeName ?? 'ShopFlare'
+            )}
+          </Link>
 
           {/* Cart button */}
           <Button
@@ -34,7 +50,7 @@ export function StorefrontHeader() {
             <ShoppingCart className="h-5 w-5" />
             {itemCount > 0 && (
               <Badge
-                className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full p-0 text-xs"
+                className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full p-0 text-[10px]"
               >
                 {itemCount > 99 ? '99+' : itemCount}
               </Badge>

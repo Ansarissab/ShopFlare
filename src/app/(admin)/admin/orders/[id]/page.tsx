@@ -18,7 +18,7 @@ import { formatPrice } from '@/lib/utils/index'
 import { ORDER_STATUSES } from '@/lib/constants'
 import { apiPatch } from '@/lib/api'
 import { useApiResource } from '@/hooks/useApiResource'
-import type { AdminOrderDetail } from '@/lib/types/store'
+import type { AdminOrderDetail } from '@/lib/types/admin'
 
 export default function AdminOrderDetailPage() {
   const params = useParams<{ id: string }>()
@@ -163,7 +163,7 @@ export default function AdminOrderDetailPage() {
         {/* Status update */}
         <div className="flex flex-col gap-2 rounded-lg border p-4">
           <p className="text-sm font-medium">{en.admin.updateStatus}</p>
-          <Select value={newStatus} onValueChange={(v) => setNewStatus(v ?? '')}>
+          <Select value={newStatus} onValueChange={(v: string | null) => setNewStatus(v ?? '')}>
             <SelectTrigger>
               <SelectValue placeholder={en.orderStatusLabels[order.status as keyof typeof en.orderStatusLabels] ?? order.status} />
             </SelectTrigger>
@@ -179,6 +179,7 @@ export default function AdminOrderDetailPage() {
             size="sm"
             onClick={handleStatusUpdate}
             disabled={!newStatus || saving}
+            className="mt-auto"
           >
             {saving ? en.admin.saving : en.admin.updateStatus}
           </Button>
@@ -201,6 +202,7 @@ export default function AdminOrderDetailPage() {
             size="sm"
             onClick={handleTrackingUpdate}
             disabled={!trackingNumber.trim() || saving}
+            className="mt-auto"
           >
             {saving ? en.admin.saving : en.admin.addTracking}
           </Button>

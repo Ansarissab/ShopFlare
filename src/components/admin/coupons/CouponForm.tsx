@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator'
 import { FormField } from '@/components/common/FormField'
 import { en } from '@/lib/i18n/en'
 import { apiPost, apiPut } from '@/lib/api'
-import type { CouponFormProps, AdminCoupon } from '@/lib/types/store'
+import type { CouponFormProps, AdminCoupon } from '@/lib/types/admin'
 
 // Convert a stored UTC ISO timestamp to the `datetime-local` input value
 // (local wall-clock), so what the merchant sees matches what they saved.
@@ -97,7 +97,7 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
         <FormField label={en.admin.couponType} htmlFor="coupon-type">
           <Select
             value={type}
-            onValueChange={(v) => setType(v as 'percentage' | 'fixed')}
+            onValueChange={(v: string | null) => setType(v as 'percentage' | 'fixed')}
             disabled={isEdit}
           >
             <SelectTrigger id="coupon-type">
@@ -187,7 +187,7 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
         <Checkbox
           id="coupon-active"
           checked={active}
-          onCheckedChange={(v) => setActive(v === true)}
+          onCheckedChange={(v: boolean) => setActive(v === true)}
         />
         <label htmlFor="coupon-active" className="text-sm cursor-pointer">
           {en.admin.active}

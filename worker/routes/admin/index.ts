@@ -4,15 +4,17 @@
 // /api/orders, /api/products, /api/config routers that checkout depends on.
 
 import { Hono } from 'hono'
-import { requireAccess } from '../../lib/access'
-import type { AdminEnv } from '../../lib/access'
+import { requireAccess } from 'worker/lib/access'
+import type { AdminEnv } from 'worker/lib/access'
 import orders from './orders'
 import products from './products'
 import config from './config'
 import coupons from './coupons'
 import reviews from './reviews'
 import notify from './notify'
-import push from '../push'
+import pages from './pages'
+import analytics from './analytics'
+import push from 'worker/routes/push'
 
 const app = new Hono<AdminEnv>()
 
@@ -25,6 +27,8 @@ app.route('/config', config)
 app.route('/coupons', coupons)
 app.route('/reviews', reviews)
 app.route('/notify', notify)
+app.route('/pages', pages)
+app.route('/analytics', analytics)
 // Push subscription mgmt is merchant-only (order alerts to merchant devices),
 // so it lives behind CF Access here — not on the public /api router.
 app.route('/push', push)

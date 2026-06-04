@@ -6,7 +6,7 @@ import { ProductCard } from '@/components/store/product/ProductCard'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
 import { en } from '@/lib/i18n/en'
-import type { ProductWithVariants } from '@/lib/types/store'
+import type { ProductWithVariants } from '@/lib/types/product'
 import { useApiResource } from '@/hooks/useApiResource'
 
 function ProductListingSkeleton() {

@@ -11,15 +11,47 @@
 
 import { useEffect, useState } from 'react'
 import { apiGet, ApiError } from '@/lib/api'
-import type { ApiResourceState } from '@/lib/types/store'
+import type { ApiResourceState } from '@/lib/types/common'
 
 export type { ApiResourceState }
 
-export function useApiResource<T>(path: string | null): ApiResourceState<T> {
+// Shared BroadcastChannel name for cross-tab data invalidation.
+// Post any message to this channel to trigger a silent re-fetch in all
+// subscribers (useApiResource with refetchOnChannel + useStoreConfig).
+export const DATA_UPDATED_CHANNEL = 'shopflare:data-updated'
+
+export interface UseApiResourceOptions {
+  // Re-fetch silently when the browser tab regains focus. Use for data that
+  // can change in another tab or context (e.g. store config).
+  refetchOnFocus?: boolean
+  // Re-fetch silently whenever a message arrives on DATA_UPDATED_CHANNEL.
+  refetchOnChannel?: boolean
+}
+
+export function useApiResource<T>(path: string | null, opts?: UseApiResourceOptions): ApiResourceState<T> {
   const [data, setData] = useState<T | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [notFound, setNotFound] = useState(false)
+  // Bump to trigger a silent background re-fetch without resetting state.
+  const [refetchKey, setRefetchKey] = useState(0)
+
+  useEffect(() => {
+    if (!opts?.refetchOnFocus) return
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') setRefetchKey(k => k + 1)
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [opts?.refetchOnFocus])
+
+  useEffect(() => {
+    if (!opts?.refetchOnChannel) return
+    if (typeof BroadcastChannel === 'undefined') return
+    const ch = new BroadcastChannel(DATA_UPDATED_CHANNEL)
+    ch.onmessage = () => setRefetchKey(k => k + 1)
+    return () => ch.close()
+  }, [opts?.refetchOnChannel])
 
   useEffect(() => {
     // No path yet (route param not ready) — stay in loading idle.
@@ -27,17 +59,25 @@ export function useApiResource<T>(path: string | null): ApiResourceState<T> {
 
     const resolvedPath = path
     let cancelled = false
+    const isInitial = refetchKey === 0
 
     async function fetchData() {
-      // Reset derived state when path changes.
-      setData(null)
-      setError(null)
-      setNotFound(false)
-      setLoading(true)
+      // Only show loading/skeleton on first fetch — background refetches update
+      // data silently so the UI doesn't flash.
+      if (isInitial) {
+        setData(null)
+        setError(null)
+        setNotFound(false)
+        setLoading(true)
+      }
 
       try {
         const result = await apiGet<T>(resolvedPath)
-        if (!cancelled) setData(result)
+        if (!cancelled) {
+          setData(result)
+          setError(null)
+          setNotFound(false)
+        }
       } catch (err) {
         if (cancelled) return
         if (err instanceof ApiError && err.status === 404) {
@@ -55,7 +95,7 @@ export function useApiResource<T>(path: string | null): ApiResourceState<T> {
     return () => {
       cancelled = true
     }
-  }, [path])
+  }, [path, refetchKey])
 
   return { data, loading, error, notFound }
 }

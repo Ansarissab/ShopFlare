@@ -2,22 +2,13 @@
 
 import { Badge } from '@/components/ui/badge'
 import { en } from '@/lib/i18n/en'
-import type { NotifyRequestRowProps } from '@/lib/types/store'
+import type { NotifyRequestRowProps } from '@/lib/types/admin'
+import { formatDate } from '@/lib/utils/index'
 
 export function NotifyRequestRow({ request }: NotifyRequestRowProps) {
   const { productName, variantLabel, size, waiting, lastRequestedAt, inStock } = request
 
-  const formattedDate = (() => {
-    try {
-      return new Date(lastRequestedAt).toLocaleDateString(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
-    } catch {
-      return lastRequestedAt
-    }
-  })()
+  const formattedDate = formatDate(lastRequestedAt, { year: 'numeric', month: 'short', day: 'numeric' }, undefined)
 
   return (
     <div className="flex items-center justify-between rounded-md border px-4 py-3 text-sm">

@@ -20,9 +20,9 @@
 //   RFC 8291  — Message Encryption for Web Push (required for payloads)
 
 import { eq } from 'drizzle-orm'
-import type { Bindings } from '../types'
-import type { Database } from '../db/index'
-import * as schema from '../db/schema'
+import type { Bindings } from 'worker/types'
+import type { Database } from 'worker/db/index'
+import * as schema from 'worker/db/schema'
 
 export interface PushPayload {
   title: string

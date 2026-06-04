@@ -98,7 +98,7 @@ pnpm worker:deploy
 Copy the Worker URL → set in `.env.local`:
 
 ```
-NEXT_PUBLIC_WORKER_URL=https://singlepage-ecomm-worker.YOUR.workers.dev
+NEXT_PUBLIC_WORKER_URL=https://shopflare-worker.YOUR.workers.dev
 ```
 
 ---
@@ -117,10 +117,10 @@ NEXT_PUBLIC_WORKER_URL=https://singlepage-ecomm-worker.YOUR.workers.dev
 
 ## Step 8 — Set Up CF Access (Admin Protection)
 
-Admin protection has **two** layers — the UI pages AND the worker admin API.
-Both must be covered or the API is publicly reachable on its origin.
+Admin protection has **three** layers — edge Access, Next.js middleware, and Worker JWT
+re-verification. All three must be in place for a fully hardened setup.
 
-### 8a — Protect the admin UI
+### 8a — Protect the admin UI (`/admin*`)
 
 1. Cloudflare Dashboard → Zero Trust → Access → Applications
 2. Add Application → Self-hosted
@@ -128,7 +128,10 @@ Both must be covered or the API is publicly reachable on its origin.
 4. Policy: Allow → Email → your@email.com
 5. Save
 
-Admin at `/admin` now requires email OTP. No passwords to manage.
+CF Access shows its own login UI (email OTP by default — no passwords). After the user
+authenticates, Access injects a signed `Cf-Access-Jwt-Assertion` header on every request.
+The Next.js middleware (`src/middleware.ts`) re-verifies that JWT so `/admin` HTML never
+renders for an unauthenticated user even if the Pages route is misconfigured.
 
 ### 8b — Protect the admin API (`/api/admin/*`)
 
@@ -141,17 +144,40 @@ public `/api/orders`, `/api/products`, `/api/config` routes). Protect that path:
    first-party; the bare `*.workers.dev` host works too)
 3. Policy: Allow → Email → your@email.com (same policy as the UI)
 4. Save, then open the application → copy its **Audience (AUD) tag**
-5. Set the worker vars so it re-verifies the assertion (defense-in-depth):
+5. Set the Worker secrets so it re-verifies the assertion (defense-in-depth):
 
    ```bash
    npx wrangler secret put CF_ACCESS_AUD          # the AUD tag from step 4
    npx wrangler secret put CF_ACCESS_TEAM_DOMAIN  # e.g. yourteam.cloudflareaccess.com
    ```
 
-The worker's `requireAccess` middleware verifies the `Cf-Access-Jwt-Assertion`
-JWT (signature via the team JWKS, plus `aud`/`iss`/`exp`). If both vars are
-unset it fails closed in production (403) and bypasses only in local
-`wrangler dev` (ENVIRONMENT=development).
+6. Set the **same values** as Cloudflare Pages environment variables so the Next.js
+   middleware can verify the JWT on the UI side too:
+
+   Cloudflare Dashboard → Pages → your project → Settings → Environment variables:
+
+   | Variable | Value |
+   | --- | --- |
+   | `CF_ACCESS_TEAM_DOMAIN` | e.g. `yourteam.cloudflareaccess.com` |
+   | `CF_ACCESS_AUD` | the AUD tag from step 4 |
+
+Both the Worker middleware (`worker/lib/access.ts`) and the Next.js middleware
+(`src/middleware.ts`) share the same RS256/JWKS verification logic (`worker/lib/access-core.ts`).
+If either var is unset the system fails closed (403 / redirect to `/admin/unauthorized`) in
+production. The dev bypass requires **both** `ENVIRONMENT=development` and `ADMIN_DEV_BYPASS=1`
+set in `.env.local` — neither alone is sufficient.
+
+### Local development (no CF tunnel)
+
+Without a Cloudflare tunnel the `Cf-Access-Jwt-Assertion` header is never injected, so the
+middleware would block `/admin`. Add these two vars to `.env.local` to bypass locally:
+
+```bash
+ENVIRONMENT=development
+ADMIN_DEV_BYPASS=1
+```
+
+Both are required. They are never present in production deployments.
 
 ---
 

@@ -7,7 +7,7 @@ import { en } from '@/lib/i18n/en'
 import { cn } from '@/lib/utils'
 import { formatPrice } from '@/lib/utils/index'
 import { useCart } from '@/hooks/useCart'
-import type { CartItemProps } from '@/lib/types/store'
+import type { CartItemProps } from '@/lib/types/cart'
 
 export function CartItem({ item }: CartItemProps) {
   const { updateQuantity, removeItem } = useCart()

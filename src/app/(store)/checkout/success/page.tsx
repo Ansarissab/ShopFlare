@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils'
 import { en } from '@/lib/i18n/en'
 import { useCart } from '@/hooks/useCart'
 import { apiGet } from '@/lib/api'
+import { BankTransferInstructions } from '@/components/store/checkout/BankTransferInstructions'
 
 function SuccessContent() {
   const searchParams = useSearchParams()
@@ -18,6 +19,8 @@ function SuccessContent() {
   const method = searchParams.get('method')
   const orderId = searchParams.get('orderId')
   const sessionId = searchParams.get('session_id')
+  // Ownership token — phone for COD/bank orders, absent for Stripe.
+  const contactParam = searchParams.get('c')
 
   // For Stripe sessions, resolve the orderNumber via the worker API.
   const [resolvedOrderNumber, setResolvedOrderNumber] = useState<string | null>(null)
@@ -37,13 +40,25 @@ function SuccessContent() {
       .finally(() => setResolving(false))
   }, [sessionId, orderId])
 
-  // For COD: orderId param holds the orderNumber value (set by CODForm).
+  // For COD/bank transfer: orderId param holds the orderNumber (set at submit).
   // For Stripe: use the resolved orderNumber from the API.
   const trackOrderNumber = orderId ?? resolvedOrderNumber
 
-  const paymentNote = method === 'cod'
-    ? 'Your order will be confirmed by our team shortly.'
-    : "Payment confirmed. You'll receive an email receipt."
+  // Bank transfer: fetch the order total so we can show how much to transfer.
+  const [bankTotalCents, setBankTotalCents] = useState<number | null>(null)
+  useEffect(() => {
+    if (method !== 'bank_transfer' || !trackOrderNumber) return
+    apiGet<{ order: { totalCents: number } }>(`/api/orders/track/${trackOrderNumber}`)
+      .then(({ order }) => setBankTotalCents(order.totalCents))
+      .catch(() => setBankTotalCents(null))
+  }, [method, trackOrderNumber])
+
+  const paymentNote =
+    method === 'cod'
+      ? 'Your order will be confirmed by our team shortly.'
+      : method === 'bank_transfer'
+        ? en.bankTransfer.awaitingPayment
+        : "Payment confirmed. You'll receive an email receipt."
 
   return (
     <div className="flex w-full max-w-md flex-col items-center gap-6 text-center">
@@ -62,11 +77,18 @@ function SuccessContent() {
 
       <p className="text-sm text-muted-foreground">{paymentNote}</p>
 
+      {method === 'bank_transfer' && trackOrderNumber && bankTotalCents !== null && (
+        <BankTransferInstructions orderNumber={trackOrderNumber} totalCents={bankTotalCents} />
+      )}
+
       <div className="mt-2 flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
         {resolving ? (
           <Skeleton className="h-11 w-full rounded-md sm:w-36" />
         ) : trackOrderNumber ? (
-          <Link href={`/track/${trackOrderNumber}`} className={cn(buttonVariants({ size: 'lg' }))}>
+          <Link
+            href={`/track/${trackOrderNumber}${contactParam ? `?c=${encodeURIComponent(contactParam)}` : ''}`}
+            className={cn(buttonVariants({ size: 'lg' }))}
+          >
             {en.tracking.track}
           </Link>
         ) : null}

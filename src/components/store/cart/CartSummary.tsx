@@ -8,7 +8,7 @@ import { Separator } from '@/components/ui/separator'
 import { en } from '@/lib/i18n/en'
 import { cn } from '@/lib/utils'
 import { formatPrice } from '@/lib/utils/index'
-import type { CartSummaryProps } from '@/lib/types/store'
+import type { CartSummaryProps } from '@/lib/types/cart'
 
 export function CartSummary({
   subtotalCents,

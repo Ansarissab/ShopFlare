@@ -20,12 +20,16 @@ export type CartItem = {
 type CartState = {
   items: CartItem[]
   isOpen: boolean
+  couponCode: string | null
+  discountCents: number
   addItem: (item: CartItem) => void
   removeItem: (sizeOptionId: string) => void
   updateQuantity: (sizeOptionId: string, qty: number) => void
   clearCart: () => void
   openCart: () => void
   closeCart: () => void
+  applyCoupon: (code: string, discountCents: number) => void
+  removeCoupon: () => void
 }
 
 export const useCart = create<CartState>()(
@@ -33,6 +37,8 @@ export const useCart = create<CartState>()(
     (set) => ({
       items: [],
       isOpen: false,
+      couponCode: null,
+      discountCents: 0,
 
       addItem: (item) =>
         set((state) => {
@@ -70,11 +76,15 @@ export const useCart = create<CartState>()(
           }
         }),
 
-      clearCart: () => set({ items: [] }),
+      clearCart: () => set({ items: [], couponCode: null, discountCents: 0 }),
 
       openCart: () => set({ isOpen: true }),
 
       closeCart: () => set({ isOpen: false }),
+
+      applyCoupon: (code, discountCents) => set({ couponCode: code, discountCents }),
+
+      removeCoupon: () => set({ couponCode: null, discountCents: 0 }),
     }),
     { name: 'cart' }
   )

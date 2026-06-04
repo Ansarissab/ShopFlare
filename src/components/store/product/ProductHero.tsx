@@ -11,13 +11,14 @@ import { VariantSelector } from '@/components/store/product/VariantSelector'
 import { SizePicker } from '@/components/store/product/SizePicker'
 import { ProductActions } from '@/components/store/product/ProductActions'
 import { NotifyMeDialog } from '@/components/store/product/NotifyMeDialog'
-import type { ProductHeroProps } from '@/lib/types/store'
+import type { ProductHeroProps } from '@/lib/types/product'
 
 export function ProductHero({
   product,
   variants,
   sizesByVariant,
   imagesByVariant,
+  currency,
   isNew,
   isPopular,
   onAddToCart,
@@ -61,8 +62,8 @@ export function ProductHero({
   const priceLabel =
     minPrice !== null
       ? minPrice === maxPrice
-        ? formatPrice(minPrice)
-        : `${formatPrice(minPrice)} – ${formatPrice(maxPrice!)}`
+        ? formatPrice(minPrice, currency)
+        : `${formatPrice(minPrice, currency)} – ${formatPrice(maxPrice!, currency)}`
       : null
 
   return (

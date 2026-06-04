@@ -12,7 +12,7 @@ import { DEFAULT_CURRENCY } from '@/lib/constants'
 import { en } from '@/lib/i18n/en'
 import { apiPost } from '@/lib/api'
 import type { CartItem } from '@/hooks/useCart'
-import type { SizeOption, ProductHeroWrapperProps } from '@/lib/types/store'
+import type { SizeOption, ProductHeroWrapperProps } from '@/lib/types/product'
 
 export function ProductHeroWrapper({ item }: ProductHeroWrapperProps) {
   const { addItem, openCart } = useCart()
@@ -113,6 +113,7 @@ export function ProductHeroWrapper({ item }: ProductHeroWrapperProps) {
       variants={item.variants}
       sizesByVariant={sizesByVariant}
       imagesByVariant={imagesByVariant}
+      currency={config?.currency ?? DEFAULT_CURRENCY}
       isAddingToCart={isAddingToCart}
       onAddToCart={handleAddToCart}
       onBuyNow={handleBuyNow}

@@ -1,5 +1,5 @@
 /**
- * SinglePageEcomm — interactive setup wizard.
+ * ShopFlare — interactive setup wizard.
  *
  * Automates the CLI-driven half of docs/setup/cloudflare-guide.md:
  *   prerequisites → CF login → create D1/KV/R2 → patch wrangler.toml →
@@ -126,7 +126,7 @@ const SECRETS: SecretSpec[] = [
 // ── wizard ──────────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
-  intro("SinglePageEcomm — setup wizard");
+  intro("ShopFlare — setup wizard");
   note(
     "This drives the CLI half of docs/setup/cloudflare-guide.md.\n" +
       "Nothing is changed until each step asks you to confirm.",
@@ -283,7 +283,7 @@ async function main(): Promise<void> {
     workerUrl = (guard(
       await text({
         message: "Worker URL (NEXT_PUBLIC_WORKER_URL)",
-        placeholder: "https://singlepage-ecomm-worker.YOUR.workers.dev",
+        placeholder: "https://shopflare-worker.YOUR.workers.dev",
       }),
     ) ?? "").trim();
   }

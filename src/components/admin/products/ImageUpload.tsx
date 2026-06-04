@@ -8,7 +8,7 @@ import imageCompression from 'browser-image-compression'
 import { Button } from '@/components/ui/button'
 import { en } from '@/lib/i18n/en'
 import { apiUpload, apiDelete } from '@/lib/api'
-import type { ProductImage } from '@/lib/types/store'
+import type { ProductImage } from '@/lib/types/product'
 
 interface ImageUploadProps {
   variantId: string

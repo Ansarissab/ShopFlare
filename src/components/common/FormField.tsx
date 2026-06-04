@@ -2,7 +2,7 @@
 
 import { Label } from '@/components/ui/label'
 import { en } from '@/lib/i18n/en'
-import type { FieldProps } from '@/lib/types/store'
+import type { FieldProps } from '@/lib/types/common'
 
 export type { FieldProps }
 

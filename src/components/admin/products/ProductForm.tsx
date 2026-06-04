@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, type MouseEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, Trash2, ChevronDown, ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
@@ -9,11 +9,90 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
+import { Skeleton } from '@/components/ui/skeleton'
 import { FormField } from '@/components/common/FormField'
 import { ImageUpload } from '@/components/admin/products/ImageUpload'
 import { en } from '@/lib/i18n/en'
-import { apiPost, apiPut, apiDelete } from '@/lib/api'
-import type { ProductWithVariants, VariantWithDetails, SizeOption, ProductImage } from '@/lib/types/store'
+import { apiPost, apiPut, apiDelete, apiGet } from '@/lib/api'
+import { formatPrice } from '@/lib/utils/index'
+import type { ProductWithVariants, VariantWithDetails, SizeOption, ProductImage } from '@/lib/types/product'
+import type { AnalyticsProductDetail } from '@/lib/types/analytics'
+
+// ─── Per-product stats panel (edit mode only) ─────────────────────────────────
+
+function ProductStatsPanel({ productId }: { productId: string }) {
+  const [stats, setStats] = useState<AnalyticsProductDetail | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    apiGet<AnalyticsProductDetail>(`/api/admin/analytics/products/${productId}?period=30d`)
+      .then(setStats)
+      .catch(() => setStats(null))
+      .finally(() => setLoading(false))
+  }, [productId])
+
+  return (
+    <div className="rounded-lg border p-5 flex flex-col gap-4">
+      <h2 className="text-sm font-semibold">{en.admin.analyticsProductStats}</h2>
+
+      {loading ? (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {[0, 1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-16 w-full rounded-lg" />
+          ))}
+        </div>
+      ) : stats ? (
+        <>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="rounded-lg border p-3">
+              <p className="text-xs text-muted-foreground">{en.admin.analyticsUnitsSold}</p>
+              <p className="text-base font-semibold">{stats.unitsSold.toLocaleString()}</p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className="text-xs text-muted-foreground">{en.admin.analyticsOrders}</p>
+              <p className="text-base font-semibold">{stats.orders.toLocaleString()}</p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className="text-xs text-muted-foreground">{en.admin.totalRevenue}</p>
+              <p className="text-base font-semibold">{formatPrice(stats.revenueCents)}</p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className="text-xs text-muted-foreground">{en.admin.analyticsLastSold}</p>
+              <p className="text-base font-semibold">
+                {stats.lastSoldAt
+                  ? new Date(stats.lastSoldAt).toLocaleDateString()
+                  : en.admin.analyticsNeverSold}
+              </p>
+            </div>
+          </div>
+
+          {stats.affinityPartners.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <p className="text-xs font-medium text-muted-foreground">
+                {en.admin.analyticsFrequentlyBoughtWith}
+              </p>
+              <div className="flex flex-col gap-1">
+                {stats.affinityPartners.slice(0, 3).map((partner) => (
+                  <div
+                    key={partner.productId}
+                    className="flex items-center justify-between text-sm rounded-md border px-3 py-2"
+                  >
+                    <span>{partner.productName}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {en.admin.analyticsTimesTogether}: {partner.pairCount}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      ) : null}
+    </div>
+  )
+}
+
+// ─── ProductForm ───────────────────────────────────────────────────────────────
 
 interface ProductFormProps {
   initial?: ProductWithVariants
@@ -250,7 +329,7 @@ export function ProductForm({ initial }: ProductFormProps) {
           <Checkbox
             id="product-active"
             checked={active}
-            onCheckedChange={(v) => setActive(v === true)}
+            onCheckedChange={(v: boolean) => setActive(v === true)}
           />
           <label htmlFor="product-active" className="text-sm cursor-pointer">
             {en.admin.active}
@@ -261,6 +340,11 @@ export function ProductForm({ initial }: ProductFormProps) {
           {saving ? en.admin.saving : initial ? en.admin.saved : en.admin.productCreated}
         </Button>
       </div>
+
+      {/* Per-product analytics stats — edit mode only */}
+      {initial?.product.id && (
+        <ProductStatsPanel productId={initial.product.id} />
+      )}
 
       {/* Variants — only shown once product is saved (has an ID) */}
       {initial?.product.id && (
@@ -309,7 +393,7 @@ export function ProductForm({ initial }: ProductFormProps) {
                         variant="ghost"
                         size="icon"
                         className="size-7 text-destructive hover:text-destructive"
-                        onClick={(e) => { e.stopPropagation(); deleteVariant(variant.id) }}
+                        onClick={(e: MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); deleteVariant(variant.id) }}
                         aria-label={en.admin.deleteVariant}
                       >
                         <Trash2 className="size-3.5" aria-hidden />

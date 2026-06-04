@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { formatPrice, getPriceRange } from '@/lib/utils/index'
 import { en } from '@/lib/i18n/en'
-import type { ProductCardProps } from '@/lib/types/store'
+import type { ProductCardProps } from '@/lib/types/product'
 
 export function ProductCard({
   product,

@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { en } from '@/lib/i18n/en'
 import { ORDER_STATUSES } from '@/lib/constants'
 import { useApiResource } from '@/hooks/useApiResource'
-import type { AdminOrdersResponse } from '@/lib/types/store'
+import type { AdminOrdersResponse } from '@/lib/types/admin'
 
 export default function AdminOrdersPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
@@ -20,7 +20,7 @@ export default function AdminOrdersPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">{en.admin.orders}</h1>
 
-        <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v ?? 'all')}>
+        <Select value={statusFilter} onValueChange={(v: string | null) => setStatusFilter(v ?? 'all')}>
           <SelectTrigger className="w-40">
             <SelectValue placeholder="All statuses" />
           </SelectTrigger>

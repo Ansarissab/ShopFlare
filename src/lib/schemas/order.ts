@@ -31,9 +31,10 @@ export const createCheckoutSessionSchema = z.object({
   couponCode: couponField,
 })
 
-// Cancel request — optional reason field
+// Cancel request — contact required for ownership verification
 export const cancelOrderSchema = z.object({
-  reason: z.string().max(500).optional(),
+  contact: z.string().min(1).max(254),
+  reason:  z.string().max(500).optional(),
 })
 
 export type ShippingAddress  = z.infer<typeof shippingAddressSchema>

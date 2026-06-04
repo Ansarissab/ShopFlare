@@ -6,7 +6,8 @@
 // Renders null until data is ready; never throws.
 
 import { useEffect, useState } from 'react'
-import type { ProductJsonLdProps, ProductJsonLdOffer, ProductReviewsResponse, StoreConfig, SizeOption } from '@/lib/types/store'
+import type { ProductJsonLdProps, ProductJsonLdOffer, ProductReviewsResponse, SizeOption } from '@/lib/types/product'
+import type { StoreConfig } from '@/lib/types/common'
 import { apiGet } from '@/lib/api'
 // getPriceRange lives in the utils/ directory module; `@/lib/utils` resolves to
 // the sibling utils.ts (cn only), so the explicit /index path is required.
@@ -26,14 +27,14 @@ export function ProductJsonLd({ item, rating: ratingProp, storeUrl, storeName }:
     async function load() {
       // Fetch store config + reviews concurrently. Failures are silently swallowed.
       const [configResult, reviewsResult] = await Promise.allSettled([
-        apiGet<{ config: StoreConfig }>('/api/config/store'),
+        apiGet<StoreConfig>('/api/config/store'),
         apiGet<ProductReviewsResponse>(`/api/reviews/product/${item.product.id}`),
       ])
 
       if (cancelled) return
 
       if (configResult.status === 'fulfilled') {
-        setCurrency(configResult.value.config.currency ?? DEFAULT_CURRENCY)
+        setCurrency(configResult.value.currency ?? DEFAULT_CURRENCY)
       }
 
       // Only set rating from API if caller didn't pass one in as prop.

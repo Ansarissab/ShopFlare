@@ -1,4 +1,5 @@
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
+import { sql } from 'drizzle-orm'
 
 // ─── Products ───────────────────────────────────────────────────────────────
 
@@ -8,8 +9,8 @@ export const products = sqliteTable('products', {
   description: text('description').notNull().default(''),
   active: integer('active', { mode: 'boolean' }).notNull().default(true),
   stripeProductId: text('stripe_product_id'),
-  createdAt: text('created_at').notNull().default("(datetime('now'))"),
-  updatedAt: text('updated_at').notNull().default("(datetime('now'))"),
+  createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),
+  updatedAt: text('updated_at').notNull().default(sql`(datetime('now'))`),
 })
 
 export const variants = sqliteTable('variants', {
@@ -48,7 +49,7 @@ export const orders = sqliteTable('orders', {
     enum: ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled']
   }).notNull().default('pending'),
   paymentMethod: text('payment_method', {
-    enum: ['stripe_checkout', 'cod', 'whatsapp', 'in_person_cash']
+    enum: ['stripe_checkout', 'cod', 'bank_transfer', 'whatsapp', 'in_person_cash']
   }).notNull(),
   customerName: text('customer_name').notNull(),
   customerEmail: text('customer_email'),
@@ -64,8 +65,8 @@ export const orders = sqliteTable('orders', {
   trackingNumber: text('tracking_number'),
   carrier: text('carrier'),
   notes: text('notes'),
-  createdAt: text('created_at').notNull().default("(datetime('now'))"),
-  updatedAt: text('updated_at').notNull().default("(datetime('now'))"),
+  createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),
+  updatedAt: text('updated_at').notNull().default(sql`(datetime('now'))`),
 })
 
 export const orderItems = sqliteTable('order_items', {
@@ -95,7 +96,7 @@ export const coupons = sqliteTable('coupons', {
   stripeCouponId: text('stripe_coupon_id'),
   stripePromotionCodeId: text('stripe_promotion_code_id'),
   active: integer('active', { mode: 'boolean' }).notNull().default(true),
-  createdAt: text('created_at').notNull().default("(datetime('now'))"),
+  createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),
 })
 
 export const couponUses = sqliteTable('coupon_uses', {
@@ -105,7 +106,7 @@ export const couponUses = sqliteTable('coupon_uses', {
   customerEmail: text('customer_email'),
   customerPhone: text('customer_phone'),
   customerIp: text('customer_ip'),
-  usedAt: text('used_at').notNull().default("(datetime('now'))"),
+  usedAt: text('used_at').notNull().default(sql`(datetime('now'))`),
 })
 
 // ─── Reviews ─────────────────────────────────────────────────────────────────
@@ -120,7 +121,7 @@ export const reviews = sqliteTable('reviews', {
   photoUrl: text('photo_url'),
   photoR2Key: text('photo_r2_key'),
   approved: integer('approved', { mode: 'boolean' }).notNull().default(false),
-  createdAt: text('created_at').notNull().default("(datetime('now'))"),
+  createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),
 })
 
 // ─── Notify Me ───────────────────────────────────────────────────────────────
@@ -131,7 +132,7 @@ export const notifyMe = sqliteTable('notify_me', {
   email: text('email'),
   phone: text('phone'),
   notified: integer('notified', { mode: 'boolean' }).notNull().default(false),
-  createdAt: text('created_at').notNull().default("(datetime('now'))"),
+  createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),
 })
 
 // ─── Store Config ────────────────────────────────────────────────────────────
@@ -139,7 +140,7 @@ export const notifyMe = sqliteTable('notify_me', {
 export const storeConfig = sqliteTable('store_config', {
   key: text('key').primaryKey(),
   value: text('value').notNull(),
-  updatedAt: text('updated_at').notNull().default("(datetime('now'))"),
+  updatedAt: text('updated_at').notNull().default(sql`(datetime('now'))`),
 })
 
 // ─── Stripe Events (idempotency) ─────────────────────────────────────────────
@@ -148,7 +149,33 @@ export const stripeEvents = sqliteTable('stripe_events', {
   id: text('id').primaryKey(),
   eventId: text('event_id').notNull().unique(),
   type: text('type').notNull(),
-  processedAt: text('processed_at').notNull().default("(datetime('now'))"),
+  processedAt: text('processed_at').notNull().default(sql`(datetime('now'))`),
+})
+
+// ─── Policy Pages ────────────────────────────────────────────────────────────
+
+export const pages = sqliteTable('pages', {
+  slug: text('slug').primaryKey(),   // shipping | returns | privacy | terms
+  title: text('title').notNull(),
+  content: text('content').notNull().default(''),
+  updatedAt: text('updated_at').notNull().default(sql`(datetime('now'))`),
+})
+
+// ─── Analytics daily rollups (funnel layer 2, $0 D1 upsert counters) ─────────
+
+export const analyticsDaily = sqliteTable('analytics_daily', {
+  date:   text('date').notNull(),
+  metric: text('metric').notNull(),
+  count:  integer('count').notNull().default(0),
+})
+
+// ─── Carts (funnel layer 2 — snapshot written on checkout_start only) ─────────
+
+export const carts = sqliteTable('carts', {
+  sessionId:  text('session_id').primaryKey(),
+  items:      text('items').notNull(),             // JSON: CartItem[]
+  updatedAt:  text('updated_at').notNull().default(sql`(datetime('now'))`),
+  recovered:  integer('recovered', { mode: 'boolean' }).notNull().default(false),
 })
 
 // ─── Push Subscriptions ──────────────────────────────────────────────────────
@@ -158,7 +185,7 @@ export const pushSubscriptions = sqliteTable('push_subscriptions', {
   endpoint: text('endpoint').notNull().unique(),
   auth: text('auth').notNull(),
   p256dh: text('p256dh').notNull(),
-  createdAt: text('created_at').notNull().default("(datetime('now'))"),
+  createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),
 })
 
 // ─── Type exports ────────────────────────────────────────────────────────────
@@ -174,3 +201,6 @@ export type OrderItem = typeof orderItems.$inferSelect
 export type Coupon = typeof coupons.$inferSelect
 export type Review = typeof reviews.$inferSelect
 export type StoreConfig = typeof storeConfig.$inferSelect
+export type Page = typeof pages.$inferSelect
+export type AnalyticsDaily = typeof analyticsDaily.$inferSelect
+export type Cart = typeof carts.$inferSelect

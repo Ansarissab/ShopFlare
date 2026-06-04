@@ -7,8 +7,9 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ReviewStars } from '@/components/store/product/ReviewStars'
 import { apiPatch, apiDelete } from '@/lib/api'
+import { formatDate } from '@/lib/utils/index'
 import { en } from '@/lib/i18n/en'
-import type { AdminReviewRowProps } from '@/lib/types/store'
+import type { AdminReviewRowProps } from '@/lib/types/admin'
 
 export function AdminReviewRow({ review, onChanged }: AdminReviewRowProps) {
   const [busy, setBusy] = useState(false)
@@ -73,11 +74,7 @@ export function AdminReviewRow({ review, onChanged }: AdminReviewRowProps) {
         )}
       </td>
       <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
-        {new Date(review.createdAt).toLocaleDateString('en', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        })}
+        {formatDate(review.createdAt)}
       </td>
       <td className="px-4 py-3">
         <div className="flex items-center gap-1">

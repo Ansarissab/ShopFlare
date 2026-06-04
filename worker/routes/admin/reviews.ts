@@ -5,11 +5,11 @@
 
 import { Hono } from 'hono'
 import { eq, desc } from 'drizzle-orm'
-import { createDb } from '../../db/index'
-import * as schema from '../../db/schema'
+import { createDb } from 'worker/db/index'
+import * as schema from 'worker/db/schema'
 import { moderateReviewSchema } from '@/lib/schemas'
-import { parseBody } from '../../lib/http'
-import type { AdminEnv } from '../../lib/access'
+import { parseBody } from 'worker/lib/http'
+import type { AdminEnv } from 'worker/lib/access'
 
 const app = new Hono<AdminEnv>()
 

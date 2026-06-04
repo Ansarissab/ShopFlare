@@ -11,7 +11,7 @@ import {
   type CarouselApi,
 } from '@/components/ui/carousel'
 import { cn } from '@/lib/utils'
-import type { ImageCarouselProps } from '@/lib/types/store'
+import type { ImageCarouselProps } from '@/lib/types/product'
 
 export function ImageCarousel({ images, className }: ImageCarouselProps) {
   const [api, setApi] = React.useState<CarouselApi>()

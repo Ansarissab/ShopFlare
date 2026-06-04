@@ -2,10 +2,11 @@
 
 import { useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
+import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { AdminReviewRow } from '@/components/admin/reviews/AdminReviewRow'
 import { useApiResource } from '@/hooks/useApiResource'
 import { en } from '@/lib/i18n/en'
-import type { AdminReviewsResponse, ReviewTableProps } from '@/lib/types/store'
+import type { AdminReviewsResponse, ReviewTableProps } from '@/lib/types/admin'
 
 // ─── Inner table ──────────────────────────────────────────────────────────────
 
@@ -60,7 +61,7 @@ export default function AdminReviewsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-bold tracking-tight">{en.admin.reviewModeration}</h1>
+      <AdminPageHeader title={en.admin.reviewModeration} />
 
       {loading && (
         <div className="flex flex-col gap-2">

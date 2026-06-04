@@ -9,11 +9,12 @@ import { buttonVariants } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { OrderTimeline } from '@/components/store/tracking/OrderTimeline'
 import { OrderLineItem } from '@/components/common/OrderLineItem'
+import { BankTransferInstructions } from '@/components/store/checkout/BankTransferInstructions'
 import { en } from '@/lib/i18n/en'
-import { formatPrice } from '@/lib/utils/index'
+import { formatPrice, formatDate } from '@/lib/utils/index'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
-import type { TrackingData } from '@/lib/types/store'
+import type { TrackingData } from '@/lib/types/order'
 import { useApiResource } from '@/hooks/useApiResource'
 
 function TrackingSkeleton() {
@@ -100,11 +101,7 @@ function OrderTrackingContent() {
           </Badge>
         </div>
         <p className="text-sm text-muted-foreground">
-          {new Date(order.createdAt).toLocaleDateString('en', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
+          {formatDate(order.createdAt, { year: 'numeric', month: 'long', day: 'numeric' })}
         </p>
         <p className="text-sm text-muted-foreground">{order.customerName}</p>
       </div>
@@ -159,10 +156,15 @@ function OrderTrackingContent() {
         </div>
       </div>
 
+      {/* Bank-transfer instructions — only while payment is still awaited */}
+      {order.paymentMethod === 'bank_transfer' && order.status === 'pending' && (
+        <BankTransferInstructions orderNumber={order.orderNumber} totalCents={order.totalCents} />
+      )}
+
       {/* Cancel button */}
       {canCancel && (
         <Link
-          href={`/track/${params.orderId}/cancel`}
+          href={`/track/${params.orderId}/cancel${contact ? `?c=${encodeURIComponent(contact)}` : ''}`}
           className={buttonVariants({ variant: 'outline' }) + ' w-full border-destructive text-destructive hover:bg-destructive/10 justify-center'}
         >
           {en.checkout.cancelOrder}

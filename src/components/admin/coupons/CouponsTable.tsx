@@ -6,7 +6,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { en } from '@/lib/i18n/en'
 import { apiDelete } from '@/lib/api'
-import type { CouponRowProps, CouponsTableProps } from '@/lib/types/store'
+import { formatDate } from '@/lib/utils/index'
+import type { CouponRowProps, CouponsTableProps } from '@/lib/types/admin'
 
 // ─── CouponRow ───────────────────────────────────────────────────────────────
 
@@ -38,7 +39,7 @@ function CouponRow({ coupon, onEdit, onDeleted }: CouponRowProps) {
       </td>
       <td className="px-4 py-3 text-xs text-muted-foreground">
         {coupon.expiresAt
-          ? new Date(coupon.expiresAt).toLocaleDateString('en', { year: 'numeric', month: 'short', day: 'numeric' })
+          ? formatDate(coupon.expiresAt)
           : '—'}
       </td>
       <td className="px-4 py-3">

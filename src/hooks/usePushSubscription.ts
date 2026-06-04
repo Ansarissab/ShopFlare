@@ -16,7 +16,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { apiGet, apiPost } from '@/lib/api'
-import type { PublicConfigResponse, UsePushSubscriptionReturn } from '@/lib/types/store'
+import type { PublicConfigResponse, UsePushSubscriptionReturn } from '@/lib/types/common'
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)

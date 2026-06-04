@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -18,15 +17,16 @@ import { apiPost, ApiError } from '@/lib/api'
 import { CartItem } from '@/components/store/cart/CartItem'
 import { FreeShippingBar } from '@/components/store/cart/FreeShippingBar'
 import { CartSummary } from '@/components/store/cart/CartSummary'
-import type { CartSheetProps } from '@/lib/types/store'
+import type { CartSheetProps } from '@/lib/types/cart'
 
 export function CartSheet({ flatRateCents = 0, thresholdCents = 0 }: CartSheetProps) {
   const { items, isOpen, closeCart } = useCart()
   const subtotalCents = useCartSubtotalCents()
   const shippingCents = calculateShipping(subtotalCents, flatRateCents, thresholdCents)
 
-  const [discountCents, setDiscountCents] = useState(0)
-  const [couponApplied, setCouponApplied] = useState(false)
+  const discountCents = useCart((s) => s.discountCents)
+  const couponApplied = useCart((s) => s.couponCode !== null)
+  const applyCoupon = useCart((s) => s.applyCoupon)
 
   async function handleApplyCoupon(code: string): Promise<boolean> {
     try {
@@ -35,8 +35,7 @@ export function CartSheet({ flatRateCents = 0, thresholdCents = 0 }: CartSheetPr
         { code, subtotalCents },
       )
       if (result.valid) {
-        setDiscountCents(result.discountCents)
-        setCouponApplied(true)
+        applyCoupon(code, result.discountCents)
         return true
       }
       toast.error(result.message ?? en.cart.couponInvalid)
@@ -49,7 +48,7 @@ export function CartSheet({ flatRateCents = 0, thresholdCents = 0 }: CartSheetPr
   }
 
   return (
-    <Sheet open={isOpen} onOpenChange={(open) => { if (!open) closeCart() }}>
+    <Sheet open={isOpen} onOpenChange={(open: boolean) => { if (!open) closeCart() }}>
       <SheetContent side="right" className="flex flex-col p-0 sm:max-w-md w-full">
         <SheetHeader className="px-4 pt-4 pb-2">
           <SheetTitle>{en.cart.title}</SheetTitle>

@@ -4,13 +4,13 @@
 
 import { Hono } from 'hono'
 import { eq, desc, count, sql } from 'drizzle-orm'
-import { createDb } from '../../db/index'
-import * as schema from '../../db/schema'
+import { createDb } from 'worker/db/index'
+import * as schema from 'worker/db/schema'
 import { updateOrderStatusSchema, updateTrackingSchema } from '@/lib/schemas'
-import { createOrder, assertItemsAvailable, CouponError, StockError } from '../../lib/orders'
-import { parseBody } from '../../lib/http'
+import { createOrder, assertItemsAvailable, CouponError, StockError } from 'worker/lib/orders'
+import { parseBody } from 'worker/lib/http'
 import { posOrderSchema } from '@/lib/schemas'
-import type { AdminEnv } from '../../lib/access'
+import type { AdminEnv } from 'worker/lib/access'
 
 const app = new Hono<AdminEnv>()
 

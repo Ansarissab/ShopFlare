@@ -15,12 +15,12 @@
 import { Hono } from 'hono'
 import { nanoid } from 'nanoid'
 import { eq } from 'drizzle-orm'
-import { createDb } from '../db/index'
-import * as schema from '../db/schema'
-import { parseBody } from '../lib/http'
-import { sendPushToAll } from '../lib/push'
+import { createDb } from 'worker/db/index'
+import * as schema from 'worker/db/schema'
+import { parseBody } from 'worker/lib/http'
+import { sendPushToAll } from 'worker/lib/push'
 import { pushSubscriptionSchema, pushUnsubscribeSchema, pushSendSchema } from '@/lib/schemas'
-import type { AdminEnv } from '../lib/access'
+import type { AdminEnv } from 'worker/lib/access'
 import { en } from '@/lib/i18n/en'
 
 const app = new Hono<AdminEnv>()
