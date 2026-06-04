@@ -8,7 +8,7 @@
     "dev:all": "concurrently -k -n web,worker -c cyan,magenta \"pnpm dev\" \"pnpm worker:dev\"",
     "dev:setup": "pnpm db:migrate:local && pnpm db:seed:local",
     "dev:fresh": "pnpm dev:setup && pnpm dev:all",
-    "build": "next build",
+    "build": "NEXT_TELEMETRY_DISABLED=1 next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit && tsc -p worker/tsconfig.json --noEmit",
