@@ -2,8 +2,9 @@
 
 // Web Push subscription hook — Agent O.
 //
-// Checks browser support, requests permission, registers the service worker,
-// subscribes via PushManager, and POSTs the subscription to /api/push/subscribe.
+// Checks browser support, requests permission, uses navigator.serviceWorker.ready
+// (registration is managed by ServiceWorkerProvider in the root layout),
+// subscribes via PushManager, and POSTs the subscription to the given endpoint.
 // The VAPID public key is fetched from GET /api/public-config (already cached
 // there by the worker). All copy comes from en.notifications.
 //
@@ -18,6 +19,13 @@ import { useState, useEffect, useCallback } from 'react'
 import { apiGet, apiPost } from '@/lib/api'
 import type { PublicConfigResponse, UsePushSubscriptionReturn } from '@/lib/types/common'
 
+export type PushSubscriptionOptions = {
+  /** POST endpoint for the subscription. Defaults to '/api/admin/push/subscribe' */
+  endpoint?: string
+  /** Additional fields merged into the POST body (e.g. { orderNumber, kind: 'order' }) */
+  extraPayload?: Record<string, unknown>
+}
+
 function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
@@ -30,7 +38,7 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
   return outputArray
 }
 
-export function usePushSubscription(): UsePushSubscriptionReturn {
+export function usePushSubscription(opts: PushSubscriptionOptions = {}): UsePushSubscriptionReturn {
   const [supported, setSupported] = useState(false)
   const [permission, setPermission] = useState<NotificationPermission>('default')
   const [enabled, setEnabled] = useState(false)
@@ -55,7 +63,16 @@ export function usePushSubscription(): UsePushSubscriptionReturn {
 
       setPermission(Notification.permission)
 
-      // Check if already subscribed
+      // Check per-endpoint registration in localStorage first (avoids cross-endpoint
+      // false-positives where an admin sub would suppress the customer opt-in).
+      const storageKey = `pwa-push-${opts.endpoint ?? 'admin'}`
+      const wasRegistered = (() => { try { return localStorage.getItem(storageKey) === '1' } catch { return false } })()
+      if (wasRegistered) {
+        setEnabled(true)
+        return
+      }
+
+      // Fallback: check PushManager (covers cases where localStorage was cleared)
       navigator.serviceWorker.ready
         .then((reg) => reg.pushManager.getSubscription())
         .then((sub) => {
@@ -67,7 +84,7 @@ export function usePushSubscription(): UsePushSubscriptionReturn {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [opts.endpoint])
 
   const enable = useCallback(async (): Promise<boolean> => {
     if (!supported || loading) return false
@@ -83,9 +100,11 @@ export function usePushSubscription(): UsePushSubscriptionReturn {
       const config = await apiGet<PublicConfigResponse>('/api/public-config')
       if (!config.vapidPublicKey) return false
 
-      // 3. Register service worker (idempotent — no-op if already registered)
-      const reg = await navigator.serviceWorker.register('/sw.js')
-      await navigator.serviceWorker.ready
+      // 3. Use the already-registered SW (ServiceWorkerProvider handles registration)
+      const swTimeout = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('SW not ready — registration may have failed')), 10_000),
+      )
+      const reg = await Promise.race([navigator.serviceWorker.ready, swTimeout])
 
       // 4. Subscribe via PushManager
       const applicationServerKey = urlBase64ToUint8Array(config.vapidPublicKey)
@@ -101,15 +120,17 @@ export function usePushSubscription(): UsePushSubscriptionReturn {
 
       if (!auth || !p256dh) throw new Error('Missing push subscription keys')
 
-      // 6. POST to worker (admin-gated — api.ts sends the CF Access cookie for
-      //    /api/admin paths)
-      await apiPost('/api/admin/push/subscribe', {
+      // 6. POST to the configured endpoint (default: admin subscribe)
+      //    api.ts sends CF Access cookie for /api/admin paths automatically.
+      await apiPost(opts.endpoint ?? '/api/admin/push/subscribe', {
         endpoint: sub.endpoint,
         auth,
         p256dh,
+        ...opts.extraPayload,
       })
 
       setEnabled(true)
+      try { localStorage.setItem(`pwa-push-${opts.endpoint ?? 'admin'}`, '1') } catch {}
       return true
     } catch (err) {
       console.warn('[usePushSubscription] enable error', err)
@@ -117,7 +138,8 @@ export function usePushSubscription(): UsePushSubscriptionReturn {
     } finally {
       setLoading(false)
     }
-  }, [supported, loading])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [supported, loading, opts.endpoint, JSON.stringify(opts.extraPayload)])
 
   return { supported, permission, enabled, enable, loading }
 }
