@@ -97,7 +97,7 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
         <FormField label={en.admin.couponType} htmlFor="coupon-type">
           <Select
             value={type}
-            onValueChange={(v) => setType(v as 'percentage' | 'fixed')}
+            onValueChange={(v: string | null) => setType(v as 'percentage' | 'fixed')}
             disabled={isEdit}
           >
             <SelectTrigger id="coupon-type">
@@ -187,7 +187,7 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
         <Checkbox
           id="coupon-active"
           checked={active}
-          onCheckedChange={(v) => setActive(v === true)}
+          onCheckedChange={(v: boolean) => setActive(v === true)}
         />
         <label htmlFor="coupon-active" className="text-sm cursor-pointer">
           {en.admin.active}

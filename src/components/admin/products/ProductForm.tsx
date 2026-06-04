@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type MouseEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, Trash2, ChevronDown, ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
@@ -329,7 +329,7 @@ export function ProductForm({ initial }: ProductFormProps) {
           <Checkbox
             id="product-active"
             checked={active}
-            onCheckedChange={(v) => setActive(v === true)}
+            onCheckedChange={(v: boolean) => setActive(v === true)}
           />
           <label htmlFor="product-active" className="text-sm cursor-pointer">
             {en.admin.active}
@@ -393,7 +393,7 @@ export function ProductForm({ initial }: ProductFormProps) {
                         variant="ghost"
                         size="icon"
                         className="size-7 text-destructive hover:text-destructive"
-                        onClick={(e) => { e.stopPropagation(); deleteVariant(variant.id) }}
+                        onClick={(e: MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); deleteVariant(variant.id) }}
                         aria-label={en.admin.deleteVariant}
                       >
                         <Trash2 className="size-3.5" aria-hidden />

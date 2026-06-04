@@ -161,7 +161,7 @@ export function POSScreen() {
         ) : (
           <div className="flex flex-col gap-3">
             {/* Product */}
-            <Select value={selectedProductId} onValueChange={(v) => {
+            <Select value={selectedProductId} onValueChange={(v: string | null) => {
               setSelectedProductId(v ?? '')
               setSelectedVariantId('')
               setSelectedSizeId('')
@@ -178,7 +178,7 @@ export function POSScreen() {
 
             {/* Variant */}
             {selectedProduct && (
-              <Select value={selectedVariantId} onValueChange={(v) => {
+              <Select value={selectedVariantId} onValueChange={(v: string | null) => {
                 setSelectedVariantId(v ?? '')
                 setSelectedSizeId('')
               }}>
@@ -204,7 +204,7 @@ export function POSScreen() {
 
             {/* Size */}
             {selectedVariant && (
-              <Select value={selectedSizeId} onValueChange={(v) => setSelectedSizeId(v ?? '')}>
+              <Select value={selectedSizeId} onValueChange={(v: string | null) => setSelectedSizeId(v ?? '')}>
                 <SelectTrigger>
                   <SelectValue placeholder={en.pos.selectSize} />
                 </SelectTrigger>
