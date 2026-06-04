@@ -47,3 +47,6 @@ next-env.d.ts
 
 # Cloudflare local state
 .wrangler/
+
+# graphify knowledge graph outputs (cache + generated files)
+graphify-out/cache
