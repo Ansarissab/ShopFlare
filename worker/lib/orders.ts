@@ -7,14 +7,20 @@ import type { Database } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import { DEFAULT_CURRENCY } from '@/lib/constants'
 import type { CurrencyCode } from '@/lib/constants'
+import { calculateTax, calculateGrandTotal } from '@/lib/utils/index'
 import { formatCents } from './money'
 
 // ─── Shipping config helper ────────────────────────────────────────────────────
 
 interface OrderConfig {
-  flatRateCents: number
+  flatRateCents:  number
   thresholdCents: number
-  currency: CurrencyCode
+  currency:       CurrencyCode
+  taxEnabled:     boolean
+  taxRate:        number
+  taxInclusive:   boolean
+  taxBasis:       string
+  taxName:        string
 }
 
 /**
@@ -32,6 +38,11 @@ async function getOrderConfig(db: Database): Promise<OrderConfig> {
         'flatShippingRateCents',
         'freeShippingThresholdCents',
         'currency',
+        'taxEnabled',
+        'taxRate',
+        'taxInclusive',
+        'taxBasis',
+        'taxName',
       ]),
     )
     .all()
@@ -47,6 +58,11 @@ async function getOrderConfig(db: Database): Promise<OrderConfig> {
     flatRateCents:   Math.max(0, Number(kv['flatShippingRateCents']      ?? '0') || 0),
     thresholdCents:  Math.max(0, Number(kv['freeShippingThresholdCents'] ?? '0') || 0),
     currency,
+    taxEnabled:   kv['taxEnabled']  === 'true',
+    taxRate:      Math.max(0, Number(kv['taxRate']  ?? '0') || 0),
+    taxInclusive: kv['taxInclusive'] === 'true',
+    taxBasis:     kv['taxBasis']    ?? 'subtotal',
+    taxName:      kv['taxName']     || 'Tax',
   }
 }
 
@@ -75,12 +91,17 @@ export interface CreateOrderInput {
 }
 
 export interface CreateOrderResult {
-  orderId: string
-  orderNumber: string
+  orderId:      string
+  orderNumber:  string
   subtotalCents: number
   discountCents: number
   shippingCents: number
-  totalCents: number
+  taxCents:      number
+  taxName:       string
+  taxRate:       number
+  taxInclusive:  boolean
+  totalCents:    number
+  currency:      CurrencyCode
 }
 
 /**
@@ -336,7 +357,7 @@ export async function createOrder(
   }
 
   // ── 2. Store config (currency + shipping) — one query, reused below ───────
-  const { flatRateCents, thresholdCents, currency } = await getOrderConfig(db)
+  const { flatRateCents, thresholdCents, currency, taxEnabled, taxRate, taxInclusive, taxBasis, taxName } = await getOrderConfig(db)
 
   // ── 2a. Coupon validation + discount ──────────────────────────────────────
   let discountCents = 0
@@ -385,7 +406,11 @@ export async function createOrder(
   const shippingCents =
     thresholdCents > 0 && subtotalCents >= thresholdCents ? 0 : flatRateCents
 
-  const totalCents = Math.max(0, subtotalCents - discountCents + shippingCents)
+  const taxCents = taxEnabled
+    ? calculateTax({ subtotalCents, shippingCents, discountCents, taxRate, taxInclusive, taxBasis })
+    : 0
+
+  const totalCents = calculateGrandTotal(subtotalCents, shippingCents, discountCents, taxCents, taxInclusive)
   const orderId = nanoid()
   const orderNumber = generateOrderNumber()
 
@@ -404,6 +429,7 @@ export async function createOrder(
     subtotalCents,
     shippingCents,
     discountCents,
+    taxCents,
     totalCents,
     couponCode: couponCode ?? null,
   })
@@ -468,7 +494,7 @@ export async function createOrder(
       .where(eq(schema.coupons.id, couponRow.id))
   }
 
-  return { orderId, orderNumber, subtotalCents, discountCents, shippingCents, totalCents }
+  return { orderId, orderNumber, subtotalCents, discountCents, shippingCents, taxCents, taxName, taxRate, taxInclusive, totalCents, currency }
 }
 
 // ─── releaseOrderInventory ─────────────────────────────────────────────────────
