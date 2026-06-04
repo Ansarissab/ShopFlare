@@ -22,7 +22,8 @@
     "db:migrate:local": "wrangler d1 migrations apply store-db --local",
     "db:migrate": "wrangler d1 migrations apply store-db --remote",
     "db:seed:local": "wrangler d1 execute store-db --local --file=worker/db/seed.sql",
-    "db:seed": "wrangler d1 execute store-db --remote --file=worker/db/seed.sql"
+    "db:seed": "wrangler d1 execute store-db --remote --file=worker/db/seed.sql",
+    "prepare": "git config core.hooksPath .githooks"
   },
   "dependencies": {
     "@base-ui/react": "1.5.0",

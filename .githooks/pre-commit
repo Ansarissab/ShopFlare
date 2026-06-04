@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+set -e
+
+echo "[pre-commit] typecheck..."
+pnpm typecheck
+
+echo "[pre-commit] tests..."
+pnpm test
