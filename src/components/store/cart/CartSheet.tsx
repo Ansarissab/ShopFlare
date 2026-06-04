@@ -48,7 +48,7 @@ export function CartSheet({ flatRateCents = 0, thresholdCents = 0 }: CartSheetPr
   }
 
   return (
-    <Sheet open={isOpen} onOpenChange={(open) => { if (!open) closeCart() }}>
+    <Sheet open={isOpen} onOpenChange={(open: boolean) => { if (!open) closeCart() }}>
       <SheetContent side="right" className="flex flex-col p-0 sm:max-w-md w-full">
         <SheetHeader className="px-4 pt-4 pb-2">
           <SheetTitle>{en.cart.title}</SheetTitle>

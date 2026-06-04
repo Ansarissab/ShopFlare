@@ -224,7 +224,7 @@ function CancelOrderContent() {
           <Checkbox
             id="cancel-confirm-check"
             checked={confirmed}
-            onCheckedChange={(val) => setConfirmed(val === true)}
+            onCheckedChange={(val: boolean) => setConfirmed(val === true)}
           />
           <label htmlFor="cancel-confirm-check" className="text-sm cursor-pointer select-none">
             {en.checkout.cancelConfirm}

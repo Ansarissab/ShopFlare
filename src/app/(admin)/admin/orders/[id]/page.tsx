@@ -163,7 +163,7 @@ export default function AdminOrderDetailPage() {
         {/* Status update */}
         <div className="flex flex-col gap-2 rounded-lg border p-4">
           <p className="text-sm font-medium">{en.admin.updateStatus}</p>
-          <Select value={newStatus} onValueChange={(v) => setNewStatus(v ?? '')}>
+          <Select value={newStatus} onValueChange={(v: string | null) => setNewStatus(v ?? '')}>
             <SelectTrigger>
               <SelectValue placeholder={en.orderStatusLabels[order.status as keyof typeof en.orderStatusLabels] ?? order.status} />
             </SelectTrigger>

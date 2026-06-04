@@ -239,7 +239,7 @@ export default function AdminSettingsPage() {
         {/* Selects: radius / font / color mode */}
         <div className="grid grid-cols-3 gap-4">
           <FormField label={en.admin.borderRadius} htmlFor="a-radius">
-            <Select value={radius} onValueChange={(v) => setRadius(v ?? 'md')}>
+            <Select value={radius} onValueChange={(v: string | null) => setRadius(v ?? 'md')}>
               <SelectTrigger id="a-radius" className="w-full">
                 <SelectValue />
               </SelectTrigger>
@@ -251,7 +251,7 @@ export default function AdminSettingsPage() {
             </Select>
           </FormField>
           <FormField label={en.admin.fontFamily} htmlFor="a-font">
-            <Select value={fontFamily} onValueChange={(v) => setFontFamily(v ?? 'sans')}>
+            <Select value={fontFamily} onValueChange={(v: string | null) => setFontFamily(v ?? 'sans')}>
               <SelectTrigger id="a-font" className="w-full">
                 <SelectValue />
               </SelectTrigger>
@@ -263,7 +263,7 @@ export default function AdminSettingsPage() {
             </Select>
           </FormField>
           <FormField label={en.admin.colorMode} htmlFor="a-mode">
-            <Select value={colorMode} onValueChange={(v) => setColorMode(v ?? 'light')}>
+            <Select value={colorMode} onValueChange={(v: string | null) => setColorMode(v ?? 'light')}>
               <SelectTrigger id="a-mode" className="w-full">
                 <SelectValue />
               </SelectTrigger>
@@ -392,7 +392,7 @@ export default function AdminSettingsPage() {
       <div className="flex flex-col gap-4 rounded-lg border p-5">
         <h2 className="text-sm font-semibold">Payments &amp; Shipping</h2>
         <FormField label={en.admin.currency} htmlFor="s-currency">
-          <Select value={currency} onValueChange={(v) => setCurrency(v ?? 'PKR')}>
+          <Select value={currency} onValueChange={(v: string | null) => setCurrency(v ?? 'PKR')}>
             <SelectTrigger id="s-currency" className="w-full">
               <SelectValue />
             </SelectTrigger>
