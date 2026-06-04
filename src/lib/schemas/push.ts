@@ -26,3 +26,14 @@ export const pushSendSchema = z.object({
 export type PushSubscriptionInput = z.infer<typeof pushSubscriptionSchema>
 export type PushUnsubscribeInput  = z.infer<typeof pushUnsubscribeSchema>
 export type PushSendInput         = z.infer<typeof pushSendSchema>
+
+// Customer push subscription — public endpoint, tied to an order.
+// `kind` is not accepted from the client; the route always inserts 'order'.
+export const customerPushSubscriptionSchema = pushSubscriptionSchema.extend({
+  orderNumber: z.string().min(1).max(20),
+})
+
+export const customerPushUnsubscribeSchema = pushSubscriptionSchema.pick({ endpoint: true })
+
+export type CustomerPushSubscriptionInput = z.infer<typeof customerPushSubscriptionSchema>
+export type CustomerPushUnsubscribeInput  = z.infer<typeof customerPushUnsubscribeSchema>

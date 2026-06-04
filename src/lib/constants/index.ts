@@ -102,3 +102,38 @@ export const TAX_BASIS = {
   subtotalAndShipping:  'subtotal_and_shipping',
 } as const
 export type TaxBasis = keyof typeof TAX_BASIS
+
+// ─── PWA ─────────────────────────────────────────────────────────────────────
+
+export const SW_CACHE_NAMES = {
+  precache: 'shopflare-precache-v1',
+  static: 'shopflare-static-v1',
+  api: 'shopflare-api-v1',
+  images: 'shopflare-images-v1',
+  pages: 'shopflare-pages-v1',
+} as const
+
+export const OFFLINE_QUEUE_IDB_KEY = 'offline_queue'
+export const INSTALL_DISMISSED_KEY = 'pwa-install-dismissed'
+
+// Tab routes for the native bottom nav (standalone mode)
+export const TAB_ROUTES = [
+  { key: 'home',  href: '/',          labelKey: 'tabHome'  },
+  { key: 'shop',  href: '/?tab=shop', labelKey: 'tabShop'  },
+  { key: 'cart',  href: null,         labelKey: 'tabCart'  },  // null = triggers CartSheet
+  { key: 'track', href: '/track',     labelKey: 'tabTrack' },
+  { key: 'menu',  href: null,         labelKey: 'tabMenu'  },  // null = triggers menu sheet
+] as const
+export type TabKey = typeof TAB_ROUTES[number]['key']
+
+// Default manifest values (used when merchant hasn't configured custom icons)
+export const PWA_MANIFEST_DEFAULTS = {
+  iconSrc: '/icon-512.png',
+  icon192: '/icon-192.png',
+  icon512: '/icon-512.png',
+  iconMaskable: '/icon-maskable-512.png',
+  iconMonochrome: '/icon-monochrome-192.png',
+  appleTouchIcon: '/apple-touch-icon.png',
+  backgroundColor: '#09090b',
+  themeColor: '#18181b',
+} as const

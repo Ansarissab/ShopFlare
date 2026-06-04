@@ -504,6 +504,50 @@ export const en = {
     pushBlocked: 'Notifications are blocked in your browser settings.',
     pushUnsupported: 'Push notifications are not supported on this device.',
   },
+  // PWA — offline page, install prompt, update toast, sync feedback, bottom nav,
+  // and customer push notification copy (Phase 10).
+  pwa: {
+    // offline page
+    offlineTitle: 'You\'re offline',
+    offlineBody: 'Check your connection and try again.',
+    offlineRetry: 'Try again',
+    // update toast
+    updateAvailable: 'App update available',
+    updateReload: 'Reload',
+    // install prompt
+    installTitle: 'Add to Home Screen',
+    installBody: 'Install this app for a faster experience.',
+    installAction: 'Install',
+    installDismiss: 'Not now',
+    installIosTitle: 'Add to Home Screen',
+    installIosStep1: 'Tap the Share button',
+    installIosStep2: 'Select "Add to Home Screen"',
+    installIosStep3: 'Tap Add',
+    installIosClose: 'Close',
+    // offline sync
+    syncQueued: 'Saved offline — will sync when back online',
+    syncSuccess: 'Your request has been sent',
+    syncFailed: 'Sync failed — please try again online',
+    // bottom tab bar
+    tabHome: 'Home',
+    tabShop: 'Shop',
+    tabCart: 'Cart',
+    tabTrack: 'Track',
+    tabMenu: 'Menu',
+    // customer push notifications
+    orderPushTitle: 'Order Update',
+    orderPushEnableTitle: 'Get order updates',
+    orderPushEnableBody: 'Enable push notifications to track your order status.',
+    orderPushEnableAction: 'Enable',
+    orderPushEnableDismiss: 'No thanks',
+    orderPushSubscribed: 'Notifications enabled',
+    orderPushBlocked: 'Notifications blocked in browser settings.',
+    orderStatusShipped: 'Your order {orderNumber} has been shipped!',
+    orderStatusDelivered: 'Your order {orderNumber} has been delivered!',
+    // back-in-stock push
+    restockPushTitle: '{productName} is back in stock!',
+    restockPushBody: 'The {size} you wanted is now available.',
+  },
 } as const
 
 export type TranslationKey = keyof typeof en

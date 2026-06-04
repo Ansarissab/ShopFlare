@@ -111,3 +111,87 @@
     outline-offset: 2px;
   }
 }
+
+/* ─── PWA / native-feel additions ─────────────────────────────────────────── */
+
+/* Safe-area insets — account for iOS notch / home bar */
+:root {
+  --safe-top:    env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left:   env(safe-area-inset-left, 0px);
+  --safe-right:  env(safe-area-inset-right, 0px);
+}
+
+/* Remove tap highlight on interactive elements (native feel) */
+button, a, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Momentum scroll on scrollable containers */
+.overflow-y-auto, .overflow-y-scroll, .overflow-auto, .overflow-scroll {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent text selection on navigation elements */
+nav, [data-tab-bar] {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Bottom tab bar safe area — content above home indicator */
+[data-tab-bar] {
+  padding-bottom: calc(0.5rem + var(--safe-bottom));
+}
+
+/* App header top safe area */
+[data-app-header] {
+  padding-top: var(--safe-top);
+}
+
+/* Overscroll behavior — prevent browser chrome pull-to-refresh interfering with app */
+@media (display-mode: standalone) {
+  html, body {
+    overscroll-behavior-y: contain;
+  }
+}
+
+/* View transitions — page slide animation */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: slide-out 200ms ease-in both;
+}
+
+::view-transition-new(root) {
+  animation: slide-in 200ms ease-out both;
+}
+
+@keyframes slide-out {
+  to { transform: translateX(-15px); opacity: 0; }
+}
+
+@keyframes slide-in {
+  from { transform: translateX(15px); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
+/* In standalone mode: hide web chrome and add padding for app shell */
+@media (display-mode: standalone) {
+  [data-web-chrome] {
+    display: none;
+  }
+
+  /* Pad main content so it clears the native app header (top) and tab bar (bottom) */
+  main {
+    padding-top: calc(3rem + var(--safe-top));
+    padding-bottom: calc(3.5rem + var(--safe-bottom));
+  }
+}

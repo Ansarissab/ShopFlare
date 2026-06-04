@@ -15,4 +15,18 @@ export const layout = {
   // Full-height centered state screens — compose with a max-w-* class via cn()
   centeredState: 'mx-auto flex flex-col items-center justify-center gap-3 px-4 text-center min-h-[60vh]',
   inlineError: 'mx-auto flex items-center justify-center px-4 min-h-[40vh]',
+
+  // Native app shell containers
+  appHeader: 'sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/60',
+  tabBar: 'fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur-sm',
+} as const
+
+// PWA-specific safe-area utilities (combine with Tailwind via cn())
+export const safeArea = {
+  top:    'pt-[var(--safe-top)]',
+  bottom: 'pb-[var(--safe-bottom)]',
+  left:   'pl-[var(--safe-left)]',
+  right:  'pr-[var(--safe-right)]',
+  x:      'pl-[var(--safe-left)] pr-[var(--safe-right)]',
+  inset:  'pt-[var(--safe-top)] pb-[var(--safe-bottom)] pl-[var(--safe-left)] pr-[var(--safe-right)]',
 } as const
