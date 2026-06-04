@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { en } from '@/lib/i18n/en'
 import { cn } from '@/lib/utils'
-import { formatPrice } from '@/lib/utils/index'
+import { formatPrice, calculateGrandTotal } from '@/lib/utils/index'
 import type { CartSummaryProps } from '@/lib/types/cart'
 
 export function CartSummary({
@@ -16,6 +16,10 @@ export function CartSummary({
   onApplyCoupon,
   couponApplied = false,
   discountCents = 0,
+  taxCents      = 0,
+  taxName       = 'Tax',
+  taxRate       = 0,
+  taxInclusive  = false,
   onClose,
 }: CartSummaryProps) {
   const router = useRouter()
@@ -23,7 +27,7 @@ export function CartSummary({
   const [couponState, setCouponState] = useState<'idle' | 'applied' | 'invalid'>('idle')
   const [applying, setApplying] = useState(false)
 
-  const totalCents = subtotalCents + shippingCents - discountCents
+  const totalCents = calculateGrandTotal(subtotalCents, shippingCents, discountCents, taxCents, taxInclusive)
 
   async function handleApplyCoupon() {
     if (!couponCode.trim()) return
@@ -99,6 +103,18 @@ export function CartSummary({
               : formatPrice(shippingCents)}
           </span>
         </div>
+        {taxCents > 0 && (
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">
+              {taxInclusive
+                ? en.cart.taxIncluded.replace('{name}', taxName)
+                : en.cart.taxRateLabel.replace('{name}', taxName).replace('{rate}', String(taxRate))}
+            </span>
+            <span className={taxInclusive ? 'text-xs text-muted-foreground' : ''}>
+              {formatPrice(taxCents)}
+            </span>
+          </div>
+        )}
         {discountCents > 0 && (
           <div className="flex justify-between text-success">
             <span>{en.cart.couponApplied}</span>

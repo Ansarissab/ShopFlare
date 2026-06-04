@@ -11,8 +11,9 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { en } from '@/lib/i18n/en'
-import { calculateShipping } from '@/lib/utils/index'
+import { calculateShipping, calculateTax } from '@/lib/utils/index'
 import { useCart, useCartSubtotalCents } from '@/hooks/useCart'
+import { useStoreConfig } from '@/hooks/useStoreConfig'
 import { apiPost, ApiError } from '@/lib/api'
 import { CartItem } from '@/components/store/cart/CartItem'
 import { FreeShippingBar } from '@/components/store/cart/FreeShippingBar'
@@ -24,9 +25,20 @@ export function CartSheet({ flatRateCents = 0, thresholdCents = 0 }: CartSheetPr
   const subtotalCents = useCartSubtotalCents()
   const shippingCents = calculateShipping(subtotalCents, flatRateCents, thresholdCents)
 
+  const { config } = useStoreConfig()
+  const taxEnabled   = config?.taxEnabled   ?? false
+  const taxRate      = config?.taxRate      ?? 0
+  const taxName      = config?.taxName      ?? 'Tax'
+  const taxInclusive = config?.taxInclusive ?? false
+  const taxBasis     = config?.taxBasis     ?? 'subtotal'
+
   const discountCents = useCart((s) => s.discountCents)
   const couponApplied = useCart((s) => s.couponCode !== null)
   const applyCoupon = useCart((s) => s.applyCoupon)
+
+  const taxCents = taxEnabled
+    ? calculateTax({ subtotalCents, shippingCents, discountCents, taxRate, taxInclusive, taxBasis })
+    : 0
 
   async function handleApplyCoupon(code: string): Promise<boolean> {
     try {
@@ -95,6 +107,10 @@ export function CartSheet({ flatRateCents = 0, thresholdCents = 0 }: CartSheetPr
                 onApplyCoupon={handleApplyCoupon}
                 couponApplied={couponApplied}
                 discountCents={discountCents}
+                taxCents={taxCents}
+                taxName={taxName}
+                taxRate={taxRate}
+                taxInclusive={taxInclusive}
                 onClose={closeCart}
               />
             </div>
