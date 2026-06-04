@@ -70,6 +70,12 @@ app.get('/store', async (c) => {
     logoR2Key:      kv['logoR2Key']      || undefined,
     faviconUrl:     kv['faviconUrl']     || undefined,
     faviconR2Key:   kv['faviconR2Key']   || undefined,
+    taxEnabled:            kv['taxEnabled'] === 'true',
+    taxRate:               Number(kv['taxRate'] ?? '0') || 0,
+    taxName:               kv['taxName'] || 'Tax',
+    taxInclusive:          kv['taxInclusive'] === 'true',
+    taxBasis:              kv['taxBasis'] || 'subtotal',
+    taxRegistrationNumber: kv['taxRegistrationNumber'] || undefined,
   }
 
   const validation = storeConfigSchema.safeParse(assembled)
