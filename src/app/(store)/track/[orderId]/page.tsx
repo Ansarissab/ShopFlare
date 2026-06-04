@@ -149,6 +149,18 @@ function OrderTrackingContent() {
             {order.shippingCents === 0 ? en.cart.shippingFree : formatPrice(order.shippingCents)}
           </span>
         </div>
+        {order.discountCents > 0 && (
+          <div className="flex justify-between text-success">
+            <span>{en.cart.couponApplied}</span>
+            <span>-{formatPrice(order.discountCents)}</span>
+          </div>
+        )}
+        {order.taxCents > 0 && (
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">{en.cart.tax}</span>
+            <span>{formatPrice(order.taxCents)}</span>
+          </div>
+        )}
         <Separator />
         <div className="flex justify-between font-semibold text-base">
           <span>{en.cart.total}</span>

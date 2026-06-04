@@ -149,6 +149,12 @@ export default function AdminOrderDetailPage() {
             <span>-{formatPrice(order.discountCents)}</span>
           </div>
         )}
+        {order.taxCents > 0 && (
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">{en.cart.tax}</span>
+            <span>{formatPrice(order.taxCents)}</span>
+          </div>
+        )}
         <Separator />
         <div className="flex justify-between font-semibold text-base">
           <span>{en.cart.total}</span>
