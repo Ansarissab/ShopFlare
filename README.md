@@ -74,7 +74,8 @@ admin dashboard. Code redeploys are only for actual code changes.
 | Bot protection | Cloudflare Turnstile |
 | Payments | Stripe Checkout (no raw card data) |
 | Email | Resend (single send, merchant BCC) |
-| Push | Web Push API (VAPID) |
+| Push | Web Push API (VAPID) — merchant new-order + customer order-status |
+| PWA | Serwist (offline + precache), Background Sync, TWA packaging for Google Play |
 | Frontend | Next.js 16.2 · React 19 · Tailwind 4 · shadcn/ui |
 | Validation | Zod v4 (shared client + Worker) |
 
@@ -235,7 +236,7 @@ you've edited in admin. Delete the `demo_*` rows to remove the sample data.
 | --- | --- |
 | `pnpm dev` | Next.js dev server |
 | `pnpm worker:dev` | Wrangler dev server for the Worker API |
-| `pnpm build` | Production build of the Next.js app |
+| `pnpm build` | Production build of the Next.js app (`--webpack` required for Serwist SW injection; Turbopack support pending upstream) |
 | `pnpm setup` | Interactive CF + Stripe setup wizard |
 | `pnpm lint` | ESLint |
 | `pnpm typecheck` | `tsc` for the app **and** the Worker |
@@ -263,6 +264,32 @@ you've edited in admin. Delete the `demo_*` rows to remove the sample data.
   HTML-escaped in emails and JSON-LD.
 
 Run a security review with the project's tooling before each release.
+
+---
+
+## PWA
+
+Both the storefront and admin dashboard are installable Progressive Web Apps.
+
+### Storefront (customer)
+
+- "Add to Home Screen" on iOS / install prompt on Android/desktop.
+- Offline catalog browsing — products and store config precached by Serwist.
+- Background Sync — COD checkout queued in IndexedDB when offline, replayed on reconnect.
+- **Order status push**: after placing an order (or from the tracking page) customers can opt in to push notifications. They receive a push when their order is marked Shipped or Delivered.
+- **Back-in-stock push**: customers who tap "Notify Me" on an out-of-stock size can also opt into push alerts (alongside email).
+- iOS 16.4+ required for push (Home Screen web app only).
+
+### Admin (merchant)
+
+- Push notification on every new order — works even with phone screen off.
+- Add the admin PWA to your home screen once; no app store needed.
+
+### Google Play distribution
+
+- A TWA (Trusted Web Activity) wrapper is provided in `packaging/twa/`.
+- Lets you publish the storefront to Google Play with zero native code.
+- See [docs/features/pwa-app-store.md](docs/features/pwa-app-store.md).
 
 ---
 
