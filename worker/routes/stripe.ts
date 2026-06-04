@@ -84,8 +84,13 @@ app.post('/checkout-session', async (c) => {
   // out between catalogue render and checkout, or CouponError if the coupon is
   // invalid. Map both to a 422 instead of a 500.
   let orderId: string
+  let taxCents: number
+  let taxName: string
+  let taxRate: number
+  let taxInclusive: boolean
+  let currency: string
   try {
-    ;({ orderId } = await createOrder(db, {
+    ;({ orderId, taxCents, taxName, taxRate, taxInclusive, currency } = await createOrder(db, {
       paymentMethod: 'stripe_checkout',
       items: orderItems,
       // customerName/email/phone are empty placeholders — the webhook fills
@@ -123,12 +128,25 @@ app.post('/checkout-session', async (c) => {
   // 5. Create Stripe Checkout session, passing orderId in metadata so the
   //    webhook can confirm the correct order row.
   try {
+    const lineItems: Array<{ price?: string; price_data?: { currency: string; unit_amount: number; product_data: { name: string } }; quantity: number }> = items.map((item) => ({
+      price: item.stripePriceId,
+      quantity: item.quantity,
+    }))
+
+    if (taxCents > 0 && !taxInclusive) {
+      lineItems.push({
+        price_data: {
+          currency: currency.toLowerCase(),
+          unit_amount: taxCents,
+          product_data: { name: `${taxName} (${taxRate}%)` },
+        },
+        quantity: 1,
+      })
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
-      line_items: items.map((item) => ({
-        price: item.stripePriceId,
-        quantity: item.quantity,
-      })),
+      line_items: lineItems,
       success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/checkout`,
       metadata: { orderId },
