@@ -42,6 +42,14 @@ export default function AdminSettingsPage() {
   const [logoUrl, setLogoUrl] = useState('')
   const [logoUploading, setLogoUploading] = useState(false)
   const [faviconUploading, setFaviconUploading] = useState(false)
+
+  // Tax
+  const [taxEnabled, setTaxEnabled] = useState(false)
+  const [taxRateInput, setTaxRateInput] = useState('0')
+  const [taxName, setTaxName] = useState('Tax')
+  const [taxInclusive, setTaxInclusive] = useState(false)
+  const [taxBasis, setTaxBasis] = useState('subtotal')
+  const [taxRegistrationNumber, setTaxRegistrationNumber] = useState('')
   const logoInputRef = useRef<HTMLInputElement>(null)
   const faviconInputRef = useRef<HTMLInputElement>(null)
 
@@ -65,6 +73,12 @@ export default function AdminSettingsPage() {
     setFontFamily(config.fontFamily ?? 'sans')
     setColorMode(config.colorMode ?? 'light')
     setLogoUrl(config.logoUrl ?? '')
+    setTaxEnabled(config.taxEnabled ?? false)
+    setTaxRateInput(String(config.taxRate ?? 0))
+    setTaxName(config.taxName ?? 'Tax')
+    setTaxInclusive(config.taxInclusive ?? false)
+    setTaxBasis(config.taxBasis ?? 'subtotal')
+    setTaxRegistrationNumber(config.taxRegistrationNumber ?? '')
   }, [config])
 
   async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -144,6 +158,12 @@ export default function AdminSettingsPage() {
         radius,
         fontFamily,
         colorMode,
+        taxEnabled,
+        taxRate:               Number(taxRateInput) || 0,
+        taxName:               taxName.trim() || 'Tax',
+        taxInclusive,
+        taxBasis,
+        taxRegistrationNumber: taxRegistrationNumber.trim() || undefined,
       })
       toast.success(en.admin.settingsSaved)
       if (typeof BroadcastChannel !== 'undefined') {
@@ -364,6 +384,124 @@ export default function AdminSettingsPage() {
             </Button>
           </div>
         </FormField>
+      </div>
+
+      {/* Tax */}
+      <div className="flex flex-col gap-4 rounded-lg border p-5">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-sm font-semibold">{en.admin.taxSettings}</h2>
+          <p className="text-xs text-muted-foreground">{en.admin.taxSettingsHint}</p>
+        </div>
+
+        {/* Enable toggle */}
+        <FormField label={en.admin.taxEnabled} htmlFor="t-enabled">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="t-enabled"
+              checked={taxEnabled}
+              onChange={(e) => setTaxEnabled(e.target.checked)}
+              className="h-4 w-4 cursor-pointer rounded border"
+            />
+            <span className="text-xs text-muted-foreground">{en.admin.taxEnabledHint}</span>
+          </div>
+        </FormField>
+
+        {taxEnabled && (
+          <>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField label={en.admin.taxName} htmlFor="t-name">
+                <Input
+                  id="t-name"
+                  value={taxName}
+                  onChange={(e) => setTaxName(e.target.value)}
+                  placeholder="GST"
+                  maxLength={30}
+                />
+              </FormField>
+              <FormField label={en.admin.taxRate} htmlFor="t-rate">
+                <Input
+                  id="t-rate"
+                  type="number"
+                  min={0}
+                  max={100}
+                  step={0.01}
+                  value={taxRateInput}
+                  onChange={(e) => setTaxRateInput(e.target.value)}
+                  placeholder="17"
+                />
+              </FormField>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField label={en.admin.taxBasis} htmlFor="t-basis">
+                <Select value={taxBasis} onValueChange={(v: string | null) => setTaxBasis(v ?? 'subtotal')}>
+                  <SelectTrigger id="t-basis" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="subtotal">{en.admin.taxBasisSubtotal}</SelectItem>
+                    <SelectItem value="subtotal_and_shipping">{en.admin.taxBasisSubtotalShipping}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormField>
+              <FormField label={en.admin.taxInclusive} htmlFor="t-inclusive">
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="checkbox"
+                    id="t-inclusive"
+                    checked={taxInclusive}
+                    onChange={(e) => setTaxInclusive(e.target.checked)}
+                    className="h-4 w-4 cursor-pointer rounded border"
+                  />
+                </div>
+              </FormField>
+            </div>
+
+            <FormField label={en.admin.taxRegistrationNumber} htmlFor="t-reg">
+              <Input
+                id="t-reg"
+                value={taxRegistrationNumber}
+                onChange={(e) => setTaxRegistrationNumber(e.target.value)}
+                placeholder="NTN-1234567-8"
+                maxLength={50}
+              />
+            </FormField>
+
+            {/* Live preview */}
+            {Number(taxRateInput) > 0 && (
+              <div className="rounded-md bg-muted/50 p-3 text-xs flex flex-col gap-1">
+                <p className="font-medium text-muted-foreground">{en.admin.livePreview}</p>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{en.cart.subtotal}</span>
+                  <span>5,000</span>
+                </div>
+                {!taxInclusive && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">
+                      {taxName} ({taxRateInput}%)
+                    </span>
+                    <span>{Math.round(5000 * (Number(taxRateInput) / 100)).toLocaleString()}</span>
+                  </div>
+                )}
+                {taxInclusive && (
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>{taxName} {en.admin.taxInclusive.toLowerCase()}</span>
+                    <span>{Math.round(5000 - 5000 / (1 + Number(taxRateInput) / 100)).toLocaleString()}</span>
+                  </div>
+                )}
+                <div className="flex justify-between font-semibold border-t pt-1 mt-1">
+                  <span>{en.cart.total}</span>
+                  <span>
+                    {taxInclusive
+                      ? '5,000'
+                      : (5000 + Math.round(5000 * (Number(taxRateInput) / 100))).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* Identity */}
