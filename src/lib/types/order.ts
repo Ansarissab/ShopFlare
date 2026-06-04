@@ -20,7 +20,9 @@ export interface TrackingOrder {
   customerName?: string
   subtotalCents: number
   shippingCents: number
-  totalCents: number
+  discountCents: number
+  taxCents:      number
+  totalCents:    number
   trackingNumber?: string
   carrier?: string
   createdAt: string

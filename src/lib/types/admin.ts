@@ -17,6 +17,7 @@ export interface AdminOrder {
   subtotalCents: number
   shippingCents: number
   discountCents: number
+  taxCents:      number
   couponCode: string | null
   trackingNumber: string | null
   carrier: string | null
