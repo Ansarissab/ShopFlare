@@ -2,7 +2,7 @@
 // validation) and the client (useStoreConfig). Composed so Admin forms (Phase 2)
 // can .pick()/.partial() individual slices instead of redefining fields.
 import { z } from 'zod/v4'
-import { CURRENCIES, RADIUS_PRESETS, FONT_PRESETS, COLOR_MODES } from '@/lib/constants'
+import { CURRENCIES, RADIUS_PRESETS, FONT_PRESETS, COLOR_MODES, TAX_BASIS } from '@/lib/constants'
 import { emailField, phoneField, hexColorField } from './base'
 
 // Derive the currency enum from the single CURRENCIES source (DRY).
@@ -27,6 +27,16 @@ export const appearanceSchema = z.object({
 })
 export type AppearanceData = z.infer<typeof appearanceSchema>
 
+export const taxConfigSchema = z.object({
+  taxEnabled:            z.boolean().optional(),
+  taxRate:               z.number().min(0).max(100).optional(),
+  taxName:               z.string().min(1).max(30).optional(),
+  taxInclusive:          z.boolean().optional(),
+  taxBasis:              z.enum(Object.keys(TAX_BASIS) as [string, ...string[]]).optional(),
+  taxRegistrationNumber: z.string().max(50).optional(),
+})
+export type TaxConfigData = z.infer<typeof taxConfigSchema>
+
 export const storeConfigSchema = z.object({
   storeName:                  z.string().min(1),
   tagline:                    z.string().optional(),
@@ -44,6 +54,6 @@ export const storeConfigSchema = z.object({
   bankAccountNumber:  z.string().optional(),
   bankIban:           z.string().optional(),
   bankInstructions:   z.string().optional(),
-}).merge(appearanceSchema)
+}).merge(appearanceSchema).merge(taxConfigSchema)
 
 export type StoreConfigData = z.infer<typeof storeConfigSchema>
