@@ -1,0 +1,974 @@
+{
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/postcss.config.mjs": {
+    "mtime": 1780253130.0,
+    "hash": "239f3ebf717465dc636818a1a619398d"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/vitest.workspace.ts": {
+    "mtime": 1780560199.43135,
+    "hash": "acd5248639e9ce09848b59ca041402c5"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/next-env.d.ts": {
+    "mtime": 1780556505.0023534,
+    "hash": "2a74d3909800ca5467fa83b0ab4a4890"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/vitest.integration.config.ts": {
+    "mtime": 1780560199.4304104,
+    "hash": "d48d2d35782f45da7a73755cc00ccd1d"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/drizzle.config.ts": {
+    "mtime": 1780253818.3808377,
+    "hash": "d576a12c8c9eaa44fc607c1a7d3bc045"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/vitest.config.ts": {
+    "mtime": 1780560199.4169002,
+    "hash": "e6c8c208e5539a4f5833b7e5f4189812"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/eslint.config.mjs": {
+    "mtime": 1780253130.0,
+    "hash": "dfa1f5f6a7037bf39dc510f30b180002"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/next.config.ts": {
+    "mtime": 1780560199.1587346,
+    "hash": "814a1209738e082f2cf4825be3b0682c"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/public/sw.js": {
+    "mtime": 1780324504.9596586,
+    "hash": "4dd413803839f43a09cf3692b1a12ab6"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/types.ts": {
+    "mtime": 1780560199.4977188,
+    "hash": "6e2d4385087abb06be3f3cde91f869ca"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/index.ts": {
+    "mtime": 1780560199.4440587,
+    "hash": "6a059c3812a66b205de4f2e8555d1b3d"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/test/api.integration.test.ts": {
+    "mtime": 1780560199.4913428,
+    "hash": "eb90e60e5a874b28db92bc932c184bf9"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/test/env.d.ts": {
+    "mtime": 1780560199.4922268,
+    "hash": "b8b6ffdfa67113a4b6943052ae506de4"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/test/apply-migrations.ts": {
+    "mtime": 1780560199.4918814,
+    "hash": "e3f722224c703e1afb52ff0a00406b13"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/lib/push.ts": {
+    "mtime": 1780560199.4525657,
+    "hash": "6f343232bf9040fc4e2a304863ebf5b3"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/lib/stripe.ts": {
+    "mtime": 1780299339.782871,
+    "hash": "fa52cdf339203a940e5ef88c989aee6b"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/lib/orders.test.ts": {
+    "mtime": 1780560199.4501834,
+    "hash": "85fcbfdea7feebf12ab905d0eb1eedeb"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/lib/analytics.ts": {
+    "mtime": 1780560199.447578,
+    "hash": "08703df6914714175ca5bd816e73f690"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/lib/http.ts": {
+    "mtime": 1780298843.8933039,
+    "hash": "e245d226683a29799f663b9dbefe34f9"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/lib/money.test.ts": {
+    "mtime": 1780560199.4492188,
+    "hash": "ecb7b684f9a42313bfc7db0888615dcb"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/lib/email.ts": {
+    "mtime": 1780560199.4485393,
+    "hash": "e248a9c821a5517e652c31ad585ebf5c"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/lib/money.ts": {
+    "mtime": 1780332125.7210577,
+    "hash": "0829fa06ae8444434e2e01a1e8b423e9"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/lib/ratelimit.ts": {
+    "mtime": 1780560199.4532378,
+    "hash": "76b9fff52b20ec4ad47f539da37a28ea"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/lib/products.ts": {
+    "mtime": 1780560199.451645,
+    "hash": "bcc8d7981707a7f33d5c1f722aebd597"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/lib/orders.ts": {
+    "mtime": 1780563116.6339145,
+    "hash": "b1f2afb1bcf3d5f095830ae8a0260bd9"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/lib/notify.ts": {
+    "mtime": 1780560199.4498532,
+    "hash": "82173dee07b29c1da63580c48ba65cae"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/lib/access.ts": {
+    "mtime": 1780560199.4465826,
+    "hash": "45f41c295eaa057a3813e137d8dd3184"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/lib/access-core.ts": {
+    "mtime": 1780560199.4457936,
+    "hash": "6bd26daa78ed7546cc819b1346851b76"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/lib/fingerprint.ts": {
+    "mtime": 1780560199.4489002,
+    "hash": "72e3da6652e531b0046e2f457dd7b2f3"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/lib/version.ts": {
+    "mtime": 1780560199.4536355,
+    "hash": "9023bf701bcea7a1211e42f5dbec3ff9"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/lib/turnstile.ts": {
+    "mtime": 1780332665.0229504,
+    "hash": "6c3be03f66811c109e6b82cd554019a0"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/db/schema.ts": {
+    "mtime": 1780562940.1033745,
+    "hash": "f0502e4f1d543af972e2bc0b51f0336d"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/db/seed.sql": {
+    "mtime": 1780560199.4433646,
+    "hash": "4c405f49a60284387307b16b9ee46f14"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/db/index.ts": {
+    "mtime": 1780253813.0967782,
+    "hash": "0c4afea9b2462a83a90644889570cb0e"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/db/migrations/0003_add_tax_cents.sql": {
+    "mtime": 1780562938.477746,
+    "hash": "f0c628ff357712c40ee0491d5a2e17db"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/db/migrations/0002_analytics_indexes.sql": {
+    "mtime": 1780560199.438032,
+    "hash": "5608e37d5159de779b6272cfc8e3a05e"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/db/migrations/0001_bright_vindicator.sql": {
+    "mtime": 1780560199.432084,
+    "hash": "d59a1edcc2cb56fe008c4d36ed378cbe"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/db/migrations/0000_neat_maddog.sql": {
+    "mtime": 1780299640.5576167,
+    "hash": "6fbaab4f06758cc2951271f3577a732c"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/routes/push.ts": {
+    "mtime": 1780560199.487776,
+    "hash": "b539b33108f153e75252dfc7baab0e74"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/routes/stripe.ts": {
+    "mtime": 1780563116.849434,
+    "hash": "7d9e1e37fde80cf039c55f1c9b957780"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/routes/coupons.ts": {
+    "mtime": 1780560199.4827585,
+    "hash": "176ce547836a59c1babca874eef4ca95"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/routes/pages.ts": {
+    "mtime": 1780560199.4841642,
+    "hash": "a71842e16999417dab92b2ecaa885e31"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/routes/products.ts": {
+    "mtime": 1780560199.4870915,
+    "hash": "d11f5af0dd30b0f87a4c863827a23a4e"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/routes/orders.ts": {
+    "mtime": 1780563098.5006058,
+    "hash": "d84d2184a1d0bc45522b659af23870d9"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/routes/notify.ts": {
+    "mtime": 1780560199.483173,
+    "hash": "174074e7c41588034e0eb159dc6c484c"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/routes/config.ts": {
+    "mtime": 1780563074.810662,
+    "hash": "9dd72a58e28b79e3ad0e85f05e286a66"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/routes/reviews.ts": {
+    "mtime": 1780560199.4884882,
+    "hash": "f6faf7b17cbc6f2cc5bd20b3d8c707e8"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/routes/admin/analytics.ts": {
+    "mtime": 1780560199.4624727,
+    "hash": "7166ece71656f2993ae4ef1248326494"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/routes/admin/coupons.ts": {
+    "mtime": 1780560199.4768896,
+    "hash": "c633c96726be0b7ffbf2298ade0edb81"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/routes/admin/pages.ts": {
+    "mtime": 1780560199.4798582,
+    "hash": "589a0cd0d8773420a33b00cb3f6730d7"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/routes/admin/products.ts": {
+    "mtime": 1780560199.480527,
+    "hash": "6c2e81ddbb67d1312ed61c1ff35db023"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/routes/admin/orders.ts": {
+    "mtime": 1780560199.4794712,
+    "hash": "38ecb286ae7bb460500810ab76977ef8"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/routes/admin/notify.ts": {
+    "mtime": 1780560199.4784372,
+    "hash": "6031d23f85dd3072fd3558e8f928178d"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/routes/admin/index.ts": {
+    "mtime": 1780560199.4774883,
+    "hash": "40e7d00f7e088c8071e9bdaa7b9fcbe4"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/routes/admin/config.ts": {
+    "mtime": 1780560199.4760382,
+    "hash": "efc6b3957f5935104cb984514c4e0b42"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/routes/admin/reviews.ts": {
+    "mtime": 1780560199.4809897,
+    "hash": "45c7226b0ca7860a02ad629a8ecd78f1"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/routes/admin/analytics/funnel.ts": {
+    "mtime": 1780560199.4709423,
+    "hash": "f0c58333c072d0059c61c175c5a4d2f5"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/routes/admin/analytics/customers.ts": {
+    "mtime": 1780560199.4697773,
+    "hash": "26e75231893f6b676ef2976d03fd7c82"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/worker/routes/admin/analytics/products.ts": {
+    "mtime": 1780560199.4724722,
+    "hash": "ac9d91e4bb899b886ed0ced12fe1ba70"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/coverage/block-navigation.js": {
+    "mtime": 1780392451.1233478,
+    "hash": "13c8dd65c9b9571b0b4960aeaf3fab0a"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/coverage/prettify.js": {
+    "mtime": 1780392451.133965,
+    "hash": "6051903a2f7363ee232a01bd32f60b6a"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/coverage/sorter.js": {
+    "mtime": 1780392451.1294322,
+    "hash": "e2f5129270684bf835820ca4433b4abb"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/proxy.ts": {
+    "mtime": 1780560199.4163518,
+    "hash": "549e7490d3bd2eda85b01acfc2aa3ef5"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/robots.ts": {
+    "mtime": 1780560199.2104115,
+    "hash": "3081802b020068bbac0d1faa62e55643"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/sitemap.ts": {
+    "mtime": 1780560199.21107,
+    "hash": "fde89cb0a55e98d70a2203c0af469ed6"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/layout.tsx": {
+    "mtime": 1780560199.2099493,
+    "hash": "41c7725fee994599f1e57238443b144b"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/(admin)/admin/layout.tsx": {
+    "mtime": 1780311991.5050342,
+    "hash": "81f7bf5ae1cb01d69daf89f0631c7c69"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/(admin)/admin/page.tsx": {
+    "mtime": 1780560199.1757488,
+    "hash": "0d52546246b25c382b2603dc2ddc14a2"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/(admin)/admin/settings/page.tsx": {
+    "mtime": 1780563279.4952183,
+    "hash": "079f1c7d86cacc9f762123f4d8fc0b6e"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/(admin)/admin/notify/page.tsx": {
+    "mtime": 1780560199.173331,
+    "hash": "5eac4e33c1b692e2e648f458187bd2a3"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/(admin)/admin/products/page.tsx": {
+    "mtime": 1780560199.179171,
+    "hash": "6e9c76b9d529cfc07f421a3970bf370b"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/(admin)/admin/products/new/page.tsx": {
+    "mtime": 1780560199.1783228,
+    "hash": "8633ab6af1c649033cde343e869b9bae"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/(admin)/admin/products/[id]/page.tsx": {
+    "mtime": 1780560199.1779425,
+    "hash": "fb1877b10382e2315862d0f13739f433"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/(admin)/admin/unauthorized/page.tsx": {
+    "mtime": 1780560199.1902828,
+    "hash": "ab5f67d61de457a5199c8672d31a5249"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/(admin)/admin/coupons/page.tsx": {
+    "mtime": 1780560199.1726892,
+    "hash": "556cf2742c1b152ff186d833befb2535"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/(admin)/admin/pos/page.tsx": {
+    "mtime": 1780560199.1770203,
+    "hash": "4b17532dcf12b2a592ad3149e3823f34"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/(admin)/admin/orders/page.tsx": {
+    "mtime": 1780560199.1748638,
+    "hash": "70cdbd14ba68516b317b0675df63c330"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/(admin)/admin/orders/[id]/page.tsx": {
+    "mtime": 1780563216.658899,
+    "hash": "916e001f8b9cf73307c44d87421da86c"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/(admin)/admin/pages/page.tsx": {
+    "mtime": 1780560199.176479,
+    "hash": "3dfab40f889842cdeadc62962dadcfa6"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/(admin)/admin/analytics/page.tsx": {
+    "mtime": 1780560199.1719337,
+    "hash": "88ecb65719d08be0d4aeb5a5a3df460b"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/(admin)/admin/reviews/page.tsx": {
+    "mtime": 1780560199.1826882,
+    "hash": "3174787410b801d65b186ef1a8e0df06"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/(store)/layout.tsx": {
+    "mtime": 1780560199.1963286,
+    "hash": "8b945a1d75b6f537c33e0bf3e7bc7989"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/(store)/page.tsx": {
+    "mtime": 1780560199.201056,
+    "hash": "dc366acb783b7b7ddafeaa10da18383f"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/(store)/track/page.tsx": {
+    "mtime": 1780294151.4604948,
+    "hash": "cfe0df14f32a6998eab2db660f412c1a"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/(store)/track/[orderId]/page.tsx": {
+    "mtime": 1780563213.7960308,
+    "hash": "9526277fd83f2395718c5010ae14bc55"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/(store)/track/[orderId]/cancel/page.tsx": {
+    "mtime": 1780560199.207549,
+    "hash": "6bd70d69e993b95646cffbbd04b5dbbd"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/(store)/product/[slug]/page.tsx": {
+    "mtime": 1780560199.2037563,
+    "hash": "8f658cdad1d42318b292e2006a0476e0"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/(store)/checkout/page.tsx": {
+    "mtime": 1780560199.1908925,
+    "hash": "0bcf652666dbf600821702687c38cd0c"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/(store)/checkout/success/page.tsx": {
+    "mtime": 1780560199.1914685,
+    "hash": "055c096da28e987b08c624460e76a067"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/app/(store)/policy/[slug]/page.tsx": {
+    "mtime": 1780560199.2031248,
+    "hash": "73aa39f82ddaad824aa22615808366ff"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/ui/tabs.tsx": {
+    "mtime": 1780253934.1204255,
+    "hash": "429035bc858475cd3bcedbb08a5ba8da"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/ui/card.tsx": {
+    "mtime": 1780253933.4438777,
+    "hash": "f493f1f077059a080b2c475873def5c0"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/ui/progress.tsx": {
+    "mtime": 1780253935.1164758,
+    "hash": "aa71e8ceb68b33af5ed5799f42cd873e"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/ui/sheet.tsx": {
+    "mtime": 1780253936.5262225,
+    "hash": "88780518e1f410c03aa766824b784be7"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/ui/scroll-area.tsx": {
+    "mtime": 1780293879.444353,
+    "hash": "ac8fc719d0fd13c77c933474827337da"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/ui/label.tsx": {
+    "mtime": 1780253934.6910455,
+    "hash": "a70440da86bfc6a07f15197cca48cb08"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/ui/sonner.tsx": {
+    "mtime": 1780253934.5371027,
+    "hash": "f46214bc2a6a5153a6e04fad523d5587"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/ui/accordion.tsx": {
+    "mtime": 1780253935.4714017,
+    "hash": "f04f5e2a04ec1972b53225e4c694cbd9"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/ui/tooltip.tsx": {
+    "mtime": 1780253935.6427844,
+    "hash": "6566a444ce6c0a87d6611903430534fa"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/ui/radio-group.tsx": {
+    "mtime": 1780293879.0949914,
+    "hash": "dab241ed149814052e52d1c9da34e754"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/ui/avatar.tsx": {
+    "mtime": 1780253934.9393551,
+    "hash": "8b41492907a73176027427a3f0fd2302"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/ui/dialog.tsx": {
+    "mtime": 1780253936.2730925,
+    "hash": "93bea24303201f8da5aca0007b52048a"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/ui/badge.tsx": {
+    "mtime": 1780253933.5926626,
+    "hash": "e4ec840217040d5630ee6ed7213a1d72"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/ui/separator.tsx": {
+    "mtime": 1780253934.3055115,
+    "hash": "3de2dca3e47ab29c4b1f632671545628"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/ui/button.tsx": {
+    "mtime": 1780253875.5530374,
+    "hash": "e04ce5251d6b0dd04020988126c905e9"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/ui/checkbox.tsx": {
+    "mtime": 1780293878.901953,
+    "hash": "b2348d074d43a3597b5622982f1978b6"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/ui/dropdown-menu.tsx": {
+    "mtime": 1780253935.845247,
+    "hash": "e6107cbb2088437e76a858f75b5a0280"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/ui/select.tsx": {
+    "mtime": 1780560199.2763038,
+    "hash": "88af6bbd036b3b6b342d8f44bfe2163d"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/ui/textarea.tsx": {
+    "mtime": 1780253934.8016183,
+    "hash": "d448d2a90e48542e51b93a1189127bf2"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/ui/input.tsx": {
+    "mtime": 1780253933.7171907,
+    "hash": "0607b02d99a2e92f9509223f36ccc6ec"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/ui/skeleton.tsx": {
+    "mtime": 1780293879.2849045,
+    "hash": "0e6e825c43d858d98c9903f4da975382"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/ui/carousel.tsx": {
+    "mtime": 1780293879.9895139,
+    "hash": "0267b73e177c079adecf87c826d5b59c"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/admin/notify/NotifyRequestRow.tsx": {
+    "mtime": 1780560199.222366,
+    "hash": "f8cc16cf0e81e380d26f6379dc957df9"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/admin/products/ImageUpload.tsx": {
+    "mtime": 1780560199.2372081,
+    "hash": "50556050020acf7049c37d600fd0f408"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/admin/products/ProductForm.tsx": {
+    "mtime": 1780560199.23829,
+    "hash": "9debcbacf123ad1e37131edebfaa8baa"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/admin/shared/EnablePushButton.tsx": {
+    "mtime": 1780332909.5472457,
+    "hash": "cc73877198428efc1168617d5687559b"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/admin/shared/AdminSidebar.tsx": {
+    "mtime": 1780560199.2405648,
+    "hash": "c9946020430779633ce05a1e0a1320ec"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/admin/shared/AdminPageHeader.tsx": {
+    "mtime": 1780560199.2399778,
+    "hash": "3a3365beef38d1d55fc6d47f68442db9"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/admin/shared/StatCard.tsx": {
+    "mtime": 1780560199.2415416,
+    "hash": "15ca5875a8b3fd5dca682870e3d4211d"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/admin/coupons/CouponForm.tsx": {
+    "mtime": 1780560199.2176068,
+    "hash": "898d5b8d0136416b96464810fea4ad92"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/admin/coupons/CouponsTable.tsx": {
+    "mtime": 1780560199.218345,
+    "hash": "05ac9cd5d36564b78f3916cdeba8ddc6"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/admin/pos/POSScreen.tsx": {
+    "mtime": 1780560199.2354968,
+    "hash": "8c289008ad87f8461c75290b58d71b75"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/admin/orders/OrdersTable.tsx": {
+    "mtime": 1780560199.2259102,
+    "hash": "94e7626a946a40d558e3d184fc52ed78"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/admin/analytics/ProductsTab.tsx": {
+    "mtime": 1780560199.2137377,
+    "hash": "0c8d493398479815b4b5bfc15676b693"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/admin/analytics/FunnelTab.tsx": {
+    "mtime": 1780560199.213007,
+    "hash": "11a36c37d3c2625826c550597503a9f7"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/admin/analytics/CustomersTab.tsx": {
+    "mtime": 1780560199.2120717,
+    "hash": "d99634c94df9d16a9b3e08b116ad5a21"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/admin/reviews/AdminReviewRow.tsx": {
+    "mtime": 1780560199.2392955,
+    "hash": "2c100692a8d38067184d4d7903e64fcc"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/common/FormField.tsx": {
+    "mtime": 1780560199.2423728,
+    "hash": "3bd7c3a31788c7c808937b6bdba533bf"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/common/OrderLineItem.tsx": {
+    "mtime": 1780299238.531946,
+    "hash": "ce0304a977fa642de4a5a37651e3dc07"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/ThemeProvider.tsx": {
+    "mtime": 1780560199.244552,
+    "hash": "ccedda377d25784a4dbd73e3a1cfe6ae"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/StorefrontFooter.tsx": {
+    "mtime": 1780560199.2428489,
+    "hash": "a94d9c2889afbf1b54dc19f5f074f006"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/StorefrontHeader.tsx": {
+    "mtime": 1780560199.243581,
+    "hash": "a962308e034c1202e06b3507846f7b06"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/product/WhatsAppButton.tsx": {
+    "mtime": 1780560199.274955,
+    "hash": "75e44519effc470e2f2fd883375bdaee"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/product/ReviewsSection.tsx": {
+    "mtime": 1780560199.2733188,
+    "hash": "41e3edcd7295f5afee77f334b8d2501f"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/product/ProductHero.tsx": {
+    "mtime": 1780560199.2680845,
+    "hash": "5a134541e19034a69c672d1dbd82501f"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/product/ProductJsonLd.tsx": {
+    "mtime": 1780560199.2705264,
+    "hash": "e820d6dbc883b943f2daf68a1df8ef18"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/product/ProductCard.tsx": {
+    "mtime": 1780560199.2674217,
+    "hash": "2793a312beec67d1fdf003ef9a34d228"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/product/ReviewStars.tsx": {
+    "mtime": 1780560199.2724657,
+    "hash": "6b72e980e61c0215e026e67ec923e29c"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/product/ReviewForm.tsx": {
+    "mtime": 1780560199.2714722,
+    "hash": "fed26b10e71db04dc0b58236def69256"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/product/ImageCarousel.tsx": {
+    "mtime": 1780560199.2571368,
+    "hash": "470b8017dabf91732eebb5507c1186d5"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/product/ProductHeroWrapper.tsx": {
+    "mtime": 1780560199.2687986,
+    "hash": "7681ce8cc459e3e390e47be6f9c28647"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/product/VariantSelector.tsx": {
+    "mtime": 1780560199.274429,
+    "hash": "d770bb8d405e596d80136201c725447f"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/product/ProductActions.tsx": {
+    "mtime": 1780560199.265203,
+    "hash": "1af3ff1922c0815f3101b8c22228b407"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/product/NotifyMeDialog.tsx": {
+    "mtime": 1780560199.259102,
+    "hash": "e1ed3b8ef10579ed3f555e59c6a9e9ce"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/product/SizePicker.tsx": {
+    "mtime": 1780560199.2738752,
+    "hash": "414b10309518ca43635b44e8bfc05b37"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/checkout/TurnstileWidget.tsx": {
+    "mtime": 1780560199.2553782,
+    "hash": "1000a8fa4b304513986441eb4b188b25"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/checkout/CheckoutMethodSelector.tsx": {
+    "mtime": 1780560199.2518735,
+    "hash": "aa9770665cb9703de8c283e835dff577"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/checkout/OrderSummary.tsx": {
+    "mtime": 1780563215.5814953,
+    "hash": "8da745e8309b6b2a7e9f699fc3734c8a"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/checkout/ManualOrderForm.tsx": {
+    "mtime": 1780560199.253614,
+    "hash": "f62d7f7e5993e6c443bcb5e8bd03be2d"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/checkout/BankTransferInstructions.tsx": {
+    "mtime": 1780560199.2512083,
+    "hash": "51ef1f88ee72f1e1454e928b232d3efd"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/cart/CartItem.tsx": {
+    "mtime": 1780560199.24721,
+    "hash": "18310d10658e2c92b7c9b560123f1a91"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/cart/CartSummary.tsx": {
+    "mtime": 1780563237.065046,
+    "hash": "ea3fa430257ad037899b84bcb231aa02"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/cart/CartSheet.tsx": {
+    "mtime": 1780563270.5523372,
+    "hash": "65251ae83b7c44a30c7d2095cc8aa3bc"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/cart/FreeShippingBar.tsx": {
+    "mtime": 1780560199.2500844,
+    "hash": "21e4d07a437ad4039dcebdb6b6d6168c"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/tracking/TrackingForm.tsx": {
+    "mtime": 1780301538.0265324,
+    "hash": "11a19e3108e39f52ae2702cd70801fb8"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/components/store/tracking/OrderTimeline.tsx": {
+    "mtime": 1780560199.275639,
+    "hash": "db6a74b4f944397dbaa3dc4d182a23a7"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/hooks/useApiResource.ts": {
+    "mtime": 1780560199.280681,
+    "hash": "75ada38c45654a37def35c2ac0b59c4c"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/hooks/usePushSubscription.ts": {
+    "mtime": 1780560199.2848837,
+    "hash": "9f514c0aab7e0a4d75a7b5c38e3ab991"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/hooks/useCart.ts": {
+    "mtime": 1780560199.2814047,
+    "hash": "4cd362e42ddc6309adab101eb8801b54"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/hooks/useStoreConfig.ts": {
+    "mtime": 1780560199.28563,
+    "hash": "ffcdd95e16f0e5f2356879f1157e07fb"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/lib/utils.test.ts": {
+    "mtime": 1780563510.4346561,
+    "hash": "af714ab4493db86fbeddf89e2f7e3898"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/lib/styles.ts": {
+    "mtime": 1780294510.746605,
+    "hash": "3da1ab1c79cdd41d8c1b8acfdde01bad"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/lib/utils.ts": {
+    "mtime": 1780560199.3702345,
+    "hash": "a6eae31e9e74e86cc9c2607c1baf9dc0"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/lib/api.ts": {
+    "mtime": 1780560199.2861958,
+    "hash": "4f6cbb195575c86af1be2749a15449a4"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/lib/whatsapp.ts": {
+    "mtime": 1780560199.4099514,
+    "hash": "52dc424f8674703d5a8abfe7a253bbfd"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/lib/theme.ts": {
+    "mtime": 1780560199.3256936,
+    "hash": "b3f06b1aa0b340573d5c5a9be6a733c2"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/lib/types/analytics.ts": {
+    "mtime": 1780560199.3359876,
+    "hash": "019b9d0b394e90f94b1ba72f42d4f3eb"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/lib/types/product.ts": {
+    "mtime": 1780560199.3466997,
+    "hash": "d9092a36054d5075b660d3b4e9466b35"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/lib/types/checkout.ts": {
+    "mtime": 1780560199.3374846,
+    "hash": "d25f3a67294eb28a1a9f5cf01de211bd"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/lib/types/common.ts": {
+    "mtime": 1780560199.3380022,
+    "hash": "f16d93af568f42c4450e37f809f8068e"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/lib/types/admin.ts": {
+    "mtime": 1780562973.4639318,
+    "hash": "9bfdaf45dc505b9662b88d3684ffe1e2"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/lib/types/order.ts": {
+    "mtime": 1780562976.5836549,
+    "hash": "d3cfe814a8ce81133652cce6406d960e"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/lib/types/index.ts": {
+    "mtime": 1780560199.3418138,
+    "hash": "fddc544aa37b0b129c250e6dbb622fae"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/lib/types/cart.ts": {
+    "mtime": 1780562978.6743865,
+    "hash": "bc4bd3b7f903350a42b4013807a22e46"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/lib/types/store.ts": {
+    "mtime": 1780560199.3491874,
+    "hash": "6cb5a786c66c78fffb5b6efb0bff4056"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/lib/constants/index.ts": {
+    "mtime": 1780562961.8052258,
+    "hash": "47ec0efb85af63041c274a2aa70255a2"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/lib/utils/index.ts": {
+    "mtime": 1780562989.0632627,
+    "hash": "ded77b29035ce7bcf7494e2d5ca23039"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/lib/schemas/push.ts": {
+    "mtime": 1780332766.8882575,
+    "hash": "df76b8653ab4af58362ebca563b29428"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/lib/schemas/base.ts": {
+    "mtime": 1780560199.3124568,
+    "hash": "1b774ecac7f3842b681edfb56e6ce65b"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/lib/schemas/product.ts": {
+    "mtime": 1780332793.1191065,
+    "hash": "0afd2cbe7e805d2154e8ddecb4487291"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/lib/schemas/admin.ts": {
+    "mtime": 1780560199.3012273,
+    "hash": "adfa2d31649534629f012f12f1cf253f"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/lib/schemas/order.test.ts": {
+    "mtime": 1780560199.3177192,
+    "hash": "db1672a989b0ff9ed422b17b13cf2185"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/lib/schemas/order.ts": {
+    "mtime": 1780560199.318302,
+    "hash": "79703c037873a58e9c6317b0c16104d4"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/lib/schemas/index.ts": {
+    "mtime": 1780332718.9637325,
+    "hash": "72e09826870fc240d7596bac49b62440"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/lib/schemas/config.ts": {
+    "mtime": 1780562978.5984461,
+    "hash": "66d9b5f108ab0fc98e6bbc2c2569d5b6"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/src/lib/i18n/en.ts": {
+    "mtime": 1780562998.8696945,
+    "hash": "ae53398c513780663d6fe9ce78c420a2"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/CONTEXT.md": {
+    "mtime": 1780252617.9039838,
+    "hash": "15cb8693e0415e39e4c294448094f561"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/README.md": {
+    "mtime": 1780560199.149398,
+    "hash": "9660784d472a8aa418369b59bb4a05e9"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/AGENTS.md": {
+    "mtime": 1780252627.8580441,
+    "hash": "0a0aa6d0fb596ffd1a223149bcab1a0f"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/CLAUDE.md": {
+    "mtime": 1780389922.1818929,
+    "hash": "6cbabf229b9f8b8081ca09ed036c30f8"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/adr/0001-cloudflare-full-stack.md": {
+    "mtime": 1780252628.8945289,
+    "hash": "e90c460cda16008c1591e576eead0d8c"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/adr/0004-pwa-push-over-telegram.md": {
+    "mtime": 1780252656.1273484,
+    "hash": "b8801891671ff1c3d0b1bc8e1dfe7fad"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/adr/0005-resend-bcc-strategy.md": {
+    "mtime": 1780252664.1691115,
+    "hash": "0808640a7587ce9fda81cd6854888212"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/adr/0002-d1-sql-over-nosql.md": {
+    "mtime": 1780252637.0734406,
+    "hash": "c625e93fb17b60d27898b3c5015d816c"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/adr/0006-stripe-checkout-not-raw-capture.md": {
+    "mtime": 1780252672.1790235,
+    "hash": "b3974e0ff95e1c8af51ded1b47798a9c"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/adr/0003-dynamic-config-no-redeploy.md": {
+    "mtime": 1780252647.4183605,
+    "hash": "55c2903dcf0577fedf474bbeca9aa3cb"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/plans/done/phase-8-dynamic-theme-settings.md": {
+    "mtime": 1780560199.1558354,
+    "hash": "fefd465ec489f2702fe6a9c3fe7f1f05"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/plans/done/phase-4-setup-docs.md": {
+    "mtime": 1780560199.1522427,
+    "hash": "a05e863034c852e911e9e181ec9c3964"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/plans/done/phase-5-hardening-and-gaps.md": {
+    "mtime": 1780560199.1526337,
+    "hash": "0fbb342fcf00a4e24425b2108864f4a7"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/plans/done/phase-2-admin.md": {
+    "mtime": 1780560199.1515603,
+    "hash": "c45bf1f3735ddab9dd4cb00b8560e480"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/plans/done/phase-0-scaffold.md": {
+    "mtime": 1780560199.1507268,
+    "hash": "a37e4e3d089583aecb315bcf1621960c"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/plans/done/phase-6-admin-auth-cache-sticky.md": {
+    "mtime": 1780560199.1530817,
+    "hash": "0d129ea1be555b5f04d34c1f5761a615"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/plans/done/phase-7-analytics.md": {
+    "mtime": 1780560199.154434,
+    "hash": "57a80a4454219f830b3b2b1fa085056d"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/plans/done/phase-3-polish.md": {
+    "mtime": 1780560199.1519248,
+    "hash": "04955b06a684befe224371344049ad26"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/plans/done/phase-1-store-frontend.md": {
+    "mtime": 1780560199.1511254,
+    "hash": "aadeaac2431869f53edef7728e73502a"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/admin-guide/customization.md": {
+    "mtime": 1780254530.2932327,
+    "hash": "5b9b4b9b9817fc26904a57017eac8292"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/admin-guide/orders.md": {
+    "mtime": 1780254524.3864372,
+    "hash": "0ecb96fa96e3776d942d07d881ccee7d"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/admin-guide/products.md": {
+    "mtime": 1780254519.4831395,
+    "hash": "c6fdd0dfc8aa27d2466eabd4f41513e4"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/features/stripe-checkout.md": {
+    "mtime": 1780301713.7837813,
+    "hash": "a1d1fc80877040de82873f060a41b4b1"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/features/coupons.md": {
+    "mtime": 1780301773.7309697,
+    "hash": "a455dea57edf6fdab99db2f08a1fe1ee"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/features/cod-orders.md": {
+    "mtime": 1780301757.5382752,
+    "hash": "68f9e306208678f8255add9e8481f4df"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/features/pwa-notifications.md": {
+    "mtime": 1780254549.5766811,
+    "hash": "c8c5529d191952495d90227bb3927a44"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/features/inventory.md": {
+    "mtime": 1780301725.3878698,
+    "hash": "836f9149134ced738bf19c72d439e12a"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/features/whatsapp.md": {
+    "mtime": 1780301736.9998014,
+    "hash": "89fc483f54f5f4ef9bb5d3c5bc267a43"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/setup/environment-variables.md": {
+    "mtime": 1780560199.1580734,
+    "hash": "71b6697d207fa35f5039506f99067290"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/setup/stripe-setup.md": {
+    "mtime": 1780254429.9355452,
+    "hash": "fa822293fa7f9a1c09d09b086aecf557"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/setup/cloudflare-guide.md": {
+    "mtime": 1780560199.1574736,
+    "hash": "77b590925b241f9c030e24b138d65b29"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/setup/domain-setup.md": {
+    "mtime": 1780254444.06041,
+    "hash": "692a0de361cda7b6c3d6755146cd99ac"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/setup/resend-setup.md": {
+    "mtime": 1780254434.0345294,
+    "hash": "368148e5fc2033e1196d3ff248306e33"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/setup/quickstart.md": {
+    "mtime": 1780301797.9011064,
+    "hash": "9b8714f1881e3da05bf09e487881f87c"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/architecture/overview.md": {
+    "mtime": 1780323294.1644979,
+    "hash": "5b81dead1259d15a6d12691eed60d324"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/architecture/caching-strategy.md": {
+    "mtime": 1780560199.1500936,
+    "hash": "6dce759a5784f03fe86bbb8ca134604e"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/architecture/cost-breakdown-normal.md": {
+    "mtime": 1780254499.3800704,
+    "hash": "a23b9ba6f8fcd258a4d3568d1cc8fc4d"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/architecture/cost-breakdown-scale.md": {
+    "mtime": 1780254507.9820893,
+    "hash": "16173ebfcc206eeb77667a87c57e2de4"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/architecture/database-schema.md": {
+    "mtime": 1780254464.1303003,
+    "hash": "3b47f86383868388ff9874e63601bd33"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/architecture/payment-flows.md": {
+    "mtime": 1780254483.99838,
+    "hash": "a7c55c29096cf0675d95c5ea38519346"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/architecture/cloudflare-ecosystem.md": {
+    "mtime": 1780254473.7614033,
+    "hash": "34108da9ec2530cd842fce8451801d3d"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/docs/architecture/dry-conventions.md": {
+    "mtime": 1780296981.5696836,
+    "hash": "2f1f34d4dad29a0d98c784e9cdbbc2a6"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/public/robots.txt": {
+    "mtime": 1780324421.8882518,
+    "hash": "49939bdf55d409d3cefa56eaf9a33420"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/coverage/index.html": {
+    "mtime": 1780392451.136194,
+    "hash": "89395febf7c425acc82b6685c382805d"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/coverage/worker/lib/money.ts.html": {
+    "mtime": 1780392451.1461532,
+    "hash": "92a6463abbe3f43596162628a7069006"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/coverage/worker/lib/index.html": {
+    "mtime": 1780392451.1452913,
+    "hash": "3284179c595ebfc13604f9e79cf8ed89"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/coverage/worker/lib/orders.ts.html": {
+    "mtime": 1780392451.149181,
+    "hash": "518a7b3dbb485059653e16096c1c6212"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/coverage/src/lib/schemas/admin.ts.html": {
+    "mtime": 1780392451.1402102,
+    "hash": "f025ba6d48a9bfdb52c126ec198e19a3"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/coverage/src/lib/schemas/index.html": {
+    "mtime": 1780392451.1375797,
+    "hash": "7cb7fbc9fb193e2f2377621707afa2a0"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/coverage/src/lib/schemas/order.ts.html": {
+    "mtime": 1780392451.143071,
+    "hash": "43682a435151b8fe9f5effe9b92e35a0"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/coverage/src/lib/schemas/push.ts.html": {
+    "mtime": 1780392451.1444943,
+    "hash": "e69d70016e8d6ecfadecb9c591a0b7dd"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/coverage/src/lib/schemas/index.ts.html": {
+    "mtime": 1780392451.1420097,
+    "hash": "7c53bea9fda2be34aa24a5e7bbc5aa5a"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/coverage/src/lib/schemas/base.ts.html": {
+    "mtime": 1780392451.1408503,
+    "hash": "6f7003ba2b1c9b0e24da761c00638f1c"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/coverage/src/lib/schemas/config.ts.html": {
+    "mtime": 1780392451.141395,
+    "hash": "c3de3670f4e8fce7622cdcb86496ee7b"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/coverage/src/lib/schemas/product.ts.html": {
+    "mtime": 1780392451.143801,
+    "hash": "5748bcf0309ec7c5fd5f8b7ef3f67824"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/coverage/favicon.png": {
+    "mtime": 1780392451.124016,
+    "hash": "8c814a46f24208d0bc459bb2cf8b7b88"
+  },
+  "/Users/dev/Documents/Work/Portfolio/SinglePageEcomm/coverage/sort-arrow-sprite.png": {
+    "mtime": 1780392451.1279283,
+    "hash": "fd08a5625d21e34b1d6d9c026f2728a9"
+  }
+}
