@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import withSerwistInit from "@serwist/next";
 
 // Worker/API origin the browser talks to — allowed in CSP connect-src so client
 // fetches (lib/api.ts) aren't blocked. Empty in pure-static builds.
@@ -48,4 +49,11 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+const withSerwist = withSerwistInit({
+  swSrc: "src/sw.ts",
+  swDest: "public/sw.js",
+  // SW disabled in dev to avoid cache-hell
+  disable: isDev,
+});
+
+export default withSerwist(nextConfig);
