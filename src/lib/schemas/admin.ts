@@ -32,10 +32,10 @@ export const updateVariantSchema = createVariantSchema.omit({ productId: true })
 export const createSizeOptionSchema = z.object({
   variantId:     idField,
   size:          z.string().min(1).max(20),
-  sku:           z.string().max(50).optional(),
+  sku:           z.string().max(50).nullish(),
   priceCents:    z.number().int().min(0),
   stock:         z.number().int().min(-1).default(0),
-  stripePriceId: z.string().optional(),
+  stripePriceId: z.string().nullish(),
   active:        z.boolean().default(true),
 })
 

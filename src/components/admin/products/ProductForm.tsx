@@ -13,7 +13,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { FormField } from '@/components/common/FormField'
 import { ImageUpload } from '@/components/admin/products/ImageUpload'
 import { en } from '@/lib/i18n/en'
-import { apiPost, apiPut, apiDelete, apiGet } from '@/lib/api'
+import { apiPost, apiPut, apiDelete, apiGet, ApiError } from '@/lib/api'
+import { updateSizeOptionSchema } from '@/lib/schemas'
 import { formatPrice } from '@/lib/utils/index'
 import type { ProductWithVariants, VariantWithDetails, SizeOption, ProductImage } from '@/lib/types/product'
 import type { AnalyticsProductDetail } from '@/lib/types/analytics'
@@ -129,6 +130,17 @@ export function ProductForm({ initial }: ProductFormProps) {
     initial?.variants[0]?.id ?? null,
   )
 
+  // sizeId → { fieldName → errorMessage } — cleared on successful save or on field change
+  const [sizeErrors, setSizeErrors] = useState<Record<string, Record<string, string>>>({})
+
+  function clearSizeError(sizeId: string, field: string) {
+    setSizeErrors((prev) => {
+      if (!prev[sizeId]?.[field]) return prev
+      const { [field]: _, ...rest } = prev[sizeId]
+      return { ...prev, [sizeId]: rest }
+    })
+  }
+
   // ─── Product save ─────────────────────────────────────────────────────────
 
   async function saveProduct() {
@@ -232,6 +244,7 @@ export function ProductForm({ initial }: ProductFormProps) {
   }
 
   function updateSizeField(variantId: string, sizeId: string, field: string, value: string | number | boolean) {
+    clearSizeError(sizeId, field)
     setVariants((prev) =>
       prev.map((v) =>
         v.id === variantId
@@ -250,18 +263,46 @@ export function ProductForm({ initial }: ProductFormProps) {
     const variant = variants.find((v) => v.id === variantId)
     const size = (variant?.sizes as LocalSize[])?.find((s) => s.id === sizeId)
     if (!size) return
+
+    const payload = {
+      size: size.size,
+      sku: size.sku,
+      priceCents: size.priceCents,
+      stock: size.stock,
+      stripePriceId: size.stripePriceId,
+      active: size.active,
+    }
+
+    // Client-side validation before hitting the network
+    const parsed = updateSizeOptionSchema.safeParse(payload)
+    if (!parsed.success) {
+      const errs: Record<string, string> = {}
+      for (const issue of parsed.error.issues) {
+        const field = String(issue.path[0] ?? '_')
+        if (!errs[field]) errs[field] = issue.message
+      }
+      setSizeErrors((prev) => ({ ...prev, [sizeId]: errs }))
+      return
+    }
+
     try {
-      await apiPut(`/api/admin/products/sizes/${sizeId}`, {
-        size: size.size,
-        sku: size.sku,
-        priceCents: size.priceCents,
-        stock: size.stock,
-        stripePriceId: size.stripePriceId,
-        active: size.active,
-      })
+      await apiPut(`/api/admin/products/sizes/${sizeId}`, payload)
+      setSizeErrors((prev) => { const { [sizeId]: _, ...rest } = prev; return rest })
       toast.success(en.admin.saved)
-    } catch {
-      toast.error(en.errors.networkError)
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 400) {
+        const body = err.body as { issues?: { path: string[]; message: string }[] }
+        if (body?.issues?.length) {
+          const errs: Record<string, string> = {}
+          for (const issue of body.issues) {
+            const field = String(issue.path[0] ?? '_')
+            if (!errs[field]) errs[field] = issue.message
+          }
+          setSizeErrors((prev) => ({ ...prev, [sizeId]: errs }))
+          return
+        }
+      }
+      toast.error(err instanceof Error ? err.message : en.errors.networkError)
     }
   }
 
@@ -468,37 +509,43 @@ export function ProductForm({ initial }: ProductFormProps) {
                             <p className="text-xs text-muted-foreground">{en.admin.noSizesYet}</p>
                           ) : (
                             <div className="flex flex-col gap-3">
-                              {(variant.sizes as LocalSize[]).map((size) => (
+                              {(variant.sizes as LocalSize[]).map((size) => {
+                                const errs = sizeErrors[size.id] ?? {}
+                                return (
                                 <div key={size.id} className="grid grid-cols-2 gap-2 items-end sm:grid-cols-4 lg:grid-cols-[1fr_1fr_1fr_1fr_auto]">
-                                  <FormField label={en.admin.sizeName} htmlFor={`size-name-${size.id}`}>
+                                  <FormField label={en.admin.sizeName} htmlFor={`size-name-${size.id}`} error={errs.size}>
                                     <Input
                                       id={`size-name-${size.id}`}
                                       value={size.size}
+                                      aria-invalid={!!errs.size}
                                       onChange={(e) => updateSizeField(variant.id, size.id, 'size', e.target.value)}
                                     />
                                   </FormField>
-                                  <FormField label={en.admin.priceCents} htmlFor={`size-price-${size.id}`}>
+                                  <FormField label={en.admin.priceCents} htmlFor={`size-price-${size.id}`} error={errs.priceCents}>
                                     <Input
                                       id={`size-price-${size.id}`}
                                       type="number"
                                       min={0}
                                       value={size.priceCents}
+                                      aria-invalid={!!errs.priceCents}
                                       onChange={(e) => updateSizeField(variant.id, size.id, 'priceCents', Number(e.target.value))}
                                     />
                                   </FormField>
-                                  <FormField label={en.admin.stock} htmlFor={`size-stock-${size.id}`}>
+                                  <FormField label={en.admin.stock} htmlFor={`size-stock-${size.id}`} error={errs.stock}>
                                     <Input
                                       id={`size-stock-${size.id}`}
                                       type="number"
                                       min={-1}
                                       value={size.stock}
+                                      aria-invalid={!!errs.stock}
                                       onChange={(e) => updateSizeField(variant.id, size.id, 'stock', Number(e.target.value))}
                                     />
                                   </FormField>
-                                  <FormField label={en.admin.sku} htmlFor={`size-sku-${size.id}`}>
+                                  <FormField label={en.admin.sku} htmlFor={`size-sku-${size.id}`} error={errs.sku}>
                                     <Input
                                       id={`size-sku-${size.id}`}
                                       value={size.sku ?? ''}
+                                      aria-invalid={!!errs.sku}
                                       onChange={(e) => updateSizeField(variant.id, size.id, 'sku', e.target.value)}
                                     />
                                   </FormField>
@@ -523,7 +570,8 @@ export function ProductForm({ initial }: ProductFormProps) {
                                     </Button>
                                   </div>
                                 </div>
-                              ))}
+                              )
+                              })}
                             </div>
                           )}
                         </div>
