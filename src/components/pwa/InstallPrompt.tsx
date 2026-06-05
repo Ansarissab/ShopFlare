@@ -81,15 +81,15 @@ export function InstallPrompt() {
     <>
       {/* Android/Desktop bottom install banner */}
       {showBanner && deferredPrompt && (
-        <div className="fixed bottom-[var(--safe-bottom,0)] left-0 right-0 z-50 border-t bg-background p-4 shadow-lg animate-in slide-in-from-bottom-4">
-          <div className="flex items-center justify-between gap-3">
+        <div className="fixed bottom-[var(--safe-bottom,0)] left-0 right-0 z-50 border-t bg-background p-3 sm:p-4 shadow-lg animate-in slide-in-from-bottom-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
               <p className="font-medium text-sm">{en.pwa.installTitle}</p>
               <p className="text-xs text-muted-foreground truncate">{en.pwa.installBody}</p>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <Button size="sm" onClick={handleInstall}>{en.pwa.installAction}</Button>
-              <Button size="sm" variant="ghost" onClick={handleDismiss}>
+            <div className="flex gap-2">
+              <Button size="sm" onClick={handleInstall} className="w-full sm:w-auto">{en.pwa.installAction}</Button>
+              <Button size="sm" variant="ghost" onClick={handleDismiss} className="w-full sm:w-auto">
                 <X className="h-4 w-4" />
               </Button>
             </div>

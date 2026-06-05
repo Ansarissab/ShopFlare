@@ -8,7 +8,7 @@ import { useIsStandalone } from '@/hooks/useDisplayMode'
 import { useCartItemCount, useCart } from '@/hooks/useCart'
 import { en } from '@/lib/i18n/en'
 import { vibrate } from '@/lib/utils/haptics'
-import { layout } from '@/lib/styles'
+import { layout, safeArea } from '@/lib/styles'
 
 type Tab = {
   key: string
@@ -43,7 +43,7 @@ export function AppTabBar() {
   return (
     <nav
       data-tab-bar
-      className={cn(layout.tabBar, 'flex items-center justify-around')}
+      className={cn(layout.tabBar, safeArea.bottom, 'flex items-center justify-around')}
       aria-label="Main navigation"
     >
       {tabs.map((tab) => {

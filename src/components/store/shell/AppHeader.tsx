@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 import { useIsStandalone } from '@/hooks/useDisplayMode'
 import { useCartItemCount, useCart } from '@/hooks/useCart'
 import { useStoreConfig } from '@/hooks/useStoreConfig'
-import { layout } from '@/lib/styles'
+import { layout, safeArea } from '@/lib/styles'
 
 export function AppHeader() {
   const isStandalone = useIsStandalone()
@@ -18,7 +18,7 @@ export function AppHeader() {
   return (
     <header
       data-app-header
-      className={cn(layout.appHeader, 'flex items-center justify-between px-4 h-12')}
+      className={cn(layout.appHeader, safeArea.x, 'flex items-center justify-between px-4 h-12')}
     >
       <span className="font-semibold text-sm truncate">
         {config?.storeName ?? 'Store'}

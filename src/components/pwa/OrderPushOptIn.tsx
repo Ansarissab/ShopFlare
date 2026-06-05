@@ -21,7 +21,7 @@ export function OrderPushOptIn({ orderNumber }: Props) {
   if (!supported || permission === 'denied' || enabled || dismissed) return null
 
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg border bg-muted/50 px-4 py-3 text-sm">
+    <div className="flex flex-col gap-2 rounded-lg border bg-muted/50 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-center gap-2 min-w-0">
         <Bell className="h-4 w-4 shrink-0 text-primary" />
         <div className="min-w-0">
@@ -29,11 +29,12 @@ export function OrderPushOptIn({ orderNumber }: Props) {
           <p className="text-xs text-muted-foreground truncate">{en.pwa.orderPushEnableBody}</p>
         </div>
       </div>
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex gap-2">
         <Button
           size="sm"
           onClick={() => enable()}
           disabled={loading}
+          className="w-full sm:w-auto"
         >
           {loading ? '…' : en.pwa.orderPushEnableAction}
         </Button>
@@ -42,6 +43,7 @@ export function OrderPushOptIn({ orderNumber }: Props) {
           variant="ghost"
           onClick={() => setDismissed(true)}
           aria-label="Dismiss"
+          className="w-full sm:w-auto"
         >
           <BellOff className="h-4 w-4" />
         </Button>
