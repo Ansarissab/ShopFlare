@@ -1,6 +1,7 @@
 'use client'
 
 import { Label } from '@/components/ui/label'
+import { HelpTip } from '@/components/common/HelpTip'
 import { en } from '@/lib/i18n/en'
 import type { FieldProps } from '@/lib/types/common'
 
@@ -17,7 +18,7 @@ export type { FieldProps }
  *     {error && <p class="text-xs text-destructive">}
  *   </div>
  */
-export function FormField({ label, htmlFor, optional = false, error, children }: FieldProps) {
+export function FormField({ label, htmlFor, optional = false, error, help, children }: FieldProps) {
   return (
     <div className="flex flex-col gap-1.5">
       <Label htmlFor={htmlFor}>
@@ -28,6 +29,7 @@ export function FormField({ label, htmlFor, optional = false, error, children }:
             <span className="text-xs text-muted-foreground">{en.common.optional}</span>
           </>
         )}
+        {help && <HelpTip text={help} />}
       </Label>
       {children}
       {error && <p className="text-xs text-destructive">{error}</p>}

@@ -93,6 +93,8 @@ export interface AdminStatCardProps {
   value: string | number
   sub?: string
   href?: string
+  /** Optional explanatory tooltip shown beside the label via HelpTip. */
+  help?: string
 }
 
 export interface CouponsResponse {

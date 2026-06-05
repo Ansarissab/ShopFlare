@@ -17,7 +17,15 @@ export interface FieldProps {
   htmlFor: string
   optional?: boolean
   error?: string
+  /** Optional explanatory tooltip shown beside the label via HelpTip. */
+  help?: string
   children: React.ReactNode
+}
+
+export interface HelpTipProps {
+  text: string
+  side?: 'top' | 'bottom' | 'left' | 'right'
+  className?: string
 }
 
 export interface ApiResourceState<T> {
