@@ -158,7 +158,7 @@ export function CategoryProductsManager({
 
       {/* Assigned products list */}
       {assigned.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{en.admin.noCategories}</p>
+        <p className="text-sm text-muted-foreground">{en.admin.noProductsAssigned}</p>
       ) : (
         <div className="flex flex-col gap-2">
           {assigned.map((item, idx) => (
