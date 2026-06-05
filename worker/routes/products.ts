@@ -43,7 +43,7 @@ app.get('/', async (c) => {
   // Batched: 4 queries total regardless of catalogue size (see assembleProductList)
   const products = await assembleProductList(db)
   return c.json({ products }, 200, {
-    'Cache-Control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=600',
+    'Cache-Control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=60',
     'ETag': etag,
   })
 })
@@ -73,7 +73,7 @@ app.get('/:id', async (c) => {
 
   const assembled = await assembleProduct(db, product)
   return c.json(assembled, 200, {
-    'Cache-Control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=600',
+    'Cache-Control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=60',
     'ETag': etag,
   })
 })

@@ -106,11 +106,18 @@ export function apiUpload<T>(path: string, form: FormData, opts?: ApiOptions): P
   return request<T>(path, { method: 'POST', body: form, headers: opts?.headers, signal: opts?.signal })
 }
 
+// In-flight dedup — prevents burst fetches when user quickly hovers many cards.
+const _prefetching = new Set<string>()
+
 // Primes the browser HTTP cache for a public GET path (hover / viewport intent).
 // Fire-and-forget: swallows all errors — never await.
 export function prefetch(path: string): void {
   if (typeof window === 'undefined') return
-  void fetch(WORKER_URL + path, { method: 'GET', credentials: 'omit', cache: 'force-cache' }).catch(() => {})
+  if (_prefetching.has(path)) return
+  _prefetching.add(path)
+  void fetch(WORKER_URL + path, { method: 'GET', cache: 'force-cache' })
+    .catch(() => {})
+    .finally(() => _prefetching.delete(path))
 }
 
 // ---------------------------------------------------------------------------

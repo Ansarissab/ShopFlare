@@ -22,6 +22,12 @@ const app = new Hono<AdminEnv>()
 // CF Access JWT verification on every admin request (defense-in-depth).
 app.use('*', requireAccess)
 
+// Ensure no admin response is ever stored by a browser or intermediate cache.
+app.use('*', async (c, next) => {
+  await next()
+  c.res.headers.set('Cache-Control', 'no-store')
+})
+
 app.route('/orders', orders)
 app.route('/products', products)
 app.route('/categories', categories)
