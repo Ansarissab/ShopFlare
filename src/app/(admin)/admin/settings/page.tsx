@@ -218,7 +218,7 @@ export default function AdminSettingsPage() {
 
         {/* Color pickers */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <FormField label={en.admin.primaryColor} htmlFor="a-primary">
+          <FormField label={en.admin.primaryColor} htmlFor="a-primary" help={en.tooltips.settings.primaryColor}>
             <div className="flex items-center gap-2">
               <input
                 type="color"
@@ -236,7 +236,7 @@ export default function AdminSettingsPage() {
               />
             </div>
           </FormField>
-          <FormField label={en.admin.accentColor} htmlFor="a-accent">
+          <FormField label={en.admin.accentColor} htmlFor="a-accent" help={en.tooltips.settings.accentColor}>
             <div className="flex items-center gap-2">
               <input
                 type="color"
@@ -258,7 +258,7 @@ export default function AdminSettingsPage() {
 
         {/* Selects: radius / font / color mode */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <FormField label={en.admin.borderRadius} htmlFor="a-radius">
+          <FormField label={en.admin.borderRadius} htmlFor="a-radius" help={en.tooltips.settings.radius}>
             <Select value={radius} onValueChange={(v: string | null) => setRadius(v ?? 'md')}>
               <SelectTrigger id="a-radius" className="w-full">
                 <SelectValue />
@@ -270,7 +270,7 @@ export default function AdminSettingsPage() {
               </SelectContent>
             </Select>
           </FormField>
-          <FormField label={en.admin.fontFamily} htmlFor="a-font">
+          <FormField label={en.admin.fontFamily} htmlFor="a-font" help={en.tooltips.settings.fontFamily}>
             <Select value={fontFamily} onValueChange={(v: string | null) => setFontFamily(v ?? 'sans')}>
               <SelectTrigger id="a-font" className="w-full">
                 <SelectValue />
@@ -282,7 +282,7 @@ export default function AdminSettingsPage() {
               </SelectContent>
             </Select>
           </FormField>
-          <FormField label={en.admin.colorMode} htmlFor="a-mode">
+          <FormField label={en.admin.colorMode} htmlFor="a-mode" help={en.tooltips.settings.colorMode}>
             <Select value={colorMode} onValueChange={(v: string | null) => setColorMode(v ?? 'light')}>
               <SelectTrigger id="a-mode" className="w-full">
                 <SelectValue />
@@ -325,7 +325,7 @@ export default function AdminSettingsPage() {
         </div>
 
         {/* Logo upload */}
-        <FormField label={en.admin.logo} htmlFor="a-logo">
+        <FormField label={en.admin.logo} htmlFor="a-logo" help={en.tooltips.settings.logo}>
           <div className="flex items-center gap-3">
             {logoUrl && (
               <div className="relative h-10 w-24 shrink-0">
@@ -363,7 +363,7 @@ export default function AdminSettingsPage() {
         </FormField>
 
         {/* Favicon upload */}
-        <FormField label={en.admin.favicon} htmlFor="a-favicon">
+        <FormField label={en.admin.favicon} htmlFor="a-favicon" help={en.tooltips.settings.favicon}>
           <div className="flex items-center gap-3">
             <input
               ref={faviconInputRef}
@@ -394,7 +394,7 @@ export default function AdminSettingsPage() {
         </div>
 
         {/* Enable toggle */}
-        <FormField label={en.admin.taxEnabled} htmlFor="t-enabled">
+        <FormField label={en.admin.taxEnabled} htmlFor="t-enabled" help={en.tooltips.settings.taxEnabled}>
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -410,7 +410,7 @@ export default function AdminSettingsPage() {
         {taxEnabled && (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormField label={en.admin.taxName} htmlFor="t-name">
+              <FormField label={en.admin.taxName} htmlFor="t-name" help={en.tooltips.settings.taxName}>
                 <Input
                   id="t-name"
                   value={taxName}
@@ -419,7 +419,7 @@ export default function AdminSettingsPage() {
                   maxLength={30}
                 />
               </FormField>
-              <FormField label={en.admin.taxRate} htmlFor="t-rate">
+              <FormField label={en.admin.taxRate} htmlFor="t-rate" help={en.tooltips.settings.taxRate}>
                 <Input
                   id="t-rate"
                   type="number"
@@ -434,7 +434,7 @@ export default function AdminSettingsPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormField label={en.admin.taxBasis} htmlFor="t-basis">
+              <FormField label={en.admin.taxBasis} htmlFor="t-basis" help={en.tooltips.settings.taxBasis}>
                 <Select value={taxBasis} onValueChange={(v: string | null) => setTaxBasis(v ?? 'subtotal')}>
                   <SelectTrigger id="t-basis" className="w-full">
                     <SelectValue />
@@ -445,7 +445,7 @@ export default function AdminSettingsPage() {
                   </SelectContent>
                 </Select>
               </FormField>
-              <FormField label={en.admin.taxInclusive} htmlFor="t-inclusive">
+              <FormField label={en.admin.taxInclusive} htmlFor="t-inclusive" help={en.tooltips.settings.taxInclusive}>
                 <div className="flex items-center gap-2 pt-1">
                   <input
                     type="checkbox"
@@ -458,7 +458,7 @@ export default function AdminSettingsPage() {
               </FormField>
             </div>
 
-            <FormField label={en.admin.taxRegistrationNumber} htmlFor="t-reg">
+            <FormField label={en.admin.taxRegistrationNumber} htmlFor="t-reg" help={en.tooltips.settings.taxRegistration}>
               <Input
                 id="t-reg"
                 value={taxRegistrationNumber}
@@ -529,7 +529,7 @@ export default function AdminSettingsPage() {
       {/* Payments & Shipping */}
       <div className="flex flex-col gap-4 rounded-lg border p-5">
         <h2 className="text-sm font-semibold">Payments &amp; Shipping</h2>
-        <FormField label={en.admin.currency} htmlFor="s-currency">
+        <FormField label={en.admin.currency} htmlFor="s-currency" help={en.tooltips.settings.currency}>
           <Select value={currency} onValueChange={(v: string | null) => setCurrency(v ?? 'PKR')}>
             <SelectTrigger id="s-currency" className="w-full">
               <SelectValue />
@@ -543,10 +543,10 @@ export default function AdminSettingsPage() {
             </SelectContent>
           </Select>
         </FormField>
-        <FormField label={en.admin.flatShippingRate} htmlFor="s-flat">
+        <FormField label={en.admin.flatShippingRate} htmlFor="s-flat" help={en.tooltips.settings.flatShipping}>
           <Input id="s-flat" type="number" min={0} value={flatShipping} onChange={(e) => setFlatShipping(e.target.value)} />
         </FormField>
-        <FormField label={en.admin.freeShippingThreshold} htmlFor="s-threshold">
+        <FormField label={en.admin.freeShippingThreshold} htmlFor="s-threshold" help={en.tooltips.settings.freeShipThreshold}>
           <Input id="s-threshold" type="number" min={0} value={freeThreshold} onChange={(e) => setFreeThreshold(e.target.value)} />
         </FormField>
       </div>

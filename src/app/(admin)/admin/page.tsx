@@ -158,16 +158,19 @@ export default function AdminDashboardPage() {
               label={en.admin.totalOrders}
               value={stats.total}
               sub={`${stats.cancelled} cancelled · ${stats.delivered} delivered`}
+              help={en.tooltips.dashboard.totalOrders}
             />
             <StatCard
               label={en.admin.totalRevenue}
               value={formatPrice(stats.revenueCents)}
               sub={`excl. cancelled · avg ${formatPrice(stats.avgOrderCents)}/order`}
+              help={en.tooltips.dashboard.revenue}
             />
             <StatCard
               label={en.admin.pendingOrders}
               value={stats.pending}
               sub={stats.pending > 0 ? 'need attention' : 'all caught up'}
+              help={en.tooltips.dashboard.pending}
             />
             <StatCard
               label={en.admin.lowStockAlert}
