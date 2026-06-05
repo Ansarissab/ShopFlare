@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { formatPrice, getPriceRange } from '@/lib/utils/index'
+import { prefetch } from '@/lib/api'
 import { en } from '@/lib/i18n/en'
 import type { ProductCardProps } from '@/lib/types/product'
 
@@ -28,7 +29,12 @@ export function ProductCard({
   const colorVariants = variants.filter((v) => v.colorHex).slice(0, 5)
 
   return (
-    <Link href={`/product/${product.id}`} className="group block outline-none">
+    <Link
+      href={`/product/${product.id}`}
+      className="group block outline-none"
+      onMouseEnter={() => prefetch(`/api/products/${product.id}`)}
+      onFocus={() => prefetch(`/api/products/${product.id}`)}
+    >
       <Card
         className={cn(
           'overflow-hidden transition-shadow hover:shadow-md focus-within:ring-2 focus-within:ring-ring flex flex-col h-full',

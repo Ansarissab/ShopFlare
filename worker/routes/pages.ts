@@ -35,7 +35,7 @@ app.get('/:slug', async (c) => {
   }
 
   return c.json(page, 200, {
-    'Cache-Control': 'no-cache',
+    'Cache-Control': 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400',
     'ETag': etag,
   })
 })

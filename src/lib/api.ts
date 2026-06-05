@@ -106,6 +106,13 @@ export function apiUpload<T>(path: string, form: FormData, opts?: ApiOptions): P
   return request<T>(path, { method: 'POST', body: form, headers: opts?.headers, signal: opts?.signal })
 }
 
+// Primes the browser HTTP cache for a public GET path (hover / viewport intent).
+// Fire-and-forget: swallows all errors — never await.
+export function prefetch(path: string): void {
+  if (typeof window === 'undefined') return
+  void fetch(WORKER_URL + path, { method: 'GET', credentials: 'omit', cache: 'force-cache' }).catch(() => {})
+}
+
 // ---------------------------------------------------------------------------
 // Background Sync / offline queue
 // ---------------------------------------------------------------------------

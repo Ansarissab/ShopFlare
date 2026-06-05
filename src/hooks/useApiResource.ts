@@ -30,9 +30,13 @@ export interface UseApiResourceOptions {
   refetchInterval?: number
 }
 
+const _cache = new Map<string, unknown>()
+
 export function useApiResource<T>(path: string | null, opts?: UseApiResourceOptions): ApiResourceState<T> {
-  const [data, setData] = useState<T | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [data, setData] = useState<T | null>(() =>
+    path && _cache.has(path) ? (_cache.get(path) as T) : null
+  )
+  const [loading, setLoading] = useState(() => (path ? !_cache.has(path) : true))
   const [error, setError] = useState<string | null>(null)
   const [notFound, setNotFound] = useState(false)
   // Bump to trigger a silent background re-fetch without resetting state.
@@ -72,7 +76,7 @@ export function useApiResource<T>(path: string | null, opts?: UseApiResourceOpti
     async function fetchData() {
       // Only show loading/skeleton on first fetch — background refetches update
       // data silently so the UI doesn't flash.
-      if (isInitial) {
+      if (isInitial && !_cache.has(resolvedPath)) {
         setData(null)
         setError(null)
         setNotFound(false)
@@ -82,6 +86,7 @@ export function useApiResource<T>(path: string | null, opts?: UseApiResourceOpti
       try {
         const result = await apiGet<T>(resolvedPath)
         if (!cancelled) {
+          _cache.set(resolvedPath, result)
           setData(result)
           setError(null)
           setNotFound(false)
