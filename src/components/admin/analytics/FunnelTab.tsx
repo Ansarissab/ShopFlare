@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { StatCard } from '@/components/admin/shared/StatCard'
+import { HelpTip } from '@/components/common/HelpTip'
 import { en } from '@/lib/i18n/en'
 import { apiGet } from '@/lib/api'
 import { formatPrice } from '@/lib/utils/index'
@@ -71,7 +72,10 @@ export function FunnelTab({ period }: FunnelTabProps) {
 
       {/* ── Layer 1: Checkout funnel ─────────────────────────────────────────── */}
       <section className="flex flex-col gap-3">
-        <h3 className="text-sm font-semibold">{en.admin.analyticsFunnel}</h3>
+        <h3 className="flex items-center gap-1.5 text-sm font-semibold">
+          {en.admin.analyticsFunnel}
+          <HelpTip text={en.tooltips.analytics.funnel} />
+        </h3>
 
         {funnelStages.length === 0 ? (
           <p className="text-sm text-muted-foreground">{en.admin.analyticsNoData}</p>
@@ -106,12 +110,16 @@ export function FunnelTab({ period }: FunnelTabProps) {
         <StatCard
           label={en.admin.analyticsAbandonmentRate}
           value={`${checkoutAbandonmentRatePct}% abandoned`}
+          help={en.tooltips.analytics.abandonment}
         />
       </div>
 
       {/* ── Abandoned checkouts table ────────────────────────────────────────── */}
       <section className="flex flex-col gap-3">
-        <h3 className="text-sm font-semibold">{en.admin.analyticsAbandonedCheckouts}</h3>
+        <h3 className="flex items-center gap-1.5 text-sm font-semibold">
+          {en.admin.analyticsAbandonedCheckouts}
+          <HelpTip text={en.tooltips.analytics.abandoned} />
+        </h3>
 
         {abandonedCheckouts.length === 0 ? (
           <p className="text-sm text-muted-foreground">{en.admin.analyticsNoData}</p>

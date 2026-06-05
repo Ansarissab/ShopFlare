@@ -298,7 +298,7 @@ export function POSScreen() {
           <span>{formatPrice(subtotalCents, config?.currency)}</span>
         </div>
 
-        <FormField label={en.pos.customerPhone} htmlFor="pos-phone">
+        <FormField label={en.pos.customerPhone} htmlFor="pos-phone" help={en.tooltips.pos.customerPhone}>
           <Input
             id="pos-phone"
             type="tel"

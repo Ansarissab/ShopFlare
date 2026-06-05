@@ -104,19 +104,23 @@ export function CustomersTab({ period }: { period: string }) {
         <StatCard
           label={en.admin.analyticsTotalCustomers}
           value={summary.totalCustomers}
+          help={en.tooltips.analytics.totalCustomers}
         />
         <StatCard
           label={en.admin.analyticsReturning}
           value={summary.returningCustomers}
           sub={`${returningPct}% of total`}
+          help={en.tooltips.analytics.returning}
         />
         <StatCard
           label={en.admin.analyticsRepeatRate}
           value={`${summary.repeatRatePct}%`}
+          help={en.tooltips.analytics.repeatRate}
         />
         <StatCard
           label={en.admin.analyticsAvgClv}
           value={formatPrice(summary.avgClvCents)}
+          help={en.tooltips.analytics.clv}
         />
       </div>
 

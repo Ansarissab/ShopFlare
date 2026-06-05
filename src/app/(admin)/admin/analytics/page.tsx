@@ -100,21 +100,25 @@ function OverviewTab({ period }: { period: AnalyticsPeriod }) {
           label={en.admin.totalRevenue}
           value={formatPrice(data.summary.totalRevenueCents)}
           sub={`${data.summary.totalOrders} orders total`}
+          help={en.tooltips.analytics.revenue}
         />
         <StatCard
           label={en.admin.totalOrders}
           value={data.summary.totalOrders - data.summary.cancelledOrders}
           sub={`${data.summary.cancelledOrders} cancelled`}
+          help={en.tooltips.analytics.orders}
         />
         <StatCard
           label={en.admin.analyticsAvgOrder}
           value={formatPrice(avgOrderCents(data.summary))}
           sub={`${data.summary.deliveredOrders} delivered`}
+          help={en.tooltips.analytics.aov}
         />
         <StatCard
           label={en.admin.analyticsDiscountsGiven}
           value={formatPrice(data.summary.totalDiscountCents)}
           sub={`${data.couponStats.length} coupons used`}
+          help={en.tooltips.analytics.discounts}
         />
       </div>
 

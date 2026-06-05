@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
+import { HelpTip } from '@/components/common/HelpTip'
 import { formatPrice, formatDate } from '@/lib/utils/index'
 import { en } from '@/lib/i18n/en'
 import type { AdminOrder } from '@/lib/types/admin'
@@ -33,8 +34,12 @@ export function OrdersTable({ orders }: OrdersTableProps) {
           <tr className="border-b bg-muted/50">
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Order</th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Customer</th>
-            <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">Method</th>
-            <th className="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
+            <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5">Method<HelpTip text={en.tooltips.orders.method} /></span>
+            </th>
+            <th className="px-4 py-3 text-left font-medium text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5">Status<HelpTip text={en.tooltips.orders.status} /></span>
+            </th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Total</th>
             <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">Date</th>
           </tr>
