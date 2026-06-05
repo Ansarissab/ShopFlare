@@ -168,7 +168,24 @@ If kept, mount `TooltipProvider` in `(store)/layout.tsx` (§4).
 - All tooltip copy lives under `en.tooltips.*` — no hardcoded strings in JSX.
 - `TooltipProvider` mounted in admin layout (and store layout if §7 done).
 - No Recharts/UI `Tooltip` import collision (feature files import `HelpTip`, not `Tooltip`).
-- `pnpm lint` + `pnpm typecheck` clean.
+- `pnpm typecheck` clean. **`pnpm lint`: introduce NO new errors** — do NOT aim
+  for absolute-clean. See "Known lint baseline" below.
+
+### Known lint baseline (carried over from the plan-11 audit)
+
+The repo already fails `pnpm lint` with **23 pre-existing errors**, all the same
+react rule — *"Calling setState synchronously within an effect can trigger
+cascading renders"* — in files like `OfflineBanner.tsx`, `InstallPrompt.tsx`,
+the analytics tabs, `checkout/page.tsx`, etc. These are unrelated to tooltips and
+are **out of scope here**. So:
+
+- Run `pnpm lint` BEFORE you start and note the error count (≈23).
+- After your changes the count must be **the same or lower** — never higher.
+- A few of these files are tooltip targets (analytics tabs, InstallPrompt). When
+  you edit them, do not "fix" the setState-in-effect error as a drive-by; leave
+  it. Just don't add a new one.
+- Do not introduce new `react-hooks` / unused-import / anonymous-default-export
+  warnings with the `HelpTip` helper or i18n additions.
 
 ## 10. Commits
 
