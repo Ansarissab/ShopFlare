@@ -1,11 +1,14 @@
 'use client'
 
 import Link from 'next/link'
+import { ExternalLink } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { Skeleton } from '@/components/ui/skeleton'
+import { buttonVariants } from '@/components/ui/button'
 import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { ProductForm } from '@/components/admin/products/ProductForm'
 import { en } from '@/lib/i18n/en'
+import { cn } from '@/lib/utils'
 import { useApiResource } from '@/hooks/useApiResource'
 import type { ProductWithVariants } from '@/lib/types/product'
 
@@ -17,7 +20,23 @@ export default function EditProductPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <AdminPageHeader title={en.admin.editProduct} backHref="/admin/products" />
+      <AdminPageHeader
+        title={en.admin.editProduct}
+        backHref="/admin/products"
+        actions={
+          params?.id && (
+            <Link
+              href={`/product/${params.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
+            >
+              <ExternalLink className="size-3.5 mr-1.5" aria-hidden />
+              {en.admin.viewProduct}
+            </Link>
+          )
+        }
+      />
 
       {loading ? (
         <div className="flex flex-col gap-4 max-w-3xl">
