@@ -31,11 +31,12 @@ export function OrdersTable({ orders }: OrdersTableProps) {
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b bg-muted/50">
-            {['Order', 'Customer', 'Method', 'Status', 'Total', 'Date'].map((h) => (
-              <th key={h} className="px-4 py-3 text-left font-medium text-muted-foreground">
-                {h}
-              </th>
-            ))}
+            <th className="px-4 py-3 text-left font-medium text-muted-foreground">Order</th>
+            <th className="px-4 py-3 text-left font-medium text-muted-foreground">Customer</th>
+            <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">Method</th>
+            <th className="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
+            <th className="px-4 py-3 text-left font-medium text-muted-foreground">Total</th>
+            <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">Date</th>
           </tr>
         </thead>
         <tbody>
@@ -48,9 +49,11 @@ export function OrdersTable({ orders }: OrdersTableProps) {
               </td>
               <td className="px-4 py-3">
                 <p className="font-medium">{order.customerName}</p>
-                <p className="text-xs text-muted-foreground">{order.customerEmail ?? order.customerPhone ?? '—'}</p>
+                <p className="hidden sm:block text-xs text-muted-foreground">
+                  {order.customerEmail ?? order.customerPhone ?? '—'}
+                </p>
               </td>
-              <td className="px-4 py-3 text-muted-foreground">
+              <td className="hidden sm:table-cell px-4 py-3 text-muted-foreground">
                 {en.paymentMethodLabels[order.paymentMethod as keyof typeof en.paymentMethodLabels] ?? order.paymentMethod}
               </td>
               <td className="px-4 py-3">
@@ -58,8 +61,8 @@ export function OrdersTable({ orders }: OrdersTableProps) {
                   {en.orderStatusLabels[order.status as keyof typeof en.orderStatusLabels] ?? order.status}
                 </Badge>
               </td>
-              <td className="px-4 py-3 font-medium">{formatPrice(order.totalCents)}</td>
-              <td className="px-4 py-3 text-muted-foreground text-xs">
+              <td className="px-4 py-3 font-medium whitespace-nowrap">{formatPrice(order.totalCents)}</td>
+              <td className="hidden sm:table-cell px-4 py-3 text-muted-foreground text-xs whitespace-nowrap">
                 {formatDate(order.createdAt)}
               </td>
             </tr>

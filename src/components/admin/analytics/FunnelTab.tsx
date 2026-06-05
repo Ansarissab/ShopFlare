@@ -116,15 +116,15 @@ export function FunnelTab({ period }: FunnelTabProps) {
         {abandonedCheckouts.length === 0 ? (
           <p className="text-sm text-muted-foreground">{en.admin.analyticsNoData}</p>
         ) : (
-          <div className="rounded-lg border overflow-hidden">
+          <div className="overflow-x-auto rounded-lg border">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/50">
                   <th className="px-3 py-2 text-left font-medium text-muted-foreground">#</th>
                   <th className="px-3 py-2 text-left font-medium text-muted-foreground">{en.admin.analyticsCustomerName}</th>
-                  <th className="px-3 py-2 text-left font-medium text-muted-foreground">{en.admin.analyticsContact}</th>
+                  <th className="hidden sm:table-cell px-3 py-2 text-left font-medium text-muted-foreground">{en.admin.analyticsContact}</th>
                   <th className="px-3 py-2 text-right font-medium text-muted-foreground">{en.admin.totalRevenue}</th>
-                  <th className="px-3 py-2 text-right font-medium text-muted-foreground"></th>
+                  <th className="hidden sm:table-cell px-3 py-2 text-right font-medium text-muted-foreground" />
                 </tr>
               </thead>
               <tbody>
@@ -132,9 +132,9 @@ export function FunnelTab({ period }: FunnelTabProps) {
                   <tr key={row.orderNumber} className="border-b last:border-0 hover:bg-muted/30">
                     <td className="px-3 py-2 font-mono text-xs text-muted-foreground">{row.orderNumber}</td>
                     <td className="px-3 py-2">{row.customerName}</td>
-                    <td className="px-3 py-2 text-muted-foreground">{row.contactHint}</td>
-                    <td className="px-3 py-2 text-right">{formatPrice(row.totalCents)}</td>
-                    <td className="px-3 py-2 text-right text-xs text-muted-foreground whitespace-nowrap">
+                    <td className="hidden sm:table-cell px-3 py-2 text-muted-foreground">{row.contactHint}</td>
+                    <td className="px-3 py-2 text-right whitespace-nowrap">{formatPrice(row.totalCents)}</td>
+                    <td className="hidden sm:table-cell px-3 py-2 text-right text-xs text-muted-foreground whitespace-nowrap">
                       {en.admin.analyticsHoursAgo.replace('{n}', String(row.hoursAgo))}
                     </td>
                   </tr>

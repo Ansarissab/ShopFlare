@@ -82,25 +82,25 @@ export function ProductsTab({ period }: { period: string }) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b text-xs text-muted-foreground">
-                  <th className="w-8 px-5 py-2 text-left font-medium">#</th>
-                  <th className="px-5 py-2 text-left font-medium">Product</th>
-                  <th className="px-5 py-2 text-right font-medium">{en.admin.analyticsOrders}</th>
-                  <th className="px-5 py-2 text-right font-medium">{en.admin.analyticsUnitsSold}</th>
-                  <th className="px-5 py-2 text-right font-medium">{en.admin.totalRevenue}</th>
-                  <th className="px-5 py-2 text-right font-medium">{en.admin.analyticsAov}</th>
+                  <th className="w-8 px-2 sm:px-5 py-2 text-left font-medium">#</th>
+                  <th className="px-2 sm:px-5 py-2 text-left font-medium">Product</th>
+                  <th className="hidden sm:table-cell px-2 sm:px-5 py-2 text-right font-medium">{en.admin.analyticsOrders}</th>
+                  <th className="hidden sm:table-cell px-2 sm:px-5 py-2 text-right font-medium">{en.admin.analyticsUnitsSold}</th>
+                  <th className="px-2 sm:px-5 py-2 text-right font-medium">{en.admin.totalRevenue}</th>
+                  <th className="hidden md:table-cell px-2 sm:px-5 py-2 text-right font-medium">{en.admin.analyticsAov}</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {leaderboard.map((row, i) => (
                   <tr key={row.productId} className="hover:bg-muted/40">
-                    <td className="px-5 py-3 text-xs text-muted-foreground tabular-nums">{i + 1}</td>
-                    <td className="px-5 py-3 font-medium">{row.productName}</td>
-                    <td className="px-5 py-3 text-right tabular-nums">{row.orders}</td>
-                    <td className="px-5 py-3 text-right tabular-nums">{row.unitsSold}</td>
-                    <td className="px-5 py-3 text-right font-semibold tabular-nums">
+                    <td className="px-2 sm:px-5 py-3 text-xs text-muted-foreground tabular-nums">{i + 1}</td>
+                    <td className="px-2 sm:px-5 py-3 font-medium truncate min-w-0">{row.productName}</td>
+                    <td className="hidden sm:table-cell px-2 sm:px-5 py-3 text-right tabular-nums">{row.orders}</td>
+                    <td className="hidden sm:table-cell px-2 sm:px-5 py-3 text-right tabular-nums">{row.unitsSold}</td>
+                    <td className="px-2 sm:px-5 py-3 text-right font-semibold tabular-nums whitespace-nowrap">
                       {formatPrice(row.revenueCents)}
                     </td>
-                    <td className="px-5 py-3 text-right tabular-nums text-muted-foreground">
+                    <td className="hidden md:table-cell px-2 sm:px-5 py-3 text-right tabular-nums text-muted-foreground whitespace-nowrap">
                       {formatPrice(row.aovCents)}
                     </td>
                   </tr>
@@ -127,7 +127,7 @@ export function ProductsTab({ period }: { period: string }) {
                 <thead>
                   <tr className="border-b text-xs text-muted-foreground">
                     <th className="px-5 py-2 text-left font-medium">Variant</th>
-                    <th className="px-5 py-2 text-right font-medium">{en.admin.analyticsUnitsSold}</th>
+                    <th className="hidden sm:table-cell px-5 py-2 text-right font-medium">{en.admin.analyticsUnitsSold}</th>
                     <th className="px-5 py-2 text-right font-medium">{en.admin.totalRevenue}</th>
                   </tr>
                 </thead>
@@ -143,8 +143,8 @@ export function ProductsTab({ period }: { period: string }) {
                         )}
                         <span>{v.variantLabel}</span>
                       </td>
-                      <td className="px-5 py-3 text-right tabular-nums">{v.unitsSold}</td>
-                      <td className="px-5 py-3 text-right font-semibold tabular-nums">
+                      <td className="hidden sm:table-cell px-5 py-3 text-right tabular-nums">{v.unitsSold}</td>
+                      <td className="px-5 py-3 text-right font-semibold tabular-nums whitespace-nowrap">
                         {formatPrice(v.revenueCents)}
                       </td>
                     </tr>
@@ -168,7 +168,7 @@ export function ProductsTab({ period }: { period: string }) {
                 <thead>
                   <tr className="border-b text-xs text-muted-foreground">
                     <th className="px-5 py-2 text-left font-medium">Size</th>
-                    <th className="px-5 py-2 text-right font-medium">{en.admin.analyticsUnitsSold}</th>
+                    <th className="hidden sm:table-cell px-5 py-2 text-right font-medium">{en.admin.analyticsUnitsSold}</th>
                     <th className="px-5 py-2 text-right font-medium">{en.admin.totalRevenue}</th>
                   </tr>
                 </thead>
@@ -176,8 +176,8 @@ export function ProductsTab({ period }: { period: string }) {
                   {data.sizes.map(s => (
                     <tr key={s.sizeOptionId} className="hover:bg-muted/40">
                       <td className="px-5 py-3">{s.size}</td>
-                      <td className="px-5 py-3 text-right tabular-nums">{s.unitsSold}</td>
-                      <td className="px-5 py-3 text-right font-semibold tabular-nums">
+                      <td className="hidden sm:table-cell px-5 py-3 text-right tabular-nums">{s.unitsSold}</td>
+                      <td className="px-5 py-3 text-right font-semibold tabular-nums whitespace-nowrap">
                         {formatPrice(s.revenueCents)}
                       </td>
                     </tr>
@@ -200,17 +200,17 @@ export function ProductsTab({ period }: { period: string }) {
               <thead>
                 <tr className="border-b text-xs text-muted-foreground">
                   <th className="px-5 py-2 text-left font-medium">Product</th>
-                  <th className="px-5 py-2 text-right font-medium">{en.admin.analyticsUnitsSold}</th>
-                  <th className="px-5 py-2 text-right font-medium">{en.admin.analyticsStockOnHand}</th>
+                  <th className="hidden sm:table-cell px-5 py-2 text-right font-medium">{en.admin.analyticsUnitsSold}</th>
+                  <th className="hidden sm:table-cell px-5 py-2 text-right font-medium">{en.admin.analyticsStockOnHand}</th>
                   <th className="px-5 py-2 text-right font-medium">{en.admin.analyticsTurnover}</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {data.slowMovers.map(m => (
                   <tr key={m.productId} className="hover:bg-muted/40">
-                    <td className="px-5 py-3 font-medium">{m.productName}</td>
-                    <td className="px-5 py-3 text-right tabular-nums">{m.unitsSold}</td>
-                    <td className="px-5 py-3 text-right tabular-nums">
+                    <td className="px-5 py-3 font-medium truncate min-w-0">{m.productName}</td>
+                    <td className="hidden sm:table-cell px-5 py-3 text-right tabular-nums">{m.unitsSold}</td>
+                    <td className="hidden sm:table-cell px-5 py-3 text-right tabular-nums">
                       {m.unlimited ? (
                         <span className="text-muted-foreground">{en.admin.analyticsUnlimited}</span>
                       ) : m.stockOnHand}

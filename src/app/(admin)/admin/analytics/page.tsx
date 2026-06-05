@@ -231,20 +231,20 @@ function OverviewTab({ period }: { period: AnalyticsPeriod }) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b text-xs text-muted-foreground">
-                  <th className="px-5 py-2 text-left font-medium">Product</th>
-                  <th className="px-5 py-2 text-right font-medium">{en.admin.analyticsUnitsSold}</th>
-                  <th className="px-5 py-2 text-right font-medium">{en.admin.totalRevenue}</th>
+                  <th className="px-2 sm:px-5 py-2 text-left font-medium">Product</th>
+                  <th className="hidden sm:table-cell px-2 sm:px-5 py-2 text-right font-medium">{en.admin.analyticsUnitsSold}</th>
+                  <th className="px-2 sm:px-5 py-2 text-right font-medium">{en.admin.totalRevenue}</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {data.topProducts.map((p, i) => (
                   <tr key={p.productId} className="hover:bg-muted/40">
-                    <td className="flex items-center gap-3 px-5 py-3">
+                    <td className="flex items-center gap-3 px-2 sm:px-5 py-3">
                       <span className="w-5 shrink-0 text-xs text-muted-foreground">{i + 1}</span>
-                      <span className="font-medium">{p.productName}</span>
+                      <span className="font-medium truncate min-w-0">{p.productName}</span>
                     </td>
-                    <td className="px-5 py-3 text-right tabular-nums">{p.unitsSold}</td>
-                    <td className="px-5 py-3 text-right font-semibold tabular-nums">
+                    <td className="hidden sm:table-cell px-2 sm:px-5 py-3 text-right tabular-nums">{p.unitsSold}</td>
+                    <td className="px-2 sm:px-5 py-3 text-right font-semibold tabular-nums whitespace-nowrap">
                       {formatPrice(p.revenueCents)}
                     </td>
                   </tr>
@@ -265,17 +265,17 @@ function OverviewTab({ period }: { period: AnalyticsPeriod }) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b text-xs text-muted-foreground">
-                  <th className="px-5 py-2 text-left font-medium">Coupon Code</th>
-                  <th className="px-5 py-2 text-right font-medium">{en.admin.analyticsUses}</th>
-                  <th className="px-5 py-2 text-right font-medium">Total Discount</th>
+                  <th className="px-2 sm:px-5 py-2 text-left font-medium">Coupon Code</th>
+                  <th className="hidden sm:table-cell px-2 sm:px-5 py-2 text-right font-medium">{en.admin.analyticsUses}</th>
+                  <th className="px-2 sm:px-5 py-2 text-right font-medium">Total Discount</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {data.couponStats.map(c => (
                   <tr key={c.couponCode} className="hover:bg-muted/40">
-                    <td className="px-5 py-3 font-mono font-medium">{c.couponCode}</td>
-                    <td className="px-5 py-3 text-right tabular-nums">{c.uses}</td>
-                    <td className="px-5 py-3 text-right font-semibold tabular-nums text-success">
+                    <td className="px-2 sm:px-5 py-3 font-mono font-medium">{c.couponCode}</td>
+                    <td className="hidden sm:table-cell px-2 sm:px-5 py-3 text-right tabular-nums">{c.uses}</td>
+                    <td className="px-2 sm:px-5 py-3 text-right font-semibold tabular-nums whitespace-nowrap text-success">
                       -{formatPrice(c.totalDiscountCents)}
                     </td>
                   </tr>

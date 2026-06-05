@@ -29,15 +29,15 @@ function CouponRow({ coupon, onEdit, onDeleted }: CouponRowProps) {
   return (
     <tr className="border-b last:border-0 hover:bg-muted/30 transition-colors">
       <td className="px-4 py-3 font-mono text-xs font-semibold">{coupon.code}</td>
-      <td className="px-4 py-3 text-sm">
+      <td className="hidden sm:table-cell px-4 py-3 text-sm">
         <span className="capitalize">{coupon.type === 'percentage' ? en.admin.couponTypePercentage : en.admin.couponTypeFixed}</span>
       </td>
       <td className="px-4 py-3 text-sm font-medium">{valueLabel}</td>
-      <td className="px-4 py-3 text-sm text-muted-foreground">
+      <td className="hidden sm:table-cell px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
         {coupon.usedCount}
         {coupon.usageLimit !== null ? ` / ${coupon.usageLimit}` : ''}
       </td>
-      <td className="px-4 py-3 text-xs text-muted-foreground">
+      <td className="hidden sm:table-cell px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
         {coupon.expiresAt
           ? formatDate(coupon.expiresAt)
           : '—'}
@@ -47,7 +47,7 @@ function CouponRow({ coupon, onEdit, onDeleted }: CouponRowProps) {
           {coupon.active ? en.admin.active : en.admin.inactive}
         </Badge>
       </td>
-      <td className="px-4 py-3">
+      <td className="hidden sm:table-cell px-4 py-3">
         {coupon.stripeCouponId ? (
           <Badge variant="outline" className="text-xs">{en.admin.syncStripeCoupon}</Badge>
         ) : (
@@ -96,20 +96,14 @@ export function CouponsTable({ coupons, onEdit, onDeleted }: CouponsTableProps) 
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b bg-muted/50">
-            {[
-              en.admin.couponCode,
-              en.admin.couponType,
-              en.admin.couponValue,
-              en.admin.usedCount,
-              en.admin.expiresAt,
-              en.admin.active,
-              en.admin.stripeColumn,
-              '',
-            ].map((h, i) => (
-              <th key={i} className="px-4 py-3 text-left font-medium text-muted-foreground">
-                {h}
-              </th>
-            ))}
+            <th className="px-4 py-3 text-left font-medium text-muted-foreground">{en.admin.couponCode}</th>
+            <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">{en.admin.couponType}</th>
+            <th className="px-4 py-3 text-left font-medium text-muted-foreground">{en.admin.couponValue}</th>
+            <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">{en.admin.usedCount}</th>
+            <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">{en.admin.expiresAt}</th>
+            <th className="px-4 py-3 text-left font-medium text-muted-foreground">{en.admin.active}</th>
+            <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">{en.admin.stripeColumn}</th>
+            <th className="px-4 py-3" />
           </tr>
         </thead>
         <tbody>

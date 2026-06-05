@@ -155,10 +155,10 @@ export function CustomersTab({ period }: { period: string }) {
               <thead>
                 <tr className="border-b text-xs text-muted-foreground">
                   <th className="px-5 py-2 text-left font-medium">Customer</th>
-                  <th className="px-5 py-2 text-right font-medium">{en.admin.analyticsOrders}</th>
+                  <th className="hidden sm:table-cell px-5 py-2 text-right font-medium">{en.admin.analyticsOrders}</th>
                   <th className="px-5 py-2 text-right font-medium">{en.admin.analyticsSpent}</th>
-                  <th className="px-5 py-2 text-right font-medium">{en.admin.analyticsFirstOrder}</th>
-                  <th className="px-5 py-2 text-right font-medium">{en.admin.analyticsLastOrder}</th>
+                  <th className="hidden md:table-cell px-5 py-2 text-right font-medium">{en.admin.analyticsFirstOrder}</th>
+                  <th className="hidden md:table-cell px-5 py-2 text-right font-medium">{en.admin.analyticsLastOrder}</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -168,14 +168,14 @@ export function CustomersTab({ period }: { period: string }) {
                       <span className="w-5 shrink-0 text-xs text-muted-foreground">{i + 1}</span>
                       <span className="font-mono text-xs">{c.customerKey}</span>
                     </td>
-                    <td className="px-5 py-3 text-right tabular-nums">{c.orders}</td>
-                    <td className="px-5 py-3 text-right font-semibold tabular-nums">
+                    <td className="hidden sm:table-cell px-5 py-3 text-right tabular-nums">{c.orders}</td>
+                    <td className="px-5 py-3 text-right font-semibold tabular-nums whitespace-nowrap">
                       {formatPrice(c.totalSpentCents)}
                     </td>
-                    <td className="px-5 py-3 text-right text-xs text-muted-foreground tabular-nums">
+                    <td className="hidden md:table-cell px-5 py-3 text-right text-xs text-muted-foreground tabular-nums whitespace-nowrap">
                       {shortDate(c.firstOrderAt)}
                     </td>
-                    <td className="px-5 py-3 text-right text-xs text-muted-foreground tabular-nums">
+                    <td className="hidden md:table-cell px-5 py-3 text-right text-xs text-muted-foreground tabular-nums whitespace-nowrap">
                       {shortDate(c.lastOrderAt)}
                     </td>
                   </tr>

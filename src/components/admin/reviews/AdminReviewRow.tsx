@@ -62,18 +62,18 @@ export function AdminReviewRow({ review, onChanged }: AdminReviewRowProps) {
         </Badge>
       </td>
       <td className="px-4 py-3 text-sm font-medium">{review.productName}</td>
-      <td className="px-4 py-3 text-sm">{review.customerName}</td>
+      <td className="hidden md:table-cell px-4 py-3 text-sm">{review.customerName}</td>
       <td className="px-4 py-3">
         <ReviewStars rating={review.rating} />
       </td>
-      <td className="px-4 py-3 max-w-xs">
+      <td className="hidden sm:table-cell px-4 py-3 max-w-[60vw] sm:max-w-xs">
         {review.body ? (
           <p className="text-sm text-muted-foreground line-clamp-2">{review.body}</p>
         ) : (
           <span className="text-xs text-muted-foreground">—</span>
         )}
       </td>
-      <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+      <td className="hidden md:table-cell px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
         {formatDate(review.createdAt)}
       </td>
       <td className="px-4 py-3">
