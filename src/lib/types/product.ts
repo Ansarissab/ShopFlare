@@ -12,6 +12,7 @@ export type VariantWithDetails = Variant & {
 export type ProductWithVariants = {
   product: Product
   variants: VariantWithDetails[]
+  categoryIds: string[]
 }
 
 export interface WhatsAppOrderParams {
