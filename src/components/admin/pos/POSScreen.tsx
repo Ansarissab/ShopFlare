@@ -252,7 +252,7 @@ export function POSScreen() {
                   <p className="text-sm font-medium truncate">{item.productName}</p>
                   <p className="text-xs text-muted-foreground">{item.variantLabel} · {item.size}</p>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 sm:gap-2">
                   <Button
                     type="button"
                     size="icon"
