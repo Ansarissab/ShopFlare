@@ -27,6 +27,11 @@ export const en = {
     viewCategory: 'View Category',
     categoryEmpty: 'No products in this category yet',
     browseCategories: 'Browse Categories',
+    searchProducts: 'Search products…',
+    searchNoResults: 'No products found for',
+    searchClearHint: 'Clear search',
+    loadingMore: 'Loading more…',
+    allProductsLoaded: 'All products loaded',
   },
   cart: {
     title: 'Your Cart',
@@ -436,6 +441,8 @@ export const en = {
     categoryDeleted: 'Category deleted',
     slugTaken: 'This slug is already taken',
     slugAutoHint: 'Auto-generated from name',
+    productPageSize: 'Products per page',
+    productPageSizeHint: 'Number of products loaded per scroll batch (6–96)',
   },
   // Tooltip copy — short, plain, merchant-friendly. Rendered via <HelpTip>.
   // Never inline these strings in JSX; always reference en.tooltips.*
