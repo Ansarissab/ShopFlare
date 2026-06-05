@@ -36,5 +36,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  return [...staticRoutes, ...productRoutes]
+  let categoryRoutes: MetadataRoute.Sitemap = []
+  if (workerUrl) {
+    try {
+      const res = await fetch(`${workerUrl}/api/categories`, { next: { revalidate: 3600 } })
+      if (res.ok) {
+        const data = (await res.json()) as { categories: Array<{ slug: string; children?: Array<{ slug: string }> }> }
+        const allSlugs: string[] = []
+        for (const cat of data.categories) {
+          allSlugs.push(cat.slug)
+          for (const child of cat.children ?? []) {
+            allSlugs.push(child.slug)
+          }
+        }
+        categoryRoutes = allSlugs.map((slug) => ({
+          url: `${siteUrl}/category/${slug}`,
+          changeFrequency: 'weekly' as const,
+          priority: 0.6,
+        }))
+      }
+    } catch {
+      // worker unavailable at build time — category routes skipped
+    }
+  }
+
+  return [...staticRoutes, ...productRoutes, ...categoryRoutes]
 }
