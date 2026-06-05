@@ -12,6 +12,7 @@ import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { FormField } from '@/components/common/FormField'
 import { ImageUpload } from '@/components/admin/products/ImageUpload'
+import { ProductCategoryPicker } from '@/components/admin/categories/ProductCategoryPicker'
 import { en } from '@/lib/i18n/en'
 import { apiPost, apiPut, apiDelete, apiGet, ApiError } from '@/lib/api'
 import { updateSizeOptionSchema } from '@/lib/schemas'
@@ -118,6 +119,9 @@ export function ProductForm({ initial }: ProductFormProps) {
   const [description, setDescription] = useState(initial?.product.description ?? '')
   const [active, setActive] = useState(initial?.product.active ?? true)
   const [saving, setSaving] = useState(false)
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
+    initial?.categoryIds ?? [],
+  )
 
   const [variants, setVariants] = useState<LocalVariant[]>(
     (initial?.variants ?? []).map((v) => ({
@@ -155,9 +159,11 @@ export function ProductForm({ initial }: ProductFormProps) {
 
       if (productId) {
         await apiPut(`/api/admin/products/${productId}`, { name, description, active })
+        await apiPut(`/api/admin/products/${productId}/categories`, { categoryIds: selectedCategoryIds })
         toast.success(en.admin.productUpdated)
       } else {
         const created = await apiPost<{ id: string }>('/api/admin/products', { name, description, active })
+        await apiPut(`/api/admin/products/${created.id}/categories`, { categoryIds: selectedCategoryIds })
         toast.success(en.admin.productCreated)
         router.push(`/admin/products/${created.id}`)
         return
@@ -375,6 +381,14 @@ export function ProductForm({ initial }: ProductFormProps) {
           <label htmlFor="product-active" className="text-sm cursor-pointer">
             {en.admin.active}
           </label>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm font-medium">{en.admin.categories}</label>
+          <ProductCategoryPicker
+            selectedIds={selectedCategoryIds}
+            onChange={setSelectedCategoryIds}
+          />
         </div>
 
         <Button onClick={saveProduct} disabled={saving} size="sm">
