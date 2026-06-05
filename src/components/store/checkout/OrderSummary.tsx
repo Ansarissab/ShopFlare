@@ -30,7 +30,7 @@ export function OrderSummary() {
   const totalCents = calculateGrandTotal(subtotalCents, shippingCents, discountCents, taxCents, taxInclusive)
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border bg-card p-5 text-card-foreground">
+    <div className="flex flex-col gap-4 rounded-lg border bg-card p-4 sm:p-5 text-card-foreground">
       {/* Item list */}
       <ul className="flex flex-col gap-4">
         {items.map((item) => (

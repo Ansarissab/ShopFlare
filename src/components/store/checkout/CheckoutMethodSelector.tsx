@@ -59,11 +59,11 @@ export function CheckoutMethodSelector() {
 
   return (
     <Tabs defaultValue="cod" className="w-full">
-      <TabsList className={cn('grid w-full', tabCount === 4 ? 'grid-cols-4' : 'grid-cols-3')}>
-        <TabsTrigger value="card">{en.checkout.payWithCard}</TabsTrigger>
-        <TabsTrigger value="cod">{en.store.cashOnDelivery}</TabsTrigger>
-        {bankEnabled && <TabsTrigger value="bank">{en.checkout.bankTransfer}</TabsTrigger>}
-        <TabsTrigger value="whatsapp">{en.store.orderOnWhatsApp}</TabsTrigger>
+      <TabsList className={cn('grid w-full', tabCount === 4 ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-2 sm:grid-cols-3')}>
+        <TabsTrigger value="card" className="text-xs sm:text-sm">{en.checkout.payWithCard}</TabsTrigger>
+        <TabsTrigger value="cod" className="text-xs sm:text-sm">{en.store.cashOnDelivery}</TabsTrigger>
+        {bankEnabled && <TabsTrigger value="bank" className="text-xs sm:text-sm">{en.checkout.bankTransfer}</TabsTrigger>}
+        <TabsTrigger value="whatsapp" className="text-xs sm:text-sm">{en.store.orderOnWhatsApp}</TabsTrigger>
       </TabsList>
 
       {/* Stripe card tab */}

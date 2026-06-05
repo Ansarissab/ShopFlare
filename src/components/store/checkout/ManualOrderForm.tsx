@@ -91,7 +91,7 @@ export function ManualOrderForm({ endpoint, successMethod, submitLabel }: Manual
       </FormField>
 
       {/* City + State row */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <FormField label={en.checkout.city} htmlFor="ship-city" error={errors.city ? requiredMsg(en.checkout.city) : undefined}>
           <Input id="ship-city" autoComplete="address-level2" aria-invalid={!!errors.city} {...register('city')} />
         </FormField>
@@ -102,7 +102,7 @@ export function ManualOrderForm({ endpoint, successMethod, submitLabel }: Manual
       </div>
 
       {/* Postal Code + Country row */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <FormField label={en.checkout.postalCode} htmlFor="ship-postal" optional>
           <Input id="ship-postal" autoComplete="postal-code" {...register('postalCode')} />
         </FormField>

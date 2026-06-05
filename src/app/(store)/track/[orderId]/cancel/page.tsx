@@ -199,7 +199,7 @@ function CancelOrderContent() {
         )}
       </div>
 
-      <div className="rounded-lg border bg-card p-5 text-card-foreground flex flex-col gap-4">
+      <div className="rounded-lg border bg-card p-4 sm:p-5 text-card-foreground flex flex-col gap-4">
         <p className="text-sm">{en.checkout.cancelConfirm}</p>
 
         <Separator />

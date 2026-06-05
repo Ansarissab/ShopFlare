@@ -69,7 +69,7 @@ export function ProductHero({
   return (
     <div
       className={cn(
-        'grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12',
+        'grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 md:gap-12',
         className,
       )}
     >

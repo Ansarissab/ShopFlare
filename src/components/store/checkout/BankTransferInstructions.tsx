@@ -34,7 +34,7 @@ export function BankTransferInstructions({ orderNumber, totalCents }: BankTransf
         {t.reference.replace('{orderNumber}', orderNumber)}
       </p>
 
-      <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
+      <dl className="mt-4 grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
         {rows.map(([label, value]) =>
           value ? (
             <div key={label} className="contents">

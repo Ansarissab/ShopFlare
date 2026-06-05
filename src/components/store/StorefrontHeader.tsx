@@ -23,7 +23,7 @@ export function StorefrontHeader() {
           {/* Store name */}
           <Link href="/" className="text-lg font-semibold tracking-tight text-foreground hover:opacity-80 transition-opacity">
             {config?.logoUrl ? (
-              <span className="relative block h-8 w-32">
+              <span className="relative block h-6 w-24 sm:h-8 sm:w-32">
                 <Image
                   src={config.logoUrl}
                   alt={config.storeName ?? 'Store logo'}
