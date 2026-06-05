@@ -138,6 +138,12 @@ export const PWA_MANIFEST_DEFAULTS = {
   themeColor: '#18181b',
 } as const
 
+// ─── Search + pagination ──────────────────────────────────────────────────────
+export const DEFAULT_PRODUCT_PAGE_SIZE = 24
+export const MIN_PRODUCT_PAGE_SIZE = 6
+export const MAX_PRODUCT_PAGE_SIZE = 96
+export const SEARCH_DEBOUNCE_MS = 250
+
 // ─── Categories ────────────────────────────────────────────────────────────────
 export const MAX_CATEGORY_DEPTH = 2
 export const MAX_CATEGORIES_PER_PRODUCT = 10
