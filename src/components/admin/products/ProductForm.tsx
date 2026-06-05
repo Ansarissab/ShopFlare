@@ -445,14 +445,14 @@ export function ProductForm({ initial }: ProductFormProps) {
                       <div className="border-t p-4 flex flex-col gap-4">
                         {/* Variant fields */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <FormField label={en.admin.variantLabel} htmlFor={`variant-label-${variant.id}`}>
+                          <FormField label={en.admin.variantLabel} htmlFor={`variant-label-${variant.id}`} help={en.tooltips.product.variantLabel}>
                             <Input
                               id={`variant-label-${variant.id}`}
                               value={variant.label}
                               onChange={(e) => updateVariantLabel(variant.id, e.target.value)}
                             />
                           </FormField>
-                          <FormField label={en.admin.colorHex} htmlFor={`variant-color-${variant.id}`}>
+                          <FormField label={en.admin.colorHex} htmlFor={`variant-color-${variant.id}`} help={en.tooltips.product.colorHex}>
                             <div className="flex gap-2">
                               <Input
                                 id={`variant-color-${variant.id}`}
@@ -513,7 +513,7 @@ export function ProductForm({ initial }: ProductFormProps) {
                                 const errs = sizeErrors[size.id] ?? {}
                                 return (
                                 <div key={size.id} className="grid grid-cols-2 gap-2 items-end sm:grid-cols-4 lg:grid-cols-[1fr_1fr_1fr_1fr_auto]">
-                                  <FormField label={en.admin.sizeName} htmlFor={`size-name-${size.id}`} error={errs.size}>
+                                  <FormField label={en.admin.sizeName} htmlFor={`size-name-${size.id}`} error={errs.size} help={en.tooltips.product.sizeName}>
                                     <Input
                                       id={`size-name-${size.id}`}
                                       value={size.size}
@@ -521,7 +521,7 @@ export function ProductForm({ initial }: ProductFormProps) {
                                       onChange={(e) => updateSizeField(variant.id, size.id, 'size', e.target.value)}
                                     />
                                   </FormField>
-                                  <FormField label={en.admin.priceCents} htmlFor={`size-price-${size.id}`} error={errs.priceCents}>
+                                  <FormField label={en.admin.priceCents} htmlFor={`size-price-${size.id}`} error={errs.priceCents} help={en.tooltips.product.priceCents}>
                                     <Input
                                       id={`size-price-${size.id}`}
                                       type="number"
@@ -531,7 +531,7 @@ export function ProductForm({ initial }: ProductFormProps) {
                                       onChange={(e) => updateSizeField(variant.id, size.id, 'priceCents', Number(e.target.value))}
                                     />
                                   </FormField>
-                                  <FormField label={en.admin.stock} htmlFor={`size-stock-${size.id}`} error={errs.stock}>
+                                  <FormField label={en.admin.stock} htmlFor={`size-stock-${size.id}`} error={errs.stock} help={en.tooltips.product.stock}>
                                     <Input
                                       id={`size-stock-${size.id}`}
                                       type="number"
@@ -541,7 +541,7 @@ export function ProductForm({ initial }: ProductFormProps) {
                                       onChange={(e) => updateSizeField(variant.id, size.id, 'stock', Number(e.target.value))}
                                     />
                                   </FormField>
-                                  <FormField label={en.admin.sku} htmlFor={`size-sku-${size.id}`} error={errs.sku}>
+                                  <FormField label={en.admin.sku} htmlFor={`size-sku-${size.id}`} error={errs.sku} help={en.tooltips.product.sku}>
                                     <Input
                                       id={`size-sku-${size.id}`}
                                       value={size.sku ?? ''}

@@ -94,7 +94,7 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
           />
         </FormField>
 
-        <FormField label={en.admin.couponType} htmlFor="coupon-type">
+        <FormField label={en.admin.couponType} htmlFor="coupon-type" help={en.tooltips.coupon.type}>
           <Select
             value={type}
             onValueChange={(v: string | null) => setType(v as 'percentage' | 'fixed')}
@@ -114,6 +114,7 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
       <FormField
         label={en.admin.couponValue}
         htmlFor="coupon-value"
+        help={en.tooltips.coupon.value}
       >
         <Input
           id="coupon-value"
@@ -133,7 +134,7 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
       <Separator />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <FormField label={en.admin.minOrderCents} htmlFor="coupon-min-order" optional>
+        <FormField label={en.admin.minOrderCents} htmlFor="coupon-min-order" optional help={en.tooltips.coupon.minOrder}>
           <Input
             id="coupon-min-order"
             type="number"
@@ -143,7 +144,7 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
           />
         </FormField>
 
-        <FormField label={en.admin.maxDiscountCents} htmlFor="coupon-max-discount" optional>
+        <FormField label={en.admin.maxDiscountCents} htmlFor="coupon-max-discount" optional help={en.tooltips.coupon.maxDiscount}>
           <Input
             id="coupon-max-discount"
             type="number"
@@ -153,7 +154,7 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
           />
         </FormField>
 
-        <FormField label={en.admin.usageLimit} htmlFor="coupon-usage-limit" optional>
+        <FormField label={en.admin.usageLimit} htmlFor="coupon-usage-limit" optional help={en.tooltips.coupon.usageLimit}>
           <Input
             id="coupon-usage-limit"
             type="number"
@@ -163,7 +164,7 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
           />
         </FormField>
 
-        <FormField label={en.admin.perCustomerLimit} htmlFor="coupon-per-customer">
+        <FormField label={en.admin.perCustomerLimit} htmlFor="coupon-per-customer" help={en.tooltips.coupon.perCustomer}>
           <Input
             id="coupon-per-customer"
             type="number"
@@ -174,7 +175,7 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
         </FormField>
       </div>
 
-      <FormField label={en.admin.expiresAt} htmlFor="coupon-expires" optional>
+      <FormField label={en.admin.expiresAt} htmlFor="coupon-expires" optional help={en.tooltips.coupon.expiresAt}>
         <Input
           id="coupon-expires"
           type="datetime-local"

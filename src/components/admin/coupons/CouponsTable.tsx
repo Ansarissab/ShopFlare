@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { Pencil, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { HelpTip } from '@/components/common/HelpTip'
 import { en } from '@/lib/i18n/en'
 import { apiDelete } from '@/lib/api'
 import { formatDate } from '@/lib/utils/index'
@@ -99,10 +100,14 @@ export function CouponsTable({ coupons, onEdit, onDeleted }: CouponsTableProps) 
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">{en.admin.couponCode}</th>
             <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">{en.admin.couponType}</th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">{en.admin.couponValue}</th>
-            <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">{en.admin.usedCount}</th>
+            <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5">{en.admin.usedCount}<HelpTip text={en.tooltips.coupon.used} /></span>
+            </th>
             <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">{en.admin.expiresAt}</th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">{en.admin.active}</th>
-            <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">{en.admin.stripeColumn}</th>
+            <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5">{en.admin.stripeColumn}<HelpTip text={en.tooltips.coupon.stripe} /></span>
+            </th>
             <th className="px-4 py-3" />
           </tr>
         </thead>
