@@ -8,6 +8,7 @@ import { requireAccess } from 'worker/lib/access'
 import type { AdminEnv } from 'worker/lib/access'
 import orders from './orders'
 import products from './products'
+import categories from './categories'
 import config from './config'
 import coupons from './coupons'
 import reviews from './reviews'
@@ -23,6 +24,7 @@ app.use('*', requireAccess)
 
 app.route('/orders', orders)
 app.route('/products', products)
+app.route('/categories', categories)
 app.route('/config', config)
 app.route('/coupons', coupons)
 app.route('/reviews', reviews)

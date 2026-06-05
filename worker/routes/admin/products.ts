@@ -3,7 +3,7 @@
 // /api/products router only exposes read-only active-product listings.
 
 import { Hono } from 'hono'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
@@ -16,6 +16,8 @@ import {
   updateVariantSchema,
   createSizeOptionSchema,
   updateSizeOptionSchema,
+  setProductCategoriesSchema,
+  reorderCategoryProductsSchema,
 } from '@/lib/schemas'
 import { MAX_IMAGES_PER_VARIANT, MAX_IMAGE_BYTES, ALLOWED_IMAGE_TYPES } from '@/lib/constants'
 import type { AdminEnv } from 'worker/lib/access'
@@ -440,6 +442,87 @@ app.delete('/images/:imageId', async (c) => {
 
   await c.env.R2.delete(image.r2Key)
   await db.delete(schema.productImages).where(eq(schema.productImages.id, imageId))
+
+  await bumpDataVersion(db)
+  return c.json({ ok: true })
+})
+
+// ─── PUT /:id/categories — replace all category assignments for a product ─────
+
+app.put('/:id/categories', async (c) => {
+  const { id } = c.req.param()
+  const [body, errResp] = await parseBody(c)
+  if (errResp) return errResp
+
+  const parsed = setProductCategoriesSchema.safeParse(body)
+  if (!parsed.success) {
+    return c.json({ error: 'Validation failed', issues: parsed.error.issues }, 400)
+  }
+
+  const db = createDb(c.env.DB)
+
+  const product = await db
+    .select({ id: schema.products.id })
+    .from(schema.products)
+    .where(eq(schema.products.id, id))
+    .get()
+  if (!product) return c.json({ error: 'Product not found' }, 404)
+
+  const { categoryIds } = parsed.data
+  const now = new Date().toISOString()
+
+  // Replace all assignments: delete existing, insert new (in order)
+  await db.delete(schema.productCategories).where(eq(schema.productCategories.productId, id))
+
+  if (categoryIds.length > 0) {
+    await db.insert(schema.productCategories).values(
+      categoryIds.map((categoryId, i) => ({
+        productId: id,
+        categoryId,
+        sortOrder: i,
+      }))
+    )
+  }
+
+  // Bump product updatedAt + data version
+  await Promise.all([
+    db.update(schema.products).set({ updatedAt: now }).where(eq(schema.products.id, id)),
+    bumpDataVersion(db),
+  ])
+
+  return c.json({ ok: true, categoryIds })
+})
+
+// ─── PUT /categories/:categoryId/reorder — reorder products within a category ─
+
+app.put('/categories/:categoryId/reorder', async (c) => {
+  const { categoryId } = c.req.param()
+  const [body, errResp] = await parseBody(c)
+  if (errResp) return errResp
+
+  const parsed = reorderCategoryProductsSchema.safeParse(body)
+  if (!parsed.success) {
+    return c.json({ error: 'Validation failed', issues: parsed.error.issues }, 400)
+  }
+
+  const db = createDb(c.env.DB)
+
+  const { productIds } = parsed.data
+
+  // Update sortOrder for each product in this category
+  await Promise.all(
+    productIds.map((productId, i) =>
+      db
+        .update(schema.productCategories)
+        .set({ sortOrder: i })
+        .where(
+          and(
+            eq(schema.productCategories.productId, productId),
+            eq(schema.productCategories.categoryId, categoryId),
+          )
+        )
+    )
+  )
 
   await bumpDataVersion(db)
   return c.json({ ok: true })
