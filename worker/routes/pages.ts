@@ -30,12 +30,14 @@ app.get('/:slug', async (c) => {
   const version = await getDataVersion(db)
   const etag = etagFor({ count: 1, maxUpdatedAt: page.updatedAt, version })
 
+  const cacheControl = 'public, max-age=300, s-maxage=3600, stale-while-revalidate=600'
+
   if (c.req.header('If-None-Match') === etag) {
-    return c.newResponse(null, 304)
+    return c.newResponse(null, 304, { 'Cache-Control': cacheControl, 'ETag': etag })
   }
 
   return c.json(page, 200, {
-    'Cache-Control': 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400',
+    'Cache-Control': cacheControl,
     'ETag': etag,
   })
 })

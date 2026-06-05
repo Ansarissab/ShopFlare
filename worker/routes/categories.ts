@@ -36,13 +36,15 @@ app.get('/', async (c) => {
     version,
   })
 
+  const cacheControl = 'public, max-age=60, s-maxage=300, stale-while-revalidate=60'
+
   if (c.req.header('If-None-Match') === etag) {
-    return c.newResponse(null, 304)
+    return c.newResponse(null, 304, { 'Cache-Control': cacheControl, 'ETag': etag })
   }
 
   const categories = await assembleCategoryTree(db)
   return c.json({ categories }, 200, {
-    'Cache-Control': 'no-cache',
+    'Cache-Control': cacheControl,
     'ETag': etag,
   })
 })
@@ -62,8 +64,10 @@ app.get('/:slug', async (c) => {
   const version = await getDataVersion(db)
   const etag = etagFor({ count: 1, maxUpdatedAt: category.updatedAt, version })
 
+  const catDetailCacheControl = 'public, max-age=60, s-maxage=300, stale-while-revalidate=60'
+
   if (c.req.header('If-None-Match') === etag) {
-    return c.newResponse(null, 304)
+    return c.newResponse(null, 304, { 'Cache-Control': catDetailCacheControl, 'ETag': etag })
   }
 
   // Resolve all products in this category + its descendants
@@ -73,7 +77,7 @@ app.get('/:slug', async (c) => {
     : []
 
   return c.json({ category, products, breadcrumb }, 200, {
-    'Cache-Control': 'no-cache',
+    'Cache-Control': catDetailCacheControl,
     'ETag': etag,
   })
 })

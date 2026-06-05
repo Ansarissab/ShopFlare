@@ -91,7 +91,7 @@ app.get('/track/:orderNumber', async (c) => {
       updatedAt: order.updatedAt,
     },
     items: safeItems,
-  })
+  }, 200, { 'Cache-Control': 'no-store' })
 })
 
 // ─── GET /by-session/:sessionId ───────────────────────────────────────────────
