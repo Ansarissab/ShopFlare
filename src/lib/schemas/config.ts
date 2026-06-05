@@ -2,7 +2,7 @@
 // validation) and the client (useStoreConfig). Composed so Admin forms (Phase 2)
 // can .pick()/.partial() individual slices instead of redefining fields.
 import { z } from 'zod/v4'
-import { CURRENCIES, RADIUS_PRESETS, FONT_PRESETS, COLOR_MODES, TAX_BASIS } from '@/lib/constants'
+import { CURRENCIES, RADIUS_PRESETS, FONT_PRESETS, COLOR_MODES, TAX_BASIS, MIN_PRODUCT_PAGE_SIZE, MAX_PRODUCT_PAGE_SIZE } from '@/lib/constants'
 import { emailField, phoneField, hexColorField } from './base'
 
 // Derive the currency enum from the single CURRENCIES source (DRY).
@@ -54,6 +54,7 @@ export const storeConfigSchema = z.object({
   bankAccountNumber:  z.string().optional(),
   bankIban:           z.string().optional(),
   bankInstructions:   z.string().optional(),
+  productPageSize: z.number().int().min(MIN_PRODUCT_PAGE_SIZE).max(MAX_PRODUCT_PAGE_SIZE).optional(),
 }).merge(appearanceSchema).merge(taxConfigSchema)
 
 export type StoreConfigData = z.infer<typeof storeConfigSchema>

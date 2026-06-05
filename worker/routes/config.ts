@@ -76,6 +76,7 @@ app.get('/store', async (c) => {
     taxInclusive:          kv['taxInclusive'] === 'true',
     taxBasis:              kv['taxBasis'] || 'subtotal',
     taxRegistrationNumber: kv['taxRegistrationNumber'] || undefined,
+    productPageSize:       kv['productPageSize'] ? Number(kv['productPageSize']) : undefined,
   }
 
   const validation = storeConfigSchema.safeParse(assembled)
