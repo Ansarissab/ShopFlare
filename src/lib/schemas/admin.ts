@@ -33,7 +33,7 @@ export const createSizeOptionSchema = z.object({
   variantId:     idField,
   size:          z.string().min(1).max(20),
   sku:           z.string().max(50).optional(),
-  priceCents:    z.number().int().positive(),
+  priceCents:    z.number().int().min(0),
   stock:         z.number().int().min(-1).default(0),
   stripePriceId: z.string().optional(),
   active:        z.boolean().default(true),

@@ -86,7 +86,7 @@ export function ImageUpload({ variantId, images, onUploaded, onDeleted }: ImageU
           type="button"
           variant="outline"
           size="sm"
-          className="size-16 sm:size-20 flex-col gap-1 text-xs"
+          className="size-16 sm:size-20 flex-col gap-1 text-[10px] leading-tight whitespace-normal text-center px-1"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
         >

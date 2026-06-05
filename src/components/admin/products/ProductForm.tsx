@@ -358,7 +358,7 @@ export function ProductForm({ initial }: ProductFormProps) {
           </div>
 
           {variants.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No variants yet.</p>
+            <p className="text-sm text-muted-foreground">{en.admin.noVariantsYet}</p>
           ) : (
             <div className="flex flex-col gap-3">
               {variants.map((variant) => {
@@ -385,7 +385,7 @@ export function ProductForm({ initial }: ProductFormProps) {
                         )}
                         <span className="text-sm font-medium">{variant.label}</span>
                         <span className="text-xs text-muted-foreground">
-                          ({(variant.sizes as LocalSize[]).length} sizes, {variant.images.length} images)
+                          ({(variant.sizes as LocalSize[]).length} sizes · {variant.images.length} images · {(variant.sizes as LocalSize[]).reduce((s, sz) => s + (sz.stock === -1 ? 0 : sz.stock), 0)} units)
                         </span>
                       </div>
                       <Button
@@ -436,14 +436,14 @@ export function ProductForm({ initial }: ProductFormProps) {
                           </FormField>
                         </div>
                         <Button size="sm" variant="outline" onClick={() => saveVariant(variant.id)}>
-                          {en.admin.saved}
+                          {en.admin.saveVariant}
                         </Button>
 
                         <Separator />
 
                         {/* Images */}
                         <div>
-                          <p className="text-xs font-medium text-muted-foreground mb-2">Images</p>
+                          <p className="text-xs font-medium text-muted-foreground mb-2">{en.admin.variantImages}</p>
                           <ImageUpload
                             variantId={variant.id}
                             images={variant.images}
@@ -465,7 +465,7 @@ export function ProductForm({ initial }: ProductFormProps) {
                           </div>
 
                           {(variant.sizes as LocalSize[]).length === 0 ? (
-                            <p className="text-xs text-muted-foreground">No sizes yet.</p>
+                            <p className="text-xs text-muted-foreground">{en.admin.noSizesYet}</p>
                           ) : (
                             <div className="flex flex-col gap-3">
                               {(variant.sizes as LocalSize[]).map((size) => (
@@ -509,7 +509,7 @@ export function ProductForm({ initial }: ProductFormProps) {
                                       variant="outline"
                                       onClick={() => saveSize(size.id, variant.id)}
                                     >
-                                      {en.admin.saved}
+                                      {en.admin.saveSize}
                                     </Button>
                                     <Button
                                       type="button"
@@ -540,7 +540,7 @@ export function ProductForm({ initial }: ProductFormProps) {
       {/* Danger zone */}
       {initial?.product.id && (
         <div className="rounded-lg border border-destructive/30 p-5 flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-destructive">Danger Zone</h2>
+          <h2 className="text-sm font-semibold text-destructive">{en.admin.dangerZone}</h2>
           <Button
             variant="destructive"
             size="sm"
