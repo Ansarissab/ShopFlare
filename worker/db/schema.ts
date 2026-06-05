@@ -1,4 +1,5 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
+import { sqliteTable, text, integer, primaryKey } from 'drizzle-orm/sqlite-core'
+import type { AnySQLiteColumn } from 'drizzle-orm/sqlite-core'
 import { sql } from 'drizzle-orm'
 
 // ─── Products ───────────────────────────────────────────────────────────────
@@ -39,6 +40,32 @@ export const productImages = sqliteTable('product_images', {
   r2Key: text('r2_key').notNull(),
   sortOrder: integer('sort_order').notNull().default(0),
 })
+
+// ─── Categories ────────────────────────────────────────────────────────────────
+
+export const categories = sqliteTable('categories', {
+  id:          text('id').primaryKey(),
+  name:        text('name').notNull(),
+  slug:        text('slug').notNull().unique(),
+  description: text('description').notNull().default(''),
+  parentId:    text('parent_id').references((): AnySQLiteColumn => categories.id, { onDelete: 'set null' }),
+  imageUrl:    text('image_url'),
+  r2Key:       text('r2_key'),
+  sortOrder:   integer('sort_order').notNull().default(0),
+  active:      integer('active', { mode: 'boolean' }).notNull().default(true),
+  createdAt:   text('created_at').notNull().default(sql`(datetime('now'))`),
+  updatedAt:   text('updated_at').notNull().default(sql`(datetime('now'))`),
+})
+
+// ─── Product ↔ Category (junction) ────────────────────────────────────────────
+
+export const productCategories = sqliteTable('product_categories', {
+  productId:  text('product_id').notNull().references(() => products.id, { onDelete: 'cascade' }),
+  categoryId: text('category_id').notNull().references(() => categories.id, { onDelete: 'cascade' }),
+  sortOrder:  integer('sort_order').notNull().default(0),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.productId, t.categoryId] }),
+}))
 
 // ─── Orders ─────────────────────────────────────────────────────────────────
 
@@ -222,3 +249,6 @@ export type AnalyticsDaily = typeof analyticsDaily.$inferSelect
 export type Cart = typeof carts.$inferSelect
 export type CustomerPushSubscription = typeof customerPushSubscriptions.$inferSelect
 export type NewCustomerPushSubscription = typeof customerPushSubscriptions.$inferInsert
+export type Category = typeof categories.$inferSelect
+export type NewCategory = typeof categories.$inferInsert
+export type ProductCategory = typeof productCategories.$inferSelect

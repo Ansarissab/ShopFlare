@@ -22,6 +22,27 @@
       "when": 1748908800000,
       "tag": "0002_analytics_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1780563760000,
+      "tag": "0003_add_tax_cents",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1780590887000,
+      "tag": "0004_customer_push",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1780677646601,
+      "tag": "0005_categories",
+      "breakpoints": true
     }
   ]
 }
