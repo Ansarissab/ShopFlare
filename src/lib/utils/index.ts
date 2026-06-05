@@ -81,6 +81,15 @@ export function getPriceRange(sizes: SizeOption[]): { minPrice: number | null; m
 // NOTE: cn() lives in @/lib/utils (shadcn root) — re-exported here for convenience
 export { cn } from '@/lib/utils'
 
+export function slugify(input: string): string {
+  return input
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80)
+}
+
 // SQLite datetime('now') returns 'YYYY-MM-DD HH:MM:SS' — space separator, no T,
 // no Z. Safari rejects this as invalid; Chrome/Firefox are lenient. Normalize to
 // strict ISO 8601 UTC before constructing a Date so all browsers agree.
