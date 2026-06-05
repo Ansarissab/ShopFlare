@@ -6,12 +6,17 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ProductHeroWrapper } from '@/components/store/product/ProductHeroWrapper'
 import { ProductGrid } from '@/components/store/product/ProductGrid'
 import { CategoryFilter } from '@/components/store/categories/CategoryFilter'
+import { SearchBar } from '@/components/store/search/SearchBar'
+import { InfiniteScrollSentinel } from '@/components/shared/InfiniteScrollSentinel'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
 import { en } from '@/lib/i18n/en'
+import { DEFAULT_PRODUCT_PAGE_SIZE } from '@/lib/constants'
 import type { ProductWithVariants } from '@/lib/types/product'
 import type { CategoryNode } from '@/lib/types/category'
 import { useApiResource } from '@/hooks/useApiResource'
+import { useStoreConfig } from '@/hooks/useStoreConfig'
+import { useProductSearch } from '@/hooks/useProductSearch'
 
 function ProductListingSkeleton() {
   return (
@@ -29,69 +34,60 @@ function ProductListingSkeleton() {
   )
 }
 
-/** Collect all ids in a subtree rooted at any node whose slug matches. */
-function collectChildIds(categories: CategoryNode[], slug: string): Set<string> {
-  const ids = new Set<string>()
-
-  function walk(nodes: CategoryNode[]) {
-    for (const node of nodes) {
-      if (node.slug === slug) {
-        ids.add(node.id)
-        for (const child of node.children ?? []) {
-          addAll(child)
-        }
-      } else {
-        walk(node.children ?? [])
-      }
-    }
+function findCategoryBySlug(categories: CategoryNode[], slug: string): CategoryNode | null {
+  for (const cat of categories) {
+    if (cat.slug === slug) return cat
+    const found = findCategoryBySlug(cat.children ?? [], slug)
+    if (found) return found
   }
-
-  function addAll(node: CategoryNode) {
-    ids.add(node.id)
-    for (const child of node.children ?? []) {
-      addAll(child)
-    }
-  }
-
-  walk(categories)
-  return ids
+  return null
 }
 
 export default function StorePage() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { config } = useStoreConfig()
 
-  const { data, loading, error } = useApiResource<{ products: ProductWithVariants[] }>('/api/products')
+  const { data, loading, error } = useApiResource<{ products: ProductWithVariants[] }>(
+    '/api/products',
+    { refetchInterval: 60_000, refetchOnFocus: true, refetchOnChannel: true },
+  )
   const { data: catData } = useApiResource<{ categories: CategoryNode[] }>('/api/categories')
 
-  // Initialise from URL on first render
   const [activeCategory, setActiveCategory] = useState<string | null>(
     () => searchParams?.get('category') ?? null,
   )
+  const [query, setQuery] = useState(() => searchParams?.get('q') ?? '')
 
-  // Sync URL when filter changes
+  // Sync URL when search or category filter changes
   useEffect(() => {
-    const current = searchParams?.get('category') ?? null
-    if (current === activeCategory) return
-    const url = activeCategory ? `/?category=${encodeURIComponent(activeCategory)}` : '/'
-    router.replace(url, { scroll: false })
-  }, [activeCategory, router, searchParams])
+    const currentQ = searchParams?.get('q') ?? ''
+    const currentCat = searchParams?.get('category') ?? null
+    if (currentQ === query && currentCat === activeCategory) return
+    const params = new URLSearchParams()
+    if (query) params.set('q', query)
+    if (activeCategory) params.set('category', activeCategory)
+    const paramStr = params.toString()
+    router.replace(paramStr ? `/?${paramStr}` : '/', { scroll: false })
+  }, [query, activeCategory, router, searchParams])
 
   const items = data?.products ?? []
   const allCategories = catData?.categories ?? []
-  // Only top-level categories (no parentId) for the filter chips
   const topLevel = allCategories.filter((c) => !c.parentId)
 
-  // Filtered items
-  const filteredItems =
-    activeCategory === null
-      ? items
-      : (() => {
-          const ids = collectChildIds(allCategories, activeCategory)
-          return items.filter((item) =>
-            item.categoryIds.some((id) => ids.has(id)),
-          )
-        })()
+  const activeCategoryId = activeCategory
+    ? (findCategoryBySlug(allCategories, activeCategory)?.id ?? null)
+    : null
+
+  const pageSize = config?.productPageSize ?? DEFAULT_PRODUCT_PAGE_SIZE
+
+  const { visibleItems, hasMore, loadMore, isLoadingMore, totalFiltered } = useProductSearch({
+    items,
+    pageSize,
+    query,
+    activeCategoryId,
+    allCategories,
+  })
 
   if (loading) return <ProductListingSkeleton />
 
@@ -112,8 +108,8 @@ export default function StorePage() {
     )
   }
 
-  // Single-product hero only when viewing unfiltered
-  if (items.length === 1 && activeCategory === null) {
+  // Single-product hero only when completely unfiltered
+  if (items.length === 1 && !query && activeCategory === null) {
     return (
       <div className={layout.page}>
         <ProductHeroWrapper item={items[0]} />
@@ -123,6 +119,10 @@ export default function StorePage() {
 
   return (
     <div className={layout.page}>
+      <div className="mb-4">
+        <SearchBar value={query} onChange={setQuery} />
+      </div>
+
       {topLevel.length > 0 && (
         <div className="mb-6">
           <CategoryFilter
@@ -133,12 +133,36 @@ export default function StorePage() {
         </div>
       )}
 
-      {filteredItems.length === 0 ? (
-        <div className={cn(layout.centeredState, 'min-h-[30vh]')}>
-          <p className="text-muted-foreground">{en.store.categoryEmpty}</p>
-        </div>
+      {visibleItems.length === 0 ? (
+        query ? (
+          <div className={cn(layout.centeredState, 'min-h-[30vh]')}>
+            <p className="text-muted-foreground">
+              {en.store.searchNoResults} &quot;{query}&quot;
+            </p>
+            <button
+              type="button"
+              onClick={() => setQuery('')}
+              className="mt-2 text-sm text-primary underline-offset-4 hover:underline"
+            >
+              {en.store.searchClearHint}
+            </button>
+          </div>
+        ) : (
+          <div className={cn(layout.centeredState, 'min-h-[30vh]')}>
+            <p className="text-muted-foreground">{en.store.categoryEmpty}</p>
+          </div>
+        )
       ) : (
-        <ProductGrid items={filteredItems} />
+        <>
+          <ProductGrid items={visibleItems} />
+          <InfiniteScrollSentinel
+            onVisible={loadMore}
+            isLoading={isLoadingMore}
+            hasMore={hasMore}
+            totalItems={totalFiltered}
+            pageSize={pageSize}
+          />
+        </>
       )}
     </div>
   )
