@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { CreditCard, Banknote, Building2, MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ManualOrderForm } from '@/components/store/checkout/ManualOrderForm'
 import { TurnstileWidget } from '@/components/store/checkout/TurnstileWidget'
@@ -12,17 +12,31 @@ import { toast } from 'sonner'
 import { apiPost } from '@/lib/api'
 import { cn } from '@/lib/utils'
 
+type MethodValue = 'card' | 'cod' | 'bank' | 'whatsapp'
+
+interface Method {
+  value: MethodValue
+  label: string
+  description: string
+  icon: React.ComponentType<{ className?: string }>
+}
+
 export function CheckoutMethodSelector() {
   const items = useCart((s) => s.items)
   const { config } = useStoreConfig()
+  const [active, setActive] = useState<MethodValue>('cod')
   const [stripeLoading, setStripeLoading] = useState(false)
-  // Stripe checkout-session is Turnstile-gated server-side (it reserves stock),
-  // so the card tab carries its own token just like the manual order forms.
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
   const [turnstileError, setTurnstileError] = useState(false)
 
-  // Bank Transfer only appears once the merchant has configured an account number.
   const bankEnabled = !!config?.bankAccountNumber
+
+  const methods: Method[] = [
+    { value: 'card',     label: en.checkout.payWithCard,      description: en.checkout.cardDescription,      icon: CreditCard },
+    { value: 'cod',      label: en.store.cashOnDelivery,      description: en.checkout.codDescription,       icon: Banknote },
+    ...(bankEnabled ? [{ value: 'bank' as const, label: en.checkout.bankTransfer, description: en.checkout.bankDescription, icon: Building2 }] : []),
+    { value: 'whatsapp', label: en.store.orderOnWhatsApp,     description: en.checkout.whatsappDescription,  icon: MessageCircle },
+  ]
 
   async function handleStripeCheckout() {
     if (!turnstileToken) {
@@ -45,7 +59,6 @@ export function CheckoutMethodSelector() {
         { items: stripeItems },
         { headers: { 'X-Turnstile-Token': turnstileToken } },
       )
-      // Stripe checkout URL is external — router.push() only handles internal routes.
       window.location.href = url
     } catch {
       toast.error(en.errors.orderFailed)
@@ -54,60 +67,75 @@ export function CheckoutMethodSelector() {
     }
   }
 
-  // Tab count is dynamic (Bank Transfer is conditional), so size the grid to match.
-  const tabCount = bankEnabled ? 4 : 3
-
   return (
-    <Tabs defaultValue="cod" className="w-full">
-      <TabsList className={cn('grid w-full', tabCount === 4 ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-2 sm:grid-cols-3')}>
-        <TabsTrigger value="card" className="text-xs sm:text-sm">{en.checkout.payWithCard}</TabsTrigger>
-        <TabsTrigger value="cod" className="text-xs sm:text-sm">{en.store.cashOnDelivery}</TabsTrigger>
-        {bankEnabled && <TabsTrigger value="bank" className="text-xs sm:text-sm">{en.checkout.bankTransfer}</TabsTrigger>}
-        <TabsTrigger value="whatsapp" className="text-xs sm:text-sm">{en.store.orderOnWhatsApp}</TabsTrigger>
-      </TabsList>
+    <div className="flex flex-col gap-5">
+      {/* Method selector */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        {methods.map((m) => {
+          const Icon = m.icon
+          const selected = active === m.value
+          return (
+            <button
+              key={m.value}
+              type="button"
+              onClick={() => setActive(m.value)}
+              className={cn(
+                'flex items-start gap-3 rounded-lg border p-4 text-left transition-colors',
+                selected
+                  ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                  : 'border-border hover:bg-muted/40',
+              )}
+            >
+              <span
+                className={cn(
+                  'mt-0.5 flex size-4 flex-none items-center justify-center rounded-full border-2',
+                  selected ? 'border-primary' : 'border-muted-foreground',
+                )}
+              >
+                {selected && <span className="size-2 rounded-full bg-primary" />}
+              </span>
+              <Icon className="size-4 flex-none mt-0.5 text-muted-foreground" aria-hidden />
+              <span className="flex flex-col gap-0.5">
+                <span className="text-sm font-medium leading-none">{m.label}</span>
+                <span className="text-xs text-muted-foreground">{m.description}</span>
+              </span>
+            </button>
+          )
+        })}
+      </div>
 
-      {/* Stripe card tab */}
-      <TabsContent value="card" className="pt-4">
-        <div className="flex flex-col gap-3">
-          <p className="text-sm text-muted-foreground">
-            {en.checkout.stripeRedirectNote}
-          </p>
-          <TurnstileWidget
-            onVerify={(token) => {
-              setTurnstileToken(token)
-              setTurnstileError(false)
-            }}
-            onError={() => {
-              setTurnstileToken(null)
-              setTurnstileError(true)
-            }}
+      {/* Active form */}
+      <div className="rounded-lg border p-4 sm:p-5">
+        {active === 'card' && (
+          <div className="flex flex-col gap-3">
+            <p className="text-sm text-muted-foreground">{en.checkout.stripeRedirectNote}</p>
+            <TurnstileWidget
+              onVerify={(token) => { setTurnstileToken(token); setTurnstileError(false) }}
+              onError={() => { setTurnstileToken(null); setTurnstileError(true) }}
+            />
+            {turnstileError && (
+              <p className="text-xs text-destructive">{en.checkout.securityCheckFailed}</p>
+            )}
+            <Button
+              size="lg"
+              className="w-full"
+              onClick={handleStripeCheckout}
+              disabled={stripeLoading || !turnstileToken}
+            >
+              {stripeLoading ? '…' : en.checkout.payWithCard}
+            </Button>
+          </div>
+        )}
+
+        {active === 'cod' && (
+          <ManualOrderForm
+            endpoint="/api/orders/cod"
+            successMethod="cod"
+            submitLabel={en.checkout.placeOrder}
           />
-          {turnstileError && (
-            <p className="text-xs text-destructive">{en.checkout.securityCheckFailed}</p>
-          )}
-          <Button
-            size="lg"
-            className="w-full"
-            onClick={handleStripeCheckout}
-            disabled={stripeLoading || !turnstileToken}
-          >
-            {stripeLoading ? '...' : en.checkout.payWithCard}
-          </Button>
-        </div>
-      </TabsContent>
+        )}
 
-      {/* COD tab */}
-      <TabsContent value="cod" className="pt-4">
-        <ManualOrderForm
-          endpoint="/api/orders/cod"
-          successMethod="cod"
-          submitLabel={en.checkout.placeOrder}
-        />
-      </TabsContent>
-
-      {/* Bank Transfer tab */}
-      {bankEnabled && (
-        <TabsContent value="bank" className="pt-4">
+        {active === 'bank' && (
           <div className="flex flex-col gap-4">
             <p className="text-sm text-muted-foreground">{en.checkout.bankTransferNote}</p>
             <ManualOrderForm
@@ -116,16 +144,15 @@ export function CheckoutMethodSelector() {
               submitLabel={en.checkout.placeOrder}
             />
           </div>
-        </TabsContent>
-      )}
+        )}
 
-      {/* WhatsApp tab */}
-      <TabsContent value="whatsapp" className="pt-4">
-        <p className="text-sm text-muted-foreground">
-          WhatsApp ordering is available directly on each product page. Visit the product you
-          want and tap &ldquo;{en.store.orderOnWhatsApp}&rdquo; to send your order.
-        </p>
-      </TabsContent>
-    </Tabs>
+        {active === 'whatsapp' && (
+          <p className="text-sm text-muted-foreground">
+            WhatsApp ordering is available directly on each product page. Visit the product you
+            want and tap &ldquo;{en.store.orderOnWhatsApp}&rdquo; to send your order.
+          </p>
+        )}
+      </div>
+    </div>
   )
 }
