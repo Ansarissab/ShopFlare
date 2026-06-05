@@ -71,6 +71,13 @@ export default function ProductDetailPage() {
   return (
     <div className={layout.page}>
       <ProductJsonLd item={item} />
+      <nav className="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
+        <Link href="/" className="hover:text-foreground transition-colors">
+          {en.store.allProducts}
+        </Link>
+        <span aria-hidden>/</span>
+        <span className="text-foreground truncate">{item.product.name}</span>
+      </nav>
       <ProductHeroWrapper item={item} />
       <ReviewsSection
         productId={item.product.id}

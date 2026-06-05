@@ -31,7 +31,7 @@ export function ProductCard({
     <Link href={`/product/${product.id}`} className="group block outline-none">
       <Card
         className={cn(
-          'overflow-hidden transition-shadow hover:shadow-md focus-within:ring-2 focus-within:ring-ring',
+          'overflow-hidden transition-shadow hover:shadow-md focus-within:ring-2 focus-within:ring-ring flex flex-col h-full',
           className,
         )}
       >
@@ -58,7 +58,7 @@ export function ProductCard({
           )}
         </div>
 
-        <CardContent className="flex flex-col gap-1.5 p-3">
+        <CardContent className="flex flex-col gap-1.5 p-3 flex-1">
           {/* Name */}
           <p className="line-clamp-2 text-sm font-medium leading-snug text-foreground">
             {product.name}

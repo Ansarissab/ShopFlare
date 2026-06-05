@@ -10,6 +10,7 @@ import { useStoreConfig } from '@/hooks/useStoreConfig'
 import { CartSheet } from '@/components/store/cart/CartSheet'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
+import { en } from '@/lib/i18n/en'
 
 export function StorefrontHeader() {
   const { openCart } = useCart()
@@ -37,6 +38,11 @@ export function StorefrontHeader() {
             ) : (
               config?.storeName ?? 'ShopFlare'
             )}
+          </Link>
+
+          {/* Track Order link */}
+          <Link href="/track" className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:block">
+            {en.store.trackOrder}
           </Link>
 
           {/* Cart button */}
