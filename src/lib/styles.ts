@@ -19,6 +19,13 @@ export const layout = {
   // Native app shell containers
   appHeader: 'sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/60',
   tabBar: 'fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur-sm',
+
+  // Responsive row: stacks vertically on mobile, horizontal from sm
+  mobileStack: 'flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between',
+
+  // Responsive form grids: single-column on mobile, multi-column from sm
+  formGrid2: 'grid grid-cols-1 sm:grid-cols-2',
+  formGrid3: 'grid grid-cols-1 sm:grid-cols-3',
 } as const
 
 // PWA-specific safe-area utilities (combine with Tailwind via cn())

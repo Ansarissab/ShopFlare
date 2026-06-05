@@ -3,9 +3,13 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Package, ShoppingCart, Tag, BarChart2, Settings, Monitor, Star, BellRing, FileText, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import {
+  LayoutDashboard, Package, ShoppingCart, Tag, BarChart2, Settings,
+  Monitor, Star, BellRing, FileText, PanelLeftClose, PanelLeftOpen, Menu,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { en } from '@/lib/i18n/en'
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 
 const navItems = [
   { href: '/admin',           label: en.admin.dashboard,      icon: LayoutDashboard },
@@ -20,13 +24,76 @@ const navItems = [
   { href: '/admin/analytics', label: en.admin.analytics,      icon: BarChart2 },
 ] as const
 
-export function AdminSidebar() {
+// Shared nav list — used in both the desktop aside and the mobile Sheet drawer
+function SidebarNav({
+  collapsed = false,
+  onNavigate,
+}: {
+  collapsed?: boolean
+  onNavigate?: () => void
+}) {
   const pathname = usePathname()
+
+  return (
+    <nav className="flex flex-col gap-0.5 p-2">
+      {navItems.map(({ href, label, icon: Icon }) => {
+        const active =
+          href === '/admin'
+            ? pathname === '/admin'
+            : pathname.startsWith(href)
+
+        return (
+          <Link
+            key={href}
+            href={href}
+            title={collapsed ? label : undefined}
+            onClick={onNavigate}
+            className={cn(
+              'flex items-center gap-2.5 rounded-md py-2 text-sm transition-colors',
+              collapsed ? 'justify-center px-2' : 'px-3',
+              active
+                ? 'bg-primary/10 text-primary font-medium'
+                : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+            )}
+          >
+            <Icon className="size-4 shrink-0" aria-hidden />
+            {!collapsed && label}
+          </Link>
+        )
+      })}
+    </nav>
+  )
+}
+
+// Mobile hamburger + Sheet drawer — visible only below md
+export function MobileAdminNav() {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger
+        className="flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+        aria-label="Open navigation"
+      >
+        <Menu className="size-5" aria-hidden />
+      </SheetTrigger>
+      <SheetContent side="left" className="w-56 p-0">
+        <div className="flex h-14 items-center border-b px-4">
+          <span className="text-sm font-semibold tracking-tight">Admin</span>
+        </div>
+        <SidebarNav onNavigate={() => setOpen(false)} />
+      </SheetContent>
+    </Sheet>
+  )
+}
+
+// Desktop persistent sidebar — hidden below md
+export function AdminSidebar() {
   const [collapsed, setCollapsed] = useState(false)
 
   return (
     <aside className={cn(
-      'flex h-full flex-col border-r bg-background transition-all duration-200',
+      'hidden md:flex h-full flex-col border-r bg-background transition-all duration-200',
       collapsed ? 'w-14' : 'w-56',
     )}>
       <div className="flex h-14 items-center border-b px-3">
@@ -49,32 +116,7 @@ export function AdminSidebar() {
         </button>
       </div>
 
-      <nav className="flex flex-col gap-0.5 p-2">
-        {navItems.map(({ href, label, icon: Icon }) => {
-          const active =
-            href === '/admin'
-              ? pathname === '/admin'
-              : pathname.startsWith(href)
-
-          return (
-            <Link
-              key={href}
-              href={href}
-              title={collapsed ? label : undefined}
-              className={cn(
-                'flex items-center gap-2.5 rounded-md py-2 text-sm transition-colors',
-                collapsed ? 'justify-center px-2' : 'px-3',
-                active
-                  ? 'bg-primary/10 text-primary font-medium'
-                  : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-              )}
-            >
-              <Icon className="size-4 shrink-0" aria-hidden />
-              {!collapsed && label}
-            </Link>
-          )
-        })}
-      </nav>
+      <SidebarNav collapsed={collapsed} />
     </aside>
   )
 }
