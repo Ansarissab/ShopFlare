@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Plus } from 'lucide-react'
+import { Plus, ExternalLink } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -62,9 +62,15 @@ export default function AdminProductsPage() {
                     {variants.length} variant{variants.length !== 1 ? 's' : ''}
                   </span>
                 </div>
-                <Link href={`/admin/products/${product.id}`} className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}>
-                  {en.admin.editProduct}
-                </Link>
+                <div className="flex items-center gap-2">
+                  <Link href={`/product/${product.id}`} target="_blank" rel="noopener noreferrer" className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}>
+                    <ExternalLink className="size-3.5 mr-1" aria-hidden />
+                    {en.admin.viewProduct}
+                  </Link>
+                  <Link href={`/admin/products/${product.id}`} className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}>
+                    {en.admin.editProduct}
+                  </Link>
+                </div>
               </div>
             ))
           )}

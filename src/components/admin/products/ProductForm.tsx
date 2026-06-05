@@ -337,7 +337,7 @@ export function ProductForm({ initial }: ProductFormProps) {
         </div>
 
         <Button onClick={saveProduct} disabled={saving} size="sm">
-          {saving ? en.admin.saving : initial ? en.admin.saved : en.admin.productCreated}
+          {saving ? en.admin.saving : initial ? en.admin.saved : en.admin.createProduct}
         </Button>
       </div>
 
