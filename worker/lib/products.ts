@@ -1,7 +1,7 @@
 // Shared product-assembly helpers — build ProductWithVariants composites
 // from D1 for use by GET /products and GET /products/:id.
 
-import { eq, inArray } from 'drizzle-orm'
+import { eq, inArray, and } from 'drizzle-orm'
 import type { Database } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import type { Product, Variant, ProductImage, SizeOption } from 'worker/db/schema'
@@ -16,6 +16,7 @@ export interface VariantWithDetails extends Variant {
 export interface ProductWithVariants {
   product: Product
   variants: VariantWithDetails[]
+  categoryIds: string[]
 }
 
 // ─── groupVariants ────────────────────────────────────────────────────────────
@@ -77,15 +78,28 @@ function groupVariants(
  */
 export async function assembleProductList(
   db: Database,
-  opts: { includeInactive?: boolean } = {},
+  opts: { includeInactive?: boolean; productIds?: string[] } = {},
 ): Promise<ProductWithVariants[]> {
   // 1. Fetch products — storefront sees active only; admin passes
   //    includeInactive to also surface soft-deleted products (so they can be
   //    re-activated rather than vanishing forever).
-  const baseProducts = db.select().from(schema.products)
-  const activeProducts = await (opts.includeInactive
-    ? baseProducts
-    : baseProducts.where(eq(schema.products.active, true))
+  //    When productIds is provided, restrict to that set (category filtering).
+  if (opts.productIds !== undefined && opts.productIds.length === 0) return []
+
+  const activeFilter = opts.includeInactive ? undefined : eq(schema.products.active, true)
+  const idFilter =
+    opts.productIds !== undefined && opts.productIds.length > 0
+      ? inArray(schema.products.id, opts.productIds)
+      : undefined
+
+  const whereClause =
+    activeFilter && idFilter
+      ? and(activeFilter, idFilter)
+      : activeFilter ?? idFilter
+
+  const activeProducts = await (whereClause
+    ? db.select().from(schema.products).where(whereClause)
+    : db.select().from(schema.products)
   ).all()
 
   if (activeProducts.length === 0) return []
@@ -100,7 +114,7 @@ export async function assembleProductList(
     .all()
 
   if (allVariants.length === 0) {
-    return activeProducts.map((product) => ({ product, variants: [] }))
+    return activeProducts.map((product) => ({ product, variants: [], categoryIds: [] }))
   }
 
   const variantIds = allVariants.map((v) => v.id)
@@ -119,10 +133,27 @@ export async function assembleProductList(
     .where(inArray(schema.sizeOptions.variantId, variantIds))
     .all()
 
-  // 5. Group in JS — O(n) Maps, no further DB round-trips
+  // 5. Batch: category assignments for these products
+  const allProductIds = activeProducts.map((p) => p.id)
+  const categoryAssignments = await db
+    .select()
+    .from(schema.productCategories)
+    .where(inArray(schema.productCategories.productId, allProductIds))
+    .all()
+
+  // Build map: productId → categoryId[]
+  const categoryIdsByProduct = new Map<string, string[]>()
+  for (const row of categoryAssignments) {
+    const arr = categoryIdsByProduct.get(row.productId) ?? []
+    arr.push(row.categoryId)
+    categoryIdsByProduct.set(row.productId, arr)
+  }
+
+  // 6. Group in JS — O(n) Maps, no further DB round-trips
   return activeProducts.map((product) => ({
     product,
     variants: groupVariants(allVariants, allImages, allSizes, product.id),
+    categoryIds: categoryIdsByProduct.get(product.id) ?? [],
   }))
 }
 
@@ -146,12 +177,12 @@ export async function assembleProduct(
     .where(eq(schema.variants.productId, product.id))
     .all()
 
-  if (variantRows.length === 0) return { product, variants: [] }
+  if (variantRows.length === 0) return { product, variants: [], categoryIds: [] }
 
   const variantIds = variantRows.map((v) => v.id)
 
-  // Batch images + sizes for this single product's variants
-  const [imageRows, sizeRows] = await Promise.all([
+  // Batch images + sizes + category assignments for this single product's variants
+  const [imageRows, sizeRows, catRows] = await Promise.all([
     db
       .select()
       .from(schema.productImages)
@@ -162,10 +193,16 @@ export async function assembleProduct(
       .from(schema.sizeOptions)
       .where(inArray(schema.sizeOptions.variantId, variantIds))
       .all(),
+    db
+      .select()
+      .from(schema.productCategories)
+      .where(eq(schema.productCategories.productId, product.id))
+      .all(),
   ])
 
   return {
     product,
     variants: groupVariants(variantRows, imageRows, sizeRows, product.id),
+    categoryIds: catRows.map((r) => r.categoryId),
   }
 }
