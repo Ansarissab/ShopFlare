@@ -38,6 +38,10 @@ Replaces Shopify Basic ($29/month) for stores that don't need the heavyweight pl
 
 **Storefront**
 - Product catalog with variants (colour) and size options (per-size price, SKU, stock)
+- **Client-side fuzzy search** (Fuse.js, threshold 0.35) across product name, description, and variant labels — no extra API call
+- **Infinite-scroll pagination** via native IntersectionObserver; page size admin-configurable (6–96, default 24)
+- **Real-time data freshness**: products refetch silently every 60 s + on tab focus + on cross-tab admin writes
+- URL-shareable filters: `?q=keyword&category=slug` — bookmarkable, back-button safe
 - Cart with localStorage persistence (Zustand) and live shipping/free-shipping threshold
 - Three checkout paths: **Stripe Checkout** (card), **Cash on Delivery**, and **WhatsApp** order hand-off
 - Coupons (percentage / fixed, min-order, usage + per-customer limits)
@@ -54,7 +58,7 @@ Replaces Shopify Basic ($29/month) for stores that don't need the heavyweight pl
 - Review moderation (approve / delete)
 - Restock-request inbox
 - **POS** (in-person cash register mode)
-- Store settings: name, tagline, logo, currency, shipping, contact — all editable, **no redeploy**
+- Store settings: name, tagline, logo, currency, shipping, contact, **products per page** — all editable, **no redeploy**
 
 **Dynamic-first:** anything a non-developer needs to change lives in D1 and is editable from the
 admin dashboard. Code redeploys are only for actual code changes.
@@ -305,7 +309,7 @@ Two Vitest projects (a workspace), both run by `pnpm test`:
   the review verified-purchase gate, Stripe webhook signature rejection, and admin CRUD.
 
 ```bash
-pnpm test            # all projects (31 tests)
+pnpm test            # all projects (73 tests)
 pnpm test:coverage   # unit coverage report
 pnpm typecheck && pnpm test && pnpm build
 ```

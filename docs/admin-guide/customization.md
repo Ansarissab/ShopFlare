@@ -26,6 +26,16 @@ Admin → Settings → Store → Currency
 - All existing prices will display in new currency
 - Stripe prices are recreated in new currency on save
 
+## Products per page
+
+Admin → Settings → Payments & Shipping → Products per page
+
+Controls how many products load in the first batch on the home page and category pages, and how many more load each time the customer scrolls to the bottom (infinite scroll).
+
+- Minimum: 6 · Maximum: 96 · Step: 6 · Default: 24
+- Smaller values reduce initial load time; larger values suit stores with many products where customers prefer to see everything at once.
+- Change takes effect immediately — no redeploy needed.
+
 ## Policies
 
 Admin → Settings → Policies

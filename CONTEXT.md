@@ -72,7 +72,11 @@ A public client-rendered page at /track/[orderId] showing Order status timeline,
 A password-protected (Cloudflare Access) section of the Store at /admin/*. Used by the Merchant to manage Products, Orders, Coupons, Shipping, Store Config, and analytics.
 
 ## Store Config
-Merchant-controlled settings stored in D1: store name, tagline, logo URL, brand colors, contact email, WhatsApp number, social links, currency, country, shipping rates, and policy content. Changes take effect without redeploy.
+Merchant-controlled settings stored in D1: store name, tagline, logo URL, brand colors, contact email, WhatsApp number, social links, currency, country, shipping rates, products-per-page (pagination size), and policy content. Changes take effect without redeploy.
+
+## Product Search
+
+Client-side fuzzy search powered by Fuse.js (threshold 0.35). Searches across product name, description, and variant labels. No API call — all matching runs against the already-loaded product list in the browser. Active query is kept in the `?q=` URL param for shareability. Works in combination with category filter on the home page and stand-alone on category pages.
 
 ## White-Label
 The Store has no branding from the underlying software. All visible identity (name, logo, colors, policies) comes from Store Config. The open-source repo is the engine; the Merchant is the brand.
