@@ -7,15 +7,19 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useCart, useCartItemCount } from '@/hooks/useCart'
 import { useStoreConfig } from '@/hooks/useStoreConfig'
+import { useApiResource } from '@/hooks/useApiResource'
 import { CartSheet } from '@/components/store/cart/CartSheet'
+import { CategoryNav } from '@/components/store/categories/CategoryNav'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
 import { en } from '@/lib/i18n/en'
+import type { CategoryNode } from '@/lib/types/category'
 
 export function StorefrontHeader() {
   const { openCart } = useCart()
   const itemCount = useCartItemCount()
   const { config } = useStoreConfig()
+  const { data: catData } = useApiResource<{ categories: CategoryNode[] }>('/api/categories')
 
   return (
     <>
@@ -39,6 +43,9 @@ export function StorefrontHeader() {
               config?.storeName ?? 'ShopFlare'
             )}
           </Link>
+
+          {/* Category nav */}
+          <CategoryNav categories={catData?.categories ?? []} />
 
           {/* Track Order link */}
           <Link href="/track" className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:block">
