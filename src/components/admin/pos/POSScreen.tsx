@@ -232,7 +232,7 @@ export function POSScreen() {
       </div>
 
       {/* Right: sale summary */}
-      <div className="flex flex-col gap-4 rounded-lg border bg-card p-5">
+      <div className="flex flex-col gap-4 rounded-lg border bg-card p-4 sm:p-5">
         <h2 className="text-sm font-semibold">{en.pos.currentSale}</h2>
 
         {saleItems.length === 0 ? (
@@ -273,7 +273,7 @@ export function POSScreen() {
                     <Plus className="size-3" aria-hidden />
                   </Button>
                 </div>
-                <span className="text-sm font-medium w-20 text-right">
+                <span className="text-sm font-medium w-16 sm:w-20 text-right whitespace-nowrap">
                   {formatPrice(item.priceCents * item.quantity, config?.currency)}
                 </span>
                 <Button

@@ -125,9 +125,9 @@ export default function AdminDashboardPage() {
   return (
     <div className="flex flex-col gap-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold tracking-tight">{en.admin.dashboard}</h1>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Link href="/admin/products/new" className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}>
             {en.admin.addProduct}
           </Link>
@@ -294,7 +294,7 @@ export default function AdminDashboardPage() {
                   <Link
                     key={o.id}
                     href={`/admin/orders/${o.id}`}
-                    className="flex items-center gap-4 px-5 py-3.5 text-sm transition-colors hover:bg-muted/40"
+                    className="flex flex-col gap-1 px-5 py-3.5 text-sm transition-colors hover:bg-muted/40 sm:flex-row sm:items-center sm:gap-4"
                   >
                     <span className="w-24 shrink-0 font-mono text-xs text-muted-foreground">
                       {o.orderNumber}
