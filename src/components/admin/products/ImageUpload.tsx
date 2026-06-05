@@ -61,9 +61,9 @@ export function ImageUpload({ variantId, images, onUploaded, onDeleted }: ImageU
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1.5 sm:gap-2">
         {images.map((img) => (
-          <div key={img.id} className="group relative size-20 rounded-md overflow-hidden border">
+          <div key={img.id} className="group relative size-16 sm:size-20 rounded-md overflow-hidden border">
             <Image
               src={img.url}
               alt=""
@@ -86,7 +86,7 @@ export function ImageUpload({ variantId, images, onUploaded, onDeleted }: ImageU
           type="button"
           variant="outline"
           size="sm"
-          className="size-20 flex-col gap-1 text-xs"
+          className="size-16 sm:size-20 flex-col gap-1 text-xs"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
         >

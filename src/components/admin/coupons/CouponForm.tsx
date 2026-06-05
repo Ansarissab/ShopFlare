@@ -83,7 +83,7 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <h2 className="text-sm font-semibold">{isEdit ? en.admin.editCoupon : en.admin.addCoupon}</h2>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <FormField label={en.admin.couponCode} htmlFor="coupon-code">
           <Input
             id="coupon-code"
@@ -132,7 +132,7 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
 
       <Separator />
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <FormField label={en.admin.minOrderCents} htmlFor="coupon-min-order" optional>
           <Input
             id="coupon-min-order"
@@ -194,11 +194,11 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
         </label>
       </div>
 
-      <div className="flex gap-2 pt-1">
-        <Button type="submit" size="sm" disabled={saving}>
+      <div className="flex flex-col sm:flex-row gap-2 pt-1">
+        <Button type="submit" size="sm" disabled={saving} className="w-full sm:w-auto">
           {saving ? en.admin.saving : en.admin.save}
         </Button>
-        <Button type="button" size="sm" variant="outline" onClick={onCancel} disabled={saving}>
+        <Button type="button" size="sm" variant="outline" onClick={onCancel} disabled={saving} className="w-full sm:w-auto">
           {en.admin.cancel}
         </Button>
       </div>

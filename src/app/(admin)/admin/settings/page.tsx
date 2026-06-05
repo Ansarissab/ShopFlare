@@ -217,7 +217,7 @@ export default function AdminSettingsPage() {
         </div>
 
         {/* Color pickers */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FormField label={en.admin.primaryColor} htmlFor="a-primary">
             <div className="flex items-center gap-2">
               <input
@@ -257,7 +257,7 @@ export default function AdminSettingsPage() {
         </div>
 
         {/* Selects: radius / font / color mode */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <FormField label={en.admin.borderRadius} htmlFor="a-radius">
             <Select value={radius} onValueChange={(v: string | null) => setRadius(v ?? 'md')}>
               <SelectTrigger id="a-radius" className="w-full">
@@ -409,7 +409,7 @@ export default function AdminSettingsPage() {
 
         {taxEnabled && (
           <>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField label={en.admin.taxName} htmlFor="t-name">
                 <Input
                   id="t-name"
@@ -433,7 +433,7 @@ export default function AdminSettingsPage() {
               </FormField>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField label={en.admin.taxBasis} htmlFor="t-basis">
                 <Select value={taxBasis} onValueChange={(v: string | null) => setTaxBasis(v ?? 'subtotal')}>
                   <SelectTrigger id="t-basis" className="w-full">

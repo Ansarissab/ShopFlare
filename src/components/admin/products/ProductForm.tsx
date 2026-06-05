@@ -403,7 +403,7 @@ export function ProductForm({ initial }: ProductFormProps) {
                     {isExpanded && (
                       <div className="border-t p-4 flex flex-col gap-4">
                         {/* Variant fields */}
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <FormField label={en.admin.variantLabel} htmlFor={`variant-label-${variant.id}`}>
                             <Input
                               id={`variant-label-${variant.id}`}
@@ -469,7 +469,7 @@ export function ProductForm({ initial }: ProductFormProps) {
                           ) : (
                             <div className="flex flex-col gap-3">
                               {(variant.sizes as LocalSize[]).map((size) => (
-                                <div key={size.id} className="grid grid-cols-[1fr_1fr_1fr_1fr_auto] gap-2 items-end">
+                                <div key={size.id} className="grid grid-cols-2 gap-2 items-end sm:grid-cols-4 lg:grid-cols-[1fr_1fr_1fr_1fr_auto]">
                                   <FormField label={en.admin.sizeName} htmlFor={`size-name-${size.id}`}>
                                     <Input
                                       id={`size-name-${size.id}`}
@@ -502,7 +502,7 @@ export function ProductForm({ initial }: ProductFormProps) {
                                       onChange={(e) => updateSizeField(variant.id, size.id, 'sku', e.target.value)}
                                     />
                                   </FormField>
-                                  <div className="flex gap-1 pb-0.5">
+                                  <div className="flex gap-1 pb-0.5 col-span-2 sm:col-span-1 lg:col-span-1">
                                     <Button
                                       type="button"
                                       size="sm"
