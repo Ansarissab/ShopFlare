@@ -26,6 +26,8 @@ export interface UseApiResourceOptions {
   refetchOnFocus?: boolean
   // Re-fetch silently whenever a message arrives on DATA_UPDATED_CHANNEL.
   refetchOnChannel?: boolean
+  // Re-fetch in the background every N milliseconds (e.g. 60_000 for 60 s).
+  refetchInterval?: number
 }
 
 export function useApiResource<T>(path: string | null, opts?: UseApiResourceOptions): ApiResourceState<T> {
@@ -52,6 +54,12 @@ export function useApiResource<T>(path: string | null, opts?: UseApiResourceOpti
     ch.onmessage = () => setRefetchKey(k => k + 1)
     return () => ch.close()
   }, [opts?.refetchOnChannel])
+
+  useEffect(() => {
+    if (!opts?.refetchInterval || opts.refetchInterval <= 0) return
+    const id = setInterval(() => setRefetchKey(k => k + 1), opts.refetchInterval)
+    return () => clearInterval(id)
+  }, [opts?.refetchInterval])
 
   useEffect(() => {
     // No path yet (route param not ready) — stay in loading idle.
