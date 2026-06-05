@@ -154,6 +154,13 @@ export default function StorePage() {
         )
       ) : (
         <>
+          <p className="mb-4 text-sm text-muted-foreground">
+            {hasMore
+              ? en.store.showingProductsOf
+                  .replace('{shown}', String(visibleItems.length))
+                  .replace('{total}', String(totalFiltered))
+              : en.store.showingProducts.replace('{count}', String(totalFiltered))}
+          </p>
           <ProductGrid items={visibleItems} />
           <InfiniteScrollSentinel
             onVisible={loadMore}
