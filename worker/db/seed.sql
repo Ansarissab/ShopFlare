@@ -4,7 +4,7 @@
 -- Populates a fresh store with sensible defaults for EVERYTHING so you can see
 -- how the storefront + admin behave end-to-end immediately after install:
 --   • store_config   — name, currency, shipping, contact
---   • products        — 3 demo products with variants + size options + images
+--   • products        — 4 demo products with variants, size options, and images (T-shirt Black/White have 3 images each to demo the image carousel)
 --   • coupons         — a percentage + a fixed-amount coupon
 --   • a sample order  — 1 delivered order so the admin dashboard isn't empty
 --   • a sample review — 1 approved review so the product page shows ratings
@@ -72,7 +72,11 @@ INSERT OR IGNORE INTO size_options (id, variant_id, size, sku, price_cents, stoc
 -- ─── Product images (external placeholders; swap for real R2 uploads in admin) ─
 INSERT OR IGNORE INTO product_images (id, variant_id, url, r2_key, sort_order) VALUES
   ('demo_img_tsb', 'demo_var_tshirt_black', 'https://picsum.photos/seed/shopflare-tshirt-black/800/800', 'demo/tshirt-black.jpg', 0),
+  ('demo_img_tsb_2', 'demo_var_tshirt_black', 'https://picsum.photos/seed/sf-tsb-front/800/800', 'demo/tshirt-black-2.jpg', 1),
+  ('demo_img_tsb_3', 'demo_var_tshirt_black', 'https://picsum.photos/seed/sf-tsb-detail/800/800', 'demo/tshirt-black-3.jpg', 2),
   ('demo_img_tsw', 'demo_var_tshirt_white', 'https://picsum.photos/seed/shopflare-tshirt-white/800/800', 'demo/tshirt-white.jpg', 0),
+  ('demo_img_tsw_2', 'demo_var_tshirt_white', 'https://picsum.photos/seed/sf-tsw-side/800/800', 'demo/tshirt-white-2.jpg', 1),
+  ('demo_img_tsw_3', 'demo_var_tshirt_white', 'https://picsum.photos/seed/sf-tsw-back/800/800', 'demo/tshirt-white-3.jpg', 2),
   ('demo_img_mug', 'demo_var_mug_white',    'https://picsum.photos/seed/shopflare-mug/800/800',          'demo/mug.jpg',          0),
   ('demo_img_cap', 'demo_var_cap_navy',     'https://picsum.photos/seed/shopflare-cap/800/800',          'demo/cap.jpg',          0);
 
@@ -173,4 +177,27 @@ Limitation of liability: To the fullest extent permitted by law, we are not liab
 Changes to terms: We may update these terms from time to time. Continued use of the store after changes are posted constitutes acceptance of the revised terms.
 
 Contact: For any questions about these terms, please reach out to us via the contact details listed on our store.', datetime('now'));
+
+-- ─── Quilted Tote Bag — multi-image demo product ──────────────────────────────
+-- 2 variants × 3 images each — exercises the ImageCarousel component end-to-end.
+INSERT OR IGNORE INTO products (id, name, description, active) VALUES
+  ('demo_bag', 'Quilted Tote Bag',
+   'Premium vegan-leather tote with a quilted finish and gold-tone hardware. Spacious main compartment with a zip closure, inner slip pocket, and adjustable shoulder strap.',
+   1);
+
+INSERT OR IGNORE INTO variants (id, product_id, label, color_hex, sort_order) VALUES
+  ('demo_var_bag_black', 'demo_bag', 'Midnight Black', '#1a1a1a', 0),
+  ('demo_var_bag_blush', 'demo_bag', 'Blush Pink',     '#e8a0a0', 1);
+
+INSERT OR IGNORE INTO size_options (id, variant_id, size, sku, price_cents, stock, active) VALUES
+  ('demo_sz_bag_blk_os', 'demo_var_bag_black', 'One Size', 'BAG-BLK-OS', 4500, 12, 1),
+  ('demo_sz_bag_bls_os', 'demo_var_bag_blush', 'One Size', 'BAG-BLS-OS', 4500,  8, 1);
+
+INSERT OR IGNORE INTO product_images (id, variant_id, url, r2_key, sort_order) VALUES
+  ('demo_img_bag_blk_1', 'demo_var_bag_black', 'https://picsum.photos/seed/sf-bag-blk-1/800/800', 'demo/bag-black-1.jpg', 0),
+  ('demo_img_bag_blk_2', 'demo_var_bag_black', 'https://picsum.photos/seed/sf-bag-blk-2/800/800', 'demo/bag-black-2.jpg', 1),
+  ('demo_img_bag_blk_3', 'demo_var_bag_black', 'https://picsum.photos/seed/sf-bag-blk-3/800/800', 'demo/bag-black-3.jpg', 2),
+  ('demo_img_bag_bls_1', 'demo_var_bag_blush', 'https://picsum.photos/seed/sf-bag-bls-1/800/800', 'demo/bag-blush-1.jpg', 0),
+  ('demo_img_bag_bls_2', 'demo_var_bag_blush', 'https://picsum.photos/seed/sf-bag-bls-2/800/800', 'demo/bag-blush-2.jpg', 1),
+  ('demo_img_bag_bls_3', 'demo_var_bag_blush', 'https://picsum.photos/seed/sf-bag-bls-3/800/800', 'demo/bag-blush-3.jpg', 2);
 
