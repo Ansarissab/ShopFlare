@@ -4,21 +4,21 @@ import { useState, useEffect, useRef } from 'react'
 import { Search, X } from 'lucide-react'
 import { en } from '@/lib/i18n/en'
 import { SEARCH_DEBOUNCE_MS } from '@/lib/constants'
-
-interface SearchBarProps {
-  value: string
-  onChange: (value: string) => void
-}
+import type { SearchBarProps } from '@/lib/types/search'
 
 export function SearchBar({ value, onChange }: SearchBarProps) {
   const [inputValue, setInputValue] = useState(value)
   const onChangeRef = useRef(onChange)
   useEffect(() => { onChangeRef.current = onChange }, [onChange])
 
-  // Sync when parent resets value (URL navigation, external clear)
-  useEffect(() => {
+  // Sync when parent resets value (URL navigation, external clear). Done during
+  // render rather than in an effect so the input reflects the new value on the
+  // first paint and avoids an extra render pass.
+  const [prevValue, setPrevValue] = useState(value)
+  if (value !== prevValue) {
+    setPrevValue(value)
     setInputValue(value)
-  }, [value])
+  }
 
   // Debounced emit
   useEffect(() => {

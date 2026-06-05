@@ -2,14 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { en } from '@/lib/i18n/en'
-
-interface InfiniteScrollSentinelProps {
-  onVisible: () => void
-  isLoading: boolean
-  hasMore: boolean
-  totalItems: number
-  pageSize: number
-}
+import type { InfiniteScrollSentinelProps } from '@/lib/types/search'
 
 export function InfiniteScrollSentinel({
   onVisible,
