@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Package, ShoppingCart, Tag, BarChart2, Settings,
   Monitor, Star, BellRing, FileText, PanelLeftClose, PanelLeftOpen, Menu,
+  FolderTree,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { en } from '@/lib/i18n/en'
@@ -13,7 +14,8 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 
 const navItems = [
   { href: '/admin',           label: en.admin.dashboard,      icon: LayoutDashboard },
-  { href: '/admin/products',  label: en.admin.products,       icon: Package },
+  { href: '/admin/products',    label: en.admin.products,       icon: Package },
+  { href: '/admin/categories', label: en.admin.categories,    icon: FolderTree },
   { href: '/admin/orders',    label: en.admin.orders,         icon: ShoppingCart },
   { href: '/admin/pos',       label: en.admin.pos,            icon: Monitor },
   { href: '/admin/coupons',   label: en.admin.coupons,        icon: Tag },
