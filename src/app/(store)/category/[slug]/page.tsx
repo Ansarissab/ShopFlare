@@ -1,15 +1,20 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ProductGrid } from '@/components/store/product/ProductGrid'
+import { SearchBar } from '@/components/store/search/SearchBar'
+import { InfiniteScrollSentinel } from '@/components/shared/InfiniteScrollSentinel'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
 import { en } from '@/lib/i18n/en'
+import { DEFAULT_PRODUCT_PAGE_SIZE } from '@/lib/constants'
 import type { CategoryDetailResponse } from '@/lib/types/category'
 import { useApiResource } from '@/hooks/useApiResource'
 import { useStoreConfig } from '@/hooks/useStoreConfig'
+import { useProductSearch } from '@/hooks/useProductSearch'
 
 // ─── Structured data ────────────────────────────────────────────────────────
 
@@ -41,10 +46,6 @@ function CategoryJsonLd({ name, description, imageUrl, url, breadcrumb }: Catego
     ...(description ? { description } : {}),
     ...(imageUrl ? { image: imageUrl } : {}),
   }
-
-  const json = [breadcrumbList, collectionPage]
-    .map((obj) => JSON.stringify(obj).replace(/</g, '\\u003c'))
-    .join('\n')
 
   return (
     <>
@@ -79,10 +80,36 @@ function CategorySkeleton() {
 
 export default function CategoryPage() {
   const params = useParams<{ slug: string }>()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
   const { data, loading, notFound } = useApiResource<CategoryDetailResponse>(
     params?.slug ? `/api/categories/${params.slug}` : null,
   )
   const { config } = useStoreConfig()
+
+  const [query, setQuery] = useState(() => searchParams?.get('q') ?? '')
+
+  // Sync ?q= to URL
+  useEffect(() => {
+    if (!params?.slug) return
+    const currentQ = searchParams?.get('q') ?? ''
+    if (currentQ === query) return
+    const url = query
+      ? `/category/${params.slug}?q=${encodeURIComponent(query)}`
+      : `/category/${params.slug}`
+    router.replace(url, { scroll: false })
+  }, [query, router, searchParams, params?.slug])
+
+  const pageSize = config?.productPageSize ?? DEFAULT_PRODUCT_PAGE_SIZE
+
+  const { visibleItems, hasMore, loadMore, isLoadingMore, totalFiltered } = useProductSearch({
+    items: data?.products ?? [],
+    pageSize,
+    query,
+    activeCategoryId: null,
+    allCategories: [],
+  })
 
   if (loading) return <CategorySkeleton />
 
@@ -98,7 +125,7 @@ export default function CategoryPage() {
     )
   }
 
-  const { category, products, breadcrumb } = data
+  const { category, breadcrumb } = data
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
   const categoryUrl = `${siteUrl}/category/${category.slug}`
 
@@ -141,7 +168,7 @@ export default function CategoryPage() {
 
       {/* Hero image */}
       {category.imageUrl && (
-        <div className="mb-6 overflow-hidden rounded-xl aspect-[3/1] w-full bg-muted">
+        <div className="mb-6 overflow-hidden rounded-xl aspect-3/1 w-full bg-muted">
           <img
             src={category.imageUrl}
             alt={category.name}
@@ -151,7 +178,7 @@ export default function CategoryPage() {
       )}
 
       {/* Heading + description */}
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
           {category.name}
         </h1>
@@ -160,19 +187,48 @@ export default function CategoryPage() {
         )}
       </div>
 
+      {/* Search within category */}
+      <div className="mb-6">
+        <SearchBar value={query} onChange={setQuery} />
+      </div>
+
       {/* Products */}
-      {products.length === 0 ? (
-        <div className={cn(layout.centeredState, 'min-h-[30vh]')}>
-          <p className="text-muted-foreground">{en.store.categoryEmpty}</p>
-        </div>
+      {visibleItems.length === 0 ? (
+        query ? (
+          <div className={cn(layout.centeredState, 'min-h-[30vh]')}>
+            <p className="text-muted-foreground">
+              {en.store.searchNoResults} &quot;{query}&quot;
+            </p>
+            <button
+              type="button"
+              onClick={() => setQuery('')}
+              className="mt-2 text-sm text-primary underline-offset-4 hover:underline"
+            >
+              {en.store.searchClearHint}
+            </button>
+          </div>
+        ) : (
+          <div className={cn(layout.centeredState, 'min-h-[30vh]')}>
+            <p className="text-muted-foreground">{en.store.categoryEmpty}</p>
+          </div>
+        )
       ) : (
-        <ProductGrid
-          items={products}
-          storeConfig={{
-            flatRateCents: config?.flatShippingRateCents ?? 0,
-            thresholdCents: config?.freeShippingThresholdCents ?? 0,
-          }}
-        />
+        <>
+          <ProductGrid
+            items={visibleItems}
+            storeConfig={{
+              flatRateCents: config?.flatShippingRateCents ?? 0,
+              thresholdCents: config?.freeShippingThresholdCents ?? 0,
+            }}
+          />
+          <InfiniteScrollSentinel
+            onVisible={loadMore}
+            isLoading={isLoadingMore}
+            hasMore={hasMore}
+            totalItems={totalFiltered}
+            pageSize={pageSize}
+          />
+        </>
       )}
     </div>
   )
