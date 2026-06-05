@@ -11,7 +11,7 @@ import { FormField } from '@/components/common/FormField'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { en } from '@/lib/i18n/en'
-import { CURRENCIES, RADIUS_PRESETS, FONT_PRESETS, THEME_PRESETS } from '@/lib/constants'
+import { CURRENCIES, RADIUS_PRESETS, FONT_PRESETS, THEME_PRESETS, DEFAULT_PRODUCT_PAGE_SIZE, MIN_PRODUCT_PAGE_SIZE, MAX_PRODUCT_PAGE_SIZE } from '@/lib/constants'
 import { apiPut, apiUpload, apiDelete } from '@/lib/api'
 import { contrastColor } from '@/lib/utils'
 import { useStoreConfig } from '@/hooks/useStoreConfig'
@@ -32,6 +32,7 @@ export default function AdminSettingsPage() {
   const [bankAccountNumber, setBankAccountNumber] = useState('')
   const [bankIban, setBankIban] = useState('')
   const [bankInstructions, setBankInstructions] = useState('')
+  const [productPageSize, setProductPageSize] = useState(String(DEFAULT_PRODUCT_PAGE_SIZE))
   const [saving, setSaving] = useState(false)
 
   const [primaryColor, setPrimaryColor] = useState('#18181b')
@@ -79,6 +80,7 @@ export default function AdminSettingsPage() {
     setTaxInclusive(config.taxInclusive ?? false)
     setTaxBasis(config.taxBasis ?? 'subtotal')
     setTaxRegistrationNumber(config.taxRegistrationNumber ?? '')
+    setProductPageSize(String(config.productPageSize ?? DEFAULT_PRODUCT_PAGE_SIZE))
   }, [config])
 
   async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -164,6 +166,7 @@ export default function AdminSettingsPage() {
         taxInclusive,
         taxBasis,
         taxRegistrationNumber: taxRegistrationNumber.trim() || undefined,
+        productPageSize: Number(productPageSize) || DEFAULT_PRODUCT_PAGE_SIZE,
       })
       toast.success(en.admin.settingsSaved)
       if (typeof BroadcastChannel !== 'undefined') {
@@ -548,6 +551,18 @@ export default function AdminSettingsPage() {
         </FormField>
         <FormField label={en.admin.freeShippingThreshold} htmlFor="s-threshold" help={en.tooltips.settings.freeShipThreshold}>
           <Input id="s-threshold" type="number" min={0} value={freeThreshold} onChange={(e) => setFreeThreshold(e.target.value)} />
+        </FormField>
+        <FormField label={en.admin.productPageSize} htmlFor="s-page-size">
+          <Input
+            id="s-page-size"
+            type="number"
+            min={MIN_PRODUCT_PAGE_SIZE}
+            max={MAX_PRODUCT_PAGE_SIZE}
+            step={6}
+            value={productPageSize}
+            onChange={(e) => setProductPageSize(e.target.value)}
+          />
+          <p className="text-xs text-muted-foreground mt-1">{en.admin.productPageSizeHint}</p>
         </FormField>
       </div>
 
