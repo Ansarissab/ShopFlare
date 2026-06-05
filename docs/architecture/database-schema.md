@@ -19,7 +19,7 @@ TypeScript types auto-inferred — never manually duplicated.
 | `notify_me` | Restock alert subscriptions |
 | `store_config` | Key-value store for merchant settings |
 | `stripe_events` | Processed webhook event IDs (idempotency) |
-| `push_subscriptions` | Merchant PWA push endpoints |
+| `push_subscriptions` | Web Push endpoints — `admin` kind (merchant order alerts) + `order` kind (customer, tied to an order number) |
 
 ## Key design decisions
 

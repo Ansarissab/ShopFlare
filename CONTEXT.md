@@ -40,6 +40,7 @@ The lifecycle stage of an Order:
 The mechanism used to pay for an Order. One of:
 - `stripe_checkout` — Stripe-hosted checkout page (cards, digital wallets)
 - `cod` — Cash on Delivery, collected in person
+- `bank_transfer` — Manual bank transfer; order email includes a bank-details block
 - `whatsapp` — Order initiated via WhatsApp, payment arranged manually
 - `in_person_cash` — POS sale, cash collected at point of sale
 
