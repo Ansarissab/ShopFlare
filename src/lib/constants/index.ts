@@ -137,3 +137,10 @@ export const PWA_MANIFEST_DEFAULTS = {
   backgroundColor: '#09090b',
   themeColor: '#18181b',
 } as const
+
+// ─── Categories ────────────────────────────────────────────────────────────────
+export const MAX_CATEGORY_DEPTH = 2
+export const MAX_CATEGORIES_PER_PRODUCT = 10
+export const MAX_CATEGORY_NAME_LENGTH = 60
+export const MAX_CATEGORY_DESCRIPTION_LENGTH = 500
+export const CATEGORY_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
