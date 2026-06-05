@@ -3,7 +3,15 @@
 import { z } from 'zod/v4'
 import { idField } from './base'
 import { storeConfigSchema } from './config'
-import { ORDER_STATUSES, MIN_COUPON_CODE_LENGTH, MAX_COUPON_CODE_LENGTH } from '@/lib/constants'
+import {
+  ORDER_STATUSES,
+  MIN_COUPON_CODE_LENGTH,
+  MAX_COUPON_CODE_LENGTH,
+  MAX_CATEGORY_NAME_LENGTH,
+  MAX_CATEGORY_DESCRIPTION_LENGTH,
+  MAX_CATEGORIES_PER_PRODUCT,
+  CATEGORY_SLUG_PATTERN,
+} from '@/lib/constants'
 
 // ─── Product ─────────────────────────────────────────────────────────────────
 
@@ -115,6 +123,25 @@ export const updatePageSchema = z.object({
 // Allow partial updates — merchant edits one section at a time
 export const updateConfigSchema = storeConfigSchema.partial()
 
+// ─── Category ──────────────────────────────────────────────────────────────────
+export const createCategorySchema = z.object({
+  name:        z.string().min(1).max(MAX_CATEGORY_NAME_LENGTH),
+  slug:        z.string().min(1).max(80).regex(CATEGORY_SLUG_PATTERN).optional(),
+  description: z.string().max(MAX_CATEGORY_DESCRIPTION_LENGTH).default(''),
+  parentId:    idField.nullish(),
+  sortOrder:   z.number().int().nonnegative().default(0),
+  active:      z.boolean().default(true),
+})
+export const updateCategorySchema = createCategorySchema.partial()
+
+export const setProductCategoriesSchema = z.object({
+  categoryIds: z.array(idField).max(MAX_CATEGORIES_PER_PRODUCT).default([]),
+})
+
+export const reorderCategoryProductsSchema = z.object({
+  productIds: z.array(idField),
+})
+
 // ─── Type exports ─────────────────────────────────────────────────────────────
 
 export type CreateProductInput     = z.infer<typeof createProductSchema>
@@ -130,3 +157,7 @@ export type UpdateConfigInput      = z.infer<typeof updateConfigSchema>
 export type CreateCouponInput      = z.infer<typeof createCouponSchema>
 export type UpdateCouponInput      = z.infer<typeof updateCouponSchema>
 export type UpdatePageInput        = z.infer<typeof updatePageSchema>
+export type CreateCategoryInput           = z.infer<typeof createCategorySchema>
+export type UpdateCategoryInput           = z.infer<typeof updateCategorySchema>
+export type SetProductCategoriesInput     = z.infer<typeof setProductCategoriesSchema>
+export type ReorderCategoryProductsInput  = z.infer<typeof reorderCategoryProductsSchema>
