@@ -32,6 +32,8 @@ export const en = {
     searchClearHint: 'Clear search',
     loadingMore: 'Loading more…',
     allProductsLoaded: 'All products loaded',
+    showingProducts: 'Showing {count} products',
+    showingProductsOf: 'Showing {shown} of {total} products',
   },
   cart: {
     title: 'Your Cart',
@@ -435,6 +437,7 @@ export const en = {
     categoryImage: 'Category Image',
     categoryProducts: 'Products in Category',
     addProductsToCategory: 'Add Products',
+    noProductsAssigned: 'No products assigned to this category yet',
     noCategories: 'No categories yet',
     categoryCreated: 'Category created',
     categoryUpdated: 'Category updated',
