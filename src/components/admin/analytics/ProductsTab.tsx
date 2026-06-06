@@ -36,15 +36,21 @@ function TabSkeleton() {
 
 export function ProductsTab({ period }: { period: string }) {
   const [data, setData]       = useState<AnalyticsProductsResponse | null>(null)
-  const [loading, setLoading] = useState(true)
+  // Track which period `data` belongs to. While it differs from the current
+  // `period` prop we are loading — derived during render, so no synchronous
+  // setState in the effect (the only setState runs post-fetch, asynchronously).
+  const [loadedPeriod, setLoadedPeriod] = useState<string | null>(null)
   const [sort, setSort]       = useState<SortKey>('revenue')
 
+  const loading = loadedPeriod !== period
+
   useEffect(() => {
-    setLoading(true)
+    let active = true
     apiGet<AnalyticsProductsResponse>(`/api/admin/analytics/products?period=${period}`)
-      .then(setData)
-      .catch(() => setData(null))
-      .finally(() => setLoading(false))
+      .then(d => { if (active) setData(d) })
+      .catch(() => { if (active) setData(null) })
+      .finally(() => { if (active) setLoadedPeriod(period) })
+    return () => { active = false }
   }, [period])
 
   if (loading) return <TabSkeleton />

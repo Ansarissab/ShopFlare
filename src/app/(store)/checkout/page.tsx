@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useSyncExternalStore } from 'react'
 import { useRouter } from 'next/navigation'
 import { CheckoutMethodSelector } from '@/components/store/checkout/CheckoutMethodSelector'
 import { OrderSummary } from '@/components/store/checkout/OrderSummary'
@@ -13,8 +13,13 @@ export default function CheckoutPage() {
   // Guard against Zustand persist hydration race: items is [] on the first
   // render before localStorage is read. Without this, the empty-cart redirect
   // fires immediately on every hard reload, sending users back to the homepage.
-  const [hydrated, setHydrated] = useState(false)
-  useEffect(() => { setHydrated(true) }, [])
+  // useSyncExternalStore seeds the mount flag without an effect-driven setState:
+  // false on the server + first client render, true once hydrated/committed.
+  const hydrated = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  )
 
   useEffect(() => {
     if (!hydrated) return

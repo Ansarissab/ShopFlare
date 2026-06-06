@@ -25,17 +25,26 @@ function layer2Label(stage: string): string {
 }
 
 export function FunnelTab({ period }: FunnelTabProps) {
-  const [data, setData] = useState<AnalyticsFunnelResponse | null>(null)
-  const [loading, setLoading] = useState(true)
+  // `loaded` holds the fetch result together with the period it was fetched for.
+  // Deriving `loading` from a period mismatch during render (instead of a
+  // synchronous setState inside the effect) avoids cascading re-renders while
+  // preserving the exact behavior: skeleton shows on mount and on every period
+  // change until the matching response (or failure) resolves.
+  const [loaded, setLoaded] = useState<{
+    period: string
+    data: AnalyticsFunnelResponse | null
+  } | null>(null)
 
   useEffect(() => {
-    setLoading(true)
-    setData(null)
+    let active = true
     apiGet<AnalyticsFunnelResponse>(`/api/admin/analytics/funnel?period=${period}`)
-      .then(setData)
-      .catch(() => setData(null))
-      .finally(() => setLoading(false))
+      .then(d => { if (active) setLoaded({ period, data: d }) })
+      .catch(() => { if (active) setLoaded({ period, data: null }) })
+    return () => { active = false }
   }, [period])
+
+  const loading = loaded?.period !== period
+  const data = loaded?.data ?? null
 
   // ── Loading skeleton ─────────────────────────────────────────────────────────
   if (loading) {

@@ -19,8 +19,16 @@ export function ImageCarousel({ images, className }: ImageCarouselProps) {
 
   React.useEffect(() => {
     if (!api) return
-    setCurrent(api.selectedScrollSnap())
-    api.on('select', () => setCurrent(api.selectedScrollSnap()))
+    // External-system sync: let embla events drive state. Embla emits
+    // 'reInit' on initialisation, which covers the initial snap without a
+    // synchronous setState in this effect.
+    const onSelect = () => setCurrent(api.selectedScrollSnap())
+    api.on('select', onSelect)
+    api.on('reInit', onSelect)
+    return () => {
+      api.off('select', onSelect)
+      api.off('reInit', onSelect)
+    }
   }, [api])
 
   if (images.length === 0) {

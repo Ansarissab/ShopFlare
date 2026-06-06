@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useSyncExternalStore } from 'react'
 import { X, Share } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
@@ -26,15 +26,26 @@ function markDismissed(): void {
   try { localStorage.setItem(INSTALL_DISMISSED_KEY, '1') } catch {}
 }
 
+// Client-only "hydrated" flag via useSyncExternalStore: returns false on the
+// server / first render and true once mounted, without a synchronous effect
+// setState. No real subscription needed — the value never changes post-mount.
+const emptySubscribe = () => () => {}
+function useHydrated(): boolean {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  )
+}
+
 export function InstallPrompt() {
   const isStandalone = useIsStandalone()
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [showIosSheet, setShowIosSheet] = useState(false)
   const [showBanner, setShowBanner] = useState(false)
-  const [mounted, setMounted] = useState(false)
+  const mounted = useHydrated()
 
   useEffect(() => {
-    setMounted(true)
     if (isDismissed() || isStandalone) return
 
     // Android / Desktop: capture the native prompt

@@ -25,13 +25,15 @@ function SuccessContent() {
 
   // For Stripe sessions, resolve the orderNumber via the worker API.
   const [resolvedOrderNumber, setResolvedOrderNumber] = useState<string | null>(null)
-  const [resolving, setResolving] = useState(false)
+  // Seed `resolving` at render to the same value the effect would set
+  // synchronously (true iff the resolve fetch is about to run), so the effect
+  // only ever calls setState asynchronously in .finally.
+  const [resolving, setResolving] = useState(() => Boolean(sessionId) && !orderId)
 
   useEffect(() => { clearCart() }, [clearCart])
 
   useEffect(() => {
     if (!sessionId || orderId) return
-    setResolving(true)
     apiGet<{ orderNumber: string }>(`/api/orders/by-session/${sessionId}`)
       .then(({ orderNumber }) => setResolvedOrderNumber(orderNumber))
       .catch(() => {

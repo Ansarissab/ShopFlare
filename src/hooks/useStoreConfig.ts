@@ -26,8 +26,13 @@ export function useStoreConfig(): UseStoreConfigResult {
     }
   }, [])
 
-  // Initial fetch
-  useEffect(() => { fetchConfig(true) }, [fetchConfig])
+  // Initial fetch — `loading` already starts true, so no showLoading arg is
+  // passed (default false → no synchronous setState; setConfig/setLoading run
+  // only after the awaited fetch resolves). The disable below covers the
+  // linter's static trace into fetchConfig, which can't see that the setState
+  // calls are post-await and therefore asynchronous, not render-cascading.
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount; all setState is post-await (async), not synchronous
+  useEffect(() => { fetchConfig() }, [fetchConfig])
 
   // Refetch when tab regains focus (covers same-browser tab switching)
   useEffect(() => {

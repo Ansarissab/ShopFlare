@@ -67,16 +67,26 @@ function CustomersSkeleton() {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function CustomersTab({ period }: { period: string }) {
-  const [data, setData] = useState<AnalyticsCustomersResponse | null>(null)
-  const [loading, setLoading] = useState(true)
+  // `loaded` holds the fetch result together with the period it was fetched for.
+  // Deriving `loading` from a period mismatch during render (instead of a
+  // synchronous setState inside the effect) avoids cascading re-renders while
+  // preserving the exact behavior: skeleton shows on mount and on every period
+  // change until the matching response (or failure) resolves.
+  const [loaded, setLoaded] = useState<{
+    period: string
+    data: AnalyticsCustomersResponse | null
+  } | null>(null)
 
   useEffect(() => {
-    setLoading(true)
+    let active = true
     apiGet<AnalyticsCustomersResponse>(`/api/admin/analytics/customers?period=${period}`)
-      .then(setData)
-      .catch(() => setData(null))
-      .finally(() => setLoading(false))
+      .then(d => { if (active) setLoaded({ period, data: d }) })
+      .catch(() => { if (active) setLoaded({ period, data: null }) })
+    return () => { active = false }
   }, [period])
+
+  const loading = loaded?.period !== period
+  const data = loaded?.data ?? null
 
   if (loading) return <CustomersSkeleton />
   if (!data) {

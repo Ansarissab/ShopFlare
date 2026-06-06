@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -19,6 +19,11 @@ import { apiPost } from '@/lib/api'
 import { useApiResource } from '@/hooks/useApiResource'
 
 type PageState = 'loading' | 'verify_contact' | 'ready' | 'not_found' | 'cannot_cancel' | 'success' | 'error'
+
+// User-driven phase. The data-derived phases (loading/ready/not_found/
+// cannot_cancel) are computed during render from the fetch hook; this enum only
+// tracks transitions the user causes (verify → data → success/error).
+type Phase = 'verify' | 'data' | 'success' | 'error'
 
 function CancelOrderContent() {
   const params = useParams<{ orderId: string }>()
@@ -38,33 +43,40 @@ function CancelOrderContent() {
 
   const { data: raw, loading: fetching, notFound: fetchNotFound, error: fetchError } = useApiResource<{ order: CancelOrder }>(apiPath)
 
-  const [order, setOrder] = useState<CancelOrder | null>(null)
-  const [pageState, setPageState] = useState<PageState>(!contact ? 'verify_contact' : 'loading')
+  const [phase, setPhase] = useState<Phase>(!contact ? 'verify' : 'data')
   const [reason, setReason] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [confirmed, setConfirmed] = useState(false)
 
-  // Translate hook state → pageState machine.
-  useEffect(() => {
-    if (pageState === 'verify_contact') return
-    if (fetching) { setPageState('loading'); return }
-    if (fetchNotFound || fetchError) { setPageState('not_found'); return }
-    if (!raw) return
-    const o = raw.order
-    setOrder(o)
-    if (o.status !== 'pending' && o.status !== 'confirmed') {
-      setPageState('cannot_cancel')
-    } else {
-      setPageState('ready')
-    }
-  }, [fetching, fetchNotFound, fetchError, raw, pageState])
+  // `order` and the data-derived page state are computed during render from the
+  // fetch hook — no effect needed to mirror them into state.
+  const order: CancelOrder | null = raw?.order ?? null
+
+  let pageState: PageState
+  if (phase === 'verify') {
+    pageState = 'verify_contact'
+  } else if (phase === 'success') {
+    pageState = 'success'
+  } else if (phase === 'error') {
+    pageState = 'error'
+  } else if (fetching) {
+    pageState = 'loading'
+  } else if (fetchNotFound || fetchError) {
+    pageState = 'not_found'
+  } else if (!raw) {
+    pageState = 'loading'
+  } else if (order && order.status !== 'pending' && order.status !== 'confirmed') {
+    pageState = 'cannot_cancel'
+  } else {
+    pageState = 'ready'
+  }
 
   function submitContact() {
     const val = contactInput.trim()
     if (!val) return
     setContact(val)
     setFetchContact(val)
-    setPageState('loading')
+    setPhase('data')
   }
 
   async function handleCancel() {
@@ -75,9 +87,9 @@ function CancelOrderContent() {
         contact,
         reason: reason.trim() || undefined,
       })
-      setPageState('success')
+      setPhase('success')
     } catch {
-      setPageState('error')
+      setPhase('error')
     } finally {
       setSubmitting(false)
     }
@@ -178,7 +190,7 @@ function CancelOrderContent() {
     return (
       <div className={cn(layout.centeredState, 'max-w-md')}>
         <h1 className="text-xl font-semibold">{en.errors.networkError}</h1>
-        <Button variant="outline" onClick={() => setPageState('ready')}>
+        <Button variant="outline" onClick={() => setPhase('data')}>
           {en.tracking.track}
         </Button>
       </div>

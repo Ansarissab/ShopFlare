@@ -80,9 +80,16 @@ function OverviewSkeleton() {
 function OverviewTab({ period }: { period: AnalyticsPeriod }) {
   const [data, setData] = useState<AnalyticsResponse | null>(null)
   const [loading, setLoading] = useState(true)
+  // Reset to the loading state synchronously during render whenever `period`
+  // changes (incl. first render). Avoids a synchronous setState in the effect
+  // while preserving the skeleton-on-refetch behavior.
+  const [loadedPeriod, setLoadedPeriod] = useState<AnalyticsPeriod | null>(null)
+  if (loadedPeriod !== period) {
+    setLoadedPeriod(period)
+    if (!loading) setLoading(true)
+  }
 
   useEffect(() => {
-    setLoading(true)
     apiGet<AnalyticsResponse>(`/api/admin/analytics?period=${period}`)
       .then(setData)
       .catch(() => setData(null))

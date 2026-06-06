@@ -95,6 +95,10 @@ function Carousel({
 
   React.useEffect(() => {
     if (!api) return
+    // Vendored shadcn/ui carousel: sync nav state with the imperative embla API.
+    // The initial synchronous call seeds canScrollPrev/Next on mount before any
+    // embla "select"/"reInit" event fires; embla owns this external state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     onSelect(api)
     api.on("reInit", onSelect)
     api.on("select", onSelect)

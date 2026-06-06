@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import { StorefrontHeader } from '@/components/store/StorefrontHeader'
 import { StorefrontFooter } from '@/components/store/StorefrontFooter'
 import { ThemeProvider } from '@/components/store/ThemeProvider'
@@ -20,7 +21,11 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
       </div>
       {/* Native app chrome — visible only in standalone (AppHeader/AppTabBar self-hide in browser) */}
       <AppHeader />
-      <main className="flex-1">{children}</main>
+      {/* Suspense boundary so client pages using useSearchParams (home/search,
+          category, tracking, checkout success) can statically prerender a shell. */}
+      <main className="flex-1">
+        <Suspense fallback={null}>{children}</Suspense>
+      </main>
       <div data-web-chrome>
         <StorefrontFooter />
       </div>

@@ -86,6 +86,10 @@ export function usePushSubscription(opts: PushSubscriptionOptions = {}): UsePush
     }
   }, [opts.endpoint])
 
+  // Stabilise the extra-payload reference for the dependency array: hooks lint
+  // forbids non-trivial expressions (JSON.stringify(...)) inline in deps.
+  const extraPayloadKey = JSON.stringify(opts.extraPayload)
+
   const enable = useCallback(async (): Promise<boolean> => {
     if (!supported || loading) return false
     setLoading(true)
@@ -139,7 +143,7 @@ export function usePushSubscription(opts: PushSubscriptionOptions = {}): UsePush
       setLoading(false)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [supported, loading, opts.endpoint, JSON.stringify(opts.extraPayload)])
+  }, [supported, loading, opts.endpoint, extraPayloadKey])
 
   return { supported, permission, enabled, enable, loading }
 }

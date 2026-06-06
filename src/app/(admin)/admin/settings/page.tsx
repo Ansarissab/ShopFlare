@@ -54,8 +54,13 @@ export default function AdminSettingsPage() {
   const logoInputRef = useRef<HTMLInputElement>(null)
   const faviconInputRef = useRef<HTMLInputElement>(null)
 
+  // One-time seed of editable form fields from the async-loaded config. Must be
+  // an effect (config arrives after fetch, then the form stays user-editable, so
+  // we can't derive these during render). The setState is intentional seeding,
+  // not a render-cascade loop — it runs once per config change.
   useEffect(() => {
     if (!config) return
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time seed of editable form state from async-loaded config
     setStoreName(config.storeName)
     setTagline(config.tagline ?? '')
     setWhatsappNumber(config.whatsappNumber ?? '')

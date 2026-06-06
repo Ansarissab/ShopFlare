@@ -23,7 +23,12 @@ export async function edgeCached<T>(
     return c.newResponse(null, 304, { 'Cache-Control': cacheControl, 'ETag': etag })
   }
 
-  const cache: Cache | undefined = typeof caches !== 'undefined' ? caches.default : undefined
+  // Edge cache is a production optimisation only. Skip it in development/test:
+  // miniflare's Cache API + waitUntil(cache.put) can hang the workers test pool,
+  // and dev gains nothing from per-colo caching. The cheap ETag/304 path above
+  // still runs everywhere. Correctness is unaffected (keys are version-scoped).
+  const cacheEnabled = typeof caches !== 'undefined' && c.env?.ENVIRONMENT !== 'development'
+  const cache: Cache | undefined = cacheEnabled ? caches.default : undefined
   const url = new URL(c.req.url)
   const key = new Request(`${url.origin}${url.pathname}?_etag=${encodeURIComponent(etag)}`)
 
