@@ -4,12 +4,15 @@ import { render, screen, fireEvent, cleanup } from '@testing-library/react'
 import { CartItem } from './CartItem'
 import { en } from '@/lib/i18n/en'
 
-vi.mock('next/image', () => ({
-  default: (props: React.ImgHTMLAttributes<HTMLImageElement> & { fill?: boolean; priority?: boolean }) => {
-    const { fill, priority, ...rest } = props
-    return require('react').createElement('img', rest)
-  },
-}))
+vi.mock('next/image', async () => {
+  const { createElement } = await import('react')
+  return {
+    default: (props: React.ImgHTMLAttributes<HTMLImageElement> & { fill?: boolean; priority?: boolean }) => {
+      const { fill, priority, ...rest } = props
+      return createElement('img', rest)
+    },
+  }
+})
 
 const updateQuantity = vi.fn()
 const removeItem = vi.fn()

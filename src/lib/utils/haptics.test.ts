@@ -1,11 +1,11 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach, type MockInstance } from 'vitest'
 import { vibrate, type HapticPattern } from '@/lib/utils/haptics'
 
 describe('vibrate', () => {
-  let vibrateSpy: ReturnType<typeof vi.spyOn>
+  let vibrateSpy: MockInstance
 
   beforeEach(() => {
     // jsdom does not expose navigator.vibrate — define it so vi.spyOn can wrap it
@@ -88,5 +88,14 @@ describe('vibrate', () => {
       vibrate(p)
       expect(vibrateSpy).toHaveBeenCalledTimes(1)
     }
+  })
+
+  it('no-ops when navigator.vibrate is unavailable', () => {
+    Object.defineProperty(navigator, 'vibrate', {
+      configurable: true,
+      writable: true,
+      value: undefined,
+    })
+    expect(() => vibrate('light')).not.toThrow()
   })
 })

@@ -3,16 +3,22 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, cleanup } from '@testing-library/react'
 import { StatCard } from './StatCard'
 
-vi.mock('next/link', () => ({
-  default: ({ href, children }: { href: string; children: React.ReactNode }) =>
-    require('react').createElement('a', { href }, children),
-}))
+vi.mock('next/link', async () => {
+  const { createElement } = await import('react')
+  return {
+    default: ({ href, children }: { href: string; children: React.ReactNode }) =>
+      createElement('a', { href }, children),
+  }
+})
 
 // HelpTip renders a tooltip button; mock it to avoid Radix portal issues
-vi.mock('@/components/common/HelpTip', () => ({
-  HelpTip: ({ text }: { text: string }) =>
-    require('react').createElement('span', { 'data-helptip': text }, text),
-}))
+vi.mock('@/components/common/HelpTip', async () => {
+  const { createElement } = await import('react')
+  return {
+    HelpTip: ({ text }: { text: string }) =>
+      createElement('span', { 'data-helptip': text }, text),
+  }
+})
 
 afterEach(cleanup)
 

@@ -104,4 +104,96 @@ describe('CartSummary', () => {
       expect(screen.getByText(en.cart.couponInvalid)).toBeTruthy()
     })
   })
+
+  // ---- appended branch-coverage cases ----
+
+  it('handleApplyCoupon returns early when code is blank/whitespace (onApplyCoupon not called)', () => {
+    const onApplyCoupon = vi.fn(() => Promise.resolve(true))
+    render(<CartSummary {...defaultProps} onApplyCoupon={onApplyCoupon} />)
+    // whitespace-only -> trim() falsy -> guard returns; also Apply stays disabled
+    fireEvent.change(screen.getByLabelText(en.cart.couponPlaceholder), {
+      target: { value: '   ' },
+    })
+    const applyBtn = screen.getByRole('button', { name: en.cart.applyCoupon }) as HTMLButtonElement
+    expect(applyBtn.disabled).toBe(true)
+    fireEvent.click(applyBtn)
+    expect(onApplyCoupon).not.toHaveBeenCalled()
+  })
+
+  it('typing after an invalid attempt resets coupon state back to idle', async () => {
+    const onApplyCoupon = vi.fn(() => Promise.resolve(false))
+    render(<CartSummary {...defaultProps} onApplyCoupon={onApplyCoupon} />)
+    const input = screen.getByLabelText(en.cart.couponPlaceholder)
+    fireEvent.change(input, { target: { value: 'BAD' } })
+    fireEvent.click(screen.getByRole('button', { name: en.cart.applyCoupon }))
+    await vi.waitFor(() => expect(screen.getByText(en.cart.couponInvalid)).toBeTruthy())
+    // changing the code clears the invalid message (couponState !== 'idle' branch)
+    fireEvent.change(input, { target: { value: 'BADX' } })
+    expect(screen.queryByText(en.cart.couponInvalid)).toBeNull()
+  })
+
+  it('disables the coupon input + Apply button when couponApplied prop is true', () => {
+    render(<CartSummary {...defaultProps} couponApplied />)
+    const input = screen.getByLabelText(en.cart.couponPlaceholder) as HTMLInputElement
+    expect(input.disabled).toBe(true)
+    const applyBtn = screen.getByRole('button', { name: en.cart.applyCoupon }) as HTMLButtonElement
+    expect(applyBtn.disabled).toBe(true)
+    // applied-feedback paragraph rendered via (couponApplied || ...) truthy branch
+    expect(screen.getAllByText(en.cart.couponApplied).length).toBeGreaterThan(0)
+  })
+
+  it('locks the input after a successful apply (couponState === applied branch)', async () => {
+    const onApplyCoupon = vi.fn(() => Promise.resolve(true))
+    render(<CartSummary {...defaultProps} onApplyCoupon={onApplyCoupon} />)
+    const input = screen.getByLabelText(en.cart.couponPlaceholder) as HTMLInputElement
+    fireEvent.change(input, { target: { value: 'SAVE10' } })
+    fireEvent.click(screen.getByRole('button', { name: en.cart.applyCoupon }))
+    await vi.waitFor(() => expect(input.disabled).toBe(true))
+  })
+
+  it('renders an exclusive tax row with name + rate label', () => {
+    render(
+      <CartSummary
+        {...defaultProps}
+        taxCents={750}
+        taxName="GST"
+        taxRate={15}
+        taxInclusive={false}
+      />,
+    )
+    expect(
+      screen.getByText(en.cart.taxRateLabel.replace('{name}', 'GST').replace('{rate}', '15')),
+    ).toBeTruthy()
+    // exclusive tax adds to the total: 5000 + 300 + 750 = 6050
+    expect(screen.getByText('₨6,050')).toBeTruthy()
+  })
+
+  it('renders an inclusive tax row that does NOT change the grand total', () => {
+    render(
+      <CartSummary
+        {...defaultProps}
+        taxCents={750}
+        taxName="VAT"
+        taxRate={15}
+        taxInclusive
+      />,
+    )
+    expect(screen.getByText(en.cart.taxIncluded.replace('{name}', 'VAT'))).toBeTruthy()
+    // inclusive tax excluded from total: 5000 + 300 = 5300
+    expect(screen.getByText('₨5,300')).toBeTruthy()
+  })
+
+  it('omits the tax row entirely when taxCents is 0 (default)', () => {
+    render(<CartSummary {...defaultProps} />)
+    expect(screen.queryByText(en.cart.tax)).toBeNull()
+    expect(
+      screen.queryByText(en.cart.taxRateLabel.replace('{name}', 'Tax').replace('{rate}', '0')),
+    ).toBeNull()
+  })
+
+  it('omits the discount row when discountCents is 0 (default)', () => {
+    render(<CartSummary {...defaultProps} />)
+    // no negative-amount discount line present
+    expect(screen.queryByText('-₨500')).toBeNull()
+  })
 })

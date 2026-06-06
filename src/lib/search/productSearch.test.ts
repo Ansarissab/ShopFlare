@@ -45,6 +45,21 @@ describe('collectDescendantIds', () => {
   it('returns an empty set for a missing id', () => {
     expect(collectDescendantIds(tree, 'nope')).toEqual(new Set())
   })
+
+  it('handles nodes whose children are undefined (?? [] fallback in addAll)', () => {
+    // node with no `children` key at all → addAll must fall back to []
+    const sparse = [{ id: 'solo' } as unknown as CategoryNode]
+    expect(collectDescendantIds(sparse, 'solo')).toEqual(new Set(['solo']))
+  })
+
+  it('handles undefined children while walking past a non-target node (?? [] in walk)', () => {
+    // First node has no children and is not the target → walk must recurse into []
+    const sparse = [
+      { id: 'a' } as unknown as CategoryNode,
+      mkNode('b', [mkNode('b-child')]),
+    ]
+    expect(collectDescendantIds(sparse, 'b')).toEqual(new Set(['b', 'b-child']))
+  })
 })
 
 // ─── filterProducts ───────────────────────────────────────────────────────────

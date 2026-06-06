@@ -9,9 +9,16 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-const categories = [
-  { id: 'cat-1', name: 'Tops', slug: 'tops', parentId: null, sortOrder: 0, imageUrl: null, productCount: 3, children: [] },
-  { id: 'cat-2', name: 'Bottoms', slug: 'bottoms', parentId: null, sortOrder: 1, imageUrl: null, productCount: 2, children: [] },
+import type { CategoryNode } from '@/lib/types/store'
+
+const cat = (o: Pick<CategoryNode, 'id' | 'name' | 'slug' | 'productCount'> & Partial<CategoryNode>): CategoryNode => ({
+  parentId: null, sortOrder: 0, imageUrl: null, r2Key: null, description: '',
+  active: true, createdAt: '2024-01-01', updatedAt: '2024-01-01', children: [], ...o,
+})
+
+const categories: CategoryNode[] = [
+  cat({ id: 'cat-1', name: 'Tops', slug: 'tops', sortOrder: 0, productCount: 3 }),
+  cat({ id: 'cat-2', name: 'Bottoms', slug: 'bottoms', sortOrder: 1, productCount: 2 }),
 ]
 
 describe('CategoryFilter', () => {

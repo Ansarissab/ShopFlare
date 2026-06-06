@@ -3,17 +3,23 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, cleanup } from '@testing-library/react'
 import { ProductCard } from './ProductCard'
 
-vi.mock('next/link', () => ({
-  default: ({ href, children }: { href: string; children: React.ReactNode }) =>
-    require('react').createElement('a', { href }, children),
-}))
+vi.mock('next/link', async () => {
+  const { createElement } = await import('react')
+  return {
+    default: ({ href, children }: { href: string; children: React.ReactNode }) =>
+      createElement('a', { href }, children),
+  }
+})
 
-vi.mock('next/image', () => ({
-  default: (props: React.ImgHTMLAttributes<HTMLImageElement> & { fill?: boolean; priority?: boolean }) => {
-    const { fill, priority, ...rest } = props
-    return require('react').createElement('img', rest)
-  },
-}))
+vi.mock('next/image', async () => {
+  const { createElement } = await import('react')
+  return {
+    default: (props: React.ImgHTMLAttributes<HTMLImageElement> & { fill?: boolean; priority?: boolean }) => {
+      const { fill, priority, ...rest } = props
+      return createElement('img', rest)
+    },
+  }
+})
 
 vi.mock('@/lib/api', () => ({
   apiGet: vi.fn(() => Promise.resolve({})),
@@ -67,6 +73,7 @@ const image = {
   id: 'img-1',
   variantId: 'var-1',
   url: '/images/tee.jpg',
+  r2Key: 'variants/var-1/tee.jpg',
   sortOrder: 0,
 }
 
@@ -158,5 +165,50 @@ describe('ProductCard', () => {
       />,
     )
     expect(screen.getByText('No image')).toBeTruthy()
+  })
+
+  it('appends + to the price when the size price range spans multiple values', () => {
+    const cheap = { ...size, id: 'sz-1', priceCents: 1500 }
+    const dear = { ...size, id: 'sz-2', priceCents: 2500 }
+    render(
+      <ProductCard product={product} variants={[variant]} sizes={[cheap, dear]} images={[image]} />,
+    )
+    expect(screen.getByText(/₨1,500\+/)).toBeTruthy()
+  })
+
+  it('renders no price line when there are no sizes', () => {
+    const { container } = render(
+      <ProductCard product={product} variants={[variant]} sizes={[]} images={[image]} />,
+    )
+    expect(container.querySelector('.text-primary')).toBeNull()
+  })
+
+  it('renders a color dot per color variant with its title', () => {
+    render(
+      <ProductCard product={product} variants={[variant]} sizes={[size]} images={[image]} />,
+    )
+    expect(screen.getByTitle('White')).toBeTruthy()
+  })
+
+  it('renders no color dots when no variant has a colorHex', () => {
+    const noColor = { ...variant, colorHex: null }
+    render(
+      <ProductCard product={product} variants={[noColor]} sizes={[size]} images={[image]} />,
+    )
+    expect(screen.queryByTitle('White')).toBeNull()
+  })
+
+  it('shows a +N overflow indicator when more than 5 color variants exist', () => {
+    const many = Array.from({ length: 7 }, (_, i) => ({
+      ...variant,
+      id: `var-${i}`,
+      label: `Color ${i}`,
+      colorHex: '#123456',
+    }))
+    render(
+      <ProductCard product={product} variants={many} sizes={[size]} images={[image]} />,
+    )
+    // 7 color variants, 5 dots shown → +2 overflow
+    expect(screen.getByText('+2')).toBeTruthy()
   })
 })
