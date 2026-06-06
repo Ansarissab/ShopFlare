@@ -73,12 +73,9 @@ async function seedDeliveredOrder(opts: {
     productId,
     variantId: 'v1',
     sizeOptionId: 's1',
-    productName: 'Demo Tee',
-    variantLabel: 'Black',
-    size: 'M',
     quantity: 1,
-    unitPriceCents: 1000,
-    totalCents: 1000,
+    priceCents: 1000,
+    snapshot: JSON.stringify({ productName: 'Demo Tee', variantLabel: 'Black', size: 'M', sku: '', imageUrl: '' }),
   })
 
   return { orderId, orderNumber }

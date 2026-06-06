@@ -8,6 +8,7 @@ function makeCtx(opts: {
   url?: string
   ifNoneMatch?: string
   globalCaches?: boolean
+  environment?: string
 }) {
   const url = opts.url ?? 'https://shop.example.com/api/products'
   const headers = new Headers()
@@ -25,6 +26,7 @@ function makeCtx(opts: {
       url,
       header: (name: string) => headers.get(name) ?? undefined,
     },
+    env: { ENVIRONMENT: opts.environment },
     newResponse: vi.fn((_body: null, status: number, headers: Record<string, string>) => {
       return new Response(null, { status, headers })
     }),
@@ -155,5 +157,103 @@ describe('edgeCached', () => {
         build: async () => ({ ok: true }),
       }),
     ).resolves.toBeDefined()
+  })
+
+  // ── caches present (Workers runtime) — exercises the `if (cache)` branches ──
+  it('returns the cached hit without calling build() when caches.match finds an entry', async () => {
+    const cachedRes = new Response(JSON.stringify({ cached: true }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
+    const matchMock = vi.fn(async () => cachedRes)
+    const putMock = vi.fn(async () => undefined)
+    vi.stubGlobal('caches', { default: { match: matchMock, put: putMock } })
+
+    const ctx = makeCtx({})
+    const build = vi.fn(async () => ({ fresh: true }))
+
+    const res = await edgeCached(ctx as never, {
+      etag: 'W/"hit"',
+      cacheControl: 'public, max-age=60',
+      build,
+    })
+
+    expect(matchMock).toHaveBeenCalledTimes(1)
+    expect(build).not.toHaveBeenCalled()
+    expect(res).toBe(cachedRes)
+    expect(await res.json()).toEqual({ cached: true })
+
+    vi.unstubAllGlobals()
+  })
+
+  it('on a cache miss builds, returns 200, and stores via waitUntil(cache.put)', async () => {
+    const matchMock = vi.fn(async () => undefined)
+    const putMock = vi.fn(async () => undefined)
+    vi.stubGlobal('caches', { default: { match: matchMock, put: putMock } })
+
+    const ctx = makeCtx({})
+    const data = { fresh: true }
+    const build = vi.fn(async () => data)
+
+    const res = await edgeCached(ctx as never, {
+      etag: 'W/"miss"',
+      cacheControl: 'public, max-age=60',
+      build,
+    })
+
+    expect(matchMock).toHaveBeenCalledTimes(1)
+    expect(build).toHaveBeenCalledTimes(1)
+    expect(res.status).toBe(200)
+    expect(await res.json()).toEqual(data)
+    // background cache.put scheduled through executionCtx.waitUntil
+    expect(ctx.executionCtx.waitUntil).toHaveBeenCalledTimes(1)
+
+    vi.unstubAllGlobals()
+  })
+
+  it('skips the Cache API entirely in the development environment', async () => {
+    const matchMock = vi.fn(async () => undefined)
+    const putMock = vi.fn(async () => undefined)
+    vi.stubGlobal('caches', { default: { match: matchMock, put: putMock } })
+
+    const ctx = makeCtx({ environment: 'development' })
+    const data = { fresh: true }
+    const build = vi.fn(async () => data)
+
+    const res = await edgeCached(ctx as never, {
+      etag: 'W/"dev"',
+      cacheControl: 'public, max-age=60',
+      build,
+    })
+
+    // Dev path: build runs and returns 200, but cache is never touched.
+    expect(build).toHaveBeenCalledTimes(1)
+    expect(res.status).toBe(200)
+    expect(matchMock).not.toHaveBeenCalled()
+    expect(putMock).not.toHaveBeenCalled()
+    expect(ctx.executionCtx.waitUntil).not.toHaveBeenCalled()
+
+    vi.unstubAllGlobals()
+  })
+
+  it('swallows the error when waitUntil throws on a cache miss', async () => {
+    const matchMock = vi.fn(async () => undefined)
+    const putMock = vi.fn(async () => undefined)
+    vi.stubGlobal('caches', { default: { match: matchMock, put: putMock } })
+
+    const ctx = makeCtx({})
+    ctx.executionCtx.waitUntil = vi.fn(() => { throw new Error('no exec ctx') })
+    const build = vi.fn(async () => ({ ok: true }))
+
+    const res = await edgeCached(ctx as never, {
+      etag: 'W/"miss-throw"',
+      cacheControl: 'public, max-age=60',
+      build,
+    })
+
+    expect(res.status).toBe(200)
+    expect(await res.json()).toEqual({ ok: true })
+
+    vi.unstubAllGlobals()
   })
 })

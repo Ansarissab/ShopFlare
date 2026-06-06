@@ -5,11 +5,28 @@
 //   POST /api/coupons/validate  — validate a coupon code
 //   POST /api/orders/cod (with coupon) — coupon applied during order placement
 
-import { env, SELF } from 'cloudflare:test'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { env, SELF, fetchMock } from 'cloudflare:test'
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { eq } from 'drizzle-orm'
 import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
+
+// Stripe is an external API — never hit it in tests. The admin coupon route syncs
+// to Stripe when STRIPE_SECRET_KEY is set (the dummy test key would make a real
+// call that fails → 502). Intercept Stripe's outbound HTTP via miniflare's
+// fetchMock so the route exercises the real D1 CRUD path with stubbed Stripe ids.
+beforeAll(() => {
+  fetchMock.activate()
+  const stripe = fetchMock.get('https://api.stripe.com')
+  stripe
+    .intercept({ method: 'POST', path: /^\/v1\/coupons/ })
+    .reply(200, { id: 'co_test', object: 'coupon' })
+    .persist()
+  stripe
+    .intercept({ method: 'POST', path: /^\/v1\/promotion_codes/ })
+    .reply(200, { id: 'promo_test', object: 'promotion_code', active: true })
+    .persist()
+})
 
 const db = () => createDb(env.DB)
 const BASE = 'https://shop.test'
@@ -87,7 +104,7 @@ describe('POST /api/admin/coupons', () => {
   it('creates a flat discount coupon (201)', async () => {
     const res = await adminPost('/api/admin/coupons', {
       code: 'FLAT200',
-      type: 'flat',
+      type: 'fixed',
       value: 200,
       active: true,
       perCustomerLimit: 2,
@@ -95,21 +112,21 @@ describe('POST /api/admin/coupons', () => {
     expect(res.status).toBe(201)
     const coupon = (await res.json()) as Record<string, unknown>
     expect(coupon.code).toBe('FLAT200')
-    expect(coupon.type).toBe('flat')
+    expect(coupon.type).toBe('fixed')
     expect(coupon.value).toBe(200)
   })
 
   it('rejects duplicate coupon code (409)', async () => {
     await adminPost('/api/admin/coupons', {
-      code: 'DUPE',
+      code: 'DUPECODE',
       type: 'percentage',
       value: 5,
       active: true,
       perCustomerLimit: 1,
     })
     const res = await adminPost('/api/admin/coupons', {
-      code: 'DUPE',
-      type: 'flat',
+      code: 'DUPECODE',
+      type: 'fixed',
       value: 100,
       active: true,
       perCustomerLimit: 1,
@@ -135,7 +152,7 @@ describe('GET /api/admin/coupons', () => {
 
   it('lists all coupons ordered newest-first', async () => {
     await adminPost('/api/admin/coupons', {
-      code: 'FIRST',
+      code: 'FIRSTONE',
       type: 'percentage',
       value: 5,
       active: true,
@@ -155,7 +172,7 @@ describe('GET /api/admin/coupons', () => {
     expect(body.coupons).toHaveLength(2)
     // newest first — SECOND was inserted last
     expect(body.coupons[0].code).toBe('SECOND')
-    expect(body.coupons[1].code).toBe('FIRST')
+    expect(body.coupons[1].code).toBe('FIRSTONE')
   })
 })
 
@@ -186,7 +203,7 @@ describe('DELETE /api/admin/coupons/:id', () => {
   it('soft-deactivates the coupon (active=false)', async () => {
     const createRes = await adminPost('/api/admin/coupons', {
       code: 'SOFTDEL',
-      type: 'flat',
+      type: 'fixed',
       value: 50,
       active: true,
       perCustomerLimit: 1,
@@ -221,7 +238,7 @@ describe('POST /api/coupons/validate', () => {
 
   it('returns valid=true + discountCents for an active flat coupon', async () => {
     await db().insert(schema.coupons).values({
-      id: 'c2', code: 'FLAT100', type: 'flat', value: 100,
+      id: 'c2', code: 'FLAT100', type: 'fixed', value: 100,
       perCustomerLimit: 2, usedCount: 0, active: true,
     })
 
@@ -252,7 +269,7 @@ describe('POST /api/coupons/validate', () => {
 
   it('returns valid=false when subtotal is below minOrderCents', async () => {
     await db().insert(schema.coupons).values({
-      id: 'c4', code: 'MINORDER', type: 'flat', value: 50,
+      id: 'c4', code: 'MINORDER', type: 'fixed', value: 50,
       minOrderCents: 1000, perCustomerLimit: 1, usedCount: 0, active: true,
     })
 
