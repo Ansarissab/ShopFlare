@@ -13,6 +13,10 @@
 # testing
 /coverage
 /test-results
+/playwright-report
+/.playwright
+/.visual-baselines
+/e2e/**/*-snapshots
 
 # next.js
 /.next/
