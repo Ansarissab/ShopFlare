@@ -66,12 +66,15 @@ describe('CategoryNav', () => {
     expect(screen.getByTestId('chevron')).toBeTruthy()
   })
 
+  // base-ui menus open via a portal; give these interaction tests extra headroom
+  // so they don't flake when the jsdom pool is CPU-starved (e.g. running alongside
+  // the miniflare integration pool).
   it('opens the menu and renders a flat (no-children) category as a single link', async () => {
     render(<CategoryNav categories={[cat({ id: '1', name: 'Shoes', slug: 'shoes' })]} />)
     fireEvent.click(screen.getByText(en.store.browseCategories))
     const link = await screen.findByText('Shoes')
     expect(link.getAttribute('href')).toBe('/category/shoes')
-  })
+  }, 15000)
 
   it('renders a parent with children as a submenu sub-trigger (parent link)', async () => {
     const categories = [
@@ -93,7 +96,7 @@ describe('CategoryNav', () => {
     expect(parentTriggerLinks.length).toBeGreaterThanOrEqual(1)
     const parentLink = parentTriggerLinks.find((el) => el.getAttribute('href') === '/category/apparel')
     expect(parentLink).toBeTruthy()
-  })
+  }, 15000)
 
   it('parent sub-trigger link stops click propagation', async () => {
     const categories = [
@@ -114,7 +117,7 @@ describe('CategoryNav', () => {
     ev.stopPropagation = stopSpy
     links[0].dispatchEvent(ev)
     expect(stopSpy).toHaveBeenCalled()
-  })
+  }, 15000)
 
   it('renders mixed flat + submenu categories', async () => {
     const categories = [
@@ -131,5 +134,5 @@ describe('CategoryNav', () => {
 
     expect(await screen.findByText('Sale')).toBeTruthy()
     expect(screen.getAllByText('Apparel').length).toBeGreaterThanOrEqual(1)
-  })
+  }, 15000)
 })
