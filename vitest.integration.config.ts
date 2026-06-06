@@ -32,6 +32,11 @@ export default defineWorkersConfig(async () => {
           // Reuse the real worker entry + bindings (D1/KV/R2, nodejs_compat).
           wrangler: { configPath: './wrangler.toml' },
           miniflare: {
+            // Pin the test runtime to the date the installed workerd actually
+            // supports, so the pool doesn't warn + fall back from wrangler.toml's
+            // (newer) production compatibility_date. Tests only — prod deploy
+            // still uses the date in wrangler.toml.
+            compatibilityDate: '2026-03-10',
             // ENVIRONMENT=development → Turnstile + CF Access dev-bypass, so
             // public POSTs and admin routes are reachable without tokens.
             // Dummy Stripe keys let the webhook construct its client so the

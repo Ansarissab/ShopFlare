@@ -126,7 +126,7 @@ describe('PUT /api/admin/config/store', () => {
     expect(body.updated).toContain('tagline')
   })
 
-  it('persists values — subsequent GET /api/config/store reflects them', async () => {
+  it('persists values - subsequent GET /api/config/store reflects them', async () => {
     await adminPut('/api/admin/config/store', { storeName: 'Persisted Store', currency: 'USD' })
 
     const res = await get('/api/config/store')

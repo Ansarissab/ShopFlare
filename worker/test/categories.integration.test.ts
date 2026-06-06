@@ -73,7 +73,7 @@ describe('category CRUD + slug rules', () => {
     expect(category.slug).toBe('shirts')
   })
 
-  it('duplicate slug → 409', async () => {
+  it('duplicate slug -> 409', async () => {
     await createCategory({ name: 'Shirts', slug: 'shirts' })
     const res = await adminPost('/api/admin/categories', { name: 'Other Shirts', slug: 'shirts' })
     expect(res.status).toBe(409)
@@ -81,14 +81,14 @@ describe('category CRUD + slug rules', () => {
     expect(body.error).toMatch(/slug/i)
   })
 
-  it('auto-slug deduplication: same name → conflict → 409', async () => {
+  it('auto-slug deduplication: same name -> conflict -> 409', async () => {
     await createCategory({ name: 'Jackets' })
     // same name → same auto-slug 'jackets'
     const res = await adminPost('/api/admin/categories', { name: 'Jackets' })
     expect(res.status).toBe(409)
   })
 
-  it('slug uniqueness check on update → 409 when taken by another category', async () => {
+  it('slug uniqueness check on update -> 409 when taken by another category', async () => {
     const { category: a } = await createCategory({ name: 'Alpha', slug: 'alpha' })
     await createCategory({ name: 'Beta', slug: 'beta' })
     // Try to rename alpha's slug to 'beta'
@@ -106,27 +106,27 @@ describe('category CRUD + slug rules', () => {
 })
 
 describe('category depth rules', () => {
-  it('creates a valid parent→child hierarchy (depth 2)', async () => {
+  it('creates a valid parent->child hierarchy (depth 2)', async () => {
     const { category: parent } = await createCategory({ name: 'Men' })
     const { status, category: child } = await createCategory({ name: 'Shirts', parentId: parent.id })
     expect(status).toBe(201)
     expect(child.parentId).toBe(parent.id)
   })
 
-  it('depth violation: parent already has a parent → 422', async () => {
+  it('depth violation: parent already has a parent -> 422', async () => {
     const { category: level0 } = await createCategory({ name: 'Level 0' })
     const { category: level1 } = await createCategory({ name: 'Level 1', parentId: level0.id })
     const res = await adminPost('/api/admin/categories', { name: 'Level 2', parentId: level1.id })
     expect(res.status).toBe(422)
   })
 
-  it('self-parent on update → 422', async () => {
+  it('self-parent on update -> 422', async () => {
     const { category } = await createCategory({ name: 'Self' })
     const res = await adminPut(`/api/admin/categories/${category.id}`, { parentId: category.id })
     expect(res.status).toBe(422)
   })
 
-  it('setting parentId to a non-existent category → 422', async () => {
+  it('setting parentId to a non-existent category -> 422', async () => {
     const res = await adminPost('/api/admin/categories', { name: 'Orphan', parentId: 'nonexistent' })
     expect(res.status).toBe(422)
   })
@@ -171,7 +171,7 @@ describe('soft-delete behaviour', () => {
     expect(categories.find((c) => c.id === category.id)).toBeUndefined()
   })
 
-  it('inactive category slug → 404 on public storefront', async () => {
+  it('inactive category slug -> 404 on public storefront', async () => {
     const { category } = await createCategory({ name: 'Ghosted', slug: 'ghosted' })
     await adminDelete(`/api/admin/categories/${category.id}`)
 
