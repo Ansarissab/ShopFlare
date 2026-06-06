@@ -1,8 +1,30 @@
 # Plan 14 — Store-page load performance (within the static-export constraint)
 
-> **Status:** proposed. Originated from a product-page slowness report (a dev HAR
-> whose initiator stack showed `useApiResource.useEffect → apiGet`).
+> **Status:** proposed (re-opened after audit). Originated from a product-page
+> slowness report (a dev HAR whose initiator stack showed
+> `useApiResource.useEffect → apiGet`).
 > **Do not `git push` / open a PR.** Small commits at the end.
+
+---
+
+## Completion status (audit-tracked)
+
+| Pillar / criterion | State |
+| --- | --- |
+| A — browser caching of public GETs (products, pages, categories) | ✅ done |
+| A — **edge** caching via Cloudflare Cache API | ✅ done — `worker/lib/edge-cache.ts`, version-keyed (ETag in cache key → immutable entries, no purge needed) |
+| A — admin GETs `no-store` | ✅ done — middleware in `worker/routes/admin/index.ts` |
+| A — RFC-7234 §4.3.4 304s repeat `Cache-Control`+`ETag` | ✅ done |
+| B — prefetch on hover / focus | ✅ done — `prefetch()` in `lib/api.ts`, wired in `ProductCard` |
+| B — prefetch on **viewport** (IntersectionObserver) | ✅ done — `src/hooks/useViewportPrefetch.ts` |
+| C — SWR in-memory cache, instant back-nav | ✅ done — `useApiResource`; `/api/orders/*` excluded |
+| D — before/after metrics on a **prod build** | ⏳ **method documented, numbers not captured** — `docs/perf/phase-14-metrics.md` (needs a live prod-build + Lighthouse/HAR run; cannot be captured headlessly) |
+| Acceptance — edit→reload correctness gate verified | ⏳ pending — part of the same live run (see metrics doc checklist) |
+
+**This plan stays in `proposed/` until Pillar D (live metrics) and the
+edit→reload correctness gate are actually run on a production build and the
+numbers filled into `docs/perf/phase-14-metrics.md`.** Everything else is shipped
+and verified (typecheck + 102 tests green).
 
 ---
 
