@@ -23,7 +23,7 @@ export default defineWorkersConfig(async () => {
       include: ['worker/test/**/*.test.ts'],
       setupFiles: ['./worker/test/apply-migrations.ts'],
       coverage: {
-        provider: 'v8',
+        provider: 'v8' as const,
         reporter: ['text', 'html', 'json-summary'],
         reportsDirectory: './coverage',
         thresholds: { lines: 95, functions: 95, branches: 95, statements: 95 },

@@ -21,7 +21,7 @@ export default defineConfig({
     // not the node pool — keep them out of the unit project.
     exclude: ['worker/test/**', '**/node_modules/**'],
     coverage: {
-      provider: 'v8',
+      provider: 'v8' as const,
       reporter: ['text', 'html', 'json-summary'],
       reportsDirectory: './coverage',
       thresholds: { lines: 95, functions: 95, branches: 95, statements: 95 },
