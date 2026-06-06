@@ -7,6 +7,7 @@ import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import { etagFor } from 'worker/lib/fingerprint'
 import { getDataVersion } from 'worker/lib/version'
+import { edgeCached } from 'worker/lib/edge-cache'
 import type { Bindings } from 'worker/types'
 import { POLICY_SLUGS } from '@/lib/constants'
 
@@ -30,15 +31,10 @@ app.get('/:slug', async (c) => {
   const version = await getDataVersion(db)
   const etag = etagFor({ count: 1, maxUpdatedAt: page.updatedAt, version })
 
-  const cacheControl = 'public, max-age=300, s-maxage=3600, stale-while-revalidate=600'
-
-  if (c.req.header('If-None-Match') === etag) {
-    return c.newResponse(null, 304, { 'Cache-Control': cacheControl, 'ETag': etag })
-  }
-
-  return c.json(page, 200, {
-    'Cache-Control': cacheControl,
-    'ETag': etag,
+  return edgeCached(c, {
+    etag,
+    cacheControl: 'public, max-age=300, s-maxage=3600, stale-while-revalidate=600',
+    build: async () => page,
   })
 })
 

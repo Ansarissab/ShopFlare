@@ -9,7 +9,10 @@ import * as schema from 'worker/db/schema'
 import { assembleProduct, assembleProductList } from 'worker/lib/products'
 import { etagFor } from 'worker/lib/fingerprint'
 import { getDataVersion } from 'worker/lib/version'
+import { edgeCached } from 'worker/lib/edge-cache'
 import type { Bindings } from 'worker/types'
+
+const CACHE_CONTROL = 'public, max-age=60, s-maxage=300, stale-while-revalidate=60'
 
 const app = new Hono<{ Bindings: Bindings }>()
 
@@ -36,17 +39,11 @@ app.get('/', async (c) => {
     version,
   })
 
-  const cacheControl = 'public, max-age=60, s-maxage=300, stale-while-revalidate=60'
-
-  if (c.req.header('If-None-Match') === etag) {
-    return c.newResponse(null, 304, { 'Cache-Control': cacheControl, 'ETag': etag })
-  }
-
   // Batched: 4 queries total regardless of catalogue size (see assembleProductList)
-  const products = await assembleProductList(db)
-  return c.json({ products }, 200, {
-    'Cache-Control': cacheControl,
-    'ETag': etag,
+  return edgeCached(c, {
+    etag,
+    cacheControl: CACHE_CONTROL,
+    build: async () => ({ products: await assembleProductList(db) }),
   })
 })
 
@@ -69,16 +66,10 @@ app.get('/:id', async (c) => {
   const version = await getDataVersion(db)
   const etag = etagFor({ count: 1, maxUpdatedAt: product.updatedAt, version })
 
-  const cacheControl = 'public, max-age=60, s-maxage=300, stale-while-revalidate=60'
-
-  if (c.req.header('If-None-Match') === etag) {
-    return c.newResponse(null, 304, { 'Cache-Control': cacheControl, 'ETag': etag })
-  }
-
-  const assembled = await assembleProduct(db, product)
-  return c.json(assembled, 200, {
-    'Cache-Control': cacheControl,
-    'ETag': etag,
+  return edgeCached(c, {
+    etag,
+    cacheControl: CACHE_CONTROL,
+    build: () => assembleProduct(db, product),
   })
 })
 

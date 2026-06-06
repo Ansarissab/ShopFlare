@@ -9,7 +9,10 @@ import { assembleCategoryTree, getCategoryBySlug, resolveCategoryProductIds } fr
 import { assembleProductList } from 'worker/lib/products'
 import { etagFor } from 'worker/lib/fingerprint'
 import { getDataVersion } from 'worker/lib/version'
+import { edgeCached } from 'worker/lib/edge-cache'
 import type { Bindings } from 'worker/types'
+
+const CACHE_CONTROL = 'public, max-age=60, s-maxage=300, stale-while-revalidate=60'
 
 const app = new Hono<{ Bindings: Bindings }>()
 
@@ -36,16 +39,10 @@ app.get('/', async (c) => {
     version,
   })
 
-  const cacheControl = 'public, max-age=60, s-maxage=300, stale-while-revalidate=60'
-
-  if (c.req.header('If-None-Match') === etag) {
-    return c.newResponse(null, 304, { 'Cache-Control': cacheControl, 'ETag': etag })
-  }
-
-  const categories = await assembleCategoryTree(db)
-  return c.json({ categories }, 200, {
-    'Cache-Control': cacheControl,
-    'ETag': etag,
+  return edgeCached(c, {
+    etag,
+    cacheControl: CACHE_CONTROL,
+    build: async () => ({ categories: await assembleCategoryTree(db) }),
   })
 })
 
@@ -64,21 +61,17 @@ app.get('/:slug', async (c) => {
   const version = await getDataVersion(db)
   const etag = etagFor({ count: 1, maxUpdatedAt: category.updatedAt, version })
 
-  const catDetailCacheControl = 'public, max-age=60, s-maxage=300, stale-while-revalidate=60'
-
-  if (c.req.header('If-None-Match') === etag) {
-    return c.newResponse(null, 304, { 'Cache-Control': catDetailCacheControl, 'ETag': etag })
-  }
-
-  // Resolve all products in this category + its descendants
-  const productIds = await resolveCategoryProductIds(db, category.id, { includeDescendants: true })
-  const products = productIds.length > 0
-    ? await assembleProductList(db, { productIds })
-    : []
-
-  return c.json({ category, products, breadcrumb }, 200, {
-    'Cache-Control': catDetailCacheControl,
-    'ETag': etag,
+  return edgeCached(c, {
+    etag,
+    cacheControl: CACHE_CONTROL,
+    build: async () => {
+      // Resolve all products in this category + its descendants
+      const productIds = await resolveCategoryProductIds(db, category.id, { includeDescendants: true })
+      const products = productIds.length > 0
+        ? await assembleProductList(db, { productIds })
+        : []
+      return { category, products, breadcrumb }
+    },
   })
 })
 
