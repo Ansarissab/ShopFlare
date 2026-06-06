@@ -1,23 +1,20 @@
 #!/usr/bin/env sh
-# Run all three checks in parallel — wall-clock = slowest single check.
-# Without parallelism: ~92s sequential. With: ~40s (test bottleneck).
+# Fast gate only — typecheck (frontend + worker) in parallel.
+# Tests moved to pre-push: commits are frequent and the suite is slow/growing.
+# Run the full suite manually anytime with `pnpm test`.
 
-echo "[pre-commit] typecheck (frontend + worker) + test — parallel..."
+echo "[pre-commit] typecheck (frontend + worker) — parallel..."
 
 npx tsc --noEmit 2>&1 | sed 's/^/[tsc:app]   /' &
 TC1=$!
 npx tsc -p worker/tsconfig.json --noEmit 2>&1 | sed 's/^/[tsc:work] /' &
 TC2=$!
-pnpm test 2>&1 | sed 's/^/[test]     /' &
-T=$!
 
-S1=0; S2=0; S3=0
+S1=0; S2=0
 wait $TC1 || S1=$?
 wait $TC2 || S2=$?
-wait $T   || S3=$?
 
 [ $S1 -ne 0 ] && echo "[pre-commit] FAIL: frontend typecheck"
 [ $S2 -ne 0 ] && echo "[pre-commit] FAIL: worker typecheck"
-[ $S3 -ne 0 ] && echo "[pre-commit] FAIL: tests"
 
-[ $S1 -eq 0 ] && [ $S2 -eq 0 ] && [ $S3 -eq 0 ]
+[ $S1 -eq 0 ] && [ $S2 -eq 0 ]

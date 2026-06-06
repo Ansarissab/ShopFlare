@@ -1,5 +1,8 @@
 #!/usr/bin/env sh
 set -e
 
+echo "[pre-push] test..."
+pnpm test
+
 echo "[pre-push] build..."
 pnpm build
