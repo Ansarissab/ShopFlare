@@ -34,14 +34,16 @@ test.describe('order tracking', () => {
   test('submitting invalid order number shows error or redirects', async ({ page }) => {
     await page.getByLabel('Order Number').fill('ORD-INVALID-9999')
     await page.getByLabel('Email or Phone').fill('test@example.com')
-    await page.getByRole('button', { name: 'Track' }).click()
+
+    // The form router.push()es to /track/:orderId; App Router holds the URL until
+    // the route's RSC payload is ready, which on a cold Turbopack dev compile can
+    // take well over the default timeout — wait for the navigation explicitly.
+    await Promise.all([
+      page.waitForURL(/\/track\/ORD-INVALID-9999/, { timeout: 30_000 }),
+      page.getByRole('button', { name: 'Track' }).click(),
+    ])
 
     // Worker returns 404 → tracking page shows "Order not found"
-    // or browser navigates to /track/ORD-INVALID-9999 and displays the error
-    await page.waitForLoadState('networkidle')
-    const notFound = page.getByText(/order not found/i)
-    const visible = await notFound.isVisible({ timeout: 8_000 }).catch(() => false)
-    // Just confirm the page handles the error without crashing
-    expect(visible || page.url().includes('/track/')).toBeTruthy()
+    await expect(page.getByText(/order not found/i)).toBeVisible({ timeout: 15_000 })
   })
 })

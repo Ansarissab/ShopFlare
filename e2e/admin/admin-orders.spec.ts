@@ -15,10 +15,11 @@ test.describe('admin orders page', () => {
     // Status filter dropdown is present
     await expect(page.getByRole('combobox')).toBeVisible()
 
-    // Either a table (has Order / Customer column headers) or empty message
-    const hasTable = await page.locator('th', { hasText: /order/i }).first().isVisible().catch(() => false)
-    const hasEmpty = await page.locator('text=No orders found').isVisible().catch(() => false)
-    expect(hasTable || hasEmpty).toBe(true)
+    // Either a table (has Order / Customer column headers) or empty message —
+    // auto-wait for whichever settles (async list load can lag under parallel load).
+    await expect(
+      page.locator('th', { hasText: /order/i }).first().or(page.getByText('No orders found')),
+    ).toBeVisible({ timeout: 15_000 })
   })
 
   test('status filter dropdown contains expected options', async ({ page }) => {
@@ -32,10 +33,10 @@ test.describe('admin orders page', () => {
     // "All" option must always appear
     await expect(page.getByRole('option', { name: /^all$/i })).toBeVisible()
 
-    // At least one status option — pending or confirmed
-    const hasPending = await page.getByRole('option', { name: /pending/i }).isVisible().catch(() => false)
-    const hasConfirmed = await page.getByRole('option', { name: /confirmed/i }).isVisible().catch(() => false)
-    expect(hasPending || hasConfirmed).toBe(true)
+    // At least one status option — pending or confirmed (both may exist; take first)
+    await expect(
+      page.getByRole('option', { name: /pending|confirmed/i }).first(),
+    ).toBeVisible({ timeout: 10_000 })
   })
 
   test('order row links are navigable', async ({ page }) => {
@@ -69,9 +70,9 @@ test.describe('admin POS page', () => {
 
     // POSScreen renders product + variant + size selects or a skeleton while loading.
     // After networkidle, at minimum a Select trigger or skeleton should be in DOM.
-    const hasSelect = await page.getByRole('combobox').first().isVisible().catch(() => false)
-    const hasSkeleton = await page.locator('[class*="skeleton"], [class*="animate-pulse"]').first().isVisible().catch(() => false)
-    expect(hasSelect || hasSkeleton).toBe(true)
+    await expect(
+      page.getByRole('combobox').first().or(page.locator('[class*="skeleton"], [class*="animate-pulse"]').first()),
+    ).toBeVisible({ timeout: 15_000 })
   })
 
   test('POS cart area is present', async ({ page }) => {

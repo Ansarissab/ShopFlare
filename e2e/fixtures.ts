@@ -21,6 +21,9 @@ export const test = base.extend<ShopFlareFixtures>({
     await use(async (page) => {
       const results = await new AxeBuilder({ page })
         .withTags(['wcag2a', 'wcag2aa'])
+        // Live color previews render arbitrary merchant-chosen colors; their
+        // contrast is the merchant's choice, not a fixed app a11y defect.
+        .exclude('[data-color-preview]')
         .analyze()
       const critical = results.violations.filter(v => v.impact === 'serious' || v.impact === 'critical')
       if (critical.length > 0) {

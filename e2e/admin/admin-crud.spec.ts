@@ -12,10 +12,11 @@ test.describe('admin products page', () => {
     // Page header with "Products" title must be present
     await expect(page.getByRole('heading', { name: /products/i })).toBeVisible()
 
-    // Either at least one product card or the empty-state link is visible
-    const hasProducts = await page.locator('text=Edit Product').first().isVisible().catch(() => false)
-    const hasEmptyState = await page.locator('text=Add your first product').isVisible().catch(() => false)
-    expect(hasProducts || hasEmptyState).toBe(true)
+    // Either at least one product card or the empty-state link is visible —
+    // auto-wait for whichever settles (async list load can lag under parallel load).
+    await expect(
+      page.locator('text=Edit Product').first().or(page.getByText('Add your first product')),
+    ).toBeVisible({ timeout: 15_000 })
 
     // "Add Product" action button must always be visible
     await expect(page.getByRole('link', { name: /add product/i })).toBeVisible()
@@ -93,8 +94,8 @@ test.describe('admin settings page', () => {
     await page.goto('/admin/settings')
     await page.waitForLoadState('networkidle')
 
-    // Page header
-    await expect(page.getByRole('heading', { name: /settings/i })).toBeVisible()
+    // Page header (h1 — be specific; "Tax Settings" etc. are section sub-headings)
+    await expect(page.getByRole('heading', { name: /store settings/i })).toBeVisible()
 
     // Appearance section
     await expect(page.getByText('Appearance')).toBeVisible()

@@ -9,10 +9,9 @@ test.describe('policy pages', () => {
       await page.waitForLoadState('networkidle')
 
       // Either the page content renders or the "Page Not Found" state is shown —
-      // both are valid when no policy content has been set yet.
-      const backToStore = page.getByRole('link', { name: 'Back to store' })
-      const visible = await backToStore.isVisible({ timeout: 8_000 }).catch(() => false)
-      expect(visible).toBeTruthy()
+      // both paths render a "Back to store" link. Auto-wait (cold dev compile +
+      // the policy API fetch can exceed a short timeout under parallel load).
+      await expect(page.getByRole('link', { name: 'Back to store' })).toBeVisible({ timeout: 20_000 })
     })
   }
 })
