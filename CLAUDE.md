@@ -48,6 +48,23 @@ If it almost exists, EXTEND it — do not copy-paste. No "shit code", DRY only.
 - Admin routes protected by CF Access (not app-level auth)
 - No raw card data ever — Stripe Checkout only
 
+## Testing & CI
+
+- `pnpm verify` (alias `pnpm run ci`) is the full gate (Rails `bin/ci` style,
+  `scripts/ci.mjs`): typecheck → lint → unit+coverage → integration → build, fail-fast.
+  `--quick` skips integration+build; `--no-build` skips build. Note: bare `pnpm ci` is a
+  reserved pnpm builtin — use `pnpm verify` or `pnpm run ci`. E2E/visual/a11y are separate
+  (`pnpm test:e2e`, need a dev server).
+- **Coverage gate = unit project only, 95%** (`pnpm test:coverage` =
+  `vitest run --project unit --coverage`). Worker routes run in the miniflare/workerd pool
+  where v8 can't instrument them → they're covered **behaviorally** by the integration
+  suite (`pnpm test:integration`), not by line %. See `docs/adr/0008-coverage-gate-unit-only.md`.
+- Excluded from the unit gate: `src/app/**`, `src/middleware.ts`, `src/proxy.ts`,
+  `src/components/ui/**`, and the CF-runtime `worker/lib/{orders,stripe,push,analytics,
+  access,categories,notify,products}.ts`. Pure helpers stay in scope.
+- Every fixed UI/UX bug gets a permanent regression test in the right layer (see
+  `docs/plans/done/phase-16-comprehensive-testing.md`).
+
 ## Dynamic-First Rule
 If a value can be stored in D1 and edited via Admin Dashboard → it MUST be.
 Minimize redeployments. Merchants are not developers.
