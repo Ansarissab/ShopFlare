@@ -22,6 +22,26 @@ export default defineWorkersConfig(async () => {
       name: 'integration',
       include: ['worker/test/**/*.test.ts'],
       setupFiles: ['./worker/test/apply-migrations.ts'],
+      coverage: {
+        provider: 'v8',
+        reporter: ['text', 'html', 'json-summary'],
+        reportsDirectory: './coverage',
+        thresholds: { lines: 95, functions: 95, branches: 95, statements: 95 },
+        exclude: [
+          '**/*.test.*',
+          '**/*.spec.*',
+          '**/*.config.*',
+          '**/types/**',
+          'e2e/**',
+          '.next/**',
+          '**/node_modules/**',
+          'src/components/ui/**',
+          'worker/db/schema.ts',
+          'worker/db/migrations/**',
+          'src/app/**/*.tsx',
+          'src/middleware.ts',
+        ],
+      },
       poolOptions: {
         workers: {
           // Reuse the real worker entry + bindings (D1/KV/R2, nodejs_compat).

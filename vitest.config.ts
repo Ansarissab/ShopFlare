@@ -20,5 +20,25 @@ export default defineConfig({
     // Integration tests run in the workers pool (vitest.integration.config.ts),
     // not the node pool — keep them out of the unit project.
     exclude: ['worker/test/**', '**/node_modules/**'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'json-summary'],
+      reportsDirectory: './coverage',
+      thresholds: { lines: 95, functions: 95, branches: 95, statements: 95 },
+      exclude: [
+        '**/*.test.*',
+        '**/*.spec.*',
+        '**/*.config.*',
+        '**/types/**',
+        'e2e/**',
+        '.next/**',
+        '**/node_modules/**',
+        'src/components/ui/**',
+        'worker/db/schema.ts',
+        'worker/db/migrations/**',
+        'src/app/**/*.tsx',
+        'src/middleware.ts',
+      ],
+    },
   },
 })
