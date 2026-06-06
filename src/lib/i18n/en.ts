@@ -153,6 +153,9 @@ export const en = {
     networkError: 'Network error. Check your connection.',
   },
   admin: {
+    back: 'Back',
+    filterByStatus: 'Filter by status',
+    allStatuses: 'All statuses',
     dashboard: 'Dashboard',
     products: 'Products',
     orders: 'Orders',

@@ -119,6 +119,8 @@ export default function StorePage() {
 
   return (
     <div className={layout.page}>
+      {/* Accessible/SEO page heading — visually hidden; the listing is the visible UI. */}
+      <h1 className="sr-only">{en.store.allProducts}</h1>
       <div className="mb-4">
         <SearchBar value={query} onChange={setQuery} />
       </div>

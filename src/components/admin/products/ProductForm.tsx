@@ -375,6 +375,7 @@ export function ProductForm({ initial }: ProductFormProps) {
         <div className="flex items-center gap-2">
           <Checkbox
             id="product-active"
+            aria-label={en.admin.active}
             checked={active}
             onCheckedChange={(v: boolean) => setActive(v === true)}
           />

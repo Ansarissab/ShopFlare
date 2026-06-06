@@ -304,10 +304,12 @@ export default function AdminSettingsPage() {
           </FormField>
         </div>
 
-        {/* Live preview */}
+        {/* Live preview — renders the merchant's chosen colors verbatim, so its
+            contrast reflects their selection, not a fixed app defect. Excluded
+            from the automated a11y contrast gate via data-color-preview. */}
         <div className="flex flex-col gap-2">
           <span className="text-xs text-muted-foreground">{en.admin.livePreview}</span>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3" data-color-preview>
             <span
               className="px-3 py-1.5 text-xs font-medium"
               style={{

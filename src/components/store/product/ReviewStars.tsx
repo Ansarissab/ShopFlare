@@ -15,7 +15,7 @@ export function ReviewStars({ rating, onChange, className }: ReviewStarsProps) {
   return (
     <div
       className={cn('flex items-center gap-0.5', className)}
-      role={interactive ? 'radiogroup' : undefined}
+      role={interactive ? 'radiogroup' : 'img'}
       aria-label={
         interactive
           ? en.reviews.selectRating

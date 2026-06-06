@@ -21,8 +21,8 @@ export default function AdminOrdersPage() {
         <h1 className="text-2xl font-bold tracking-tight">{en.admin.orders}</h1>
 
         <Select value={statusFilter} onValueChange={(v: string | null) => setStatusFilter(v ?? 'all')}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="All statuses" />
+          <SelectTrigger className="w-40" aria-label={en.admin.filterByStatus}>
+            <SelectValue placeholder={en.admin.allStatuses} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All</SelectItem>

@@ -166,7 +166,7 @@ export function POSScreen() {
               setSelectedVariantId('')
               setSelectedSizeId('')
             }}>
-              <SelectTrigger>
+              <SelectTrigger aria-label={en.pos.selectProduct}>
                 <SelectValue placeholder={en.pos.selectProduct} />
               </SelectTrigger>
               <SelectContent>
@@ -182,7 +182,7 @@ export function POSScreen() {
                 setSelectedVariantId(v ?? '')
                 setSelectedSizeId('')
               }}>
-                <SelectTrigger>
+                <SelectTrigger aria-label={en.pos.selectVariant}>
                   <SelectValue placeholder={en.pos.selectVariant} />
                 </SelectTrigger>
                 <SelectContent>
@@ -205,7 +205,7 @@ export function POSScreen() {
             {/* Size */}
             {selectedVariant && (
               <Select value={selectedSizeId} onValueChange={(v: string | null) => setSelectedSizeId(v ?? '')}>
-                <SelectTrigger>
+                <SelectTrigger aria-label={en.pos.selectSize}>
                   <SelectValue placeholder={en.pos.selectSize} />
                 </SelectTrigger>
                 <SelectContent>
