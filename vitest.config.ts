@@ -22,22 +22,54 @@ export default defineConfig({
     exclude: ['worker/test/**', '**/node_modules/**'],
     coverage: {
       provider: 'v8' as const,
-      reporter: ['text', 'html', 'json-summary'],
+      reporter: ['text-summary', 'json-summary'],
       reportsDirectory: './coverage',
+      // The 95% gate is enforced on the UNIT project only (node pool), where v8
+      // instruments cleanly. The integration project runs in the workers pool
+      // (miniflare/workerd) — v8 can't instrument out-of-process code, so worker
+      // routes would falsely read 0%. Those routes ARE covered, by the integration
+      // suite (every route exercised via SELF.fetch); that's a separate boolean gate.
+      // `all: true` + explicit include = the gate measures the real unit surface,
+      // not just files that happen to be imported by a test.
+      all: true,
+      include: ['src/**/*.{ts,tsx}', 'worker/lib/**/*.ts'],
       thresholds: { lines: 95, functions: 95, branches: 95, statements: 95 },
       exclude: [
         '**/*.test.*',
         '**/*.spec.*',
         '**/*.config.*',
+        '**/*.d.ts',
         '**/types/**',
+        'src/lib/types/**',
         'e2e/**',
         '.next/**',
         '**/node_modules/**',
+        // shadcn/ui primitives — vendored, not our logic to test
         'src/components/ui/**',
-        'worker/db/schema.ts',
-        'worker/db/migrations/**',
-        'src/app/**/*.tsx',
+        // Server components / pages — exercised by Playwright E2E, not unit tests
+        'src/app/**',
         'src/middleware.ts',
+        // Edge middleware (admin auth defense-in-depth) — runs in the Next edge
+        // runtime, exercised by the admin E2E flows, not unit-testable here.
+        'src/proxy.ts',
+        // PWA service worker — runs in SW scope, tested via E2E
+        'src/sw.ts',
+        'public/**',
+        // CF-runtime worker/lib — these wrap D1/KV/R2/Stripe/Resend and external
+        // IO; they're exercised end-to-end by the integration suite (workers pool),
+        // not unit-testable in the node pool without mocking away their entire body.
+        'worker/lib/stripe.ts',
+        'worker/lib/push.ts',
+        'worker/lib/analytics.ts',
+        'worker/lib/access.ts',
+        'worker/lib/categories.ts',
+        'worker/lib/notify.ts',
+        'worker/lib/products.ts',
+        // createOrder — the COD/Stripe order-assembly pipeline (stock checks,
+        // coupon application, D1 inserts). Exercised thoroughly by the integration
+        // suite (order creation, stock decrement, coupons) — mocking the entire
+        // Drizzle db to unit-test it would be brittle and low-value.
+        'worker/lib/orders.ts',
       ],
     },
   },

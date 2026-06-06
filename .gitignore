@@ -65,3 +65,7 @@ next-env.d.ts
 graphify-out/cache
 graphify-out/.graphify_python
 graphify-out/.graphify_root
+
+.tmp_test/*
+.tmpcov/*
+.tmp-cov/*

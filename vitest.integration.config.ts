@@ -22,26 +22,11 @@ export default defineWorkersConfig(async () => {
       name: 'integration',
       include: ['worker/test/**/*.test.ts'],
       setupFiles: ['./worker/test/apply-migrations.ts'],
-      coverage: {
-        provider: 'v8' as const,
-        reporter: ['text', 'html', 'json-summary'],
-        reportsDirectory: './coverage',
-        thresholds: { lines: 95, functions: 95, branches: 95, statements: 95 },
-        exclude: [
-          '**/*.test.*',
-          '**/*.spec.*',
-          '**/*.config.*',
-          '**/types/**',
-          'e2e/**',
-          '.next/**',
-          '**/node_modules/**',
-          'src/components/ui/**',
-          'worker/db/schema.ts',
-          'worker/db/migrations/**',
-          'src/app/**/*.tsx',
-          'src/middleware.ts',
-        ],
-      },
+      // No coverage block here on purpose. This project runs in the Cloudflare
+      // workers pool (miniflare/workerd); v8 coverage instruments the node process,
+      // not the out-of-process runtime, so worker routes falsely report 0%. The
+      // integration suite's job is behavioural ("every route exercised end-to-end"),
+      // not line coverage. The 95% line gate lives on the unit project only.
       poolOptions: {
         workers: {
           // Reuse the real worker entry + bindings (D1/KV/R2, nodejs_compat).
