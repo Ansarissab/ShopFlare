@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { formatPrice, getPriceRange } from '@/lib/utils/index'
 import { prefetch } from '@/lib/api'
+import { useViewportPrefetch } from '@/hooks/useViewportPrefetch'
 import { en } from '@/lib/i18n/en'
 import type { ProductCardProps } from '@/lib/types/product'
 
@@ -16,6 +17,7 @@ export function ProductCard({
   isNew,
   className,
 }: ProductCardProps) {
+  const viewportRef = useViewportPrefetch<HTMLAnchorElement>(`/api/products/${product.id}`)
   const { minPrice, maxPrice } = getPriceRange(sizes)
   // activeSizes used to show out-of-stock message
   const activeSizes = sizes.filter((s) => s.active && s.stock !== 0)
@@ -30,6 +32,7 @@ export function ProductCard({
 
   return (
     <Link
+      ref={viewportRef}
       href={`/product/${product.id}`}
       className="group block outline-none"
       onMouseEnter={() => prefetch(`/api/products/${product.id}`)}
