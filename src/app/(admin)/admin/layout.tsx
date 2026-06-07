@@ -1,13 +1,28 @@
 import type { Metadata } from 'next'
 import { AdminSidebar, MobileAdminNav } from '@/components/admin/shared/AdminSidebar'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { isAdminAuthorized } from '@/lib/server/admin-auth'
+import { Unauthorized } from '@/components/admin/shared/Unauthorized'
 import type { ReactNode } from 'react'
 
 export const metadata: Metadata = {
   manifest: '/admin-manifest.webmanifest',
 }
 
-export default function AdminLayout({ children }: { children: ReactNode }) {
+// The auth guard reads request headers/cookies (CF Access JWT), so this subtree
+// must be dynamic — never statically prerendered. Without this, Next optimizes
+// /admin to static at build and throws "static to dynamic at runtime" (500)
+// once the guard calls headers()/cookies().
+export const dynamic = 'force-dynamic'
+
+export default async function AdminLayout({ children }: { children: ReactNode }) {
+  // App-level guard (defense-in-depth on top of edge CF Access). Render the
+  // unauthorized UI inline rather than redirecting — the unauthorized page lives
+  // under this same layout, so a redirect would loop.
+  if (!(await isAdminAuthorized())) {
+    return <Unauthorized />
+  }
+
   return (
     <TooltipProvider delay={200}>
       <div className="flex h-screen overflow-hidden">
