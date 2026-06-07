@@ -56,7 +56,10 @@ If it almost exists, EXTEND it — do not copy-paste. No "shit code", DRY only.
 ## Security Rules — NEVER VIOLATE
 - Secrets only in CF Worker env vars or .env.local (gitignored)
 - D1 only accessible via CF Worker — never direct from client
-- All public forms must have CF Turnstile (incl. admin login)
+- All public forms must have CF Turnstile (incl. admin login). Enforced in
+  production only; `verifyTurnstile` skips entirely when `ENVIRONMENT=development`
+  (local `wrangler dev` + the integration suite), so local never needs a real
+  token/secret. DRY: that single bypass covers every route + the login.
 - Stripe webhooks must verify signature in CF Worker
 - Admin API gated by an HMAC session token (app-level password): secrets
   `ADMIN_PASSWORD` + `ADMIN_SESSION_SECRET`; `requireAdmin` verifies the Bearer

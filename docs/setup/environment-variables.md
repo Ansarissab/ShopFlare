@@ -62,6 +62,12 @@ enforced by the API worker; the UI gate is client-side). Local worker secrets go
 `pnpm worker:dev` uses **local** D1/KV/R2 (miniflare); the integration suite is local too.
 Only `pnpm db:migrate` / `db:seed` (the non-`:local` ones) touch remote D1, by design.
 
+> **Turnstile is not used locally.** `verifyTurnstile` skips entirely when
+> `ENVIRONMENT=development` (local `wrangler dev` + the integration suite), so you
+> never need a real Turnstile token or secret locally — even if `.dev.vars` has one.
+> It's enforced only in production (`ENVIRONMENT=production`). One bypass covers every
+> public form + the admin login (DRY).
+
 > **Local admin bypass:** Both `ENVIRONMENT=development` *and* `ADMIN_DEV_BYPASS=1`
 > are required together — neither alone is sufficient. Never set in production
 > (the deploy forces `ENVIRONMENT=production`).
