@@ -1,4 +1,4 @@
-// Admin order routes — mounted under /api/admin/orders, behind requireAccess.
+// Admin order routes — mounted under /api/admin/orders, behind requireAdmin.
 // List/detail expose full customer PII and mutate order state, so they MUST
 // stay on the protected /api/admin prefix (never the public /api/orders router).
 

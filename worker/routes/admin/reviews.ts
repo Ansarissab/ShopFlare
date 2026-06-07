@@ -1,4 +1,4 @@
-// Admin review moderation — mounted under /api/admin/reviews, behind requireAccess.
+// Admin review moderation — mounted under /api/admin/reviews, behind requireAdmin.
 //   GET /          list all reviews (pending + approved) with product name
 //   PATCH /:id     moderate (approve/unapprove) via moderateReviewSchema
 //   DELETE /:id    delete row (+ R2 photo if present)

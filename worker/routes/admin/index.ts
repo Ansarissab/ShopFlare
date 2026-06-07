@@ -1,11 +1,12 @@
-// Admin API aggregator — every route here is gated by requireAccess, so the
-// admin surface lives on a single protected prefix (/api/admin/*). This is what
-// lets edge CF Access protect admin endpoints without touching the public
-// /api/orders, /api/products, /api/config routers that checkout depends on.
+// Admin API aggregator — every route here (except /login) is gated by
+// requireAdmin, so the admin surface lives on a single protected prefix
+// (/api/admin/*), separate from the public /api/orders, /api/products,
+// /api/config routers that checkout depends on.
 
 import { Hono } from 'hono'
-import { requireAccess } from 'worker/lib/access'
+import { requireAdmin } from 'worker/lib/access'
 import type { AdminEnv } from 'worker/lib/access'
+import login from './login'
 import orders from './orders'
 import products from './products'
 import categories from './categories'
@@ -19,8 +20,12 @@ import push from 'worker/routes/push'
 
 const app = new Hono<AdminEnv>()
 
-// CF Access JWT verification on every admin request (defense-in-depth).
-app.use('*', requireAccess)
+// Public: login issues the session token (Turnstile-protected). Registered
+// BEFORE requireAdmin so it stays exempt — otherwise no one could obtain a token.
+app.route('/login', login)
+
+// Session-token verification on every other admin request.
+app.use('*', requireAdmin)
 
 // Ensure no admin response is ever stored by a browser or intermediate cache.
 app.use('*', async (c, next) => {

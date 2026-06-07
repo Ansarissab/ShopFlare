@@ -1,5 +1,5 @@
 // Push subscription management — mounted at /api/admin/push, behind CF Access
-// (requireAccess on the admin router). These are MERCHANT-only: order-alert
+// (requireAdmin on the admin router). These are MERCHANT-only: order-alert
 // subscriptions for the merchant's own devices, so they must not live on the
 // public /api router.
 //

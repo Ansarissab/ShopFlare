@@ -1,85 +1,47 @@
-// Cloudflare Access JWT verification — defense-in-depth for the admin API.
+// App-level admin authentication for the admin API (/api/admin/*).
 //
-// Edge CF Access protects the admin paths at the network layer and injects a
-// signed assertion JWT on every request that passes its policy. This middleware
-// re-verifies that assertion inside the Worker so the admin endpoints are still
-// protected even if someone reaches the Worker origin directly (bypassing the
-// edge app, e.g. via the raw *.workers.dev hostname).
+// Replaces Cloudflare Access: on *.workers.dev, Access can only gate a whole
+// worker (which would lock the public store), not a single /admin path. Instead
+// the merchant logs in via POST /api/admin/login with ADMIN_PASSWORD and the
+// worker issues an HMAC session token (see admin-session.ts). That token is sent
+// as an `Authorization: Bearer <token>` header on every admin request — cookies
+// can't be shared across the separate frontend/API workers.dev hosts because
+// workers.dev is on the Public Suffix List. This middleware verifies the token.
 //
-// Core verification logic lives in worker/lib/access-core.ts — also imported
-// by src/middleware.ts so the Next.js admin UI is gated with the same impl.
-//
-// Config (worker/types.ts Bindings):
-//   CF_ACCESS_TEAM_DOMAIN  e.g. "myteam.cloudflareaccess.com" (no scheme)
-//   CF_ACCESS_AUD          the Access application's Audience (AUD) tag
-//
-// Fail-closed: in production a missing/invalid token → 403. In local
-// `wrangler dev` with ENVIRONMENT=development AND ADMIN_DEV_BYPASS=1, requests
-// are allowed through. Both flags are required — the bypass can never be
-// accidental in production (ENVIRONMENT is forced to "production" by the deploy
-// script and ADMIN_DEV_BYPASS is never set there).
+// Dev/test bypass: ENVIRONMENT=development AND ADMIN_DEV_BYPASS=1 (both required)
+// skips verification — used by `wrangler dev` and the integration suite. Never
+// set in production (the deploy forces ENVIRONMENT=production).
 
 import type { MiddlewareHandler } from 'hono'
 import type { Bindings } from 'worker/types'
-import { fetchJwks, verifyAccessJwt } from 'worker/lib/access-core'
-import type { Jwk, VerifyResult } from 'worker/lib/access-core'
+import { verifySessionToken } from 'worker/lib/admin-session'
 
-export type AccessVariables = { accessEmail: string }
-export type AdminEnv = { Bindings: Bindings; Variables: AccessVariables }
-
-const JWKS_KV_KEY = 'access:jwks'
-const JWKS_TTL_SECONDS = 3600
-
-async function getCachedJwks(env: Bindings, teamDomain: string): Promise<Jwk[]> {
-  const cached = await env.KV.get<Jwk[]>(JWKS_KV_KEY, 'json')
-  if (cached && cached.length > 0) return cached
-
-  const keys = await fetchJwks(teamDomain)
-  if (keys.length > 0) {
-    await env.KV.put(JWKS_KV_KEY, JSON.stringify(keys), { expirationTtl: JWKS_TTL_SECONDS })
-  }
-  return keys
-}
+// Hono environment for admin routes. Kept here so every admin route file can
+// import the type from one place (`worker/lib/access`).
+export type AdminEnv = { Bindings: Bindings }
 
 /**
- * Reads the Access assertion from the `Cf-Access-Jwt-Assertion` header (set by
- * the edge) or the `CF_Authorization` cookie, then verifies it. On success the
- * authenticated email is stashed at c.set('accessEmail', ...).
+ * Gate admin endpoints on a valid Bearer session token. Fails closed: missing
+ * secret → 503, missing/invalid/expired token → 401.
  */
-export const requireAccess: MiddlewareHandler<AdminEnv> = async (c, next) => {
-  const teamDomain = c.env.CF_ACCESS_TEAM_DOMAIN
-  const aud = c.env.CF_ACCESS_AUD
-
-  if (!teamDomain || !aud) {
-    // Require BOTH flags — can never be accidental.
-    if (c.env.ENVIRONMENT === 'development' && c.env.ADMIN_DEV_BYPASS === '1') {
-      console.warn('[access] INSECURE: admin auth bypassed — ENVIRONMENT=development + ADMIN_DEV_BYPASS=1')
-      return next()
-    }
-    return c.json({ error: 'Admin access is not configured' }, 403)
+export const requireAdmin: MiddlewareHandler<AdminEnv> = async (c, next) => {
+  // Local dev / integration tests — both flags required, never set in prod.
+  if (c.env.ENVIRONMENT === 'development' && c.env.ADMIN_DEV_BYPASS === '1') {
+    return next()
   }
 
-  const headerToken = c.req.header('Cf-Access-Jwt-Assertion')
-  const cookieToken = c.req
-    .header('Cookie')
-    ?.split(';')
-    .map((p) => p.trim())
-    .find((p) => p.startsWith('CF_Authorization='))
-    ?.slice('CF_Authorization='.length)
+  const secret = c.env.ADMIN_SESSION_SECRET
+  if (!secret) {
+    console.warn('[admin-auth] ADMIN_SESSION_SECRET unset — failing closed')
+    return c.json({ error: 'Admin auth is not configured' }, 503)
+  }
 
-  const token = headerToken ?? cookieToken
+  const auth = c.req.header('Authorization')
+  const token = auth?.startsWith('Bearer ') ? auth.slice('Bearer '.length) : undefined
   if (!token) return c.json({ error: 'Unauthorized' }, 401)
 
-  let result: VerifyResult
-  try {
-    const jwks = await getCachedJwks(c.env, teamDomain)
-    result = await verifyAccessJwt(token, jwks, teamDomain, aud)
-  } catch {
-    return c.json({ error: 'Unauthorized' }, 401)
-  }
+  const ok = await verifySessionToken(token, secret, Math.floor(Date.now() / 1000))
+  if (!ok) return c.json({ error: 'Unauthorized' }, 401)
 
-  if (!result.ok) return c.json({ error: 'Unauthorized' }, 401)
-
-  c.set('accessEmail', result.email ?? '')
   return next()
 }

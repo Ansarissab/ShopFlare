@@ -1,4 +1,4 @@
-// Admin category routes — mounted under /api/admin/categories, behind requireAccess.
+// Admin category routes — mounted under /api/admin/categories, behind requireAdmin.
 // Full CRUD: create, update, soft-delete, image upload/remove, list, get.
 
 import { Hono } from 'hono'

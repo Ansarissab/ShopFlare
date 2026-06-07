@@ -26,14 +26,14 @@ export type Bindings = {
   TURNSTILE_SITE_KEY: string
   TURNSTILE_SECRET_KEY: string
 
-  // Cloudflare Access (admin API auth — defense-in-depth on top of edge Access).
-  // CF_ACCESS_TEAM_DOMAIN: e.g. "myteam.cloudflareaccess.com" (no scheme).
-  // CF_ACCESS_AUD: the Access application's Audience (AUD) tag.
-  // When either is unset the middleware fails closed (403) in production but
-  // allows requests in local `wrangler dev` when ADMIN_DEV_BYPASS=1 (explicit,
-  // never set in production).
-  CF_ACCESS_TEAM_DOMAIN?: string
-  CF_ACCESS_AUD?: string
+  // App-level admin auth (see worker/lib/access.ts + admin-session.ts).
+  // ADMIN_PASSWORD: the merchant's admin password (rotate via `wrangler secret
+  //   put ADMIN_PASSWORD`; read fresh per request, no redeploy needed).
+  // ADMIN_SESSION_SECRET: HMAC key for signing session tokens. Rotating it
+  //   immediately invalidates every issued token.
+  // Both required in production; when unset the admin API fails closed (503).
+  ADMIN_PASSWORD?: string
+  ADMIN_SESSION_SECRET?: string
   ENVIRONMENT?: string
   // Must be '1' together with ENVIRONMENT=development to bypass auth locally.
   ADMIN_DEV_BYPASS?: string

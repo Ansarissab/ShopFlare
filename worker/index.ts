@@ -8,9 +8,8 @@ app.use(
   '*',
   cors({
     // Allow the configured FRONTEND_URL plus any localhost origin (dev/preview).
-    // Credentials are enabled (admin requests carry the CF Access cookie), so we
-    // must NEVER reflect an arbitrary origin or '*' — that would let any site
-    // make credentialed cross-origin calls to /api/admin.
+    // We restrict to a single known origin (never '*') so a malicious site can't
+    // read admin responses (e.g. the login token) from a victim's browser.
     origin: (origin, c) => {
       // Localhost is always allowed (dev/preview).
       if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
@@ -25,10 +24,9 @@ app.use(
       if (c.env.ENVIRONMENT === 'development') return origin || null
       return null
     },
-    // Send the Access assertion header / CF_Authorization cookie through to the
-    // worker so requireAccess can verify it.
-    credentials: true,
-    allowHeaders: ['Content-Type', 'X-Turnstile-Token', 'Cf-Access-Jwt-Assertion'],
+    // Admin requests carry the session token in the Authorization (Bearer)
+    // header; public POSTs carry X-Turnstile-Token.
+    allowHeaders: ['Content-Type', 'X-Turnstile-Token', 'Authorization'],
     allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   }),
 )

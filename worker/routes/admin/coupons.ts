@@ -1,4 +1,4 @@
-// Admin coupon routes — mounted under /api/admin/coupons, behind requireAccess.
+// Admin coupon routes — mounted under /api/admin/coupons, behind requireAdmin.
 // Full CRUD + Stripe coupon/promotion-code sync.
 
 import { Hono } from 'hono'

@@ -1,4 +1,4 @@
-// Admin config routes — mounted under /api/admin/config, behind requireAccess.
+// Admin config routes — mounted under /api/admin/config, behind requireAdmin.
 // The public, read-only GET /api/config/store lives in routes/config.ts.
 
 import { Hono } from 'hono'

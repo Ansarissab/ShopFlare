@@ -1,4 +1,4 @@
-// Admin product routes — mounted under /api/admin/products, behind requireAccess.
+// Admin product routes — mounted under /api/admin/products, behind requireAdmin.
 // Full CRUD for products, variants, size options, and R2 images. The public
 // /api/products router only exposes read-only active-product listings.
 

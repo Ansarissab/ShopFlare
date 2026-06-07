@@ -1,4 +1,4 @@
-// Admin policy pages — mounted under /api/admin/pages, behind requireAccess.
+// Admin policy pages — mounted under /api/admin/pages, behind requireAdmin.
 
 import { Hono } from 'hono'
 import { eq } from 'drizzle-orm'

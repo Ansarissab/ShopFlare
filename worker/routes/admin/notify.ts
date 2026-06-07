@@ -1,4 +1,4 @@
-// Admin restock-request view — mounted under /api/admin/notify, behind requireAccess.
+// Admin restock-request view — mounted under /api/admin/notify, behind requireAdmin.
 // GET / returns aggregated outstanding notify_me rows grouped by sizeOptionId,
 // joined to size_options → variants → products. Ordered by waiting count desc.
 
