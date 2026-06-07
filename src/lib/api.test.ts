@@ -12,6 +12,9 @@ import {
   prefetch,
   drainOfflineQueue,
   apiPostQueued,
+  getAdminToken,
+  setAdminToken,
+  clearAdminToken,
 } from '@/lib/api'
 
 // Build a Response-like fetch result.
@@ -77,14 +80,110 @@ describe('apiGet', () => {
     expect(init.signal).toBe(ctrl.signal)
   })
 
-  it('sends credentials:include for admin paths', async () => {
+  it('attaches the Bearer token on admin paths when one is stored', async () => {
+    setAdminToken('tok123')
     await apiGet('/api/admin/orders')
-    expect(fetchMock.mock.calls[0][1].credentials).toBe('include')
+    expect(fetchMock.mock.calls[0][1].headers).toMatchObject({ Authorization: 'Bearer tok123' })
+    clearAdminToken()
   })
 
-  it('omits credentials for public paths', async () => {
+  it('omits Authorization on admin paths when no token is stored', async () => {
+    clearAdminToken()
+    await apiGet('/api/admin/orders')
+    expect((fetchMock.mock.calls[0][1].headers as Record<string, string>).Authorization).toBeUndefined()
+  })
+
+  it('never attaches the token on public paths', async () => {
+    setAdminToken('tok123')
     await apiGet('/api/products')
-    expect(fetchMock.mock.calls[0][1].credentials).toBeUndefined()
+    expect((fetchMock.mock.calls[0][1].headers as Record<string, string>).Authorization).toBeUndefined()
+    clearAdminToken()
+  })
+
+  it('does not attach the token to the public admin login endpoint', async () => {
+    setAdminToken('tok123')
+    await apiPost('/api/admin/login', { password: 'x' })
+    expect((fetchMock.mock.calls[0][1].headers as Record<string, string>).Authorization).toBeUndefined()
+    clearAdminToken()
+  })
+})
+
+describe('admin token storage + 401 handling', () => {
+  function stubLocation(pathname: string) {
+    const orig = Object.getOwnPropertyDescriptor(window, 'location')
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: { pathname, href: pathname },
+    })
+    return () => { if (orig) Object.defineProperty(window, 'location', orig) }
+  }
+
+  it('clears the token and redirects to /admin/login on a 401 from a protected admin path', async () => {
+    setAdminToken('tok')
+    const restore = stubLocation('/admin/orders')
+    fetchMock.mockResolvedValueOnce(jsonResponse({ error: 'Unauthorized' }, 401))
+    await expect(apiGet('/api/admin/orders')).rejects.toMatchObject({ status: 401 })
+    expect(getAdminToken()).toBeNull()
+    expect(window.location.href).toBe('/admin/login')
+    restore()
+  })
+
+  it('clears the token but does not redirect when already on the login page', async () => {
+    setAdminToken('tok')
+    const restore = stubLocation('/admin/login')
+    fetchMock.mockResolvedValueOnce(jsonResponse({ error: 'Unauthorized' }, 401))
+    await expect(apiGet('/api/admin/orders')).rejects.toMatchObject({ status: 401 })
+    expect(getAdminToken()).toBeNull()
+    expect(window.location.href).toBe('/admin/login') // unchanged (no redirect)
+    restore()
+  })
+
+  it('does not clear the token on a 401 from the public login endpoint', async () => {
+    setAdminToken('tok')
+    fetchMock.mockResolvedValueOnce(jsonResponse({ error: 'Invalid password' }, 401))
+    await expect(apiPost('/api/admin/login', { password: 'x' })).rejects.toMatchObject({ status: 401 })
+    expect(getAdminToken()).toBe('tok')
+    clearAdminToken()
+  })
+
+  it('token helpers swallow storage errors', () => {
+    const orig = Object.getOwnPropertyDescriptor(window, 'localStorage')
+    Object.defineProperty(window, 'localStorage', {
+      configurable: true,
+      value: {
+        getItem() { throw new Error('blocked') },
+        setItem() { throw new Error('blocked') },
+        removeItem() { throw new Error('blocked') },
+      },
+    })
+    expect(getAdminToken()).toBeNull()
+    expect(() => setAdminToken('a')).not.toThrow()
+    expect(() => clearAdminToken()).not.toThrow()
+    if (orig) Object.defineProperty(window, 'localStorage', orig)
+  })
+})
+
+describe('request() extra branches', () => {
+  it('prefetch fires once and dedups a repeat call for the same path', () => {
+    prefetch('/api/dedup-unique')
+    prefetch('/api/dedup-unique')
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('error message falls back to parsed.message, then to HTTP status', async () => {
+    fetchMock.mockResolvedValueOnce(jsonResponse({ message: 'msg-only' }, 400))
+    await expect(apiGet('/api/x')).rejects.toMatchObject({ status: 400, message: 'msg-only' })
+    fetchMock.mockResolvedValueOnce(jsonResponse({ other: 1 }, 500))
+    await expect(apiGet('/api/y')).rejects.toMatchObject({ status: 500, message: 'HTTP 500' })
+  })
+
+  it('error message falls back to HTTP status on a non-JSON body', async () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: false,
+      status: 502,
+      text: () => Promise.resolve('<html>bad gateway</html>'),
+    } as unknown as Response)
+    await expect(apiGet('/api/z')).rejects.toMatchObject({ status: 502, message: 'HTTP 502' })
   })
 })
 
