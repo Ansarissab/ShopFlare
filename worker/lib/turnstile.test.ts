@@ -18,6 +18,12 @@ describe('verifyTurnstile', () => {
     expect(fetch).not.toHaveBeenCalled()
   })
 
+  it('bypasses verification in dev mode even when a secret IS set (Turnstile unused locally)', async () => {
+    const result = await verifyTurnstile(null, 'real-secret', '1.2.3.4', { isDevelopment: true })
+    expect(result).toBe(true)
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
   it('fails closed in production when secret is empty', async () => {
     const result = await verifyTurnstile('any-token', '', undefined, { isDevelopment: false })
     expect(result).toBe(false)

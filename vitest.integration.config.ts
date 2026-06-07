@@ -37,10 +37,12 @@ export default defineWorkersConfig(async () => {
             // (newer) production compatibility_date. Tests only — prod deploy
             // still uses the date in wrangler.toml.
             compatibilityDate: '2026-03-10',
-            // ENVIRONMENT=development → Turnstile + CF Access dev-bypass, so
-            // public POSTs and admin routes are reachable without tokens.
-            // Dummy Stripe keys let the webhook construct its client so the
-            // signature check runs (and rejects a forged signature with 400).
+            // ENVIRONMENT=development → admin dev-bypass + Turnstile bypass
+            // (verifyTurnstile skips entirely when isDevelopment), so public POSTs
+            // and admin routes are reachable without tokens — regardless of any
+            // real keys in a developer's `.dev.vars`. Dummy Stripe keys let the
+            // webhook construct its client so the signature check runs (and
+            // rejects a forged signature with 400).
             bindings: {
               ENVIRONMENT: 'development',
               ADMIN_DEV_BYPASS: '1',

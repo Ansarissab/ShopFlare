@@ -1,13 +1,13 @@
 const SITEVERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
 
-let _warnedOnce = false
-
 /**
  * verifyTurnstile — server-side Cloudflare Turnstile token verification.
  *
- * - When `secret` is empty: bypasses ONLY in local development
- *   (opts.isDevelopment), otherwise FAILS CLOSED (returns false) so a
- *   production worker deployed without the secret rejects unverified requests.
+ * - Local/dev (`opts.isDevelopment`): Turnstile is NOT used — verification is
+ *   skipped entirely, so local `wrangler dev` and the integration suite never
+ *   need a real token or secret (and a real key in `.dev.vars` can't 403 them).
+ *   Production sets ENVIRONMENT=production, so this never bypasses in prod.
+ * - Production with no `secret`: FAILS CLOSED (returns false).
  * - Returns `false` when `token` is falsy.
  * - POSTs to the Turnstile siteverify endpoint and returns `response.success`.
  * - Returns `false` on any network/parse error (fail-closed).
@@ -18,15 +18,11 @@ export async function verifyTurnstile(
   remoteIp?: string,
   opts?: { isDevelopment?: boolean },
 ): Promise<boolean> {
-  // No secret configured.
+  // Local/dev: skip Turnstile entirely (not used locally).
+  if (opts?.isDevelopment) return true
+
+  // Production. No secret configured → fail closed.
   if (!secret) {
-    if (opts?.isDevelopment) {
-      if (!_warnedOnce) {
-        console.warn('[turnstile] TURNSTILE_SECRET_KEY is not configured — skipping verification (dev mode)')
-        _warnedOnce = true
-      }
-      return true
-    }
     console.warn('[turnstile] TURNSTILE_SECRET_KEY unset in production — failing closed')
     return false
   }
