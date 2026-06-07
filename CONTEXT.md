@@ -69,7 +69,7 @@ An alphanumeric code entered by the Merchant when an Order ships. Displayed on t
 A public client-rendered page at /track/[orderId] showing Order status timeline, items, and Tracking Number.
 
 ## Admin Dashboard
-A password-protected (Cloudflare Access) section of the Store at /admin/*. Used by the Merchant to manage Products, Orders, Coupons, Shipping, Store Config, and analytics.
+A password-protected section of the Store at /admin/* (app-level admin password → signed session token). Used by the Merchant to manage Products, Orders, Coupons, Shipping, Store Config, and analytics.
 
 ## Store Config
 Merchant-controlled settings stored in D1: store name, tagline, logo URL, brand colors, contact email, WhatsApp number, social links, currency, country, shipping rates, products-per-page (pagination size), and policy content. Changes take effect without redeploy.
@@ -88,4 +88,4 @@ A verified Customer rating (1–5 stars) and optional text/photo submitted after
 A request by a Customer to be emailed/WhatsApped when an out-of-stock Size Option is restocked.
 
 ## Setup Wizard
-An interactive CLI tool (npx create-store) that guides the Merchant through initial deployment: API keys, Cloudflare D1 creation, Worker deployment, CF Access configuration, and DB migrations.
+An interactive CLI tool (npx create-store) that guides the Merchant through initial deployment: API keys, Cloudflare D1 creation, Worker deployment, admin password setup, and DB migrations.

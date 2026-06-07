@@ -11,9 +11,9 @@ Request
 
 ## Static assets
 
-Next.js generates hashed chunk filenames. Served by Cloudflare Pages CDN with
-`Cache-Control: public, max-age=31536000, immutable`. A new deploy invalidates these
-automatically because the hash changes.
+Next.js generates hashed chunk filenames. Served by Cloudflare Workers Static Assets
+(CDN) with `Cache-Control: public, max-age=31536000, immutable`. A new deploy
+invalidates these automatically because the hash changes.
 
 ## Product images (R2)
 
@@ -56,13 +56,12 @@ When an admin save succeeds on the client, it posts to `shopflare:data-updated`
 `useApiResource` with `refetchOnChannel: true`) silently refetch in all open tabs — so the
 storefront reflects changes made in the admin tab immediately without a full page reload.
 
-## CF Access JWKS
+## Admin session tokens (no cache needed)
 
-The admin JWT verification (`worker/lib/access-core.ts`) fetches the team's public keys once
-from `https://{teamDomain}/cdn-cgi/access/certs`. The Worker caches these in KV for 1 hour
-(`access:jwks`). The Next.js middleware uses a module-level in-memory Map with the same 1-hour
-TTL (persists across requests in the same edge instance). Access rotates keys roughly every
-6 weeks, so a 1-hour cache is a safe middle ground.
+Admin auth uses stateless HMAC session tokens (`worker/lib/admin-session.ts`), signed and
+verified with `ADMIN_SESSION_SECRET`. There is no external key fetch and nothing to cache —
+verification is a local HMAC check per request. (This replaced the former CF Access JWKS
+fetch/cache; see ADR 0010.)
 
 ## What is NOT cached in KV
 

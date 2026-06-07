@@ -4,8 +4,7 @@
 
 ```
 Customer browser
-  → Cloudflare CDN (Pages)
-    → Static Next.js HTML/JS
+  → Frontend Worker (Next.js SSR via OpenNext) + static assets from CDN
       → Cloudflare Worker (Hono API)
         → Cloudflare D1 (SQLite DB)
         → Cloudflare KV (cache)
@@ -14,25 +13,25 @@ Customer browser
         → Resend API
 ```
 
-## Two runtimes
+## Two runtimes (two Workers)
 
 | Runtime | Role |
 |---|---|
-| **Next.js (CF Pages)** | Static HTML/JS served from CDN. All UI. |
-| **CF Worker (Hono)** | API, webhooks, Stripe calls, DB access |
+| **Frontend Worker** (Next.js SSR via OpenNext, `shopflare-web`) | All UI: SSR/RSC + static assets |
+| **API Worker** (Hono, `shopflare-worker`) | API, webhooks, Stripe calls, DB access |
 
-The Next.js app is a pure static export. No server-side rendering.
-Dynamic data fetched client-side from CF Worker endpoints.
+The Next.js app is server-rendered (SSR/RSC), deployed as its own Worker via
+`@opennextjs/cloudflare` — not a static export, not Cloudflare Pages. Data is
+fetched from the API Worker (client-side, and server-side during SSR).
 
 ## Admin access
 
-CF Access intercepts `/admin/*` at the edge.
-Merchant gets email OTP — no passwords, no auth code.
-
-The admin **API** is equally protected: all admin endpoints live under
-`/api/admin/*` (separate from public routes), covered by a second CF Access
-application, and the worker re-verifies the Access assertion JWT in
-`requireAccess` (defense-in-depth). See cloudflare-guide Step 8.
+App-level password — no Cloudflare Access (it can't path-scope `/admin` on
+`*.workers.dev`). The merchant signs in at `/admin/login` with `ADMIN_PASSWORD`;
+the API Worker issues an HMAC session token (`/api/admin/login`). All admin
+endpoints live under `/api/admin/*` and are gated by `requireAdmin`, which
+verifies the `Authorization: Bearer` token on every request (fails closed). The
+admin UI is a client-gated static shell. See cloudflare-guide + ADR 0010.
 
 ## Data flow for an order
 

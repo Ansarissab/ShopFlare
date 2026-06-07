@@ -47,8 +47,8 @@ pnpm worker:dev   # CF Worker on localhost:8787
 ### 6. Deploy
 
 ```bash
-git push origin main   # Triggers Cloudflare Pages auto-deploy
-pnpm worker:deploy     # Deploy CF Worker
+pnpm worker:deploy   # Deploy the API Worker (shopflare-worker)
+pnpm web:deploy      # Build via OpenNext + deploy the frontend Worker (shopflare-web)
 ```
 
 See [cloudflare-guide.md](cloudflare-guide.md) for detailed CF setup steps.

@@ -4,6 +4,12 @@ date: 2026-05-31
 ---
 # ADR 0001: Full Cloudflare Stack Over Firebase + GitHub Pages
 
+> **Partially superseded (2026-06-07):** the "Pages" and "Access" choices below were
+> revised at go-live. The frontend ships as an OpenNext SSR Worker, not Cloudflare
+> Pages (ADR 0009), and admin uses an app-level password, not Cloudflare Access
+> (ADR 0010). The rest of the stack (Workers, D1, KV, R2, Turnstile, Web Analytics)
+> stands. This ADR is kept as historical record.
+
 ## Context
 Project requires zero hosting cost, global CDN, webhook support, and a secure admin. Initial consideration: GitHub Pages (static) + Firebase (DB + Auth).
 

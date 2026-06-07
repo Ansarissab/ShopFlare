@@ -51,7 +51,7 @@ Replaces Shopify Basic ($29/month) for stores that don't need the heavyweight pl
 - PWA: installable, with Web Push order alerts
 - SEO: sitemap + JSON-LD product structured data
 
-**Admin dashboard** (protected by Cloudflare Access)
+**Admin dashboard** (app-level password login → Bearer session token)
 - Product / variant / size CRUD with R2 image upload (client-compressed)
 - Order management: status, tracking number + carrier, full customer detail
 - Coupon management with automatic Stripe coupon + promotion-code sync

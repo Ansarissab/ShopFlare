@@ -68,7 +68,7 @@ code and this file disagree, fix one of them — drift is a bug.
 
 | Term | Definition | Aliases to avoid |
 | --- | --- | --- |
-| **Admin Dashboard** | Cloudflare Access-protected `/admin/*` area for managing the Store | Admin panel, backend, CMS |
+| **Admin Dashboard** | Password-protected `/admin/*` area (app-level login → session token) for managing the Store | Admin panel, backend, CMS |
 | **Store Config** | Merchant settings in the `store_config` key-value table (name, logo, colors, currency, shipping, tax, policies); changes apply without redeploy | Settings, store settings |
 | **Shipping Config** | Flat rate, free-shipping threshold, and operating currency (a slice of Store Config) | Shipping rules, delivery config |
 | **Dynamic-First Rule** | Any value that can live in D1 and be edited from the Admin Dashboard MUST — minimize redeploys | Config-driven |
@@ -133,9 +133,10 @@ code and this file disagree, fix one of them — drift is a bug.
 
 ## Flagged ambiguities
 
-- **"user" / "account"** — the codebase has no Customer accounts. A **Customer** is
-  identified per-Order by email/phone + **Order Number**. The **Merchant** authenticates
-  via Cloudflare Access, not an app-level user record.
+- **"user" / "account"** — the codebase has no Customer accounts, and no admin accounts
+  either. A **Customer** is identified per-Order by email/phone + **Order Number**. The
+  **Merchant** authenticates with a single shared admin password (which mints a session
+  token) — there is no per-user record and no sign-up.
 
 - **"SKU" vs "Size Option" vs "Variant"** — three distinct things. The **Size Option**
   is the priced, stocked, sellable unit. **SKU** is just an optional label on it. A
