@@ -321,6 +321,7 @@ export const en = {
     loginSubmitting: 'Signing in…',
     loginInvalid: 'Invalid password. Try again.',
     loginError: 'Could not sign in. Please try again.',
+    loginVerifying: 'Completing security check…',
     // analytics
     analyticsRevenueTrend: 'Revenue Trend',
     analyticsPaymentMethods: 'Payment Methods',

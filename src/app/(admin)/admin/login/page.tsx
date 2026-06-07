@@ -58,8 +58,9 @@ export default function AdminLoginPage() {
               />
             </div>
             <TurnstileWidget onVerify={setTurnstileToken} onError={() => setTurnstileToken('')} />
+            {!turnstileToken && <p className="text-xs text-muted-foreground">{t.loginVerifying}</p>}
             {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
-            <Button type="submit" disabled={loading || !password}>
+            <Button type="submit" disabled={loading || !password || !turnstileToken}>
               {loading ? t.loginSubmitting : t.loginSubmit}
             </Button>
           </form>
