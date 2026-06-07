@@ -6,12 +6,30 @@
 //
 // 404 / status-specific handling: catch `ApiError` and inspect `.status`.
 
-// Base URL of the CF Worker. In production this MUST be set (Pages build-time
-// env). In local dev it defaults to the standard `wrangler dev` port so the
-// store works out-of-the-box without an .env.local.
-export const WORKER_URL =
-  process.env.NEXT_PUBLIC_WORKER_URL ||
-  (process.env.NODE_ENV === 'development' ? 'http://localhost:8787' : '')
+// Base URL of the CF Worker. In production this MUST be set (build-time env). In
+// local dev it defaults to the standard `wrangler dev` port.
+//
+// Dev/prod isolation guard: in development we REFUSE a non-localhost origin so
+// `next dev` can never read or write production data — even if a production
+// NEXT_PUBLIC_WORKER_URL is left in `.env.local`. Set NEXT_PUBLIC_ALLOW_REMOTE_API=1
+// to opt out (e.g. to point local dev at a staging worker on purpose).
+export function resolveWorkerUrl(): string {
+  const configured = process.env.NEXT_PUBLIC_WORKER_URL?.replace(/\/$/, '') ?? ''
+  const isDev = process.env.NODE_ENV === 'development'
+  const isLocal = /^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(configured)
+
+  if (isDev && configured && !isLocal && process.env.NEXT_PUBLIC_ALLOW_REMOTE_API !== '1') {
+    console.warn(
+      `[api] Ignoring non-local NEXT_PUBLIC_WORKER_URL (${configured}) in development to keep ` +
+        `dev off production. Use http://localhost:8787, or set NEXT_PUBLIC_ALLOW_REMOTE_API=1 to override.`,
+    )
+    return 'http://localhost:8787'
+  }
+  if (configured) return configured
+  return isDev ? 'http://localhost:8787' : ''
+}
+
+export const WORKER_URL = resolveWorkerUrl()
 
 export class ApiError extends Error {
   constructor(

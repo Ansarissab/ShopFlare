@@ -38,9 +38,12 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files — ignore secrets/overrides, but commit the non-secret local defaults.
 .env*
 !.env*.example
+# Committed local-dev defaults (localhost only, NO secrets). Keeps `next dev`
+# pointed at the local worker so it never touches production.
+!.env.development
 
 # Cloudflare Workers local secrets
 .dev.vars

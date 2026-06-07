@@ -15,6 +15,7 @@ import {
   getAdminToken,
   setAdminToken,
   clearAdminToken,
+  resolveWorkerUrl,
 } from '@/lib/api'
 
 // Build a Response-like fetch result.
@@ -39,6 +40,44 @@ beforeEach(() => {
 afterEach(() => {
   vi.clearAllMocks()
   vi.unstubAllGlobals()
+  vi.unstubAllEnvs()
+})
+
+describe('resolveWorkerUrl (dev/prod isolation)', () => {
+  it('refuses a non-localhost URL during development (uses localhost)', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    vi.stubEnv('NODE_ENV', 'development')
+    vi.stubEnv('NEXT_PUBLIC_WORKER_URL', 'https://shopflare-worker.prod.workers.dev')
+    vi.stubEnv('NEXT_PUBLIC_ALLOW_REMOTE_API', '')
+    expect(resolveWorkerUrl()).toBe('http://localhost:8787')
+  })
+
+  it('allows a localhost URL during development', () => {
+    vi.stubEnv('NODE_ENV', 'development')
+    vi.stubEnv('NEXT_PUBLIC_WORKER_URL', 'http://localhost:8787')
+    expect(resolveWorkerUrl()).toBe('http://localhost:8787')
+  })
+
+  it('allows a remote URL in dev only when explicitly opted in', () => {
+    vi.stubEnv('NODE_ENV', 'development')
+    vi.stubEnv('NEXT_PUBLIC_WORKER_URL', 'https://staging.workers.dev')
+    vi.stubEnv('NEXT_PUBLIC_ALLOW_REMOTE_API', '1')
+    expect(resolveWorkerUrl()).toBe('https://staging.workers.dev')
+  })
+
+  it('uses the configured URL in production', () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    vi.stubEnv('NEXT_PUBLIC_WORKER_URL', 'https://shopflare-worker.prod.workers.dev/')
+    expect(resolveWorkerUrl()).toBe('https://shopflare-worker.prod.workers.dev') // trailing slash trimmed
+  })
+
+  it('falls back to localhost in dev and empty string in prod when unset', () => {
+    vi.stubEnv('NEXT_PUBLIC_WORKER_URL', '')
+    vi.stubEnv('NODE_ENV', 'development')
+    expect(resolveWorkerUrl()).toBe('http://localhost:8787')
+    vi.stubEnv('NODE_ENV', 'production')
+    expect(resolveWorkerUrl()).toBe('')
+  })
 })
 
 describe('ApiError', () => {

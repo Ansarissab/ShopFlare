@@ -21,25 +21,35 @@ request, no redeploy needed).
 | `ADMIN_PASSWORD` | The merchant's admin password. Login compares against it (constant-time). Rotate: `wrangler secret put ADMIN_PASSWORD`. |
 | `ADMIN_SESSION_SECRET` | HMAC key signing admin session tokens. Generate with `openssl rand -hex 32`. **Rotating it logs everyone out.** |
 
-## Frontend build-time vars (`.env.local`, baked by `pnpm web:deploy`)
-`NEXT_PUBLIC_*` values are inlined into the client bundle **at build time** — they
-must be present in `.env.local` *before* you run `pnpm web:deploy`. The frontend
-worker (`shopflare-web`) needs **no runtime secrets** (admin auth is enforced by
-the API worker; the UI gate is client-side).
+## Frontend build vars (`NEXT_PUBLIC_*`) — dev vs prod are SEPARATE files
+
+`NEXT_PUBLIC_*` values are inlined into the client bundle **at build time**. To keep
+local dev off production, they live in environment-specific files — **never put them
+in `.env.local`** (which overrides everything and would leak the prod URL into `next dev`).
 
 | Variable | Description |
 | --- | --- |
-| `NEXT_PUBLIC_WORKER_URL` | Deployed API worker URL (e.g. `https://shopflare-worker.YOUR.workers.dev`) |
-| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | CF Turnstile site key — baked in for the Turnstile widget |
-| `NEXT_PUBLIC_SITE_URL` | Public site URL (frontend worker origin) — used by `sitemap.ts` |
+| `NEXT_PUBLIC_WORKER_URL` | API worker origin the client calls |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | CF Turnstile site key (widget) |
+| `NEXT_PUBLIC_SITE_URL` | Public site URL — used by `sitemap.ts` |
 
-> Changed a `NEXT_PUBLIC_*` value? You must **rebuild + redeploy** the frontend
-> (`pnpm web:deploy`) — it's compiled in, not read at runtime.
+- **`.env.development`** (committed, localhost only) → used by `next dev`. Pins the app
+  to the local worker. No secrets.
+- **`.env.production`** (gitignored; copy from `.env.production.example`) → baked by
+  `pnpm web:deploy`. Holds the deployed URLs + real Turnstile site key.
+
+> Changed a `NEXT_PUBLIC_*` value? **Rebuild + redeploy** (`pnpm web:deploy`) — it's
+> compiled in, not read at runtime.
+
+**Dev/prod isolation guard:** `lib/api.ts` refuses a non-localhost `NEXT_PUBLIC_WORKER_URL`
+during `next dev` (falls back to `http://localhost:8787`) so local can never hit
+production. To intentionally point dev at a remote/staging worker, set
+`NEXT_PUBLIC_ALLOW_REMOTE_API=1`.
 
 ## Local development
-Never committed to git. Both files are gitignored.
-
-`.dev.vars` (local API worker, `wrangler dev`):
+The frontend worker (`shopflare-web`) needs **no runtime secrets** (admin auth is
+enforced by the API worker; the UI gate is client-side). Local worker secrets go in
+`.dev.vars` (gitignored):
 
 | Variable | Description |
 | --- | --- |
@@ -48,8 +58,9 @@ Never committed to git. Both files are gitignored.
 | `ADMIN_DEV_BYPASS` | `1` together with `ENVIRONMENT=development` skips the admin token check locally. **Never set in production.** |
 | `ADMIN_PASSWORD` / `ADMIN_SESSION_SECRET` | Optional locally (the dev bypass skips the check); set them to exercise the real login flow |
 
-`.env.local` (Next.js dev): `NEXT_PUBLIC_WORKER_URL=http://localhost:8787`,
-`NEXT_PUBLIC_TURNSTILE_SITE_KEY` (test key), `NEXT_PUBLIC_SITE_URL`.
+`next dev` reads `.env.development` (localhost) automatically — no `.env.local` needed.
+`pnpm worker:dev` uses **local** D1/KV/R2 (miniflare); the integration suite is local too.
+Only `pnpm db:migrate` / `db:seed` (the non-`:local` ones) touch remote D1, by design.
 
 > **Local admin bypass:** Both `ENVIRONMENT=development` *and* `ADMIN_DEV_BYPASS=1`
 > are required together — neither alone is sufficient. Never set in production
