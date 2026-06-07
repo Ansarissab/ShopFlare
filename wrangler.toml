@@ -5,17 +5,17 @@ compatibility_flags = ["nodejs_compat"]
 
 [[d1_databases]]
 binding = "DB"
-database_name = "store-db"
-database_id = "placeholder-replace-after-cf-setup"
+database_name = "shopflare-db0"
+database_id = "f7a387f1-813a-4b85-9554-119fc61cae6c"
 migrations_dir = "worker/db/migrations"
 
 [[kv_namespaces]]
 binding = "KV"
-id = "placeholder-replace-after-cf-setup"
+id = "e0364e783aaf43059dfbb77aaa2fcc0a"
 
 [[r2_buckets]]
+bucket_name = "shopflare-images0"
 binding = "R2"
-bucket_name = "store-images"
 
 [vars]
-ENVIRONMENT = "development"
+ENVIRONMENT = "production"
