@@ -48,10 +48,6 @@ export default defineConfig({
         'src/components/ui/**',
         // Server components / pages — exercised by Playwright E2E, not unit tests
         'src/app/**',
-        'src/middleware.ts',
-        // Edge middleware (admin auth defense-in-depth) — runs in the Next edge
-        // runtime, exercised by the admin E2E flows, not unit-testable here.
-        'src/proxy.ts',
         // PWA service worker — runs in SW scope, tested via E2E
         'src/sw.ts',
         'public/**',
