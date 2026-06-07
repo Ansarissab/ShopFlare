@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { eq, ne, and, sql } from 'drizzle-orm'
+import { eq, and, sql } from 'drizzle-orm'
 import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import type { AdminEnv } from 'worker/lib/access'

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, within, cleanup } from '@testing-library/react'
+import { render, screen, cleanup } from '@testing-library/react'
 import { FunnelTab } from './FunnelTab'
 import { en } from '@/lib/i18n/en'
 import { formatPrice } from '@/lib/utils/index'

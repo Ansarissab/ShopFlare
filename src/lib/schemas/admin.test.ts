@@ -5,7 +5,6 @@ import {
   createVariantSchema,
   updateVariantSchema,
   createSizeOptionSchema,
-  updateSizeOptionSchema,
   updateOrderStatusSchema,
   updateTrackingSchema,
   posOrderSchema,

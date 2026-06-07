@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { en } from '@/lib/i18n/en'
-import { apiGet, apiPut, ApiError } from '@/lib/api'
+import { apiGet, apiPut } from '@/lib/api'
 import type { ProductWithVariants } from '@/lib/types/product'
 
 interface CategoryProductsManagerProps {

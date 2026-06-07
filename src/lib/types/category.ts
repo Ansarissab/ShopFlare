@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import type { Category, ProductCategory } from 'worker/db/schema'
 import type { ProductWithVariants } from './product'
 

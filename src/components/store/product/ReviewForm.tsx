@@ -1,5 +1,8 @@
 'use client'
 
+/* eslint-disable react-hooks/incompatible-library -- react-hook-form's watch() returns a
+   function the React Compiler can't memoize; skipping memoization here is expected. */
+
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'

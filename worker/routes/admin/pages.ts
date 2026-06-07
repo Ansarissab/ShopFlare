@@ -1,7 +1,6 @@
 // Admin policy pages — mounted under /api/admin/pages, behind requireAdmin.
 
 import { Hono } from 'hono'
-import { eq } from 'drizzle-orm'
 import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import { updatePageSchema } from '@/lib/schemas'

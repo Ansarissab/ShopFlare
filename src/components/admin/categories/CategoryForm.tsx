@@ -1,5 +1,8 @@
 'use client'
 
+/* eslint-disable react-hooks/incompatible-library -- react-hook-form's watch() returns a
+   function the React Compiler can't memoize; skipping memoization here is expected. */
+
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -44,7 +47,6 @@ export function CategoryForm({ category, parentOptions, onSuccess }: CategoryFor
     setValue,
     setError,
     formState: { errors, isSubmitting },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } = useForm<CategoryFormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(createCategorySchema) as any,
@@ -65,7 +67,6 @@ export function CategoryForm({ category, parentOptions, onSuccess }: CategoryFor
   // Auto-fill slug from name in create mode only when slug is still unedited
   useEffect(() => {
     if (!isEdit) {
-      const autoSlug = slugify(nameValue ?? '')
       const currentSlug = slugValue ?? ''
       // Only override if current slug is either empty or matches auto from previous name
       if (currentSlug === '' || slugify(nameValue ?? '') !== currentSlug) {

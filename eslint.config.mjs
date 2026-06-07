@@ -26,6 +26,21 @@ const eslintConfig = defineConfig([
     ".visual-baselines/**",
     "e2e/**/*-snapshots/**",
   ]),
+  // Allow intentionally-unused identifiers prefixed with `_` (omitted props,
+  // placeholder args, caught errors) — the conventional escape hatch.
+  {
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+          ignoreRestSiblings: true,
+        },
+      ],
+    },
+  },
   // Playwright fixtures legitimately call the injected `use()` — not a React Hook.
   {
     files: ["e2e/**/*.ts"],

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, fireEvent, waitFor, within, cleanup } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react'
 import { CategoryProductsManager } from './CategoryProductsManager'
 import { en } from '@/lib/i18n/en'
 import { apiGet, apiPut } from '@/lib/api'

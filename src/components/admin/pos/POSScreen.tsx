@@ -107,7 +107,7 @@ export function POSScreen() {
     }
   }
 
-  function handleSendWhatsApp(orderNumber: string) {
+  function handleSendWhatsApp(_orderNumber: string) {
     if (!config?.whatsappNumber) return
     const firstItem = saleItems[0]
     if (!firstItem) return

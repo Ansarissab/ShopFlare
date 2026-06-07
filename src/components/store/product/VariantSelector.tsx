@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import { en } from '@/lib/i18n/en'
-import type { Variant, VariantSelectorProps } from '@/lib/types/product'
+import type { VariantSelectorProps } from '@/lib/types/product'
 
 export function VariantSelector({
   variants,

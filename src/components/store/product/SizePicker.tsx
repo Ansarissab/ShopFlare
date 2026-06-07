@@ -5,7 +5,7 @@ import { formatPrice } from '@/lib/utils/index'
 import { en } from '@/lib/i18n/en'
 import { LOW_STOCK_THRESHOLD } from '@/lib/constants'
 import { Badge } from '@/components/ui/badge'
-import type { SizeOption, SizePickerProps } from '@/lib/types/product'
+import type { SizePickerProps } from '@/lib/types/product'
 
 export function SizePicker({
   sizes,

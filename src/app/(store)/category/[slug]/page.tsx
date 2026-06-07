@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ProductGrid } from '@/components/store/product/ProductGrid'
@@ -168,11 +169,13 @@ export default function CategoryPage() {
 
       {/* Hero image */}
       {category.imageUrl && (
-        <div className="mb-6 overflow-hidden rounded-xl aspect-3/1 w-full bg-muted">
-          <img
+        <div className="relative mb-6 overflow-hidden rounded-xl aspect-3/1 w-full bg-muted">
+          <Image
             src={category.imageUrl}
             alt={category.name}
-            className="h-full w-full object-cover"
+            fill
+            sizes="100vw"
+            className="object-cover"
           />
         </div>
       )}

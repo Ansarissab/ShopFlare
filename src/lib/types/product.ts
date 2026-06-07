@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import type { Product, Variant, SizeOption, ProductImage } from 'worker/db/schema'
 import type { CurrencyCode } from '@/lib/constants'
 

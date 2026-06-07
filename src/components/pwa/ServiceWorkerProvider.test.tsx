@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, waitFor, cleanup } from '@testing-library/react'
 import { ServiceWorkerProvider, useServiceWorker } from './ServiceWorkerProvider'
 import { en } from '@/lib/i18n/en'

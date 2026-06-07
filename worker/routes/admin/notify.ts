@@ -3,7 +3,7 @@
 // joined to size_options → variants → products. Ordered by waiting count desc.
 
 import { Hono } from 'hono'
-import { eq, and, count, max, desc, sql } from 'drizzle-orm'
+import { eq, count, max, desc, sql } from 'drizzle-orm'
 import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import type { AdminEnv } from 'worker/lib/access'

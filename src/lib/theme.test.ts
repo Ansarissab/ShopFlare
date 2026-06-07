@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { describe, it, expect, afterEach, vi } from 'vitest'
 import { applyTheme, THEME_STORAGE_KEY } from '@/lib/theme'
 import { RADIUS_PRESETS, FONT_PRESETS } from '@/lib/constants'
 import { contrastColor } from '@/lib/utils'

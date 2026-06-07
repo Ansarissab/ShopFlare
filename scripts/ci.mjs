@@ -39,7 +39,8 @@ function run(cmd, argv) {
     child.on('error', reject)
     child.on('close', (code) => {
       const ms = Number(process.hrtime.bigint() - start) / 1e6
-      code === 0 ? resolve(ms) : reject(Object.assign(new Error(`exit ${code}`), { ms }))
+      if (code === 0) resolve(ms)
+      else reject(Object.assign(new Error(`exit ${code}`), { ms }))
     })
   })
 }
