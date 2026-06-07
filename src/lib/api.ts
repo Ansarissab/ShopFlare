@@ -31,25 +31,62 @@ export type ApiOptions = {
   signal?: AbortSignal
 }
 
+// ---------------------------------------------------------------------------
+// Admin session token (app-level auth)
+// ---------------------------------------------------------------------------
+// The admin API is gated by a Bearer session token (issued by /api/admin/login).
+// It can't live in a cookie: the frontend and API run on separate *.workers.dev
+// hosts and workers.dev is a public-suffix domain, so a shared cookie is blocked
+// by browsers. We store the token in localStorage and attach it as a header.
+const ADMIN_TOKEN_KEY = 'shopflare_admin_token'
+
+export function getAdminToken(): string | null {
+  if (typeof window === 'undefined') return null
+  try { return localStorage.getItem(ADMIN_TOKEN_KEY) } catch { return null }
+}
+
+export function setAdminToken(token: string): void {
+  if (typeof window === 'undefined') return
+  try { localStorage.setItem(ADMIN_TOKEN_KEY, token) } catch { /* storage disabled */ }
+}
+
+export function clearAdminToken(): void {
+  if (typeof window === 'undefined') return
+  try { localStorage.removeItem(ADMIN_TOKEN_KEY) } catch { /* storage disabled */ }
+}
+
+// Protected admin endpoints — everything under /api/admin except the public login.
+function isProtectedAdminPath(path: string): boolean {
+  return path.startsWith('/api/admin') && !path.startsWith('/api/admin/login')
+}
+
 async function request<T>(path: string, init?: RequestInit & { signal?: AbortSignal }): Promise<T> {
-  // Admin endpoints sit behind CF Access — send the CF_Authorization cookie so
-  // the edge can inject the assertion the worker verifies (requireAccess).
-  const credentials: RequestCredentials | undefined = path.startsWith('/api/admin')
-    ? 'include'
-    : undefined
+  // Protected admin endpoints carry the session token as a Bearer header.
+  const authHeader: Record<string, string> = {}
+  if (isProtectedAdminPath(path)) {
+    const token = getAdminToken()
+    if (token) authHeader.Authorization = `Bearer ${token}`
+  }
 
   const res = await fetch(`${WORKER_URL}${path}`, {
-    credentials,
     ...init,
     headers: {
       // FormData bodies set their own multipart Content-Type boundary — don't
       // override. JSON string bodies get application/json.
       ...(typeof init?.body === 'string' ? { 'Content-Type': 'application/json' } : {}),
+      ...authHeader,
       ...init?.headers,
     },
   })
 
   if (!res.ok) {
+    // Expired/invalid session on a protected admin call → drop token, bounce to login.
+    if (res.status === 401 && isProtectedAdminPath(path) && typeof window !== 'undefined') {
+      clearAdminToken()
+      if (!window.location.pathname.startsWith('/admin/login')) {
+        window.location.href = '/admin/login'
+      }
+    }
     const raw = await res.text()
     let parsed: unknown
     try { parsed = JSON.parse(raw) } catch { parsed = undefined }

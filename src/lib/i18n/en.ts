@@ -312,10 +312,15 @@ export const en = {
     stripeColumn: 'Stripe',
     reviewStatus: 'Status',
     reviewDate: 'Date',
-    // unauthorized page
-    unauthorizedTitle: 'Access Denied',
-    unauthorizedMessage: 'You need a valid Cloudflare Access identity to view the admin panel.',
-    unauthorizedBack: 'Back to store',
+    // login page
+    loginTitle: 'Admin Sign In',
+    loginSubtitle: 'Enter your admin password to continue.',
+    loginPasswordLabel: 'Password',
+    loginPasswordPlaceholder: 'Admin password',
+    loginSubmit: 'Sign in',
+    loginSubmitting: 'Signing in…',
+    loginInvalid: 'Invalid password. Try again.',
+    loginError: 'Could not sign in. Please try again.',
     // analytics
     analyticsRevenueTrend: 'Revenue Trend',
     analyticsPaymentMethods: 'Payment Methods',
