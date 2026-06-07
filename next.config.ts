@@ -1,5 +1,10 @@
 import type { NextConfig } from "next";
 import withSerwistInit from "@serwist/next";
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+
+// Lets `next dev` see Cloudflare bindings/env via the OpenNext adapter.
+// Safe no-op in production builds.
+initOpenNextCloudflareForDev();
 
 // Worker/API origin the browser talks to — allowed in CSP connect-src so client
 // fetches (lib/api.ts) aren't blocked. Empty in pure-static builds.

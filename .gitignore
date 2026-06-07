@@ -22,6 +22,9 @@
 /.next/
 /out/
 
+# OpenNext (Cloudflare adapter build output)
+/.open-next/
+
 # production
 /build
 

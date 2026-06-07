@@ -1,0 +1,14 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  // Frontend SSR worker (Next.js via OpenNext). Separate from the API worker
+  // (wrangler.toml = shopflare-worker). This one serves the site + RSC/SSR and
+  // talks to the API worker over HTTP via NEXT_PUBLIC_WORKER_URL.
+  "name": "shopflare-web",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-05-31",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  }
+}
