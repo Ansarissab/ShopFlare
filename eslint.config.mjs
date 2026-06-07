@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // OpenNext build output (frontend worker bundle — generated, minified)
+    ".open-next/**",
     // Generated build artifacts
     "public/sw.js",
     "public/sw.js.map",
