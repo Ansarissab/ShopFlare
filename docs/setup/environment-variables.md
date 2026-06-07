@@ -1,7 +1,11 @@
 # Environment Variables
 
-## CF Worker secrets (set via `wrangler secret put`)
-Never committed to git. Set once per deployment.
+> Admin auth uses an **app-level password** (a session token signed in the API
+> worker), not Cloudflare Access. See `docs/setup/cloudflare-guide.md`.
+
+## API worker secrets (`shopflare-worker`) — `wrangler secret put`
+Never committed to git. Set once per deployment; rotate any time (read fresh per
+request, no redeploy needed).
 
 | Variable | Description |
 | --- | --- |
@@ -12,53 +16,50 @@ Never committed to git. Set once per deployment.
 | `VAPID_PRIVATE_KEY` | Web Push private key |
 | `VAPID_PUBLIC_KEY` | Web Push public key (served via `/api/public-config`) |
 | `TURNSTILE_SITE_KEY` | CF Turnstile site key (served via `/api/public-config`) |
-| `TURNSTILE_SECRET_KEY` | CF Turnstile server secret — used to verify tokens server-side via siteverify |
-| `FRONTEND_URL` | Cloudflare Pages origin (e.g. `https://yourstore.pages.dev`) — used for Stripe success/cancel redirect URLs and CORS |
-| `CF_ACCESS_TEAM_DOMAIN` | CF Access team domain, e.g. `yourteam.cloudflareaccess.com` — for admin API JWT re-verification |
-| `CF_ACCESS_AUD` | CF Access Audience (AUD) tag from the admin Access application |
+| `TURNSTILE_SECRET_KEY` | CF Turnstile server secret — verifies tokens via siteverify |
+| `FRONTEND_URL` | Frontend worker origin (e.g. `https://shopflare-web.YOUR.workers.dev`) — Stripe success/cancel redirects + CORS allow-list |
+| `ADMIN_PASSWORD` | The merchant's admin password. Login compares against it (constant-time). Rotate: `wrangler secret put ADMIN_PASSWORD`. |
+| `ADMIN_SESSION_SECRET` | HMAC key signing admin session tokens. Generate with `openssl rand -hex 32`. **Rotating it logs everyone out.** |
 
-## CF Pages environment variables (Cloudflare Dashboard → Pages → Settings → Variables)
-
-Used by the Next.js app at build and runtime. Set in the Cloudflare Pages dashboard.
-
-| Variable | Description |
-| --- | --- |
-| `CF_ACCESS_TEAM_DOMAIN` | Same value as the Worker secret — needed by the Next.js middleware to verify admin JWT |
-| `CF_ACCESS_AUD` | Same value as the Worker secret — needed by the Next.js middleware |
-| `NEXT_PUBLIC_WORKER_URL` | Deployed CF Worker URL (e.g. `https://shopflare-worker.YOUR.workers.dev`) |
-| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | CF Turnstile site key — baked into the client bundle for the Turnstile widget |
-
-> **Why CF_ACCESS_TEAM_DOMAIN/AUD appear in both Worker and Pages?**
-> The Worker verifies Access JWTs on the API (`/api/admin/*`) and the Next.js middleware
-> verifies them on the UI (`/admin/*`). Both need the same credentials. Set them once in
-> each environment.
-
-## Next.js env (`.env.local`) — local development only
-Never committed to git.
+## Frontend build-time vars (`.env.local`, baked by `pnpm web:deploy`)
+`NEXT_PUBLIC_*` values are inlined into the client bundle **at build time** — they
+must be present in `.env.local` *before* you run `pnpm web:deploy`. The frontend
+worker (`shopflare-web`) needs **no runtime secrets** (admin auth is enforced by
+the API worker; the UI gate is client-side).
 
 | Variable | Description |
 | --- | --- |
-| `NEXT_PUBLIC_WORKER_URL` | Local wrangler dev URL, e.g. `http://localhost:8787` |
-| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Turnstile test site key (always passes in test mode) |
-| `ENVIRONMENT` | Set to `development` to enable the admin dev bypass |
-| `ADMIN_DEV_BYPASS` | Set to `1` together with `ENVIRONMENT=development` to skip CF Access JWT check locally. **Never set in production.** |
+| `NEXT_PUBLIC_WORKER_URL` | Deployed API worker URL (e.g. `https://shopflare-worker.YOUR.workers.dev`) |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | CF Turnstile site key — baked in for the Turnstile widget |
+| `NEXT_PUBLIC_SITE_URL` | Public site URL (frontend worker origin) — used by `sitemap.ts` |
 
-> **Local admin bypass:** Without a Cloudflare tunnel, the `Cf-Access-Jwt-Assertion` header is
-> never injected, so the Next.js middleware and Worker admin middleware would block `/admin`.
-> Both flags (`ENVIRONMENT=development` + `ADMIN_DEV_BYPASS=1`) are required together — neither
-> alone is sufficient. They are never set in production deployments.
-
-**Note:** `TURNSTILE_SITE_KEY` is also set as a Worker secret so it can be served via
-`GET /api/public-config`. The `NEXT_PUBLIC_TURNSTILE_SITE_KEY` in `.env.local` is the same
-value but baked into the Next.js bundle at build time for the client widget.
-
-## Generate VAPID keys
-```bash
-npx web-push generate-vapid-keys
-```
-Copy both keys → `wrangler secret put` each one.
+> Changed a `NEXT_PUBLIC_*` value? You must **rebuild + redeploy** the frontend
+> (`pnpm web:deploy`) — it's compiled in, not read at runtime.
 
 ## Local development
-Copy `.dev.vars.example` to `.dev.vars` and fill in test values.
-Copy `.env.local.example` to `.env.local` and fill in.
-Both files are gitignored.
+Never committed to git. Both files are gitignored.
+
+`.dev.vars` (local API worker, `wrangler dev`):
+
+| Variable | Description |
+| --- | --- |
+| `STRIPE_*`, `RESEND_API_KEY`, `VAPID_*`, `TURNSTILE_*` | Test values |
+| `ENVIRONMENT` | `development` — enables the admin dev bypass |
+| `ADMIN_DEV_BYPASS` | `1` together with `ENVIRONMENT=development` skips the admin token check locally. **Never set in production.** |
+| `ADMIN_PASSWORD` / `ADMIN_SESSION_SECRET` | Optional locally (the dev bypass skips the check); set them to exercise the real login flow |
+
+`.env.local` (Next.js dev): `NEXT_PUBLIC_WORKER_URL=http://localhost:8787`,
+`NEXT_PUBLIC_TURNSTILE_SITE_KEY` (test key), `NEXT_PUBLIC_SITE_URL`.
+
+> **Local admin bypass:** Both `ENVIRONMENT=development` *and* `ADMIN_DEV_BYPASS=1`
+> are required together — neither alone is sufficient. Never set in production
+> (the deploy forces `ENVIRONMENT=production`).
+
+## Generate keys
+```bash
+npx web-push generate-vapid-keys     # VAPID_PUBLIC_KEY + VAPID_PRIVATE_KEY
+openssl rand -hex 32                 # ADMIN_SESSION_SECRET
+```
+
+## Bootstrap
+Copy `.dev.vars.example` → `.dev.vars` and `.env.local.example` → `.env.local`, fill in.

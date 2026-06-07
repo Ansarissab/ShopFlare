@@ -18,9 +18,22 @@ See agents.md for parallel agent build orchestration plan.
 
 ## Stack
 - Next.js 16.2, React 19, Tailwind 4.3, shadcn/ui
-- Cloudflare: Pages, Workers (Hono), D1 (Drizzle ORM), KV, R2, Access, Turnstile
+- Cloudflare: **two Workers** — frontend (Next.js SSR via `@opennextjs/cloudflare`,
+  worker name `shopflare-web`) + API (Hono, `shopflare-worker`) — D1 (Drizzle ORM),
+  KV, R2, Turnstile. NOT Pages, NOT static export, NOT CF Access (see Deployment).
 - Stripe Checkout, Resend (BCC), Web Push API (PWA)
 - Zod v4 (import from "zod/v4"), nanoid, browser-image-compression, @clack/prompts
+
+## Deployment (CF go-live — see docs/setup/cloudflare-guide.md)
+- App is SSR (proxy/middleware + dynamic routes) → NOT a static export. The frontend
+  runs as its own Worker via OpenNext: `pnpm web:deploy` (config `wrangler.frontend.jsonc`,
+  `open-next.config.ts`). API worker: `pnpm worker:deploy` (`wrangler.toml`).
+- Two separate `*.workers.dev` hosts → cookies can't be shared (public-suffix domain),
+  so the admin token travels as an `Authorization: Bearer` header, not a cookie.
+- CF resources: D1 `shopflare-db0`, KV (binding `KV`), R2 `shopflare-images0`. Bindings
+  in code/config are `DB`/`KV`/`R2` (never rename them).
+- `$0 hosting`: stay on the Workers FREE plan (over-limit = HTTP 429, never billed).
+  R2 requires a card on file but stays $0 under free limits. Set CF budget alerts.
 
 ## DRY Rules — ALWAYS FOLLOW (ENFORCED — see docs/architecture/dry-conventions.md)
 
@@ -43,9 +56,11 @@ If it almost exists, EXTEND it — do not copy-paste. No "shit code", DRY only.
 ## Security Rules — NEVER VIOLATE
 - Secrets only in CF Worker env vars or .env.local (gitignored)
 - D1 only accessible via CF Worker — never direct from client
-- All public forms must have CF Turnstile
+- All public forms must have CF Turnstile (incl. admin login)
 - Stripe webhooks must verify signature in CF Worker
-- Admin routes protected by CF Access (not app-level auth)
+- Admin API gated by an HMAC session token (app-level password): secrets
+  `ADMIN_PASSWORD` + `ADMIN_SESSION_SECRET`; `requireAdmin` verifies the Bearer
+  token, fails closed. (CF Access can't path-scope `/admin` on `*.workers.dev`.)
 - No raw card data ever — Stripe Checkout only
 
 ## Testing & CI
@@ -59,9 +74,9 @@ If it almost exists, EXTEND it — do not copy-paste. No "shit code", DRY only.
   `vitest run --project unit --coverage`). Worker routes run in the miniflare/workerd pool
   where v8 can't instrument them → they're covered **behaviorally** by the integration
   suite (`pnpm test:integration`), not by line %. See `docs/adr/0008-coverage-gate-unit-only.md`.
-- Excluded from the unit gate: `src/app/**`, `src/middleware.ts`, `src/proxy.ts`,
-  `src/components/ui/**`, and the CF-runtime `worker/lib/{orders,stripe,push,analytics,
-  access,categories,notify,products}.ts`. Pure helpers stay in scope.
+- Excluded from the unit gate: `src/app/**`, `src/components/ui/**`, and the CF-runtime
+  `worker/lib/{orders,stripe,push,analytics,access,categories,notify,products}.ts`. Pure
+  helpers stay in scope (e.g. `worker/lib/admin-session.ts` IS unit-tested).
 - Every fixed UI/UX bug gets a permanent regression test in the right layer (see
   `docs/plans/done/phase-16-comprehensive-testing.md`).
 

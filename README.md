@@ -69,12 +69,12 @@ admin dashboard. Code redeploys are only for actual code changes.
 
 | Layer | Technology |
 | --- | --- |
-| Hosting (frontend) | Cloudflare Pages (free) |
-| API / Webhooks | Cloudflare Workers + [Hono](https://hono.dev) |
+| Hosting (frontend) | Cloudflare **Workers** — Next.js SSR via [`@opennextjs/cloudflare`](https://opennext.js.org/cloudflare) (`shopflare-web`) |
+| API / Webhooks | Cloudflare Workers + [Hono](https://hono.dev) (`shopflare-worker`) |
 | Database | Cloudflare D1 (SQLite) + [Drizzle ORM](https://orm.drizzle.team) |
 | Cache / rate-limit | Cloudflare KV |
-| Images | Cloudflare R2 (zero egress) |
-| Admin auth | Cloudflare Access (edge) + in-Worker JWT re-verification |
+| Images | Cloudflare R2 (zero egress; card on file required, $0 under free tier) |
+| Admin auth | App-level password → HMAC session token (Bearer), verified in the API Worker |
 | Bot protection | Cloudflare Turnstile |
 | Payments | Stripe Checkout (no raw card data) |
 | Email | Resend (single send, merchant BCC) |
@@ -88,26 +88,30 @@ admin dashboard. Code redeploys are only for actual code changes.
 ## Architecture
 
 ```
-Browser ──► Cloudflare Pages (Next.js static + RSC)
+Browser ──► Frontend Worker  (Next.js SSR via OpenNext — shopflare-web)
    │
-   │  fetch (lib/api.ts)
+   │  fetch (lib/api.ts) + Authorization: Bearer <admin token> on /api/admin/*
    ▼
-Cloudflare Worker (Hono)  ──►  D1 (orders, products, coupons, …)
-   ├─ /api/*          public: products, config, orders (COD/track/cancel),
-   │                  coupons/validate, reviews, notify
-   ├─ /api/stripe/*   checkout-session + signed webhook
-   └─ /api/admin/*    Cloudflare Access-gated CRUD (re-verified in Worker)
+API Worker (Hono — shopflare-worker)  ──►  D1 (orders, products, coupons, …)
+   ├─ /api/*            public: products, config, orders (COD/track/cancel),
+   │                    coupons/validate, reviews, notify
+   ├─ /api/stripe/*     checkout-session + signed webhook
+   ├─ /api/admin/login  password → HMAC session token (Turnstile + rate-limited)
+   └─ /api/admin/*      token-gated CRUD (requireAdmin verifies the Bearer token)
         │
         ├─► R2  (product images, served back via /cdn/*)
-        ├─► KV  (Access JWKS cache, per-IP rate-limit buckets)
+        ├─► KV  (per-IP rate-limit buckets)
         ├─► Stripe   (coupons, promotion codes, checkout sessions)
         └─► Resend / Web Push  (order + restock notifications)
 ```
 
 Key boundaries:
-- **D1 is never reached from the browser** — only through the Worker.
-- **Public vs admin** routes are split by URL prefix so Cloudflare Access can guard
-  `/api/admin/*` at the edge without touching the public checkout surface.
+- **D1 is never reached from the browser** — only through the API Worker.
+- **Public vs admin** routes are split by URL prefix; `/api/admin/*` requires a valid
+  Bearer session token (the admin UI is a static shell that fetches via the API, so
+  it carries no protected data itself).
+- **Two separate `*.workers.dev` hosts** (frontend + API) → cookies can't be shared
+  (public-suffix domain), so the admin token travels as an `Authorization` header.
 - **Prices are server-authoritative** — the client sends only `{ sizeOptionId, quantity }`
   (or a Stripe price id); the Worker computes every amount from D1.
 
@@ -120,7 +124,7 @@ See [docs/architecture/overview.md](docs/architecture/overview.md) and [docs/adr
 ```
 src/
   app/(store)/        storefront routes (catalog, product, cart, checkout, track)
-  app/(admin)/        admin dashboard routes (CF Access protected)
+  app/(admin)/        admin dashboard routes (token-gated: /admin/login + AdminShell)
   components/         ui (shadcn) · store · admin · common
   hooks/              useCart, useStoreConfig, usePushSubscription, …
   lib/
@@ -131,8 +135,9 @@ src/
     types/store.ts    composite + component prop types
 worker/
   index.ts            Hono entry + CORS + /cdn/* + public-config
-  routes/             public routers + routes/admin/* (CF Access gated)
-  lib/                orders, money, turnstile, ratelimit, access, email, push, notify
+  routes/             public routers + routes/admin/* (token-gated; admin/login is public)
+  lib/                orders, money, turnstile, ratelimit, access (requireAdmin),
+                      admin-session (HMAC tokens), email, push, notify
   db/                 Drizzle schema, migrations, seed.sql
 docs/                  ADRs, architecture, features, setup guides
 scripts/setup/        interactive setup wizard (pnpm setup)
@@ -176,8 +181,8 @@ foreman/overmind. The frontend defaults `NEXT_PUBLIC_WORKER_URL` to
 Open http://localhost:3000 — the seeded demo store (3 products, 2 coupons, a sample
 review) loads immediately. The admin dashboard is at `/admin`.
 
-> In local dev, add `ENVIRONMENT=development` and `ADMIN_DEV_BYPASS=1` to `.env.local`
-> to bypass CF Access JWT verification and reach `/admin` without a tunnel. Both flags are
+> In local dev, set `ENVIRONMENT=development` and `ADMIN_DEV_BYPASS=1` in `.dev.vars`
+> to bypass the admin token check and reach `/admin` without logging in. Both flags are
 > required together — neither alone is sufficient. Turnstile is also bypassed in dev.
 > Both **fail closed in production**.
 
@@ -195,19 +200,21 @@ cp .env.local.example .env.local
 
 | Variable | Where | Purpose |
 | --- | --- | --- |
-| `STRIPE_SECRET_KEY` | Worker | Stripe API calls + webhook verify |
-| `STRIPE_WEBHOOK_SECRET` | Worker | Verifies `/api/stripe/webhook` signatures |
-| `STRIPE_PUBLISHABLE_KEY` | Worker | Returned via `/api/public-config` |
-| `TURNSTILE_SECRET_KEY` / `TURNSTILE_SITE_KEY` | Worker | Bot protection on public POSTs |
-| `CF_ACCESS_TEAM_DOMAIN` / `CF_ACCESS_AUD` | Worker | Admin JWT re-verification |
-| `RESEND_API_KEY` / `RESEND_FROM` | Worker | Transactional email |
-| `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | Worker | Web Push |
-| `FRONTEND_URL` | Worker | CORS allow-list + email/redirect links |
-| `ENVIRONMENT` | Worker | `development` locally; forced `production` on deploy |
-| `NEXT_PUBLIC_WORKER_URL` | Next.js | Worker origin the client calls |
+| `STRIPE_SECRET_KEY` | API Worker | Stripe API calls + webhook verify |
+| `STRIPE_WEBHOOK_SECRET` | API Worker | Verifies `/api/stripe/webhook` signatures |
+| `STRIPE_PUBLISHABLE_KEY` | API Worker | Returned via `/api/public-config` |
+| `TURNSTILE_SECRET_KEY` / `TURNSTILE_SITE_KEY` | API Worker | Bot protection on public POSTs + admin login |
+| `ADMIN_PASSWORD` | API Worker | The admin login password (rotate any time, no redeploy) |
+| `ADMIN_SESSION_SECRET` | API Worker | HMAC key for admin session tokens (`openssl rand -hex 32`) |
+| `RESEND_API_KEY` / `RESEND_FROM` | API Worker | Transactional email |
+| `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | API Worker | Web Push |
+| `FRONTEND_URL` | API Worker | CORS allow-list + email/redirect links (frontend worker origin) |
+| `ENVIRONMENT` | API Worker | `development` locally; forced `production` on deploy |
+| `NEXT_PUBLIC_WORKER_URL` | Next.js (build-time) | API Worker origin the client calls |
 
-Cloudflare bindings (`wrangler.toml`): `DB` (D1), `KV`, `R2`. The `database_id` / KV `id`
-placeholders are filled after you create the resources (the wizard handles this).
+Cloudflare bindings (`wrangler.toml`): `DB` (D1 `shopflare-db0`), `KV`, `R2` (`shopflare-images0`).
+The `database_id` / KV `id` are filled after you create the resources. The frontend worker uses
+a separate `wrangler.frontend.jsonc` (built by OpenNext) and needs **no** runtime secrets.
 
 Full reference: [docs/setup/environment-variables.md](docs/setup/environment-variables.md).
 
@@ -239,8 +246,10 @@ you've edited in admin. Delete the `demo_*` rows to remove the sample data.
 | Script | Description |
 | --- | --- |
 | `pnpm dev` | Next.js dev server |
-| `pnpm worker:dev` | Wrangler dev server for the Worker API |
+| `pnpm worker:dev` | Wrangler dev server for the API Worker |
 | `pnpm build` | Production build of the Next.js app (`--webpack` required for Serwist SW injection; Turbopack support pending upstream) |
+| `pnpm web:preview` | Build via OpenNext + preview the frontend worker locally (workerd) |
+| `pnpm web:deploy` | Build via OpenNext + deploy the frontend worker (`shopflare-web`) |
 | `pnpm setup` | Interactive CF + Stripe setup wizard |
 | `pnpm lint` | ESLint |
 | `pnpm typecheck` | `tsc` for the app **and** the Worker |
@@ -257,8 +266,10 @@ you've edited in admin. Delete the `demo_*` rows to remove the sample data.
 - **No raw card data** — Stripe Checkout only; webhooks are signature-verified and idempotent
   (deduped via a `stripe_events` table).
 - **D1 only via the Worker** — never exposed to the browser.
-- **Admin** — Cloudflare Access at the edge **plus** RS256 JWT re-verification inside the Worker
-  (JWKS cached in KV), so the admin API stays protected even if the Worker origin is hit directly.
+- **Admin** — app-level password login (`/api/admin/login`) issues an HMAC-signed session
+  token (constant-time password check, Turnstile, per-IP rate limit); every `/api/admin/*`
+  request is gated by `requireAdmin` verifying that Bearer token. Fails closed. No account
+  creation — one password, rotated via `wrangler secret put ADMIN_PASSWORD`.
 - **Public POSTs** (COD, Stripe checkout-session, reviews, notify, coupon-validate) are gated by
   **Cloudflare Turnstile** and a coarse **per-IP KV rate limit**.
 - **Server-authoritative pricing** — the client cannot set prices or discounts.
@@ -321,14 +332,18 @@ pnpm typecheck && pnpm test && pnpm build
 
 ## Deployment
 
-1. Create the Cloudflare resources (D1, KV, R2, Access app, Turnstile widget) — the wizard
-   prints the exact commands; see [docs/setup/cloudflare-guide.md](docs/setup/cloudflare-guide.md).
-2. Set Worker secrets: `wrangler secret put STRIPE_SECRET_KEY` (etc.).
+Full walkthrough: [docs/setup/cloudflare-guide.md](docs/setup/cloudflare-guide.md).
+
+1. Create the Cloudflare resources (D1, KV, R2 — R2 needs a card on file, $0 under free tier)
+   and Turnstile widget; paste IDs into `wrangler.toml`.
+2. Set API worker secrets incl. `ADMIN_PASSWORD` + `ADMIN_SESSION_SECRET` (`wrangler secret put …`).
 3. Apply migrations + seed: `pnpm db:migrate && pnpm db:seed`.
-4. Deploy the Worker: `pnpm worker:deploy`.
-5. Deploy the Next.js app to Cloudflare Pages (connect the repo or `wrangler pages deploy`).
-6. Point `FRONTEND_URL` (Worker) and `NEXT_PUBLIC_WORKER_URL` (Pages) at the deployed origins.
-7. Register the Stripe webhook → `<worker-origin>/api/stripe/webhook`.
+4. Deploy the API worker: `pnpm worker:deploy`.
+5. Set `NEXT_PUBLIC_*` in `.env.local`, then deploy the frontend worker: `pnpm web:deploy`
+   (Next.js SSR via OpenNext — **not** Pages, **not** static export).
+6. Set `FRONTEND_URL` (API worker) = the frontend worker origin, then `pnpm worker:deploy` again.
+7. Register the Stripe webhook → `<api-worker-origin>/api/stripe/webhook`.
+8. Set a Cloudflare **budget alert** ($1) and stay on the Workers free plan → $0.
 
 Domain setup: [docs/setup/domain-setup.md](docs/setup/domain-setup.md).
 
