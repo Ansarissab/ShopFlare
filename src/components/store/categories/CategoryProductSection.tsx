@@ -1,0 +1,92 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { ProductGrid } from '@/components/store/product/ProductGrid'
+import { SearchBar } from '@/components/store/search/SearchBar'
+import { InfiniteScrollSentinel } from '@/components/shared/InfiniteScrollSentinel'
+import { layout } from '@/lib/styles'
+import { cn } from '@/lib/utils'
+import { en } from '@/lib/i18n/en'
+import { useProductSearch } from '@/hooks/useProductSearch'
+import type { ProductWithVariants } from '@/lib/types/product'
+
+interface CategoryProductSectionProps {
+  slug: string
+  products: ProductWithVariants[]
+  pageSize: number
+  flatRateCents: number
+  thresholdCents: number
+  initialQuery?: string
+}
+
+export function CategoryProductSection({
+  slug,
+  products,
+  pageSize,
+  flatRateCents,
+  thresholdCents,
+  initialQuery = '',
+}: CategoryProductSectionProps) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [query, setQuery] = useState(() => searchParams?.get('q') ?? initialQuery)
+
+  useEffect(() => {
+    const currentQ = searchParams?.get('q') ?? ''
+    if (currentQ === query) return
+    const url = query
+      ? `/category/${slug}?q=${encodeURIComponent(query)}`
+      : `/category/${slug}`
+    router.replace(url, { scroll: false })
+  }, [query, router, searchParams, slug])
+
+  const { visibleItems, hasMore, loadMore, isLoadingMore, totalFiltered } = useProductSearch({
+    items: products,
+    pageSize,
+    query,
+    activeCategoryId: null,
+    allCategories: [],
+  })
+
+  if (visibleItems.length === 0) {
+    return query ? (
+      <div className={cn(layout.centeredState, 'min-h-[30vh]')}>
+        <SearchBar value={query} onChange={setQuery} />
+        <p className="text-muted-foreground mt-4">
+          {en.store.searchNoResults} &quot;{query}&quot;
+        </p>
+        <button
+          type="button"
+          onClick={() => setQuery('')}
+          className="mt-2 text-sm text-primary underline-offset-4 hover:underline"
+        >
+          {en.store.searchClearHint}
+        </button>
+      </div>
+    ) : (
+      <div className={cn(layout.centeredState, 'min-h-[30vh]')}>
+        <p className="text-muted-foreground">{en.store.categoryEmpty}</p>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      <div className="mb-6">
+        <SearchBar value={query} onChange={setQuery} />
+      </div>
+      <ProductGrid
+        items={visibleItems}
+        storeConfig={{ flatRateCents, thresholdCents }}
+      />
+      <InfiniteScrollSentinel
+        onVisible={loadMore}
+        isLoading={isLoadingMore}
+        hasMore={hasMore}
+        totalItems={totalFiltered}
+        pageSize={pageSize}
+      />
+    </>
+  )
+}
