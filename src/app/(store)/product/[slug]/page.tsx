@@ -1,76 +1,70 @@
-'use client'
-
+import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
-import { Skeleton } from '@/components/ui/skeleton'
 import { ProductHeroWrapper } from '@/components/store/product/ProductHeroWrapper'
 import { ReviewsSection } from '@/components/store/product/ReviewsSection'
-import { ProductJsonLd } from '@/components/store/product/ProductJsonLd'
+import { JsonLd } from '@/components/shared/JsonLd'
 import { layout } from '@/lib/styles'
-import { cn } from '@/lib/utils'
-import type { ProductWithVariants } from '@/lib/types/product'
 import { en } from '@/lib/i18n/en'
-import { useApiResource } from '@/hooks/useApiResource'
+import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
+import { buildPageMetadata } from '@/lib/seo/metadata'
+import { productJsonLd, breadcrumbListJsonLd } from '@/lib/seo/jsonld'
+import type { ProductWithVariants } from '@/lib/types/product'
+import type { StoreConfig } from '@/lib/types/common'
 
-function ProductDetailSkeleton() {
-  return (
-    <div className={layout.page}>
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-        <div className="flex flex-col gap-3">
-          <Skeleton className="aspect-square w-full rounded-xl" />
-          <div className="flex gap-2">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-16 w-16 flex-none rounded-md" />
-            ))}
-          </div>
-        </div>
-        <div className="flex flex-col gap-4">
-          <Skeleton className="h-8 w-2/3" />
-          <Skeleton className="h-6 w-1/4" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-5/6" />
-          <div className="flex gap-2 pt-2">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="size-10 rounded-full" />
-            ))}
-          </div>
-          <div className="flex gap-2">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-9 w-16 rounded-md" />
-            ))}
-          </div>
-          <Skeleton className="h-12 w-full rounded-lg" />
-        </div>
-      </div>
-    </div>
-  )
+interface PageProps {
+  params: Promise<{ slug: string }>
 }
 
-export default function ProductDetailPage() {
-  const params = useParams<{ slug: string }>()
-  const { data: item, loading, notFound } = useApiResource<ProductWithVariants>(
-    params?.slug ? `/api/products/${params.slug}` : null,
-  )
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params
+  const [item, config] = await Promise.all([
+    fetchFromWorker<ProductWithVariants>(`/api/products/${slug}`, { revalidate: 60 }),
+    fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: 300 }),
+  ])
 
-  if (loading) return <ProductDetailSkeleton />
+  if (!item) return { title: en.product.notFound }
 
-  if (notFound || !item) {
-    return (
-      <div className={cn(layout.centeredState, 'max-w-7xl')}>
-        <h1>{en.product.notFound}</h1>
-        <p className="text-muted-foreground text-sm">
-          {en.product.notFoundBody}
-        </p>
-        <Link href="/" className="text-sm text-primary underline-offset-4 hover:underline">
-          {en.product.backToStore}
-        </Link>
-      </div>
-    )
-  }
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
+  const firstImage = item.variants[0]?.images[0]?.url
+
+  return buildPageMetadata({
+    title: item.product.name,
+    description: item.product.description ?? undefined,
+    canonical: `${siteUrl}/product/${slug}`,
+    imageUrl: firstImage,
+    storeName: config?.storeName,
+  })
+}
+
+export default async function ProductDetailPage({ params }: PageProps) {
+  const { slug } = await params
+  const [item, config] = await Promise.all([
+    fetchFromWorker<ProductWithVariants>(`/api/products/${slug}`, { revalidate: 60 }),
+    fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: 300 }),
+  ])
+
+  if (!item) notFound()
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
+  const storeUrl = siteUrl
+
+  const breadcrumb = breadcrumbListJsonLd([
+    { name: config?.storeName ?? 'Home', url: `${siteUrl}/` },
+    { name: item.product.name, url: `${siteUrl}/product/${slug}` },
+  ])
+
+  const product = productJsonLd(item, {
+    currency: config?.currency,
+    storeUrl,
+    storeName: config?.storeName,
+  })
 
   return (
     <div className={layout.page}>
-      <ProductJsonLd item={item} />
+      <JsonLd data={breadcrumb} />
+      <JsonLd data={product} />
+
       <nav className="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
         <Link href="/" className="hover:text-foreground transition-colors">
           {en.store.allProducts}
@@ -78,6 +72,7 @@ export default function ProductDetailPage() {
         <span aria-hidden>/</span>
         <span className="text-foreground truncate">{item.product.name}</span>
       </nav>
+
       <ProductHeroWrapper item={item} />
       <ReviewsSection
         productId={item.product.id}
