@@ -1,50 +1,52 @@
-'use client'
-
+import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
-import { Skeleton } from '@/components/ui/skeleton'
+import { RenderHtml } from '@/components/shared/RenderHtml'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
 import { formatDate } from '@/lib/utils/index'
 import { en } from '@/lib/i18n/en'
-import { useApiResource } from '@/hooks/useApiResource'
+import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
+import { buildPageMetadata } from '@/lib/seo/metadata'
 import type { StorePage } from '@/lib/types/admin'
+import type { StoreConfig } from '@/lib/types/common'
 
-function PolicySkeleton() {
-  return (
-    <div className={cn(layout.detailPage, 'max-w-3xl')}>
-      <Skeleton className="h-8 w-1/2" />
-      <Skeleton className="h-4 w-1/4" />
-      <div className="flex flex-col gap-2 mt-4">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <Skeleton key={i} className="h-4 w-full" />
-        ))}
-      </div>
-    </div>
-  )
+interface PageProps {
+  params: Promise<{ slug: string }>
 }
 
-export default function PolicyPage() {
-  const params = useParams<{ slug: string }>()
-  const { data: page, loading, notFound } = useApiResource<StorePage>(
-    params?.slug ? `/api/pages/${params.slug}` : null,
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params
+  const [page, config] = await Promise.all([
+    fetchFromWorker<StorePage>(`/api/pages/${slug}`, { revalidate: 300 }),
+    fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: 300 }),
+  ])
+
+  if (!page) return { title: en.policies.notFound }
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
+
+  return buildPageMetadata({
+    title: page.title,
+    canonical: `${siteUrl}/policy/${slug}`,
+    storeName: config?.storeName,
+  })
+}
+
+export default async function PolicyPage({ params }: PageProps) {
+  const { slug } = await params
+  const page = await fetchFromWorker<StorePage>(`/api/pages/${slug}`, { revalidate: 300 })
+
+  if (!page) notFound()
+
+  const updatedDate = formatDate(
+    page.updatedAt,
+    { year: 'numeric', month: 'long', day: 'numeric' },
+    undefined,
   )
 
-  if (loading) return <PolicySkeleton />
-
-  if (notFound || !page) {
-    return (
-      <div className={cn(layout.centeredState, 'max-w-3xl')}>
-        <h1 className="text-xl font-semibold">{en.policies.notFound}</h1>
-        <p className="text-muted-foreground text-sm">{en.policies.notFoundBody}</p>
-        <Link href="/" className="text-sm text-primary underline-offset-4 hover:underline">
-          {en.policies.backToStore}
-        </Link>
-      </div>
-    )
-  }
-
-  const updatedDate = formatDate(page.updatedAt, { year: 'numeric', month: 'long', day: 'numeric' }, undefined)
+  // Detect whether content is plain text or HTML (Trix output starts with <).
+  const isHtml = page.content?.trimStart().startsWith('<')
 
   return (
     <div className={cn(layout.detailPage, 'max-w-3xl')}>
@@ -54,9 +56,13 @@ export default function PolicyPage() {
       </p>
 
       {page.content ? (
-        <div className="text-sm leading-relaxed text-foreground whitespace-pre-wrap">
-          {page.content}
-        </div>
+        isHtml ? (
+          <RenderHtml html={page.content} />
+        ) : (
+          <div className="text-sm leading-relaxed text-foreground whitespace-pre-wrap">
+            {page.content}
+          </div>
+        )
       ) : (
         <p className="text-sm text-muted-foreground italic">{en.policies.empty}</p>
       )}
