@@ -118,6 +118,7 @@ export function ProductForm({ initial }: ProductFormProps) {
   const [name, setName] = useState(initial?.product.name ?? '')
   const [description, setDescription] = useState(initial?.product.description ?? '')
   const [active, setActive] = useState(initial?.product.active ?? true)
+  const [reviewsEnabled, setReviewsEnabled] = useState(initial?.product.reviewsEnabled ?? true)
   const [saving, setSaving] = useState(false)
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
     initial?.categoryIds ?? [],
@@ -158,11 +159,11 @@ export function ProductForm({ initial }: ProductFormProps) {
       const productId = initial?.product.id
 
       if (productId) {
-        await apiPut(`/api/admin/products/${productId}`, { name, description, active })
+        await apiPut(`/api/admin/products/${productId}`, { name, description, active, reviewsEnabled })
         await apiPut(`/api/admin/products/${productId}/categories`, { categoryIds: selectedCategoryIds })
         toast.success(en.admin.productUpdated)
       } else {
-        const created = await apiPost<{ id: string }>('/api/admin/products', { name, description, active })
+        const created = await apiPost<{ id: string }>('/api/admin/products', { name, description, active, reviewsEnabled })
         await apiPut(`/api/admin/products/${created.id}/categories`, { categoryIds: selectedCategoryIds })
         toast.success(en.admin.productCreated)
         router.push(`/admin/products/${created.id}`)
@@ -381,6 +382,18 @@ export function ProductForm({ initial }: ProductFormProps) {
           />
           <label htmlFor="product-active" className="text-sm cursor-pointer">
             {en.admin.active}
+          </label>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Checkbox
+            id="product-reviews-enabled"
+            aria-label={en.admin.enableReviewsProduct}
+            checked={reviewsEnabled}
+            onCheckedChange={(v: boolean) => setReviewsEnabled(v === true)}
+          />
+          <label htmlFor="product-reviews-enabled" className="text-sm cursor-pointer">
+            {en.admin.enableReviewsProduct}
           </label>
         </div>
 

@@ -47,6 +47,9 @@ export default function AdminSettingsPage() {
   // WhatsApp
   const [whatsappEnabled, setWhatsappEnabled] = useState(false)
 
+  // Reviews
+  const [reviewsEnabled, setReviewsEnabled] = useState(true)
+
   // Tax
   const [taxEnabled, setTaxEnabled] = useState(false)
   const [taxRateInput, setTaxRateInput] = useState('0')
@@ -68,6 +71,7 @@ export default function AdminSettingsPage() {
     setTagline(config.tagline ?? '')
     setWhatsappNumber(config.whatsappNumber ?? '')
     setWhatsappEnabled(config.whatsappEnabled ?? false)
+    setReviewsEnabled(config.reviewsEnabled ?? true)
     setContactEmail(config.contactEmail ?? '')
     setCurrency(config.currency)
     setFlatShipping(String(config.flatShippingRateCents))
@@ -154,6 +158,7 @@ export default function AdminSettingsPage() {
         tagline: tagline.trim() || undefined,
         whatsappNumber: whatsappNumber.trim() || undefined,
         whatsappEnabled,
+        reviewsEnabled,
         contactEmail: contactEmail.trim() || undefined,
         currency,
         flatShippingRateCents: Number(flatShipping),
@@ -546,6 +551,18 @@ export default function AdminSettingsPage() {
               className="h-4 w-4 cursor-pointer rounded border"
             />
             <span className="text-xs text-muted-foreground">{en.admin.enableWhatsAppHint}</span>
+          </div>
+        </FormField>
+        <FormField label={en.admin.enableReviews} htmlFor="s-reviews-enabled">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="s-reviews-enabled"
+              checked={reviewsEnabled}
+              onChange={(e) => setReviewsEnabled(e.target.checked)}
+              className="h-4 w-4 cursor-pointer rounded border"
+            />
+            <span className="text-xs text-muted-foreground">{en.admin.enableReviewsHint}</span>
           </div>
         </FormField>
         <FormField label={en.admin.contactEmail} htmlFor="s-email">
