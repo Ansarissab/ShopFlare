@@ -27,8 +27,14 @@ re-implemented.
 | Colors             | `globals.css` CSS vars            | Never hardcode hex (WhatsApp brand green is the only documented exception). |
 | Helpers            | `src/lib/utils/index.ts`          | `formatPrice`, `calculateShipping`, `buildProductMaps`, `cn`. One definition each. |
 | **Network I/O**    | `src/lib/api.ts`                  | **All** calls go through `apiGet`/`apiPost`. No raw `fetch()`, no per-file `WORKER_URL`. Custom headers → `{ headers }` option. |
+| Server-side fetch  | `src/lib/server/fetchFromWorker.ts` | Server components + `generateMetadata` use `fetchFromWorker<T>()`. Never raw `fetch()` with a hardcoded worker URL in a page. |
 | UI strings         | `src/lib/i18n/en.ts`              | Never hardcode user-facing text in JSX.           |
-| Constants          | `src/lib/constants/index.ts`      | `CURRENCIES`, `ORDER_STATUSES`, `PAYMENT_METHODS`, `DEFAULT_CURRENCY`. |
+| Constants          | `src/lib/constants/index.ts`      | `CURRENCIES`, `ORDER_STATUSES`, `PAYMENT_METHODS`, `DEFAULT_CURRENCY`, `FEATURE_FLAGS`. |
+| **Feature flags**  | `src/lib/features.ts` / `worker/lib/features.ts` | Always call `isFeatureEnabled(config, key)`. Never read flag keys inline. |
+| **HTML sanitize**  | `src/lib/html.ts` + `src/components/shared/RenderHtml.tsx` | All merchant-authored HTML goes through `sanitizeHtml()`. Never `dangerouslySetInnerHTML` with raw stored HTML. |
+| **Image compress** | `src/lib/image.ts` (`compressImage`) | Single compression config for all upload contexts. Never call `browser-image-compression` directly. |
+| **Rich text**      | `src/components/shared/RichText.tsx` | Single Trix wrapper. Never instantiate `trix` directly. |
+| **SEO metadata**   | `src/lib/seo/metadata.ts` + `src/lib/seo/jsonld.ts` | All JSON-LD builders and `buildPageMetadata` live here. Server pages emit via `<JsonLd>`. |
 
 ## 3. Global Type Definitions
 

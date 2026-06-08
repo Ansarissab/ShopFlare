@@ -128,11 +128,17 @@ src/
   components/         ui (shadcn) · store · admin · common
   hooks/              useCart, useStoreConfig, usePushSubscription, …
   lib/
-    api.ts            ALL network I/O (apiGet/apiPost/…). Never raw fetch.
-    constants/        ORDER_STATUSES, CURRENCIES, PAYMENT_METHODS, limits
+    api.ts            ALL client network I/O (apiGet/apiPost/…). Never raw fetch.
+    server/           server-only helpers: fetchFromWorker (typed ISR fetch for RSC)
+    features.ts       isFeatureEnabled — feature-flag helper (worker mirror in worker/lib/)
+    html.ts           sanitizeHtml (DOMPurify) — sanitize merchant HTML before render
+    image.ts          compressImage — single compression config for all upload paths
+    seo/              jsonld builders + buildPageMetadata (used in generateMetadata)
+    constants/        ORDER_STATUSES, CURRENCIES, PAYMENT_METHODS, FEATURE_FLAGS, limits
     i18n/en.ts        ALL UI strings (never hardcode in components)
     schemas/          Zod v4 schemas, shared client + Worker
     types/store.ts    composite + component prop types
+  components/shared/  RichText (Trix editor), RenderHtml, ImageUpload, JsonLd
 worker/
   index.ts            Hono entry + CORS + /cdn/* + public-config
   routes/             public routers + routes/admin/* (token-gated; admin/login is public)

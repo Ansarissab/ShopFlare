@@ -140,16 +140,3 @@ export interface ReviewFormProps {
   productName: string
   onSubmitted: () => void
 }
-
-// JSON-LD / SEO
-export interface ProductJsonLdProps {
-  item: ProductWithVariants
-  rating?: { average: number; count: number }
-  storeUrl?: string
-  storeName?: string
-}
-
-export type ProductJsonLdOffer =
-  | { '@type': 'AggregateOffer'; lowPrice: number; highPrice: number; offerCount: number; priceCurrency: string; availability: string; url?: string }
-  | { '@type': 'Offer'; price: number; priceCurrency: string; availability: string; url?: string }
-  | { '@type': 'Offer'; priceCurrency: string; availability: string; url?: string }

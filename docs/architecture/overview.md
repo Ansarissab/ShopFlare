@@ -24,6 +24,12 @@ The Next.js app is server-rendered (SSR/RSC), deployed as its own Worker via
 `@opennextjs/cloudflare` — not a static export, not Cloudflare Pages. Data is
 fetched from the API Worker (client-side, and server-side during SSR).
 
+Public store pages (`/product/[slug]`, `/category/[slug]`, `/policy/[slug]`) are
+async Server Components that fetch their entity via `fetchFromWorker()`, call
+`generateMetadata()` server-side, and emit JSON-LD structured data in the initial
+HTML. Client islands (`ProductHeroWrapper`, `CategoryProductSection`) receive
+server-fetched data as props — no duplicate fetch on hydration.
+
 ## Admin access
 
 App-level password — no Cloudflare Access (it can't path-scope `/admin` on
