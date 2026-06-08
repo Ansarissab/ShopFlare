@@ -44,6 +44,9 @@ export default function AdminSettingsPage() {
   const [logoUploading, setLogoUploading] = useState(false)
   const [faviconUploading, setFaviconUploading] = useState(false)
 
+  // WhatsApp
+  const [whatsappEnabled, setWhatsappEnabled] = useState(false)
+
   // Tax
   const [taxEnabled, setTaxEnabled] = useState(false)
   const [taxRateInput, setTaxRateInput] = useState('0')
@@ -64,6 +67,7 @@ export default function AdminSettingsPage() {
     setStoreName(config.storeName)
     setTagline(config.tagline ?? '')
     setWhatsappNumber(config.whatsappNumber ?? '')
+    setWhatsappEnabled(config.whatsappEnabled ?? false)
     setContactEmail(config.contactEmail ?? '')
     setCurrency(config.currency)
     setFlatShipping(String(config.flatShippingRateCents))
@@ -149,6 +153,7 @@ export default function AdminSettingsPage() {
         storeName: storeName.trim() || undefined,
         tagline: tagline.trim() || undefined,
         whatsappNumber: whatsappNumber.trim() || undefined,
+        whatsappEnabled,
         contactEmail: contactEmail.trim() || undefined,
         currency,
         flatShippingRateCents: Number(flatShipping),
@@ -530,6 +535,18 @@ export default function AdminSettingsPage() {
         <h2 className="text-sm font-semibold">Contact</h2>
         <FormField label={en.admin.whatsappNumber} htmlFor="s-wa">
           <Input id="s-wa" type="tel" value={whatsappNumber} onChange={(e) => setWhatsappNumber(e.target.value)} placeholder="+92300..." />
+        </FormField>
+        <FormField label={en.admin.enableWhatsApp} htmlFor="s-wa-enabled">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="s-wa-enabled"
+              checked={whatsappEnabled}
+              onChange={(e) => setWhatsappEnabled(e.target.checked)}
+              className="h-4 w-4 cursor-pointer rounded border"
+            />
+            <span className="text-xs text-muted-foreground">{en.admin.enableWhatsAppHint}</span>
+          </div>
         </FormField>
         <FormField label={en.admin.contactEmail} htmlFor="s-email">
           <Input id="s-email" type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
