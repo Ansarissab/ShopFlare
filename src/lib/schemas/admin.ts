@@ -16,9 +16,10 @@ import {
 // ─── Product ─────────────────────────────────────────────────────────────────
 
 export const createProductSchema = z.object({
-  name:        z.string().min(1).max(200),
-  description: z.string().default(''),
-  active:      z.boolean().default(true),
+  name:           z.string().min(1).max(200),
+  description:    z.string().default(''),
+  active:         z.boolean().default(true),
+  reviewsEnabled: z.boolean().default(true),
   stripeProductId: z.string().optional(),
 })
 
