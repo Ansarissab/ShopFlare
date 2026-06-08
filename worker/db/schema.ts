@@ -9,6 +9,7 @@ export const products = sqliteTable('products', {
   name: text('name').notNull(),
   description: text('description').notNull().default(''),
   active: integer('active', { mode: 'boolean' }).notNull().default(true),
+  reviewsEnabled: integer('reviews_enabled', { mode: 'boolean' }).notNull().default(true),
   stripeProductId: text('stripe_product_id'),
   createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),
   updatedAt: text('updated_at').notNull().default(sql`(datetime('now'))`),

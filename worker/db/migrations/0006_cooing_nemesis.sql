@@ -1,0 +1,1 @@
+ALTER TABLE `products` ADD `reviews_enabled` integer DEFAULT true NOT NULL;

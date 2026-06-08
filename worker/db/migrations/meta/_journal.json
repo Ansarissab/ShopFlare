@@ -43,6 +43,13 @@
       "when": 1780677646601,
       "tag": "0005_categories",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1780947632705,
+      "tag": "0006_cooing_nemesis",
+      "breakpoints": true
     }
   ]
 }
