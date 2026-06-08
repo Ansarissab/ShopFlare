@@ -11,15 +11,17 @@ import { en } from '@/lib/i18n/en'
 import type { ReviewsSectionProps, ProductReviewsResponse } from '@/lib/types/product'
 import { formatDate } from '@/lib/utils/index'
 
-export function ReviewsSection({ productId, productName, className }: ReviewsSectionProps) {
+export function ReviewsSection({ productId, productName, reviewsEnabled = true, className }: ReviewsSectionProps) {
   const [showForm, setShowForm] = useState(false)
   const { data, loading, error } = useApiResource<ProductReviewsResponse>(
-    `/api/reviews/product/${productId}`,
+    reviewsEnabled ? `/api/reviews/product/${productId}` : null,
   )
 
   function handleSubmitted() {
     setShowForm(false)
   }
+
+  if (!reviewsEnabled) return null
 
   return (
     <section aria-labelledby="reviews-heading" className={className}>

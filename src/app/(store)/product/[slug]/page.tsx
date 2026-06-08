@@ -9,6 +9,7 @@ import { en } from '@/lib/i18n/en'
 import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
 import { buildPageMetadata } from '@/lib/seo/metadata'
 import { productJsonLd, breadcrumbListJsonLd } from '@/lib/seo/jsonld'
+import { isFeatureEnabled } from '@/lib/features'
 import type { ProductWithVariants } from '@/lib/types/product'
 import type { StoreConfig } from '@/lib/types/common'
 
@@ -77,6 +78,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
       <ReviewsSection
         productId={item.product.id}
         productName={item.product.name}
+        reviewsEnabled={isFeatureEnabled(config, 'reviewsEnabled') && item.product.reviewsEnabled}
         className="mt-10"
       />
     </div>

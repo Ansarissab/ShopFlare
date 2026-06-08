@@ -134,6 +134,7 @@ export interface ReviewStarsProps {
 export interface ReviewsSectionProps {
   productId: string
   productName: string
+  reviewsEnabled?: boolean
   className?: string
 }
 
