@@ -7,6 +7,7 @@ import { AppHeader } from '@/components/store/shell/AppHeader'
 import { AppTabBar } from '@/components/store/shell/AppTabBar'
 import { InstallPrompt } from '@/components/pwa/InstallPrompt'
 import { OfflineBanner } from '@/components/pwa/OfflineBanner'
+import { WhatsAppWidget } from '@/components/store/WhatsAppWidget'
 
 export const metadata: Metadata = {
   manifest: '/manifest.webmanifest',
@@ -32,6 +33,7 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
       <AppTabBar />
       <InstallPrompt />
       <OfflineBanner />
+      <WhatsAppWidget />
     </ThemeProvider>
   )
 }
