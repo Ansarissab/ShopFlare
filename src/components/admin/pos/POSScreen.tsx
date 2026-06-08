@@ -14,6 +14,7 @@ import { FormField } from '@/components/common/FormField'
 import { en } from '@/lib/i18n/en'
 import { formatPrice } from '@/lib/utils/index'
 import { buildWhatsAppOrderUrl } from '@/lib/whatsapp'
+import { isFeatureEnabled } from '@/lib/features'
 import { apiPost } from '@/lib/api'
 import { useApiResource } from '@/hooks/useApiResource'
 import { useStoreConfig } from '@/hooks/useStoreConfig'
@@ -108,7 +109,7 @@ export function POSScreen() {
   }
 
   function handleSendWhatsApp(_orderNumber: string) {
-    if (!config?.whatsappNumber) return
+    if (!isFeatureEnabled(config, 'whatsappEnabled') || !config?.whatsappNumber) return
     const firstItem = saleItems[0]
     if (!firstItem) return
     const url = buildWhatsAppOrderUrl({
@@ -133,7 +134,7 @@ export function POSScreen() {
           {en.pos.orderNumber.replace('{number}', completedOrderNumber)}
         </p>
         <div className="flex gap-3">
-          {config?.whatsappNumber && (
+          {isFeatureEnabled(config, 'whatsappEnabled') && config?.whatsappNumber && (
             <Button variant="outline" onClick={() => handleSendWhatsApp(completedOrderNumber)}>
               {en.pos.sendWhatsApp}
             </Button>
