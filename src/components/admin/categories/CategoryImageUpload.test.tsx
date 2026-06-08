@@ -4,7 +4,7 @@ import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/re
 import { CategoryImageUpload } from './CategoryImageUpload'
 import { en } from '@/lib/i18n/en'
 import { apiUpload, apiDelete } from '@/lib/api'
-import imageCompression from 'browser-image-compression'
+import { compressImage } from '@/lib/image'
 import { toast } from 'sonner'
 
 vi.mock('next/image', async () => {
@@ -22,8 +22,8 @@ vi.mock('@/lib/api', () => ({
   apiDelete: vi.fn(() => Promise.resolve({})),
 }))
 
-vi.mock('browser-image-compression', () => ({
-  default: vi.fn((file: File) => Promise.resolve(file)),
+vi.mock('@/lib/image', () => ({
+  compressImage: vi.fn((file: File) => Promise.resolve({ file, originalBytes: file.size, compressedBytes: file.size })),
 }))
 
 vi.mock('sonner', () => ({
@@ -75,7 +75,7 @@ describe('CategoryImageUpload', () => {
     fireEvent.change(fileInput(), { target: { files: [file] } })
 
     await waitFor(() => expect(onUploadComplete).toHaveBeenCalledWith('/uploaded.jpg'))
-    expect(imageCompression).toHaveBeenCalled()
+    expect(compressImage).toHaveBeenCalled()
     expect(apiUpload).toHaveBeenCalledWith('/api/admin/categories/cat-1/image', expect.any(FormData))
     expect(toast.success).toHaveBeenCalledWith(en.admin.imageUploaded)
   })

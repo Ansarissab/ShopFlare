@@ -4,7 +4,7 @@ import { useRef, useState } from 'react'
 import Image from 'next/image'
 import { Trash2, Upload } from 'lucide-react'
 import { toast } from 'sonner'
-import imageCompression from 'browser-image-compression'
+import { compressImage } from '@/lib/image'
 import { Button } from '@/components/ui/button'
 import { en } from '@/lib/i18n/en'
 import { apiUpload, apiDelete } from '@/lib/api'
@@ -26,11 +26,7 @@ export function CategoryImageUpload({
 
     setUploading(true)
     try {
-      const compressed = await imageCompression(file, {
-        maxSizeMB: 0.8,
-        maxWidthOrHeight: 1200,
-        useWebWorker: true,
-      })
+      const { file: compressed } = await compressImage(file)
 
       const form = new FormData()
       form.append('file', compressed, file.name)

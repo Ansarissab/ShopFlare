@@ -151,6 +151,7 @@ export const en = {
     outOfStock: 'Sorry, this item is out of stock',
     orderFailed: 'Order failed. Please try again.',
     networkError: 'Network error. Check your connection.',
+    imageTooLarge: 'Image is too large even after compression. Please use a smaller image.',
   },
   admin: {
     back: 'Back',

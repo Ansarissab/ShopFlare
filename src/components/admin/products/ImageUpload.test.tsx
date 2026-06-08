@@ -24,13 +24,13 @@ vi.mock('sonner', () => ({
   toast: Object.assign(vi.fn(), { success: vi.fn(), error: vi.fn() }),
 }))
 
-vi.mock('browser-image-compression', () => ({
-  default: vi.fn((file: File) => Promise.resolve(file)),
+vi.mock('@/lib/image', () => ({
+  compressImage: vi.fn((file: File) => Promise.resolve({ file, originalBytes: file.size, compressedBytes: file.size })),
 }))
 
 import { apiUpload, apiDelete } from '@/lib/api'
 import { toast } from 'sonner'
-import imageCompression from 'browser-image-compression'
+import { compressImage } from '@/lib/image'
 
 function makeImage(id: string): ProductImage {
   return {
@@ -80,7 +80,7 @@ describe('ImageUpload', () => {
     fireEvent.change(input, { target: { files: [file] } })
 
     await waitFor(() => expect(onUploaded).toHaveBeenCalledWith({ id: 'img-new', url: '/new.jpg' }))
-    expect(imageCompression).toHaveBeenCalled()
+    expect(compressImage).toHaveBeenCalled()
     expect(apiUpload).toHaveBeenCalledWith('/api/admin/products/images/upload', expect.any(FormData))
     expect(toast.success).toHaveBeenCalledWith(en.admin.imageUploaded)
     // input reset
@@ -104,7 +104,7 @@ describe('ImageUpload', () => {
   })
 
   it('upload failure with non-Error toasts network error', async () => {
-    ;(imageCompression as unknown as ReturnType<typeof vi.fn>).mockRejectedValueOnce('weird')
+    ;(compressImage as unknown as ReturnType<typeof vi.fn>).mockRejectedValueOnce('weird')
     const { container } = renderUpload()
     const input = container.querySelector('input[type="file"]') as HTMLInputElement
     fireEvent.change(input, { target: { files: [new File(['x'], 'p.png', { type: 'image/png' })] } })
