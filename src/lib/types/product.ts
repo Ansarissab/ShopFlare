@@ -50,6 +50,7 @@ export interface ProductActionsProps {
   selectedSize: SizeOption | null
   allSizesOOS: boolean
   isAddingToCart: boolean
+  showWhatsApp: boolean
   onAddToCart: () => void
   onBuyNow: () => void
   onWhatsApp: () => void
@@ -75,6 +76,7 @@ export interface ProductHeroProps {
   currency: CurrencyCode
   isNew?: boolean
   isPopular?: boolean
+  showWhatsApp: boolean
   onAddToCart: (sizeOption: SizeOption) => void
   onBuyNow: (sizeOption: SizeOption) => void
   onWhatsApp: (sizeOption: SizeOption) => void

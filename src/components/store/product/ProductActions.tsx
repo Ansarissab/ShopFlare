@@ -10,6 +10,7 @@ export function ProductActions({
   selectedSize,
   allSizesOOS,
   isAddingToCart,
+  showWhatsApp,
   onAddToCart,
   onBuyNow,
   onWhatsApp,
@@ -66,16 +67,18 @@ export function ProductActions({
 
       {/* Contextual: WhatsApp + COD — only when size is selected */}
       {hasSelection && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <Button
-            variant="outline"
-            size="lg"
-            className="gap-2"
-            onClick={onWhatsApp}
-          >
-            <MessageCircle className="size-4" />
-            <span className="truncate">{en.store.orderOnWhatsApp}</span>
-          </Button>
+        <div className={cn('grid gap-2', showWhatsApp ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1')}>
+          {showWhatsApp && (
+            <Button
+              variant="outline"
+              size="lg"
+              className="gap-2"
+              onClick={onWhatsApp}
+            >
+              <MessageCircle className="size-4" />
+              <span className="truncate">{en.store.orderOnWhatsApp}</span>
+            </Button>
+          )}
           <Button
             variant="outline"
             size="lg"

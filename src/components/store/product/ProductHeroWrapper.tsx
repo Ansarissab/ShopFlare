@@ -9,6 +9,7 @@ import { useStoreConfig } from '@/hooks/useStoreConfig'
 import { buildWhatsAppOrderUrl } from '@/lib/whatsapp'
 import { buildProductMaps } from '@/lib/utils/index'
 import { DEFAULT_CURRENCY } from '@/lib/constants'
+import { isFeatureEnabled } from '@/lib/features'
 import { en } from '@/lib/i18n/en'
 import { apiPost } from '@/lib/api'
 import type { CartItem } from '@/hooks/useCart'
@@ -107,6 +108,8 @@ export function ProductHeroWrapper({ item }: ProductHeroWrapperProps) {
     [buildCartItem, addItem, router],
   )
 
+  const showWhatsApp = isFeatureEnabled(config, 'whatsappEnabled') && !!config?.whatsappNumber
+
   return (
     <ProductHero
       product={item.product}
@@ -115,6 +118,7 @@ export function ProductHeroWrapper({ item }: ProductHeroWrapperProps) {
       imagesByVariant={imagesByVariant}
       currency={config?.currency ?? DEFAULT_CURRENCY}
       isAddingToCart={isAddingToCart}
+      showWhatsApp={showWhatsApp}
       onAddToCart={handleAddToCart}
       onBuyNow={handleBuyNow}
       onWhatsApp={handleWhatsApp}

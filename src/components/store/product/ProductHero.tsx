@@ -21,6 +21,7 @@ export function ProductHero({
   currency,
   isNew,
   isPopular,
+  showWhatsApp,
   onAddToCart,
   onBuyNow,
   onWhatsApp,
@@ -135,6 +136,7 @@ export function ProductHero({
           selectedSize={selectedSize}
           allSizesOOS={allSizesOOS}
           isAddingToCart={isAddingToCart}
+          showWhatsApp={showWhatsApp}
           onAddToCart={() => selectedSize && onAddToCart(selectedSize)}
           onBuyNow={() => selectedSize && onBuyNow(selectedSize)}
           onWhatsApp={() => selectedSize && onWhatsApp(selectedSize)}
