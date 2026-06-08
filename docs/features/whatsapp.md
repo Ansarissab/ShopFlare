@@ -1,5 +1,29 @@
 # WhatsApp Integration
 
+## Enable / Disable (Feature Flag)
+
+WhatsApp is **off by default**. Enable via Admin → Settings → Contact → **Enable WhatsApp** checkbox.
+The flag (`whatsappEnabled`) is stored in Store Config and applied at runtime — no redeploy.
+
+Gating rules (all three surfaces obey the same matrix):
+
+| `whatsappEnabled` | `whatsappNumber` set | Result                                            |
+| ----------------- | -------------------- | ------------------------------------------------- |
+| OFF               | any                  | No WhatsApp UI anywhere                           |
+| ON                | empty                | Hidden — admin hint reminds merchant              |
+| ON                | set                  | Floating widget + per-product button + POS button |
+
+Toggle round-trips through PUT `/api/admin/config/store` (same endpoint as all other settings).
+
+## Floating Chat Widget (Phase 19)
+
+A fixed bottom-right button appears on **every** storefront page (mounted in `(store)/layout.tsx`).
+
+- Opens `wa.me/{number}?text=...` with a generic greeting (`en.whatsapp.contactGreeting`).
+- Brand green `#25D366` background — intentional exception to the CSS-var colour rule (same exception as `WhatsAppButton.tsx`).
+- In PWA standalone mode (AppTabBar visible) the widget shifts up to `bottom-20` (80px) so both remain tappable.
+- `aria-label` from `en.store.whatsappWidgetLabel`; SVG icon is `aria-hidden`.
+
 ## Customer order flow
 
 Customer selects product → clicks "Order on WhatsApp" → WhatsApp opens with pre-filled message:

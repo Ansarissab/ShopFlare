@@ -43,7 +43,7 @@ Replaces Shopify Basic ($29/month) for stores that don't need the heavyweight pl
 - **Real-time data freshness**: products refetch silently every 60 s + on tab focus + on cross-tab admin writes
 - URL-shareable filters: `?q=keyword&category=slug` — bookmarkable, back-button safe
 - Cart with localStorage persistence (Zustand) and live shipping/free-shipping threshold
-- Three checkout paths: **Stripe Checkout** (card), **Cash on Delivery**, and **WhatsApp** order hand-off
+- Three checkout paths: **Stripe Checkout** (card), **Cash on Delivery**, and **WhatsApp** order hand-off (optional, admin-toggleable; includes a floating chat widget on every storefront page)
 - Coupons (percentage / fixed, min-order, usage + per-customer limits)
 - Order tracking page and self-service cancellation (while pending/confirmed)
 - Verified-purchase **reviews + ratings** (only delivered orders, admin-moderated)
