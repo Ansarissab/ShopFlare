@@ -116,6 +116,7 @@ function makeProps(overrides: Partial<ProductHeroProps> = {}): ProductHeroProps 
       v2: [img('i3', 'v2')],
     },
     currency: 'PKR',
+    showWhatsApp: true,
     onAddToCart: vi.fn(),
     onBuyNow: vi.fn(),
     onWhatsApp: vi.fn(),
