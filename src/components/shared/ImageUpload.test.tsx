@@ -9,7 +9,7 @@ vi.mock('next/image', async () => {
   const { createElement } = await import('react')
   return {
     default: (props: Record<string, unknown>) => {
-      const { fill, priority, ...rest } = props
+      const { fill, priority, unoptimized, ...rest } = props
       return createElement('img', rest as React.ImgHTMLAttributes<HTMLImageElement>)
     },
   }
@@ -31,6 +31,12 @@ vi.mock('@/lib/image', () => ({
   COMPRESS_CONFIRM_THRESHOLD_BYTES: 3 * 1024 * 1024,
 }))
 
+// Prevent URL.createObjectURL errors in jsdom
+vi.stubGlobal('URL', {
+  createObjectURL: vi.fn(() => 'blob:mock'),
+  revokeObjectURL: vi.fn(),
+})
+
 import { apiUpload, apiDelete } from '@/lib/api'
 import { compressImage } from '@/lib/image'
 import { toast } from 'sonner'
@@ -42,6 +48,14 @@ afterEach(() => {
 
 function fileInput(): HTMLInputElement {
   return document.querySelector('input[type="file"]') as HTMLInputElement
+}
+
+// Helper: simulate picking a file with given size
+function pickFile(size: number, name = 'photo.jpg') {
+  const content = 'x'.repeat(size)
+  const file = new File([content], name, { type: 'image/jpeg' })
+  Object.defineProperty(file, 'size', { value: size })
+  return file
 }
 
 describe('shared ImageUpload', () => {
@@ -65,7 +79,9 @@ describe('shared ImageUpload', () => {
     expect(apiUpload).not.toHaveBeenCalled()
   })
 
-  it('compresses and uploads file, calls onUploaded', async () => {
+  // ── Silent upload (file ≤ 3 MB threshold) ────────────────────────────────
+
+  it('compresses and uploads silently when original ≤ threshold', async () => {
     const onUploaded = vi.fn()
     render(<ImageUpload endpoint="/api/upload" onUploaded={onUploaded} />)
     const file = new File(['x'], 'photo.jpg', { type: 'image/jpeg' })
@@ -75,9 +91,10 @@ describe('shared ImageUpload', () => {
     expect(compressImage).toHaveBeenCalledWith(file)
     expect(apiUpload).toHaveBeenCalledWith('/api/upload', expect.any(FormData))
     expect(toast.success).toHaveBeenCalledWith(en.admin.imageUploaded)
+    expect(screen.queryByText(en.admin.compressTitle)).toBeNull()
   })
 
-  it('appends extraFields to FormData', async () => {
+  it('appends extraFields to FormData on silent upload', async () => {
     const onUploaded = vi.fn()
     render(
       <ImageUpload
@@ -94,17 +111,91 @@ describe('shared ImageUpload', () => {
     expect(fd.get('sortOrder')).toBe('0')
   })
 
-  it('toasts imageTooLarge when compressed size exceeds MAX_IMAGE_BYTES', async () => {
+  // ── Confirm dialog (file > 3 MB threshold) ────────────────────────────────
+
+  it('shows confirm dialog when original > threshold', async () => {
+    const THRESHOLD = 3 * 1024 * 1024
     vi.mocked(compressImage).mockResolvedValueOnce({
       file: new File(['x'], 'big.jpg'),
-      originalBytes: 10_000_000,
+      originalBytes: THRESHOLD + 1,
+      compressedBytes: 500_000,
+    })
+    render(<ImageUpload endpoint="/api/upload" onUploaded={vi.fn()} />)
+    fireEvent.change(fileInput(), { target: { files: [new File(['x'], 'big.jpg')] } })
+
+    await waitFor(() => expect(screen.getByText(en.admin.compressTitle)).toBeTruthy())
+    expect(screen.getByText(en.admin.compressConfirm)).toBeTruthy()
+    expect(screen.getByText(en.admin.compressCancel)).toBeTruthy()
+    expect(apiUpload).not.toHaveBeenCalled()
+  })
+
+  it('uploads after clicking confirm in dialog', async () => {
+    const onUploaded = vi.fn()
+    const THRESHOLD = 3 * 1024 * 1024
+    vi.mocked(compressImage).mockResolvedValueOnce({
+      file: new File(['x'], 'big.jpg'),
+      originalBytes: THRESHOLD + 1,
+      compressedBytes: 500_000,
+    })
+    render(<ImageUpload endpoint="/api/upload" onUploaded={onUploaded} />)
+    fireEvent.change(fileInput(), { target: { files: [new File(['x'], 'big.jpg')] } })
+    await waitFor(() => screen.getByText(en.admin.compressTitle))
+
+    fireEvent.click(screen.getByText(en.admin.compressConfirm))
+    await waitFor(() => expect(onUploaded).toHaveBeenCalledWith({ id: 'new', url: '/new.jpg' }))
+    expect(apiUpload).toHaveBeenCalled()
+    expect(toast.success).toHaveBeenCalledWith(en.admin.imageUploaded)
+  })
+
+  it('cancels without uploading when Cancel clicked in dialog', async () => {
+    const THRESHOLD = 3 * 1024 * 1024
+    vi.mocked(compressImage).mockResolvedValueOnce({
+      file: new File(['x'], 'big.jpg'),
+      originalBytes: THRESHOLD + 1,
+      compressedBytes: 500_000,
+    })
+    render(<ImageUpload endpoint="/api/upload" onUploaded={vi.fn()} />)
+    fireEvent.change(fileInput(), { target: { files: [new File(['x'], 'big.jpg')] } })
+    await waitFor(() => screen.getByText(en.admin.compressTitle))
+
+    fireEvent.click(screen.getByText(en.admin.compressCancel))
+    await waitFor(() => expect(screen.queryByText(en.admin.compressTitle)).toBeNull())
+    expect(apiUpload).not.toHaveBeenCalled()
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock')
+  })
+
+  // ── Hard block (compressed > MAX_IMAGE_BYTES) ─────────────────────────────
+
+  it('shows dialog with Upload disabled when large original compresses > MAX_IMAGE_BYTES', async () => {
+    const THRESHOLD = 3 * 1024 * 1024
+    vi.mocked(compressImage).mockResolvedValueOnce({
+      file: new File(['x'], 'big.jpg'),
+      originalBytes: THRESHOLD + 1,
       compressedBytes: MAX_IMAGE_BYTES + 1,
     })
     render(<ImageUpload endpoint="/api/upload" onUploaded={vi.fn()} />)
     fireEvent.change(fileInput(), { target: { files: [new File(['x'], 'big.jpg')] } })
+
+    await waitFor(() => screen.getByText(en.admin.compressTitle))
+    expect(screen.getByText(en.admin.compressTooLarge)).toBeTruthy()
+    const uploadBtn = screen.getByText(en.admin.compressConfirm).closest('button')!
+    expect(uploadBtn.disabled).toBe(true)
+    expect(apiUpload).not.toHaveBeenCalled()
+  })
+
+  it('toasts imageTooLarge for sub-threshold file that compresses over cap', async () => {
+    vi.mocked(compressImage).mockResolvedValueOnce({
+      file: new File(['x'], 'small.jpg'),
+      originalBytes: 500_000,
+      compressedBytes: MAX_IMAGE_BYTES + 1,
+    })
+    render(<ImageUpload endpoint="/api/upload" onUploaded={vi.fn()} />)
+    fireEvent.change(fileInput(), { target: { files: [new File(['x'], 'small.jpg')] } })
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith(en.errors.imageTooLarge))
     expect(apiUpload).not.toHaveBeenCalled()
   })
+
+  // ── Error handling ────────────────────────────────────────────────────────
 
   it('toasts error message on upload failure', async () => {
     vi.mocked(apiUpload).mockRejectedValueOnce(new Error('upload fail'))
@@ -119,6 +210,8 @@ describe('shared ImageUpload', () => {
     fireEvent.change(fileInput(), { target: { files: [new File(['x'], 'f.jpg')] } })
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith(en.errors.networkError))
   })
+
+  // ── Image display and delete ──────────────────────────────────────────────
 
   it('renders currentImages with delete buttons when deleteEndpoint provided', () => {
     const currentImages = [{ id: 'img1', url: '/img1.jpg' }]
