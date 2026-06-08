@@ -32,7 +32,6 @@ interface TrixEditorElement extends HTMLElement {
 
 // Teach React's JSX about <trix-editor>
 declare namespace React {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
       'trix-editor': React.DetailedHTMLProps<

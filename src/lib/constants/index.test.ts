@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
+  FEATURE_FLAGS,
   ORDER_STATUSES,
   PAYMENT_METHODS,
   CURRENCIES,
@@ -167,6 +168,19 @@ describe('TAB_ROUTES', () => {
     for (const t of TAB_ROUTES) {
       expect(typeof t.labelKey).toBe('string')
     }
+  })
+})
+
+describe('FEATURE_FLAGS', () => {
+  it('reviews + llmDiscovery on by default', () => {
+    expect(FEATURE_FLAGS.reviewsEnabled).toBe(true)
+    expect(FEATURE_FLAGS.llmDiscoveryEnabled).toBe(true)
+  })
+
+  it('whatsapp, landing, blog off by default', () => {
+    expect(FEATURE_FLAGS.whatsappEnabled).toBe(false)
+    expect(FEATURE_FLAGS.landingEnabled).toBe(false)
+    expect(FEATURE_FLAGS.blogEnabled).toBe(false)
   })
 })
 
