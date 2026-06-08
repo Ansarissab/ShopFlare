@@ -144,6 +144,17 @@ export const MIN_PRODUCT_PAGE_SIZE = 6
 export const MAX_PRODUCT_PAGE_SIZE = 96
 export const SEARCH_DEBOUNCE_MS = 250
 
+// ─── Feature Flags ────────────────────────────────────────────────────────────
+
+export const FEATURE_FLAGS = {
+  whatsappEnabled:     false, // phase 19
+  reviewsEnabled:      true,  // phase 20 (on by default — already live)
+  landingEnabled:      false, // phase 22
+  blogEnabled:         false, // phase 23
+  llmDiscoveryEnabled: true,  // phase 21
+} as const
+export type FeatureFlagKey = keyof typeof FEATURE_FLAGS
+
 // ─── Categories ────────────────────────────────────────────────────────────────
 export const MAX_CATEGORY_DEPTH = 2
 export const MAX_CATEGORIES_PER_PRODUCT = 10

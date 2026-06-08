@@ -77,6 +77,12 @@ app.get('/store', async (c) => {
     taxBasis:              kv['taxBasis'] || 'subtotal',
     taxRegistrationNumber: kv['taxRegistrationNumber'] || undefined,
     productPageSize:       kv['productPageSize'] ? Number(kv['productPageSize']) : undefined,
+    // Feature flags — default from FEATURE_FLAGS constants when not stored.
+    whatsappEnabled:     kv['whatsappEnabled'] !== undefined ? kv['whatsappEnabled'] === 'true' : false,
+    reviewsEnabled:      kv['reviewsEnabled']  !== undefined ? kv['reviewsEnabled']  === 'true' : true,
+    landingEnabled:      kv['landingEnabled']  !== undefined ? kv['landingEnabled']  === 'true' : false,
+    blogEnabled:         kv['blogEnabled']     !== undefined ? kv['blogEnabled']     === 'true' : false,
+    llmDiscoveryEnabled: kv['llmDiscoveryEnabled'] !== undefined ? kv['llmDiscoveryEnabled'] === 'true' : true,
   }
 
   const validation = storeConfigSchema.safeParse(assembled)
