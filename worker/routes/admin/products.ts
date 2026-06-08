@@ -72,6 +72,7 @@ app.post('/', async (c) => {
     name: parsed.data.name,
     description: parsed.data.description,
     active: parsed.data.active,
+    reviewsEnabled: parsed.data.reviewsEnabled,
     stripeProductId: parsed.data.stripeProductId ?? null,
     createdAt: now,
     updatedAt: now,
@@ -104,13 +105,14 @@ app.put('/:id', async (c) => {
     .get()
   if (!product) return c.json({ error: 'Product not found' }, 404)
 
-  const { name, description, active, stripeProductId } = parsed.data
+  const { name, description, active, reviewsEnabled, stripeProductId } = parsed.data
   await db
     .update(schema.products)
     .set({
       ...(name !== undefined ? { name } : {}),
       ...(description !== undefined ? { description } : {}),
       ...(active !== undefined ? { active } : {}),
+      ...(reviewsEnabled !== undefined ? { reviewsEnabled } : {}),
       ...(stripeProductId !== undefined ? { stripeProductId } : {}),
       updatedAt: new Date().toISOString(),
     })

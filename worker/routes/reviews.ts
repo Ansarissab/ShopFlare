@@ -11,6 +11,8 @@ import { submitReviewSchema } from '@/lib/schemas'
 import { parseBody } from 'worker/lib/http'
 import { verifyTurnstile } from 'worker/lib/turnstile'
 import { rateLimit } from 'worker/lib/ratelimit'
+import { reviewsAllowed } from 'worker/lib/reviews'
+import { en } from '@/lib/i18n/en'
 import type { Bindings } from 'worker/types'
 
 const app = new Hono<{ Bindings: Bindings }>()
@@ -46,7 +48,12 @@ app.post('/', async (c) => {
   const { orderNumber, contact, productId, customerName, rating, body: reviewBody } = parsed.data
   const db = createDb(c.env.DB)
 
-  // 3. Resolve order
+  // 3. Reviews flag — site-wide OFF or per-product OFF blocks new submissions
+  if (!(await reviewsAllowed(db, productId))) {
+    return c.json({ error: en.reviews.disabled }, 403)
+  }
+
+  // 4. Resolve order
   const order = await db
     .select()
     .from(schema.orders)
@@ -127,6 +134,13 @@ app.post('/', async (c) => {
 app.get('/product/:productId', async (c) => {
   const { productId } = c.req.param()
   const db = createDb(c.env.DB)
+
+  // When reviews are disabled for this product (site-wide or per-product),
+  // return the empty shape (200) so the response stays cacheable and the UI
+  // simply renders nothing — no 403 that would surface as an error in the UI.
+  if (!(await reviewsAllowed(db, productId))) {
+    return c.json({ reviews: [], average: 0, count: 0 })
+  }
 
   const rows = await db
     .select({
