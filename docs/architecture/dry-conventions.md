@@ -33,6 +33,7 @@ re-implemented.
 | **Feature flags**  | `src/lib/features.ts` / `worker/lib/features.ts` | Always call `isFeatureEnabled(config, key)`. Never read flag keys inline. |
 | **HTML sanitize**  | `src/lib/html.ts` + `src/components/shared/RenderHtml.tsx` | All merchant-authored HTML goes through `sanitizeHtml()`. Never `dangerouslySetInnerHTML` with raw stored HTML. |
 | **Image compress** | `src/lib/image.ts` (`compressImage`) | Single compression config for all upload contexts. Never call `browser-image-compression` directly. |
+| **Image upload**    | `src/components/shared/ImageUpload.tsx` | All admin image uploads go through this shared component (confirm dialog, hard-block, delete). Never duplicate upload logic per-caller. |
 | **Rich text**      | `src/components/shared/RichText.tsx` | Single Trix wrapper. Never instantiate `trix` directly. |
 | **SEO metadata**   | `src/lib/seo/metadata.ts` + `src/lib/seo/jsonld.ts` | All JSON-LD builders and `buildPageMetadata` live here. Server pages emit via `<JsonLd>`. |
 
