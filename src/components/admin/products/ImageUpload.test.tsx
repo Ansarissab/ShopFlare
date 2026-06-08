@@ -8,8 +8,8 @@ import type { ProductImage } from '@/lib/types/product'
 vi.mock('next/image', async () => {
   const { createElement } = await import('react')
   return {
-    default: (props: React.ImgHTMLAttributes<HTMLImageElement> & { fill?: boolean; priority?: boolean }) => {
-      const { fill, priority, ...rest } = props
+    default: (props: React.ImgHTMLAttributes<HTMLImageElement> & { fill?: boolean; priority?: boolean; unoptimized?: boolean }) => {
+      const { fill, priority, unoptimized, ...rest } = props
       return createElement('img', rest)
     },
   }
@@ -26,7 +26,13 @@ vi.mock('sonner', () => ({
 
 vi.mock('@/lib/image', () => ({
   compressImage: vi.fn((file: File) => Promise.resolve({ file, originalBytes: file.size, compressedBytes: file.size })),
+  COMPRESS_CONFIRM_THRESHOLD_BYTES: 3 * 1024 * 1024,
 }))
+
+vi.stubGlobal('URL', {
+  createObjectURL: vi.fn(() => 'blob:mock'),
+  revokeObjectURL: vi.fn(),
+})
 
 import { apiUpload, apiDelete } from '@/lib/api'
 import { toast } from 'sonner'
@@ -59,7 +65,6 @@ function renderUpload(images: ProductImage[] = []) {
 describe('ImageUpload', () => {
   it('renders existing images and the upload button', () => {
     const { container } = renderUpload([makeImage('a'), makeImage('b')])
-    // alt="" → presentation role, so query by tag
     const imgs = container.querySelectorAll('img')
     expect(imgs.length).toBe(2)
     expect(screen.getByText(en.admin.uploadImage)).toBeTruthy()
@@ -83,7 +88,6 @@ describe('ImageUpload', () => {
     expect(compressImage).toHaveBeenCalled()
     expect(apiUpload).toHaveBeenCalledWith('/api/admin/products/images/upload', expect.any(FormData))
     expect(toast.success).toHaveBeenCalledWith(en.admin.imageUploaded)
-    // input reset
     expect(input.value).toBe('')
   })
 
