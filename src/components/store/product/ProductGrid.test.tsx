@@ -34,6 +34,7 @@ function makeProduct(id: string, name: string): ProductWithVariants {
       name,
       description: '',
       active: true,
+      reviewsEnabled: true,
       stripeProductId: null,
       createdAt: '2024-01-01 00:00:00',
       updatedAt: '2024-01-01 00:00:00',

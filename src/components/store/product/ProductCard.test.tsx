@@ -41,6 +41,7 @@ const product = {
   name: 'Classic Tee',
   description: 'A classic t-shirt',
   active: true,
+  reviewsEnabled: true,
   stripeProductId: null,
   createdAt: '2024-01-01',
   updatedAt: '2024-01-01',

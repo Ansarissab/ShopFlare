@@ -120,6 +120,7 @@ function makeProducts(): ProductWithVariants[] {
         name: 'Hoodie',
         description: '',
         active: true,
+        reviewsEnabled: true,
         stripeProductId: null,
         createdAt: '',
         updatedAt: '',

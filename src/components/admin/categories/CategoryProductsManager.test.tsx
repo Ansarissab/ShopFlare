@@ -24,6 +24,7 @@ function makeProduct(id: string, name: string, categoryIds: string[] = []): Prod
       name,
       description: '',
       active: true,
+      reviewsEnabled: true,
       stripeProductId: null,
       createdAt: '2026-01-01',
       updatedAt: '2026-01-01',

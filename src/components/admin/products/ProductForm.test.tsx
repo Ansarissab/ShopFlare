@@ -55,6 +55,7 @@ function makeProduct(overrides?: Partial<ProductWithVariants['product']>, varian
       name: 'Hoodie',
       description: 'A cozy hoodie',
       active: true,
+      reviewsEnabled: true,
       stripeProductId: null,
       createdAt: '2026-01-01T00:00:00Z',
       updatedAt: '2026-01-01T00:00:00Z',
@@ -132,7 +133,7 @@ describe('ProductForm — create mode (no initial)', () => {
     fireEvent.click(screen.getByText(en.admin.createProduct))
 
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith(en.admin.productCreated))
-    expect(apiPost).toHaveBeenCalledWith('/api/admin/products', { name: 'New Tee', description: '', active: true })
+    expect(apiPost).toHaveBeenCalledWith('/api/admin/products', { name: 'New Tee', description: '', active: true, reviewsEnabled: true })
     expect(apiPut).toHaveBeenCalledWith('/api/admin/products/new-prod/categories', { categoryIds: ['cat-1'] })
     expect(pushMock).toHaveBeenCalledWith('/admin/products/new-prod')
   })
@@ -143,7 +144,7 @@ describe('ProductForm — create mode (no initial)', () => {
     fireEvent.change(screen.getByLabelText(en.admin.productDescription), { target: { value: 'desc' } })
     fireEvent.click(byId('product-active'))
     fireEvent.click(screen.getByText(en.admin.createProduct))
-    await waitFor(() => expect(apiPost).toHaveBeenCalledWith('/api/admin/products', { name: 'X', description: 'desc', active: false }))
+    await waitFor(() => expect(apiPost).toHaveBeenCalledWith('/api/admin/products', { name: 'X', description: 'desc', active: false, reviewsEnabled: true }))
   })
 
   it('create failure toasts network error', async () => {
@@ -194,7 +195,7 @@ describe('ProductForm — edit mode (with initial)', () => {
     render(<ProductForm initial={makeProduct()} />)
     fireEvent.click(screen.getByText(en.admin.saved))
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith(en.admin.productUpdated))
-    expect(apiPut).toHaveBeenCalledWith('/api/admin/products/prod-1', { name: 'Hoodie', description: 'A cozy hoodie', active: true })
+    expect(apiPut).toHaveBeenCalledWith('/api/admin/products/prod-1', { name: 'Hoodie', description: 'A cozy hoodie', active: true, reviewsEnabled: true })
     expect(apiPut).toHaveBeenCalledWith('/api/admin/products/prod-1/categories', { categoryIds: [] })
   })
 

@@ -85,6 +85,7 @@ const product: Product = {
   name: 'Cool Hoodie',
   description: 'A warm hoodie',
   active: true,
+  reviewsEnabled: true,
   stripeProductId: null,
   createdAt: '2024-01-01 00:00:00',
   updatedAt: '2024-01-01 00:00:00',
