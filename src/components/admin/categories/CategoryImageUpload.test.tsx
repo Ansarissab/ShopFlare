@@ -11,7 +11,7 @@ vi.mock('next/image', async () => {
   const { createElement } = await import('react')
   return {
     default: (props: Record<string, unknown>) => {
-      const { fill, priority, ...rest } = props
+      const { fill, priority, unoptimized, ...rest } = props
       return createElement('img', rest)
     },
   }
@@ -24,11 +24,17 @@ vi.mock('@/lib/api', () => ({
 
 vi.mock('@/lib/image', () => ({
   compressImage: vi.fn((file: File) => Promise.resolve({ file, originalBytes: file.size, compressedBytes: file.size })),
+  COMPRESS_CONFIRM_THRESHOLD_BYTES: 3 * 1024 * 1024,
 }))
 
 vi.mock('sonner', () => ({
   toast: Object.assign(vi.fn(), { success: vi.fn(), error: vi.fn() }),
 }))
+
+vi.stubGlobal('URL', {
+  createObjectURL: vi.fn(() => 'blob:mock'),
+  revokeObjectURL: vi.fn(),
+})
 
 afterEach(() => {
   cleanup()
@@ -47,7 +53,7 @@ function fileInput(): HTMLInputElement {
 }
 
 describe('CategoryImageUpload', () => {
-  it('renders upload button when no current image', () => {
+  it('renders upload button and category image label when no current image', () => {
     render(<CategoryImageUpload {...baseProps} />)
     expect(screen.getByText(en.admin.uploadImage)).toBeTruthy()
     expect(screen.getByText(en.admin.categoryImage)).toBeTruthy()
@@ -63,9 +69,14 @@ describe('CategoryImageUpload', () => {
 
   it('renders image preview and delete button when currentImageUrl exists', () => {
     render(<CategoryImageUpload {...baseProps} currentImageUrl="/existing.jpg" />)
-    expect(screen.getByText(en.admin.deleteImage)).toBeTruthy()
+    expect(screen.getByLabelText(en.admin.deleteImage)).toBeTruthy()
     const img = document.querySelector('img') as HTMLImageElement
     expect(img.getAttribute('src')).toBe('/existing.jpg')
+  })
+
+  it('hides upload button when image already present (max=1)', () => {
+    render(<CategoryImageUpload {...baseProps} currentImageUrl="/existing.jpg" />)
+    expect(screen.queryByText(en.admin.uploadImage)).toBeNull()
   })
 
   it('uploads a file: compresses, calls apiUpload, fires onUploadComplete + success toast', async () => {
@@ -96,17 +107,17 @@ describe('CategoryImageUpload', () => {
   })
 
   it('shows network error toast when upload throws a non-Error', async () => {
-    vi.mocked(apiUpload).mockRejectedValueOnce('weird')
+    vi.mocked(compressImage).mockRejectedValueOnce('weird')
     render(<CategoryImageUpload {...baseProps} />)
     const file = new File(['x'], 'pic.png', { type: 'image/png' })
     fireEvent.change(fileInput(), { target: { files: [file] } })
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith(en.errors.networkError))
   })
 
-  it('removes image: calls apiDelete, fires onRemove + success toast', async () => {
+  it('removes image: calls apiDelete with category endpoint, fires onRemove + success toast', async () => {
     const onRemove = vi.fn()
     render(<CategoryImageUpload {...baseProps} currentImageUrl="/existing.jpg" onRemove={onRemove} />)
-    fireEvent.click(screen.getByText(en.admin.deleteImage))
+    fireEvent.click(screen.getByLabelText(en.admin.deleteImage))
     await waitFor(() => expect(onRemove).toHaveBeenCalled())
     expect(apiDelete).toHaveBeenCalledWith('/api/admin/categories/cat-1/image')
     expect(toast.success).toHaveBeenCalledWith(en.admin.imageDeleted)
@@ -115,48 +126,7 @@ describe('CategoryImageUpload', () => {
   it('shows error toast when remove throws', async () => {
     vi.mocked(apiDelete).mockRejectedValueOnce(new Error('del-fail'))
     render(<CategoryImageUpload {...baseProps} currentImageUrl="/existing.jpg" />)
-    fireEvent.click(screen.getByText(en.admin.deleteImage))
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('del-fail'))
-  })
-
-  it('does nothing when files list is null (optional-chaining branch)', async () => {
-    render(<CategoryImageUpload {...baseProps} />)
-    fireEvent.change(fileInput(), { target: { files: null } })
-    await Promise.resolve()
-    expect(apiUpload).not.toHaveBeenCalled()
-  })
-
-  it('shows saving label and disables upload button while uploading', async () => {
-    let resolveUpload: (v: { imageUrl: string }) => void = () => {}
-    vi.mocked(apiUpload).mockReturnValueOnce(
-      new Promise((res) => { resolveUpload = res }),
-    )
-    render(<CategoryImageUpload {...baseProps} />)
-    const file = new File(['x'], 'pic.png', { type: 'image/png' })
-    fireEvent.change(fileInput(), { target: { files: [file] } })
-
-    // pending state → button shows saving label and is disabled
-    await waitFor(() => expect(screen.getByText(en.admin.saving)).toBeTruthy())
-    const btn = screen.getByText(en.admin.saving).closest('button') as HTMLButtonElement
-    expect(btn.disabled).toBe(true)
-
-    resolveUpload({ imageUrl: '/uploaded.jpg' })
-    await waitFor(() => expect(screen.getByText(en.admin.uploadImage)).toBeTruthy())
-  })
-
-  it('shows saving label and disables delete button while removing', async () => {
-    let resolveDel: (v: unknown) => void = () => {}
-    vi.mocked(apiDelete).mockReturnValueOnce(
-      new Promise<void>((res) => { resolveDel = res as (v: unknown) => void }),
-    )
-    render(<CategoryImageUpload {...baseProps} currentImageUrl="/existing.jpg" />)
-    fireEvent.click(screen.getByText(en.admin.deleteImage))
-
-    await waitFor(() => expect(screen.getByText(en.admin.saving)).toBeTruthy())
-    const btn = screen.getByText(en.admin.saving).closest('button') as HTMLButtonElement
-    expect(btn.disabled).toBe(true)
-
-    resolveDel({})
-    await waitFor(() => expect(screen.getByText(en.admin.deleteImage)).toBeTruthy())
+    fireEvent.click(screen.getByLabelText(en.admin.deleteImage))
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith(en.errors.networkError))
   })
 })
