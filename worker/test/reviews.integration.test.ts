@@ -315,3 +315,151 @@ describe('GET /api/reviews/product/:id', () => {
     expect(body.count).toBe(0)
   })
 })
+
+// ─── Reviews flag matrix (Phase 20) ──────────────────────────────────────────
+
+async function setSiteWideReviewsFlag(enabled: boolean) {
+  await db()
+    .insert(schema.storeConfig)
+    .values({ key: 'reviewsEnabled', value: String(enabled) })
+    .onConflictDoUpdate({ target: schema.storeConfig.key, set: { value: String(enabled) } })
+}
+
+async function seedProductWithReviews(productReviewsEnabled: boolean) {
+  await db().insert(schema.products).values({
+    id: 'p-flag',
+    name: 'Flag Tee',
+    active: true,
+    reviewsEnabled: productReviewsEnabled,
+  })
+  await db().insert(schema.variants).values({ id: 'v-flag', productId: 'p-flag', label: 'Black', sortOrder: 0 })
+  await db().insert(schema.sizeOptions).values({ id: 's-flag', variantId: 'v-flag', size: 'M', priceCents: 1000, stock: 5, active: true })
+}
+
+describe('Reviews flag matrix', () => {
+  it('ON+ON: POST accepted, GET returns reviews', async () => {
+    await seedProductWithReviews(true)
+    await setSiteWideReviewsFlag(true)
+    await seedDeliveredOrder({ email: 'a@example.com', productId: 'p-flag', orderNumber: 'ORD-FLAG01' })
+
+    const postRes = await post('/api/reviews', {
+      orderNumber: 'ORD-FLAG01',
+      contact: 'a@example.com',
+      productId: 'p-flag',
+      customerName: 'Alice',
+      rating: 5,
+    })
+    expect(postRes.status).toBe(201)
+
+    // Approve the review directly
+    await db().update(schema.reviews).set({ approved: true }).where(eq(schema.reviews.productId, 'p-flag'))
+
+    const getRes = await get('/api/reviews/product/p-flag')
+    const body = (await getRes.json()) as { count: number }
+    expect(getRes.status).toBe(200)
+    expect(body.count).toBe(1)
+  })
+
+  it('ON+OFF (per-product off): POST → 403, GET → empty', async () => {
+    await seedProductWithReviews(false)
+    await setSiteWideReviewsFlag(true)
+    await seedDeliveredOrder({ email: 'b@example.com', productId: 'p-flag', orderNumber: 'ORD-FLAG02' })
+
+    const postRes = await post('/api/reviews', {
+      orderNumber: 'ORD-FLAG02',
+      contact: 'b@example.com',
+      productId: 'p-flag',
+      customerName: 'Bob',
+      rating: 4,
+    })
+    expect(postRes.status).toBe(403)
+
+    const getRes = await get('/api/reviews/product/p-flag')
+    expect(getRes.status).toBe(200)
+    const body = (await getRes.json()) as { reviews: unknown[]; average: number; count: number }
+    expect(body.reviews).toHaveLength(0)
+    expect(body.count).toBe(0)
+    expect(body.average).toBe(0)
+  })
+
+  it('OFF+ON (site-wide off): POST → 403, GET → empty for all', async () => {
+    await seedProductWithReviews(true)
+    await setSiteWideReviewsFlag(false)
+    await seedDeliveredOrder({ email: 'c@example.com', productId: 'p-flag', orderNumber: 'ORD-FLAG03' })
+
+    const postRes = await post('/api/reviews', {
+      orderNumber: 'ORD-FLAG03',
+      contact: 'c@example.com',
+      productId: 'p-flag',
+      customerName: 'Carol',
+      rating: 5,
+    })
+    expect(postRes.status).toBe(403)
+
+    const getRes = await get('/api/reviews/product/p-flag')
+    expect(getRes.status).toBe(200)
+    const body = (await getRes.json()) as { reviews: unknown[]; count: number }
+    expect(body.reviews).toHaveLength(0)
+    expect(body.count).toBe(0)
+  })
+
+  it('OFF+OFF: POST → 403, GET → empty', async () => {
+    await seedProductWithReviews(false)
+    await setSiteWideReviewsFlag(false)
+    await seedDeliveredOrder({ email: 'd@example.com', productId: 'p-flag', orderNumber: 'ORD-FLAG04' })
+
+    const postRes = await post('/api/reviews', {
+      orderNumber: 'ORD-FLAG04',
+      contact: 'd@example.com',
+      productId: 'p-flag',
+      customerName: 'Dave',
+      rating: 3,
+    })
+    expect(postRes.status).toBe(403)
+
+    const getRes = await get('/api/reviews/product/p-flag')
+    expect(getRes.status).toBe(200)
+    const body = (await getRes.json()) as { reviews: unknown[]; count: number }
+    expect(body.reviews).toHaveLength(0)
+  })
+
+  it('preservation: review survives flag toggle off then on', async () => {
+    await seedProductWithReviews(true)
+    await setSiteWideReviewsFlag(true)
+    await seedDeliveredOrder({ email: 'e@example.com', productId: 'p-flag', orderNumber: 'ORD-FLAG05' })
+
+    // Submit and approve review while both flags are ON
+    const postRes = await post('/api/reviews', {
+      orderNumber: 'ORD-FLAG05',
+      contact: 'e@example.com',
+      productId: 'p-flag',
+      customerName: 'Eve',
+      rating: 5,
+    })
+    expect(postRes.status).toBe(201)
+    await db().update(schema.reviews).set({ approved: true }).where(eq(schema.reviews.productId, 'p-flag'))
+
+    // Flip site-wide OFF → GET returns empty
+    await setSiteWideReviewsFlag(false)
+    const offRes = await get('/api/reviews/product/p-flag')
+    const offBody = (await offRes.json()) as { count: number }
+    expect(offBody.count).toBe(0)
+
+    // Flip back ON → review reappears (row was never deleted)
+    await setSiteWideReviewsFlag(true)
+    const onRes = await get('/api/reviews/product/p-flag')
+    const onBody = (await onRes.json()) as { count: number }
+    expect(onBody.count).toBe(1)
+  })
+
+  it('default-on: freshly inserted product has reviews_enabled = 1', async () => {
+    // Insert without explicit reviewsEnabled (relies on DB default)
+    await db().insert(schema.products).values({ id: 'p-default', name: 'Default', active: true })
+    const row = await db()
+      .select({ reviewsEnabled: schema.products.reviewsEnabled })
+      .from(schema.products)
+      .where(eq(schema.products.id, 'p-default'))
+      .get()
+    expect(row?.reviewsEnabled).toBe(true)
+  })
+})
