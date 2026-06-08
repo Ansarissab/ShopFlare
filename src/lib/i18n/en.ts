@@ -34,6 +34,7 @@ export const en = {
     allProductsLoaded: 'All products loaded',
     showingProducts: 'Showing {count} products',
     showingProductsOf: 'Showing {shown} of {total} products',
+    whatsappWidgetLabel: 'Chat on WhatsApp',
   },
   cart: {
     title: 'Your Cart',
@@ -464,6 +465,9 @@ export const en = {
     slugAutoHint: 'Auto-generated from name',
     productPageSize: 'Products per page',
     productPageSizeHint: 'Number of products loaded per scroll batch (6–96)',
+    // whatsapp toggle (phase 19)
+    enableWhatsApp:     'Enable WhatsApp',
+    enableWhatsAppHint: 'WhatsApp number must also be set for any button to appear.',
   },
   // Tooltip copy — short, plain, merchant-friendly. Rendered via <HelpTip>.
   // Never inline these strings in JSX; always reference en.tooltips.*
@@ -576,6 +580,7 @@ export const en = {
     qty: 'Qty:',
     price: 'Price:',
     footer: 'Please confirm availability and delivery details.',
+    contactGreeting: 'Hi, I have a question about your store',
   },
   // Store-facing reviews (Agent P)
   reviews: {
