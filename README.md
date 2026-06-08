@@ -52,7 +52,7 @@ Replaces Shopify Basic ($29/month) for stores that don't need the heavyweight pl
 - SEO: sitemap + JSON-LD product structured data
 
 **Admin dashboard** (app-level password login → Bearer session token)
-- Product / variant / size CRUD with R2 image upload (client-compressed)
+- Product / variant / size CRUD with R2 image upload (client-compressed; large images auto-optimized with a before/after confirm step)
 - Order management: status, tracking number + carrier, full customer detail
 - Coupon management with automatic Stripe coupon + promotion-code sync
 - Review moderation (approve / delete)

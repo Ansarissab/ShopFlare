@@ -236,7 +236,7 @@ export const en = {
     compressSavedLabel: '{pct}% smaller',
     compressConfirm: 'Upload optimized',
     compressCancel: 'Cancel',
-    compressTooLarge: 'Image is still over 5 MB after compression. Please use a smaller image.',
+    compressTooLarge: 'Image is still over {mb} MB after compression. Please use a smaller image.',
     stripeProductId: 'Stripe Product ID',
     stripePriceId: 'Stripe Price ID',
     syncStripe: 'Sync with Stripe',

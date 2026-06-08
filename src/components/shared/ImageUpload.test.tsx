@@ -147,6 +147,30 @@ describe('shared ImageUpload', () => {
     expect(toast.success).toHaveBeenCalledWith(en.admin.imageUploaded)
   })
 
+  it('extraFields are included in FormData when confirming via dialog', async () => {
+    const THRESHOLD = 3 * 1024 * 1024
+    vi.mocked(compressImage).mockResolvedValueOnce({
+      file: new File(['x'], 'big.jpg'),
+      originalBytes: THRESHOLD + 1,
+      compressedBytes: 500_000,
+    })
+    render(
+      <ImageUpload
+        endpoint="/api/upload"
+        extraFields={{ variantId: 'v1', sortOrder: '2' }}
+        onUploaded={vi.fn()}
+      />,
+    )
+    fireEvent.change(fileInput(), { target: { files: [new File(['x'], 'big.jpg')] } })
+    await waitFor(() => screen.getByText(en.admin.compressTitle))
+
+    fireEvent.click(screen.getByText(en.admin.compressConfirm))
+    await waitFor(() => expect(apiUpload).toHaveBeenCalled())
+    const fd = (apiUpload as ReturnType<typeof vi.fn>).mock.calls[0][1] as FormData
+    expect(fd.get('variantId')).toBe('v1')
+    expect(fd.get('sortOrder')).toBe('2')
+  })
+
   it('cancels without uploading when Cancel clicked in dialog', async () => {
     const THRESHOLD = 3 * 1024 * 1024
     vi.mocked(compressImage).mockResolvedValueOnce({
@@ -177,7 +201,8 @@ describe('shared ImageUpload', () => {
     fireEvent.change(fileInput(), { target: { files: [new File(['x'], 'big.jpg')] } })
 
     await waitFor(() => screen.getByText(en.admin.compressTitle))
-    expect(screen.getByText(en.admin.compressTooLarge)).toBeTruthy()
+    const capMb = Math.round(MAX_IMAGE_BYTES / 1024 / 1024)
+    expect(screen.getByText(en.admin.compressTooLarge.replace('{mb}', String(capMb)))).toBeTruthy()
     const uploadBtn = screen.getByText(en.admin.compressConfirm).closest('button')!
     expect(uploadBtn.disabled).toBe(true)
     expect(apiUpload).not.toHaveBeenCalled()

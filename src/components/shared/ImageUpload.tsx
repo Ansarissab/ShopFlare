@@ -215,7 +215,9 @@ export function ImageUpload<T = unknown>({
                   </p>
                 )}
                 {confirmState.overCap && (
-                  <p className="text-destructive text-xs mt-1">{en.admin.compressTooLarge}</p>
+                  <p className="text-destructive text-xs mt-1">
+                    {en.admin.compressTooLarge.replace('{mb}', String(Math.round(MAX_IMAGE_BYTES / 1024 / 1024)))}
+                  </p>
                 )}
               </div>
             </div>
