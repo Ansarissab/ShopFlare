@@ -89,6 +89,9 @@ importers:
       tailwind-merge:
         specifier: ^3.6.0
         version: 3.6.0
+      trix:
+        specifier: ^2.1.19
+        version: 2.1.19
       tw-animate-css:
         specifier: 1.4.0
         version: 1.4.0
@@ -5443,6 +5446,10 @@ packages:
   tree-kill@1.2.2:
     resolution: {integrity: sha512-L0Orpi8qGpRG//Nd+H90vFB+3iHnue1zSSGmNOOCh1GLJ7rUKVwV2HvijphGQS2UmhUZewS9VgvxYIdgr+fG1A==}
     hasBin: true
+
+  trix@2.1.19:
+    resolution: {integrity: sha512-E7RA3EOeUiUwNJlrF5onIOkqCA06xUU6GmHOVxXyMnGMValrDK3Ce7uaMVgiVUOvVt4mzUERAHAzD10mxoLpOg==}
+    engines: {node: '>= 18'}
 
   ts-api-utils@2.5.0:
     resolution: {integrity: sha512-OJ/ibxhPlqrMM0UiNHJ/0CKQkoKF243/AEmplt3qpRgkW8VG7IfOS41h7V8TjITqdByHzrjcS/2si+y4lIh8NA==}
@@ -11426,6 +11433,10 @@ snapshots:
       punycode: 2.3.1
 
   tree-kill@1.2.2: {}
+
+  trix@2.1.19:
+    dependencies:
+      dompurify: 3.4.8
 
   ts-api-utils@2.5.0(typescript@5.9.3):
     dependencies:
