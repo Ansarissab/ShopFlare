@@ -82,10 +82,40 @@ Client-side fuzzy search powered by Fuse.js (threshold 0.35). Searches across pr
 The Store has no branding from the underlying software. All visible identity (name, logo, colors, policies) comes from Store Config. The open-source repo is the engine; the Merchant is the brand.
 
 ## Review
-A verified Customer rating (1–5 stars) and optional text/photo submitted after an Order is delivered. Only verified purchasers (matched by email/phone to a delivered Order) can submit. Requires Merchant approval before display.
+A verified Customer rating (1–5 stars) and optional text/photo submitted after an Order is delivered. Only verified purchasers (matched by email/phone to a delivered Order) can submit. Requires Merchant approval before display. Reviews are gated by a Feature Flag: they can be switched off site-wide or for an individual Product. When off, the storefront hides reviews and the submit endpoint refuses new ones; existing reviews are preserved.
 
 ## Notify Me
 A request by a Customer to be emailed/WhatsApped when an out-of-stock Size Option is restocked.
 
 ## Setup Wizard
 An interactive CLI tool (npx create-store) that guides the Merchant through initial deployment: API keys, Cloudflare D1 creation, Worker deployment, admin password setup, and DB migrations.
+
+## Feature Flag
+A Merchant-controlled on/off switch for an optional capability (e.g. WhatsApp, Reviews, Landing Page, Blog, LLM Discovery). Stored in Store Config and toggled from the Admin Dashboard. Off-state is enforced server-side, not merely hidden in the UI. A flag may be site-wide; some (e.g. Reviews) also have a per-Product flag, where the site-wide off-state wins.
+
+## WhatsApp Widget
+A persistent floating WhatsApp button shown on every storefront page (distinct from the per-Product WhatsApp Order button). Opens a generic wa.me chat with the Merchant. Gated by a Feature Flag and the presence of a WhatsApp number.
+
+## Landing Page
+An optional storytelling home page that replaces the Product grid at `/` when enabled (the catalog then lives at `/shop`). Composed of a fixed, ordered set of Merchant-editable Sections (hero, story, Featured Products, reviews strip, call-to-action). Section text and images are edited from the Admin Dashboard without redeploy. Gated by a Feature Flag.
+
+## Featured Product
+A Product the Merchant selects to highlight in the Landing Page's featured strip. Selection is Merchant-controlled and stored in Store Config / D1.
+
+## Style Preset
+A named, one-click "look" (e.g. Minimal, Bold, Elegant, Playful) bundling brand colors, font, corner radius, density, and hero style. Applied via the existing CSS-variable theme engine. Distinct from full alternate layout templates (a v2 concept).
+
+## Rich Text
+Merchant-authored formatted content created with the shared Trix editor and stored as sanitized HTML. Used for Blog Posts, policy pages, Landing Page section bodies, and Product descriptions. Inline images are uploaded to R2 (not embedded as base64) and pass through the standard image compression path.
+
+## Blog
+An optional collection of Merchant-authored articles published for SEO. Each Blog Post has a title, slug, Rich Text body, cover image (R2), excerpt, tags, and a draft/published state. Server-rendered with Article structured data, listed at `/blog`, and included in the sitemap and RSS feed. Gated by a Feature Flag.
+
+## LLM Discovery
+The set of optional, Merchant-toggleable features that make the Store legible to AI crawlers and answer engines: an auto-generated `llms.txt`, Markdown (`.md`) versions of public pages, FAQ structured data, and an AI-bot policy in robots.txt (allowing search bots, optionally blocking training bots).
+
+## Health Check
+A machine endpoint (`/healthz`) that probes D1, KV, and R2 and returns an overall status (200 healthy / 503 degraded). Consumed by the public Status Page and by an external uptime monitor.
+
+## Status Page
+A public page reporting the Store's current operational health, backed by the Health Check. Paired with an external monitor for uptime history and alerting.
