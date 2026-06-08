@@ -42,7 +42,7 @@ vi.mock('@/hooks/useApiResource', () => ({
 }))
 
 // useStoreConfig: controllable per-test
-let storeConfigState: { config: unknown } = { config: { whatsappNumber: '+10000000000', currency: 'PKR' } }
+let storeConfigState: { config: unknown } = { config: { whatsappNumber: '+10000000000', whatsappEnabled: true, currency: 'PKR' } }
 vi.mock('@/hooks/useStoreConfig', () => ({
   useStoreConfig: () => storeConfigState,
 }))
@@ -166,7 +166,7 @@ afterEach(() => {
 
 beforeEach(() => {
   apiResourceState = { data: undefined, loading: true }
-  storeConfigState = { config: { whatsappNumber: '+10000000000', currency: 'PKR' } }
+  storeConfigState = { config: { whatsappNumber: '+10000000000', whatsappEnabled: true, currency: 'PKR' } }
   apiPost.mockResolvedValue({ orderId: 'o1', orderNumber: '1001' })
   // window.open used by whatsapp handler
   vi.stubGlobal('open', vi.fn())
@@ -411,7 +411,17 @@ describe('POSScreen', () => {
 
   it('success screen hides WhatsApp button when no whatsappNumber configured', async () => {
     setLoaded()
-    storeConfigState = { config: { whatsappNumber: '', currency: 'PKR' } }
+    storeConfigState = { config: { whatsappNumber: '', whatsappEnabled: true, currency: 'PKR' } }
+    render(<POSScreen />)
+    addItem()
+    fireEvent.click(screen.getByRole('button', { name: en.pos.completeSale }))
+    await waitFor(() => expect(screen.getByText(en.pos.newSale)).toBeTruthy())
+    expect(screen.queryByRole('button', { name: en.pos.sendWhatsApp })).toBeNull()
+  })
+
+  it('success screen hides WhatsApp button when flag OFF even with number set', async () => {
+    setLoaded()
+    storeConfigState = { config: { whatsappNumber: '+10000000000', whatsappEnabled: false, currency: 'PKR' } }
     render(<POSScreen />)
     addItem()
     fireEvent.click(screen.getByRole('button', { name: en.pos.completeSale }))

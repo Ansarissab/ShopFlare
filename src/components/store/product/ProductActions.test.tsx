@@ -21,6 +21,7 @@ function defaults() {
     selectedSize: size as SizeOption | null,
     allSizesOOS: false,
     isAddingToCart: false,
+    showWhatsApp: true,
     onAddToCart: vi.fn(),
     onBuyNow: vi.fn(),
     onWhatsApp: vi.fn(),
@@ -88,5 +89,20 @@ describe('ProductActions', () => {
     expect((container.firstChild as HTMLElement).className).toContain('cls-a')
     rerender(<ProductActions {...props} allSizesOOS className="cls-b" />)
     expect((container.firstChild as HTMLElement).className).toContain('cls-b')
+  })
+
+  // ── WhatsApp flag gating ─────────────────────────────────────────────────────
+
+  it('hides the WhatsApp button when showWhatsApp is false but still shows COD', () => {
+    const props = { ...defaults(), showWhatsApp: false }
+    render(<ProductActions {...props} />)
+    expect(screen.queryByText(en.store.orderOnWhatsApp)).toBeNull()
+    expect(screen.getByText(en.store.cashOnDelivery)).toBeTruthy()
+  })
+
+  it('shows the WhatsApp button when showWhatsApp is true and size is selected', () => {
+    const props = { ...defaults(), showWhatsApp: true }
+    render(<ProductActions {...props} />)
+    expect(screen.getByText(en.store.orderOnWhatsApp)).toBeTruthy()
   })
 })
