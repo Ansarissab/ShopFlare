@@ -1,6 +1,30 @@
 import { test, expect } from '../fixtures'
 
 test.describe('product detail page', () => {
+  test('server renders title, OG tags, and JSON-LD in initial HTML', async ({ page }) => {
+    await page.goto('/')
+    await page.waitForLoadState('networkidle')
+
+    const firstProductLink = page.getByRole('link').filter({ hasText: /.+/ }).first()
+    const href = await firstProductLink.getAttribute('href')
+    if (!href || !href.startsWith('/product/')) {
+      test.skip(true, 'No products — skipping metadata test')
+      return
+    }
+
+    // Fetch raw HTML before any JS hydration
+    const res = await page.request.get(href)
+    const html = await res.text()
+
+    // <title> present
+    expect(html).toMatch(/<title[^>]*>[^<]+<\/title>/)
+    // OG meta present
+    expect(html).toMatch(/og:title/)
+    // JSON-LD script with Product schema in initial HTML (not injected by client JS)
+    expect(html).toMatch(/"@type"\s*:\s*"Product"/)
+    expect(html).toMatch(/application\/ld\+json/)
+  })
+
   test('navigates to a product page from the grid', async ({ page }) => {
     await page.goto('/')
     await page.waitForLoadState('networkidle')

@@ -4,7 +4,7 @@
 import 'trix/dist/trix.css'
 import 'trix'
 
-import { useEffect, useRef, useId } from 'react'
+import { useEffect, useLayoutEffect, useRef, useId } from 'react'
 import { toast } from 'sonner'
 import { compressImage } from '@/lib/image'
 import { apiUpload } from '@/lib/api'
@@ -21,7 +21,9 @@ export function RichTextEditor({ value, onChange, uploadEndpoint }: RichTextEdit
   const inputId = `trix-input-${uid}`
   const editorRef = useRef<TrixEditorElement | null>(null)
   const onChangeRef = useRef(onChange)
-  onChangeRef.current = onChange
+  useLayoutEffect(() => {
+    onChangeRef.current = onChange
+  })
 
   // Sync value into editor when it changes externally (e.g. form reset).
   useEffect(() => {
@@ -30,7 +32,6 @@ export function RichTextEditor({ value, onChange, uploadEndpoint }: RichTextEdit
     if (el.value !== value) {
       el.editor?.loadJSON(JSON.parse(value || '{}') as unknown)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
 
   useEffect(() => {

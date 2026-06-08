@@ -30,3 +30,29 @@ test.describe('home page', () => {
     }
   })
 })
+
+test.describe('category page metadata', () => {
+  test('server renders title, OG tags, and JSON-LD in initial HTML', async ({ page }) => {
+    // Find a category link from the home page
+    await page.goto('/')
+    await page.waitForLoadState('networkidle')
+
+    const href = await page.evaluate(() => {
+      const a = document.querySelector('a[href^="/category/"]')
+      return a ? a.getAttribute('href') : null
+    })
+
+    if (!href) {
+      test.skip(true, 'No categories — skipping category metadata test')
+      return
+    }
+
+    const res = await page.request.get(href)
+    const html = await res.text()
+
+    expect(html).toMatch(/<title[^>]*>[^<]+<\/title>/)
+    expect(html).toMatch(/og:title/)
+    expect(html).toMatch(/"@type"\s*:\s*"CollectionPage"/)
+    expect(html).toMatch(/application\/ld\+json/)
+  })
+})
