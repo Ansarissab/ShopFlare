@@ -46,7 +46,7 @@ Replaces Shopify Basic ($29/month) for stores that don't need the heavyweight pl
 - Three checkout paths: **Stripe Checkout** (card), **Cash on Delivery**, and **WhatsApp** order hand-off (optional, admin-toggleable; includes a floating chat widget on every storefront page)
 - Coupons (percentage / fixed, min-order, usage + per-customer limits)
 - Order tracking page and self-service cancellation (while pending/confirmed)
-- Verified-purchase **reviews + ratings** (only delivered orders, admin-moderated)
+- Verified-purchase **reviews + ratings** (only delivered orders, admin-moderated; toggleable site-wide and per-product — no redeploy needed)
 - **Notify-me** restock requests on out-of-stock sizes, with automatic restock emails
 - PWA: installable, with Web Push order alerts
 - SEO: sitemap + JSON-LD product structured data
