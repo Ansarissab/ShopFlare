@@ -87,6 +87,63 @@ describe('productJsonLd', () => {
     const brand = result.brand as Record<string, unknown>
     expect(brand.name).toBe('Acme')
   })
+
+  it('uses provided currency for offer priceCurrency', () => {
+    const result = productJsonLd(makeProduct({ minPrice: 1000 }), { currency: 'USD' })
+    const offers = result.offers as Record<string, unknown>
+    expect(offers.priceCurrency).toBe('USD')
+  })
+
+  it('falls back to DEFAULT_CURRENCY meta when unknown currency provided', () => {
+    // covers CURRENCIES['XYZ'] ?? CURRENCIES[DEFAULT_CURRENCY] right-hand branch
+    const result = productJsonLd(makeProduct(), { currency: 'XYZ' as string })
+    expect(result['@type']).toBe('Product')
+  })
+
+  it('omits images when all variant image urls are empty', () => {
+    const item = makeProduct()
+    ;(item.variants[0] as unknown as Record<string, unknown>).images = [
+      { id: 'i1', variantId: 'v1', url: '', r2Key: 'k', sortOrder: 0 },
+    ]
+    const result = productJsonLd(item)
+    expect(result.image).toBeUndefined()
+  })
+
+  it('omits description when product has none', () => {
+    const item = makeProduct()
+    ;(item as unknown as Record<string, unknown>).product = { ...item.product, description: null }
+    const result = productJsonLd(item)
+    expect(result.description).toBeUndefined()
+  })
+
+  it('includes url in Offer when storeUrl provided', () => {
+    const result = productJsonLd(makeProduct({ minPrice: 1000 }), { storeUrl: 'https://shop.test' })
+    const offers = result.offers as Record<string, unknown>
+    expect(offers.url).toBe('https://shop.test/product/p1')
+  })
+
+  it('includes url in AggregateOffer when storeUrl provided', () => {
+    const result = productJsonLd(makeProduct({ minPrice: 1000, maxPrice: 2000 }), { storeUrl: 'https://shop.test' })
+    const offers = result.offers as Record<string, unknown>
+    expect(offers['@type']).toBe('AggregateOffer')
+    expect(offers.url).toBe('https://shop.test/product/p1')
+  })
+
+  it('emits null-price Offer when product has no sizes', () => {
+    const item: ProductWithVariants = {
+      ...makeProduct(),
+      variants: [
+        {
+          id: 'v1', productId: 'p1', label: 'Default', colorHex: null, sortOrder: 0,
+          images: [], sizes: [],
+        } as unknown as ProductWithVariants['variants'][0],
+      ],
+    }
+    const result = productJsonLd(item)
+    const offers = result.offers as Record<string, unknown>
+    expect(offers['@type']).toBe('Offer')
+    expect(offers.price).toBeUndefined()
+  })
 })
 
 describe('aggregateRatingJsonLd', () => {
@@ -109,6 +166,11 @@ describe('organizationJsonLd', () => {
     const r = organizationJsonLd({ name: 'Acme', logoUrl: 'https://logo.jpg', email: 'hi@acme.com' })
     expect(r.logo).toBe('https://logo.jpg')
     expect(r.email).toBe('hi@acme.com')
+  })
+
+  it('includes url when provided', () => {
+    const r = organizationJsonLd({ name: 'Acme', url: 'https://acme.com' })
+    expect(r.url).toBe('https://acme.com')
   })
 })
 
@@ -137,6 +199,15 @@ describe('collectionPageJsonLd', () => {
     expect(r['@type']).toBe('CollectionPage')
     expect(r.name).toBe('Shoes')
   })
+
+  it('includes description and imageUrl when provided', () => {
+    const r = collectionPageJsonLd({
+      name: 'Shoes', url: 'https://example.com/shoes',
+      description: 'Best shoes', imageUrl: 'https://img.jpg',
+    })
+    expect(r.description).toBe('Best shoes')
+    expect(r.image).toBe('https://img.jpg')
+  })
 })
 
 describe('faqPageJsonLd', () => {
@@ -154,6 +225,20 @@ describe('articleJsonLd', () => {
     expect(r['@type']).toBe('Article')
     expect(r.headline).toBe('Post')
   })
+
+  it('includes all optional fields when provided', () => {
+    const r = articleJsonLd({
+      title: 'Post', url: 'https://blog.com/1',
+      description: 'Desc', imageUrl: 'https://img.jpg',
+      datePublished: '2024-01-01', dateModified: '2024-01-02',
+      authorName: 'Alice',
+    })
+    expect(r.description).toBe('Desc')
+    expect(r.image).toBe('https://img.jpg')
+    expect(r.datePublished).toBe('2024-01-01')
+    expect(r.dateModified).toBe('2024-01-02')
+    expect((r.author as Record<string, unknown>).name).toBe('Alice')
+  })
 })
 
 describe('offerJsonLd', () => {
@@ -161,5 +246,10 @@ describe('offerJsonLd', () => {
     const r = offerJsonLd({ price: 9.99, currency: 'USD', availability: 'InStock' })
     expect(r['@type']).toBe('Offer')
     expect(r.availability).toContain('InStock')
+  })
+
+  it('includes url when provided', () => {
+    const r = offerJsonLd({ price: 9.99, currency: 'USD', availability: 'InStock', url: 'https://shop.com/p1' })
+    expect(r.url).toBe('https://shop.com/p1')
   })
 })
