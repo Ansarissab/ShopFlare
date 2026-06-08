@@ -468,6 +468,10 @@ export const en = {
     // whatsapp toggle (phase 19)
     enableWhatsApp:     'Enable WhatsApp',
     enableWhatsAppHint: 'WhatsApp number must also be set for any button to appear.',
+    // reviews toggle (phase 20)
+    enableReviews:     'Enable reviews',
+    enableReviewsHint: 'Show customer reviews across the store. Turning this off hides reviews everywhere and stops new submissions; existing reviews are kept.',
+    enableReviewsProduct: 'Enable reviews for this product',
   },
   // Tooltip copy — short, plain, merchant-friendly. Rendered via <HelpTip>.
   // Never inline these strings in JSX; always reference en.tooltips.*
@@ -607,6 +611,7 @@ export const en = {
     ratingRequired: 'Please select a rating',
     submitFailed: 'Could not submit review. Please try again.',
     cancel: 'Cancel',
+    disabled: 'Reviews are not available for this product',
     // Accessibility labels (ReviewStars)
     selectRating: 'Select rating',
     starsAriaLabel: '{rating} out of 5 stars',
