@@ -4,11 +4,10 @@ Get your store live in 15 minutes.
 
 ## Prerequisites
 
-- Node 24 + pnpm (via mise: `.tool-versions` included)
+- Node 22+ + pnpm (via mise: `.tool-versions` included)
 - Cloudflare account (free): <https://dash.cloudflare.com>
 - Stripe account (free): <https://dashboard.stripe.com>
 - Resend account (free): <https://resend.com>
-- GitHub account (for deployment)
 
 ## Steps
 
@@ -28,7 +27,17 @@ pnpm install
 pnpm setup
 ```
 
-The wizard walks you through every step interactively.
+The wizard handles everything interactively:
+
+- Cloudflare login
+- R2 bucket creation
+- DB migrations + seed
+- Worker secrets (Stripe, Resend, Turnstile, admin password)
+- API worker deploy (auto-provisions D1 + KV on first deploy)
+- Stripe webhook auto-create
+- Frontend worker deploy
+- `.env.local` generation
+- Post-deploy smoke check
 
 ### 4. Set up the local database
 
@@ -44,11 +53,14 @@ pnpm dev          # Next.js on localhost:3000
 pnpm worker:dev   # CF Worker on localhost:8787
 ```
 
-### 6. Deploy
+### 6. Deploy (after setup wizard)
+
+If you need to redeploy later:
 
 ```bash
-pnpm worker:deploy   # Deploy the API Worker (shopflare-worker)
-pnpm web:deploy      # Build via OpenNext + deploy the frontend Worker (shopflare-web)
+pnpm worker:deploy   # API Worker (shopflare-worker)
+pnpm web:deploy      # Frontend Worker (shopflare-web, OpenNext SSR — not Pages)
 ```
 
-See [cloudflare-guide.md](cloudflare-guide.md) for detailed CF setup steps.
+See [cloudflare-guide.md](cloudflare-guide.md) for full manual steps and the
+maintainer override for keeping real resource ids local.
