@@ -8,12 +8,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
     ?? (workerUrl ? workerUrl.replace(/\/api$/, '') : '')
 
+  // Fetch per-page updatedAt timestamps to populate lastModified on policy routes
+  let policyUpdates: Record<string, string> = {}
+  if (workerUrl) {
+    try {
+      const pagesRes = await fetch(`${workerUrl}/api/pages`, { next: { revalidate: 3600 } })
+      if (pagesRes.ok) {
+        const pages = (await pagesRes.json()) as Array<{ slug: string; updatedAt?: string }>
+        for (const p of pages) {
+          if (p.updatedAt) policyUpdates[p.slug] = p.updatedAt
+        }
+      }
+    } catch {
+      // skip — policy routes will have no lastModified
+    }
+  }
+
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: siteUrl || '/', changeFrequency: 'daily', priority: 1 },
     ...POLICY_SLUGS.map((slug) => ({
       url: `${siteUrl}/policy/${slug}`,
       changeFrequency: 'monthly' as const,
       priority: 0.3,
+      ...(policyUpdates[slug] ? { lastModified: new Date(policyUpdates[slug]) } : {}),
     })),
   ]
 
@@ -22,13 +39,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     try {
       const res = await fetch(`${workerUrl}/api/products`, { next: { revalidate: 3600 } })
       if (res.ok) {
-        const products = (await res.json()) as Array<{ slug?: string; id: string }>
+        const products = (await res.json()) as Array<{ slug?: string; id: string; updatedAt?: string }>
         productRoutes = products
           .filter((p) => p.slug)
           .map((p) => ({
             url: `${siteUrl}/product/${p.slug}`,
             changeFrequency: 'weekly' as const,
             priority: 0.8,
+            ...(p.updatedAt ? { lastModified: new Date(p.updatedAt) } : {}),
           }))
       }
     } catch {
@@ -60,5 +78,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
+  // TODO: blog routes — add here when phase-23 ships
   return [...staticRoutes, ...productRoutes, ...categoryRoutes]
 }
