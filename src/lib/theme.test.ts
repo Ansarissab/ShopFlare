@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { applyTheme, THEME_STORAGE_KEY } from '@/lib/theme'
-import { RADIUS_PRESETS, FONT_PRESETS } from '@/lib/constants'
+import { RADIUS_PRESETS, FONT_PRESETS, DENSITY_PRESETS } from '@/lib/constants'
 import { contrastColor } from '@/lib/utils'
 
 afterEach(() => {
@@ -10,6 +10,7 @@ afterEach(() => {
   // reset inline styles + attribute between cases
   document.documentElement.removeAttribute('style')
   document.documentElement.removeAttribute('data-theme')
+  document.documentElement.removeAttribute('data-hero-style')
 })
 
 describe('THEME_STORAGE_KEY', () => {
@@ -85,5 +86,37 @@ describe('applyTheme', () => {
   it('leaves data-theme untouched when colorMode absent', () => {
     applyTheme({ primaryColor: '#abcdef' })
     expect(root().getAttribute('data-theme')).toBeNull()
+  })
+
+  it('maps density preset to --density', () => {
+    applyTheme({ density: 'compact' })
+    expect(root().style.getPropertyValue('--density')).toBe(DENSITY_PRESETS.compact)
+  })
+
+  it('maps spacious density to --density', () => {
+    applyTheme({ density: 'spacious' })
+    expect(root().style.getPropertyValue('--density')).toBe(DENSITY_PRESETS.spacious)
+  })
+
+  it('does not set --density when density absent', () => {
+    applyTheme({})
+    expect(root().style.getPropertyValue('--density')).toBe('')
+  })
+
+  it('sets data-hero-style when heroStyle provided', () => {
+    applyTheme({ heroStyle: 'centered' })
+    expect(root().getAttribute('data-hero-style')).toBe('centered')
+  })
+
+  it('sets data-hero-style for all supported hero styles', () => {
+    for (const style of ['image-left', 'full-bleed', 'centered', 'split'] as const) {
+      applyTheme({ heroStyle: style })
+      expect(root().getAttribute('data-hero-style')).toBe(style)
+    }
+  })
+
+  it('does not touch data-hero-style when heroStyle absent', () => {
+    applyTheme({})
+    expect(root().getAttribute('data-hero-style')).toBeNull()
   })
 })

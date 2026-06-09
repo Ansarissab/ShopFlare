@@ -8,6 +8,7 @@ const vibrate = vi.fn()
 let isStandalone = true
 let cartCount = 0
 let pathname = '/'
+let landingEnabled: boolean | undefined = undefined
 
 vi.mock('next/link', async () => {
   const { createElement } = await import('react')
@@ -42,12 +43,17 @@ vi.mock('@/lib/utils/haptics', () => ({
   vibrate: (...args: unknown[]) => vibrate(...args),
 }))
 
+vi.mock('@/hooks/useStoreConfig', () => ({
+  useStoreConfig: () => ({ config: landingEnabled !== undefined ? { landingEnabled } : undefined, loading: false }),
+}))
+
 import { AppTabBar } from './AppTabBar'
 
 beforeEach(() => {
   isStandalone = true
   cartCount = 0
   pathname = '/'
+  landingEnabled = undefined
 })
 
 afterEach(() => {
@@ -71,12 +77,19 @@ describe('AppTabBar', () => {
     expect(screen.getByText(en.pwa.tabMenu)).toBeTruthy()
   })
 
-  it('renders link tabs with correct hrefs', () => {
+  it('renders link tabs with correct hrefs (landing off → shop = /)', () => {
+    landingEnabled = false
     render(<AppTabBar />)
     expect(screen.getByLabelText(en.pwa.tabHome).getAttribute('href')).toBe('/')
-    expect(screen.getByLabelText(en.pwa.tabShop).getAttribute('href')).toBe('/product')
+    expect(screen.getByLabelText(en.pwa.tabShop).getAttribute('href')).toBe('/')
     expect(screen.getByLabelText(en.pwa.tabTrack).getAttribute('href')).toBe('/track')
     expect(screen.getByLabelText(en.pwa.tabMenu).getAttribute('href')).toBe('/#menu')
+  })
+
+  it('shop tab href is /shop when landing is enabled', () => {
+    landingEnabled = true
+    render(<AppTabBar />)
+    expect(screen.getByLabelText(en.pwa.tabShop).getAttribute('href')).toBe('/shop')
   })
 
   it('cart tab is a button (no href) and calls vibrate + openCart on click', () => {
@@ -122,8 +135,9 @@ describe('AppTabBar', () => {
     expect(homeLabel.className).toContain('text-primary')
   })
 
-  it('marks shop tab active on nested path (startsWith href + "/")', () => {
-    pathname = '/product/abc'
+  it('marks shop tab active on /shop nested path when landing enabled', () => {
+    landingEnabled = true
+    pathname = '/shop/somecat'
     render(<AppTabBar />)
     const shopLabel = screen.getByText(en.pwa.tabShop)
     expect(shopLabel.className).toContain('text-primary')

@@ -22,6 +22,10 @@ import {
   FONT_PRESETS,
   COLOR_MODES,
   THEME_PRESETS,
+  STYLE_PRESETS,
+  DENSITY_PRESETS,
+  HERO_STYLES,
+  LANDING_SECTION_KEYS,
   TAX_BASIS,
   SW_CACHE_NAMES,
   TAB_ROUTES,
@@ -132,7 +136,7 @@ describe('appearance presets', () => {
   })
 
   it('every theme preset has a name + two hex colors', () => {
-    expect(THEME_PRESETS.length).toBe(4)
+    expect(THEME_PRESETS.length).toBe(STYLE_PRESETS.length)
     for (const p of THEME_PRESETS) {
       expect(p.name.length).toBeGreaterThan(0)
       expect(p.primaryColor).toMatch(/^#[0-9a-f]{6}$/i)
@@ -244,6 +248,78 @@ describe('AI bot user-agent lists', () => {
     for (const bot of AI_TRAINING_BOTS) {
       expect(searchSet.has(bot)).toBe(false)
       expect(scraperSet.has(bot)).toBe(false)
+    }
+  })
+})
+
+describe('LANDING_SECTION_KEYS', () => {
+  it('contains the 5 expected section keys', () => {
+    expect(LANDING_SECTION_KEYS).toContain('hero')
+    expect(LANDING_SECTION_KEYS).toContain('story')
+    expect(LANDING_SECTION_KEYS).toContain('featured')
+    expect(LANDING_SECTION_KEYS).toContain('reviews')
+    expect(LANDING_SECTION_KEYS).toContain('cta')
+    expect(LANDING_SECTION_KEYS).toHaveLength(5)
+  })
+})
+
+describe('DENSITY_PRESETS', () => {
+  it('has compact, comfortable and spacious entries', () => {
+    expect(DENSITY_PRESETS).toHaveProperty('compact')
+    expect(DENSITY_PRESETS).toHaveProperty('comfortable')
+    expect(DENSITY_PRESETS).toHaveProperty('spacious')
+  })
+
+  it('comfortable is the neutral scale 1', () => {
+    expect(DENSITY_PRESETS.comfortable).toBe('1')
+  })
+
+  it('compact is smaller than comfortable, spacious is larger', () => {
+    expect(Number(DENSITY_PRESETS.compact)).toBeLessThan(1)
+    expect(Number(DENSITY_PRESETS.spacious)).toBeGreaterThan(1)
+  })
+})
+
+describe('HERO_STYLES', () => {
+  it('includes the 4 supported hero layouts', () => {
+    expect(HERO_STYLES).toContain('image-left')
+    expect(HERO_STYLES).toContain('full-bleed')
+    expect(HERO_STYLES).toContain('centered')
+    expect(HERO_STYLES).toContain('split')
+    expect(HERO_STYLES).toHaveLength(4)
+  })
+})
+
+describe('STYLE_PRESETS', () => {
+  it('provides 6 named presets', () => {
+    expect(STYLE_PRESETS).toHaveLength(6)
+  })
+
+  it('each preset has all 6 required appearance fields', () => {
+    for (const p of STYLE_PRESETS) {
+      expect(p).toHaveProperty('name')
+      expect(p).toHaveProperty('primaryColor')
+      expect(p).toHaveProperty('accentColor')
+      expect(p).toHaveProperty('fontFamily')
+      expect(p).toHaveProperty('radius')
+      expect(p).toHaveProperty('density')
+      expect(p).toHaveProperty('heroStyle')
+    }
+  })
+
+  it('every preset color is a valid #rrggbb hex', () => {
+    for (const p of STYLE_PRESETS) {
+      expect(p.primaryColor).toMatch(/^#[0-9a-f]{6}$/i)
+      expect(p.accentColor).toMatch(/^#[0-9a-f]{6}$/i)
+    }
+  })
+
+  it('THEME_PRESETS is derived from STYLE_PRESETS with matching names', () => {
+    expect(THEME_PRESETS).toHaveLength(STYLE_PRESETS.length)
+    for (let i = 0; i < STYLE_PRESETS.length; i++) {
+      expect(THEME_PRESETS[i].name).toBe(STYLE_PRESETS[i].name)
+      expect(THEME_PRESETS[i].primaryColor).toBe(STYLE_PRESETS[i].primaryColor)
+      expect(THEME_PRESETS[i].accentColor).toBe(STYLE_PRESETS[i].accentColor)
     }
   })
 })

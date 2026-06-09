@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { fetchFromWorker } from './fetchFromWorker'
+import { fetchFromWorker, r2Url } from './fetchFromWorker'
 
 const fetchMock = vi.fn()
 vi.stubGlobal('fetch', fetchMock)
@@ -66,5 +66,31 @@ describe('fetchFromWorker', () => {
       expect.any(String),
       expect.objectContaining({ next: { revalidate: 300 } }),
     )
+  })
+})
+
+describe('r2Url', () => {
+  afterEach(() => vi.unstubAllEnvs())
+
+  it('returns null for null key', () => {
+    expect(r2Url(null)).toBeNull()
+  })
+
+  it('returns null for undefined key', () => {
+    expect(r2Url(undefined)).toBeNull()
+  })
+
+  it('returns null for empty string key', () => {
+    expect(r2Url('')).toBeNull()
+  })
+
+  it('builds CDN URL from NEXT_PUBLIC_WORKER_URL + key', () => {
+    vi.stubEnv('NEXT_PUBLIC_WORKER_URL', 'https://worker.test')
+    expect(r2Url('images/hero.avif')).toBe('https://worker.test/cdn/images/hero.avif')
+  })
+
+  it('uses empty base when env is unset', () => {
+    vi.stubEnv('NEXT_PUBLIC_WORKER_URL', '')
+    expect(r2Url('img/logo.png')).toBe('/cdn/img/logo.png')
   })
 })
