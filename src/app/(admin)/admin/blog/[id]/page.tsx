@@ -62,7 +62,6 @@ export default function BlogEditorPage({
   useEffect(() => {
     if (isNew) return
     let cancelled = false
-    setLoading(true)
     apiGet<BlogPost>(`/api/admin/blog/${id}`)
       .then((post) => {
         if (cancelled) return

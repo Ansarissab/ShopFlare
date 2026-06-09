@@ -30,7 +30,6 @@ export default function AdminBlogListPage() {
 
   useEffect(() => {
     let cancelled = false
-    setLoading(true)
     apiGet<{ posts: BlogPost[] }>('/api/admin/blog')
       .then((res) => { if (!cancelled) setPosts(res.posts) })
       .catch(() => { if (!cancelled) toast.error(en.errors.networkError) })
