@@ -6,6 +6,11 @@
 [![Cloudflare](https://img.shields.io/badge/Cloudflare-Stack-orange)](https://cloudflare.com)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Ansarissab/ShopFlare)
+
+> **Deploy button deploys the API worker only.** For a full store (both workers +
+> migrations + Stripe webhook auto-setup), fork the repo and run `pnpm setup`.
+
 🧪 **1360** unit tests &nbsp;·&nbsp; 🔗 **153** integration tests &nbsp;·&nbsp; 📊 **95%** coverage
 
 A free, open-source, self-hosted online store. Fork it, run the setup wizard, start selling.
@@ -346,15 +351,19 @@ pnpm typecheck && pnpm test && pnpm build
 
 Full walkthrough: [docs/setup/cloudflare-guide.md](docs/setup/cloudflare-guide.md).
 
-1. Create the Cloudflare resources (D1, KV, R2 — R2 needs a card on file, $0 under free tier)
-   and Turnstile widget; paste IDs into `wrangler.toml`.
-2. Set API worker secrets incl. `ADMIN_PASSWORD` + `ADMIN_SESSION_SECRET` (`wrangler secret put …`).
-3. Apply migrations + seed: `pnpm db:migrate && pnpm db:seed`.
-4. Deploy the API worker: `pnpm worker:deploy`.
+**Recommended:** run `pnpm setup` — the wizard handles all steps below automatically.
+
+1. Create R2 bucket (`npx wrangler r2 bucket create shopflare-images0`) — needs a card
+   on file, stays $0. D1 and KV are **auto-provisioned** on first `pnpm worker:deploy`.
+2. Apply migrations + seed: `pnpm db:migrate && pnpm db:seed`.
+3. Set API worker secrets incl. `ADMIN_PASSWORD` + `ADMIN_SESSION_SECRET`.
+4. Deploy the API worker: `pnpm worker:deploy` (auto-provisions D1 + KV on first run).
 5. Set `NEXT_PUBLIC_*` in `.env.local`, then deploy the frontend worker: `pnpm web:deploy`
    (Next.js SSR via OpenNext — **not** Pages, **not** static export).
 6. Set `FRONTEND_URL` (API worker) = the frontend worker origin, then `pnpm worker:deploy` again.
-7. Register the Stripe webhook → `<api-worker-origin>/api/stripe/webhook`.
+7. Stripe webhook is auto-created by `pnpm setup`; manual: Stripe Dashboard →
+   `<api-worker>/api/stripe/webhook`, events `checkout.session.completed`,
+   `checkout.session.expired`, `payment_intent.payment_failed`.
 8. Set a Cloudflare **budget alert** ($1) and stay on the Workers free plan → $0.
 
 Domain setup: [docs/setup/domain-setup.md](docs/setup/domain-setup.md).
