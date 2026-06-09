@@ -36,6 +36,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: page.content ? plainText(page.content) : undefined,
     canonical: `${siteUrl}/policy/${slug}`,
     storeName: config?.storeName,
+    mdUrl: `${siteUrl}/policy/${slug}.md`,
   })
 }
 

@@ -35,6 +35,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     canonical: `${siteUrl}/category/${slug}`,
     imageUrl: data.category.imageUrl ?? undefined,
     storeName: config?.storeName,
+    mdUrl: `${siteUrl}/category/${slug}.md`,
   })
 }
 

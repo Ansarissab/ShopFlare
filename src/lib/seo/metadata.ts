@@ -7,17 +7,26 @@ export interface PageMetadataInput {
   canonical?: string
   imageUrl?: string
   storeName?: string
+  /** Absolute URL to the .md version of this page (advertised via rel=alternate). */
+  mdUrl?: string
 }
 
 // Builds consistent Next.js Metadata from a page's entity data.
 // Uses the root layout title template (%s — StoreName) when storeName is provided.
 export function buildPageMetadata(input: PageMetadataInput): Metadata {
-  const { title, description, canonical, imageUrl, storeName } = input
+  const { title, description, canonical, imageUrl, storeName, mdUrl } = input
 
   return {
     title,
     ...(description ? { description } : {}),
-    ...(canonical ? { alternates: { canonical } } : {}),
+    ...(canonical || mdUrl
+      ? {
+          alternates: {
+            ...(canonical ? { canonical } : {}),
+            ...(mdUrl ? { types: { 'text/markdown': mdUrl } } : {}),
+          },
+        }
+      : {}),
     openGraph: {
       title,
       ...(description ? { description } : {}),
