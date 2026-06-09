@@ -169,4 +169,26 @@ app.get('/product/:productId', async (c) => {
   return c.json({ reviews: rows, average, count })
 })
 
+// ─── GET /store — store-wide approved reviews (landing Reviews strip) ─────────
+
+app.get('/store', async (c) => {
+  const db = createDb(c.env.DB)
+
+  const rows = await db
+    .select({
+      id:           schema.reviews.id,
+      customerName: schema.reviews.customerName,
+      rating:       schema.reviews.rating,
+      body:         schema.reviews.body,
+      createdAt:    schema.reviews.createdAt,
+    })
+    .from(schema.reviews)
+    .where(eq(schema.reviews.approved, true))
+    .orderBy(desc(schema.reviews.createdAt))
+    .limit(20)
+    .all()
+
+  return c.json({ reviews: rows })
+})
+
 export default app
