@@ -9,7 +9,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ?? (workerUrl ? workerUrl.replace(/\/api$/, '') : '')
 
   // Fetch per-page updatedAt timestamps to populate lastModified on policy routes
-  let policyUpdates: Record<string, string> = {}
+  const policyUpdates: Record<string, string> = {}
   if (workerUrl) {
     try {
       const pagesRes = await fetch(`${workerUrl}/api/pages`, { next: { revalidate: 3600 } })
