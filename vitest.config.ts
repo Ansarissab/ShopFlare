@@ -66,6 +66,13 @@ export default defineConfig({
         // suite (order creation, stock decrement, coupons) — mocking the entire
         // Drizzle db to unit-test it would be brittle and low-value.
         'worker/lib/orders.ts',
+        // healthProbe — wraps D1/KV/R2 binding calls; exercised end-to-end by the
+        // integration suite (happy path + forced binding failure → 503).
+        'worker/lib/health.ts',
+        // reviews + sanitize — wrap D1 and use CF helper types;
+        // covered behaviorally by the integration suite.
+        'worker/lib/reviews.ts',
+        'worker/lib/sanitize.ts',
       ],
     },
   },

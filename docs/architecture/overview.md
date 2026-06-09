@@ -67,3 +67,20 @@ admin UI is a client-gated static shell. See cloudflare-guide + ADR 0010.
 6. Stripe fires webhook → CF Worker `/api/stripe/webhook`
 7. CF Worker verifies signature → creates order in D1 → sends Resend email → fires Web Push to merchant
 8. Customer redirected to `/track/ORD-XXXXX`
+
+## Health and uptime
+
+`GET /healthz` (API Worker, `worker/lib/health.ts`) probes D1, KV, and R2
+independently. Each check has its own try/catch + 1500 ms timeout — a single
+hung binding cannot stall the others. Returns:
+
+- `200 { checks: { db, kv, r2 }, overall: 'ok', ts }` — all bindings healthy
+- `503 { checks: { db, kv, r2 }, overall: 'degraded', ts }` — one or more failed
+
+`/status` (Frontend Worker SSR, `src/app/(store)/status/page.tsx`) fetches
+`/healthz` server-side on every request (no-store cache) and renders a
+human-readable per-service status page for customers and the merchant.
+
+An external Better Stack monitor polls `/healthz` every 3 minutes and hosts
+the public uptime-history page — the app itself does not store history.
+See [`docs/setup/status-monitoring.md`](../setup/status-monitoring.md).

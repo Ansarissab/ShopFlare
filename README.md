@@ -54,6 +54,7 @@ Replaces Shopify Basic ($29/month) for stores that don't need the heavyweight pl
 - PWA: installable, with Web Push order alerts
 - **SEO / GEO / AEO**: server-rendered metadata + JSON-LD on every page (Product, Category, Organization, BreadcrumbList, FAQPage, Article); sitemap with `lastModified`; toggleable LLM discovery (`/llms.txt`, Markdown `.md` twins, AI-bot policy in `robots.txt`)
 - **Blog**: toggleable merchant blog at `/blog` — Trix rich text editor, cover images (R2), tags, draft/published workflow, RSS feed at `/blog/rss.xml`, Article structured data, included in sitemap
+- **Status / uptime**: machine `GET /healthz` (D1/KV/R2 probed independently, 200 ok / 503 degraded), public `/status` SSR live snapshot, and Better Stack free-tier monitor for uptime history + alerts
 
 **Admin dashboard** (app-level password login → Bearer session token)
 - Product / variant / size CRUD with R2 image upload (client-compressed; large images auto-optimized with a before/after confirm step)
