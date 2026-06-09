@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, primaryKey } from 'drizzle-orm/sqlite-core'
+import { sqliteTable, text, integer, primaryKey, index } from 'drizzle-orm/sqlite-core'
 import type { AnySQLiteColumn } from 'drizzle-orm/sqlite-core'
 import { sql } from 'drizzle-orm'
 import type { LandingSectionKey } from '@/lib/constants'
@@ -252,6 +252,26 @@ export const customerPushSubscriptions = sqliteTable('customer_push_subscription
   createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),
 })
 
+// ─── Blog Posts ──────────────────────────────────────────────────────────────
+
+export const blogPosts = sqliteTable('blog_posts', {
+  id:          text('id').primaryKey(),
+  slug:        text('slug').notNull().unique(),
+  title:       text('title').notNull(),
+  bodyHtml:    text('body_html').notNull().default(''),
+  excerpt:     text('excerpt').notNull().default(''),
+  coverR2Key:  text('cover_r2_key'),
+  coverAlt:    text('cover_alt'),
+  tags:        text('tags').notNull().default('[]'),
+  status:      text('status').notNull().default('draft'),
+  publishedAt: text('published_at'),
+  createdAt:   text('created_at').notNull().default(sql`(datetime('now'))`),
+  updatedAt:   text('updated_at').notNull().default(sql`(datetime('now'))`),
+}, (t) => ({
+  statusIdx:      index('blog_posts_status_idx').on(t.status),
+  publishedAtIdx: index('blog_posts_published_at_idx').on(t.publishedAt),
+}))
+
 // ─── Type exports ────────────────────────────────────────────────────────────
 
 export type Product = typeof products.$inferSelect
@@ -275,3 +295,5 @@ export type NewCustomerPushSubscription = typeof customerPushSubscriptions.$infe
 export type Category = typeof categories.$inferSelect
 export type NewCategory = typeof categories.$inferInsert
 export type ProductCategory = typeof productCategories.$inferSelect
+export type BlogPost = typeof blogPosts.$inferSelect
+export type NewBlogPost = typeof blogPosts.$inferInsert
