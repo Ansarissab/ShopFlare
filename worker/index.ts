@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import type { Bindings } from './types'
+import { healthProbe } from './lib/health'
 
 const app = new Hono<{ Bindings: Bindings }>()
 
@@ -31,7 +32,14 @@ app.use(
   }),
 )
 
-// Health check
+// Uptime probe — returns per-service health (200 ok / 503 degraded).
+// Monitor target: GET /healthz. No auth, no PII.
+app.get('/healthz', async (c) => {
+  const report = await healthProbe(c.env)
+  return c.json(report, report.overall === 'ok' ? 200 : 503)
+})
+
+// Legacy ping (unchanged — existing integration test + any callers stay green)
 app.get('/api/ping', (c) => c.json({ ok: true }))
 
 // ─── /cdn/* — serve product images from R2 ────────────────────────────────────
