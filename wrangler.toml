@@ -3,15 +3,19 @@ main = "worker/index.ts"
 compatibility_date = "2026-05-31"
 compatibility_flags = ["nodejs_compat"]
 
+# Resource ids are intentionally absent so wrangler auto-provisions D1/KV on
+# first deploy (wrangler ≥ 4.45.0 auto-provision, Oct 2025).
+# Maintainers who already have real resources: keep a git-ignored
+# wrangler.local.toml with the real ids and point WRANGLER_CONFIG at it
+# for your own deploys (see docs/setup/cloudflare-guide.md §Maintainer override).
+
 [[d1_databases]]
 binding = "DB"
 database_name = "shopflare-db0"
-database_id = "f7a387f1-813a-4b85-9554-119fc61cae6c"
 migrations_dir = "worker/db/migrations"
 
 [[kv_namespaces]]
 binding = "KV"
-id = "e0364e783aaf43059dfbb77aaa2fcc0a"
 
 [[r2_buckets]]
 bucket_name = "shopflare-images0"

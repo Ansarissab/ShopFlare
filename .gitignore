@@ -74,3 +74,6 @@ next-env.d.ts
 **/.tmp_test/*
 **/.tmpcov/*
 **/.tmp-cov/*
+
+# Maintainer local wrangler override (keeps real resource ids out of git)
+wrangler.local.toml
