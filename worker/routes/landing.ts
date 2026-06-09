@@ -8,8 +8,9 @@ import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import { isFeatureEnabled } from 'worker/lib/features'
 import type { Bindings } from 'worker/types'
-import type { LandingSection, LandingSectionKey } from '@/lib/types'
+import type { LandingSection } from '@/lib/types'
 import { LANDING_SECTION_KEYS } from '@/lib/constants'
+import type { LandingSectionKey } from '@/lib/constants'
 
 const app = new Hono<{ Bindings: Bindings }>()
 

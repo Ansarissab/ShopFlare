@@ -11,6 +11,7 @@ import { nanoid } from 'nanoid'
 import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import { SECTION_SCHEMAS, featuredProductsSchema, sectionKeySchema } from '@/lib/schemas/landing'
+import type { LandingSectionInput } from '@/lib/schemas/landing'
 import { parseBody } from 'worker/lib/http'
 import { bumpDataVersion } from 'worker/lib/version'
 import type { AdminEnv } from 'worker/lib/access'
@@ -78,33 +79,28 @@ app.put('/sections/:key', async (c) => {
 
   const db = createDb(c.env.DB)
   const now = new Date().toISOString()
-  const data = parsed.data
+  // Cast to base type — all per-section schemas are subsets of the base,
+  // so every field is already optional; we just need a single typed shape.
+  const data = parsed.data as LandingSectionInput
+
+  const row = {
+    sectionKey,
+    enabled:    data.enabled ?? true,
+    heading:    data.heading    ?? null,
+    subtext:    data.subtext    ?? null,
+    bodyHtml:   data.bodyHtml   ?? null,
+    ctaText:    data.ctaText    ?? null,
+    ctaHref:    data.ctaHref    ?? null,
+    imageR2Key: data.imageR2Key ?? null,
+    updatedAt:  now,
+  }
 
   await db
     .insert(schema.landingContent)
-    .values({
-      sectionKey,
-      enabled:    data.enabled ?? true,
-      heading:    'heading' in data ? (data.heading ?? null) : null,
-      subtext:    'subtext' in data ? (data.subtext ?? null) : null,
-      bodyHtml:   'bodyHtml' in data ? (data.bodyHtml ?? null) : null,
-      ctaText:    'ctaText' in data ? (data.ctaText ?? null) : null,
-      ctaHref:    'ctaHref' in data ? (data.ctaHref ?? null) : null,
-      imageR2Key: 'imageR2Key' in data ? (data.imageR2Key ?? null) : null,
-      updatedAt:  now,
-    })
+    .values(row)
     .onConflictDoUpdate({
       target: schema.landingContent.sectionKey,
-      set: {
-        enabled:    data.enabled ?? true,
-        heading:    'heading' in data ? (data.heading ?? null) : null,
-        subtext:    'subtext' in data ? (data.subtext ?? null) : null,
-        bodyHtml:   'bodyHtml' in data ? (data.bodyHtml ?? null) : null,
-        ctaText:    'ctaText' in data ? (data.ctaText ?? null) : null,
-        ctaHref:    'ctaHref' in data ? (data.ctaHref ?? null) : null,
-        imageR2Key: 'imageR2Key' in data ? (data.imageR2Key ?? null) : null,
-        updatedAt:  now,
-      },
+      set: { ...row },
     })
 
   await bumpDataVersion(db)
