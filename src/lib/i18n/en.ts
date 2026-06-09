@@ -512,6 +512,32 @@ export const en = {
     slugAutoHint: 'Auto-generated from name',
     productPageSize: 'Products per page',
     productPageSizeHint: 'Number of products loaded per scroll batch (6–96)',
+    // blog nav + editor (phase 23)
+    blog:                    'Blog',
+    addPost:                 'New Post',
+    blogEditorTitle:         'Title',
+    blogEditorSlug:          'URL slug',
+    blogEditorSlugHint:      'Auto-generated from title. Must be lowercase letters, numbers, and hyphens.',
+    blogEditorExcerpt:       'Excerpt',
+    blogEditorExcerptHint:   'Short summary shown on the blog index and used as the meta description.',
+    blogEditorTags:          'Tags',
+    blogEditorTagsHint:      'Comma-separated. Max 20 tags.',
+    blogEditorCover:         'Cover image',
+    blogEditorCoverAlt:      'Cover alt text',
+    blogEditorBody:          'Post body',
+    blogEditorDraft:         'Draft',
+    blogEditorPublished:     'Published',
+    blogEditorPublish:       'Publish',
+    blogEditorUnpublish:     'Unpublish',
+    blogEditorSave:          'Save',
+    blogEditorSaving:        'Saving…',
+    blogEditorSaved:         'Post saved',
+    blogEditorDeleteConfirm: 'Delete this post? This cannot be undone.',
+    blogEditorCreated:       'Post created',
+    blogEditorSlugTaken:     'This slug is already taken',
+    blogEditorPublishedAt:   'Published',
+    blogEditorNoPosts:       'No posts yet. Create your first post.',
+    blogEditorStatusBadge:   'Status',
     // whatsapp toggle (phase 19)
     enableWhatsApp:     'Enable WhatsApp',
     enableWhatsAppHint: 'WhatsApp number must also be set for any button to appear.',
@@ -519,6 +545,9 @@ export const en = {
     enableReviews:     'Enable reviews',
     enableReviewsHint: 'Show customer reviews across the store. Turning this off hides reviews everywhere and stops new submissions; existing reviews are kept.',
     enableReviewsProduct: 'Enable reviews for this product',
+    // blog toggle (phase 23)
+    enableBlog:     'Enable blog',
+    enableBlogHint: 'When ON, /blog and individual post pages are visible to visitors. Off = 404 for all blog URLs.',
   },
   // SEO / LLM discovery settings (phase 21)
   seo: {
@@ -531,6 +560,17 @@ export const en = {
     aiTrainingHelp:      'When enabled, AI training crawlers (GPTBot, CCBot, etc.) may use your content for model training.',
     llmDiscoveryLabel:   'Enable LLM discovery',
     llmDiscoveryHelp:    'Shows your store in /llms.txt and allows AI answer bots to index your content.',
+  },
+  // Blog storefront (phase 23)
+  blog: {
+    pageTitle:      'Blog',
+    pageDescription:'Latest articles and updates from our store.',
+    noPosts:        'No posts yet. Check back soon!',
+    readMore:       'Read more',
+    publishedOn:    'Published {date}',
+    breadcrumbBlog: 'Blog',
+    rssTitle:       'Blog RSS Feed',
+    tagLabel:       'Tag:',
   },
   // Tooltip copy — short, plain, merchant-friendly. Rendered via <HelpTip>.
   // Never inline these strings in JSX; always reference en.tooltips.*
