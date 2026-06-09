@@ -87,19 +87,19 @@ The markdown serializer lives in `src/lib/markdown.ts` — one shared serializer
 duplication per page type.
 
 Advertised via:
-- `<link rel="alternate" type="text/markdown" href="{url}.md">` in `<head>`
-- `Link: <{url}.md>; rel="alternate"; type="text/markdown"` response header
+- `<link rel="alternate" type="text/markdown" href="{url}.md">` in `<head>` (set by `buildPageMetadata`)
+- `Link: <{url}.md>; rel="alternate"; type="text/markdown"` HTTP response header (set by `src/middleware.ts`)
 
 **No User-Agent sniffing.** The same URL serves the same content to everyone; only the
-explicit `.md` suffix (or `Accept: text/markdown` — see below) changes the format.
+explicit `.md` suffix or `Accept: text/markdown` header changes the format.
 UA-based content swaps = cloaking, which is penalized.
 
 ### `Accept: text/markdown` content negotiation
 
-The `.md` routes also respond to `GET /product/{slug}.md` regardless of `Accept`. For
-full content negotiation (serving markdown at the canonical URL when `Accept: text/markdown`
-is sent), a middleware rewrite would be needed — this is a TODO (the `.md` suffix URL
-is the primary mechanism and covers all current use cases).
+`src/middleware.ts` intercepts requests to `/product/:slug`, `/category/:slug`, and
+`/policy/:slug`. When the request carries `Accept: text/markdown`, the middleware rewrites
+the request to the `.md` twin route — so `GET /product/shirt` with that header returns the
+same markdown as `GET /product/shirt.md`. Default `Accept` returns HTML unchanged.
 
 ---
 
