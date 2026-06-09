@@ -24,8 +24,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
+  // When the landing page is enabled, `/` is the marketing page and `/shop` is the catalog.
+  let landingEnabled = false
+  if (workerUrl) {
+    try {
+      const cfgRes = await fetch(`${workerUrl}/api/config/store`, { next: { revalidate: 3600 } })
+      if (cfgRes.ok) {
+        const cfg = (await cfgRes.json()) as { landingEnabled?: boolean }
+        landingEnabled = cfg.landingEnabled ?? false
+      }
+    } catch {
+      // skip — landingEnabled stays false, /shop won't be included
+    }
+  }
+
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: siteUrl || '/', changeFrequency: 'daily', priority: 1 },
+    ...(landingEnabled ? [{ url: `${siteUrl}/shop`, changeFrequency: 'daily' as const, priority: 0.9 }] : []),
     ...POLICY_SLUGS.map((slug) => ({
       url: `${siteUrl}/policy/${slug}`,
       changeFrequency: 'monthly' as const,

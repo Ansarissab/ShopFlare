@@ -13,6 +13,7 @@ import { CategoryNav } from '@/components/store/categories/CategoryNav'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
 import { en } from '@/lib/i18n/en'
+import { catalogHref } from '@/lib/nav'
 import type { CategoryNode } from '@/lib/types/category'
 
 export function StorefrontHeader() {
@@ -46,6 +47,13 @@ export function StorefrontHeader() {
 
           {/* Category nav */}
           <CategoryNav categories={catData?.categories ?? []} />
+
+          {/* Shop link — only shown when landing page is enabled so / is the marketing page */}
+          {config?.landingEnabled && (
+            <Link href={catalogHref(true)} className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:block">
+              {en.store.shopNav}
+            </Link>
+          )}
 
           {/* Track Order link */}
           <Link href="/track" className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:block">

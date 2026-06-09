@@ -10,6 +10,7 @@ import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
 import { buildPageMetadata } from '@/lib/seo/metadata'
 import { breadcrumbListJsonLd, collectionPageJsonLd } from '@/lib/seo/jsonld'
 import { DEFAULT_PRODUCT_PAGE_SIZE } from '@/lib/constants'
+import { catalogHref } from '@/lib/nav'
 import type { CategoryDetailResponse } from '@/lib/types/category'
 import type { StoreConfig } from '@/lib/types/common'
 
@@ -54,8 +55,9 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
   const categoryUrl = `${siteUrl}/category/${category.slug}`
 
+  const catalogUrl = `${siteUrl}${catalogHref(config?.landingEnabled)}`
   const breadcrumbItems = [
-    { name: config?.storeName ?? 'Home', url: `${siteUrl}/` },
+    { name: config?.storeName ?? 'Home', url: catalogUrl },
     ...breadcrumb.map((b) => ({ name: b.name, url: `${siteUrl}/category/${b.slug}` })),
     { name: category.name, url: categoryUrl },
   ]
@@ -74,7 +76,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
 
       {/* Breadcrumb */}
       <nav className="mb-6 flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
-        <Link href="/" className="hover:text-foreground transition-colors">
+        <Link href={catalogHref(config?.landingEnabled)} className="hover:text-foreground transition-colors">
           {config?.storeName ?? 'Home'}
         </Link>
         {breadcrumb.map((b) => (

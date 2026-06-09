@@ -10,6 +10,7 @@ import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
 import { buildPageMetadata } from '@/lib/seo/metadata'
 import { productJsonLd, breadcrumbListJsonLd } from '@/lib/seo/jsonld'
 import { isFeatureEnabled } from '@/lib/features'
+import { catalogHref } from '@/lib/nav'
 import type { ProductWithVariants } from '@/lib/types/product'
 import type { StoreConfig } from '@/lib/types/common'
 
@@ -52,8 +53,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
   const storeUrl = siteUrl
 
+  const catalogUrl = `${siteUrl}${catalogHref(config?.landingEnabled)}`
   const breadcrumb = breadcrumbListJsonLd([
-    { name: config?.storeName ?? 'Home', url: `${siteUrl}/` },
+    { name: config?.storeName ?? 'Home', url: catalogUrl },
     { name: item.product.name, url: `${siteUrl}/product/${slug}` },
   ])
 
@@ -76,7 +78,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
       <JsonLd data={productLd} />
 
       <nav className="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
-        <Link href="/" className="hover:text-foreground transition-colors">
+        <Link href={catalogHref(config?.landingEnabled)} className="hover:text-foreground transition-colors">
           {en.store.allProducts}
         </Link>
         <span aria-hidden>/</span>

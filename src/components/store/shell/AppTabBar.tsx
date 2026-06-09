@@ -9,6 +9,8 @@ import { useCartItemCount, useCart } from '@/hooks/useCart'
 import { en } from '@/lib/i18n/en'
 import { vibrate } from '@/lib/utils/haptics'
 import { layout, safeArea } from '@/lib/styles'
+import { useStoreConfig } from '@/hooks/useStoreConfig'
+import { catalogHref } from '@/lib/nav'
 
 type Tab = {
   key: string
@@ -23,13 +25,14 @@ export function AppTabBar() {
   const pathname = usePathname()
   const cartCount = useCartItemCount()
   const openCart = useCart((s) => s.openCart)
+  const { config } = useStoreConfig()
 
   // Only show in standalone mode
   if (!isStandalone) return null
 
   const tabs: Tab[] = [
-    { key: 'home',  label: en.pwa.tabHome,  href: '/',        icon: Home },
-    { key: 'shop',  label: en.pwa.tabShop,  href: '/product', icon: ShoppingBag },
+    { key: 'home',  label: en.pwa.tabHome,  href: '/',                                      icon: Home },
+    { key: 'shop',  label: en.pwa.tabShop,  href: catalogHref(config?.landingEnabled), icon: ShoppingBag },
     {
       key: 'cart',
       label: en.pwa.tabCart,

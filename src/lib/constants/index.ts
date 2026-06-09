@@ -167,11 +167,11 @@ export const INSTALL_DISMISSED_KEY = 'pwa-install-dismissed'
 
 // Tab routes for the native bottom nav (standalone mode)
 export const TAB_ROUTES = [
-  { key: 'home',  href: '/',          labelKey: 'tabHome'  },
-  { key: 'shop',  href: '/?tab=shop', labelKey: 'tabShop'  },
-  { key: 'cart',  href: null,         labelKey: 'tabCart'  },  // null = triggers CartSheet
-  { key: 'track', href: '/track',     labelKey: 'tabTrack' },
-  { key: 'menu',  href: null,         labelKey: 'tabMenu'  },  // null = triggers menu sheet
+  { key: 'home',  href: '/',      labelKey: 'tabHome'  },
+  { key: 'shop',  href: '/shop',  labelKey: 'tabShop'  },  // /shop when landingEnabled, / when off — AppTabBar resolves via catalogHref
+  { key: 'cart',  href: null,     labelKey: 'tabCart'  },  // null = triggers CartSheet
+  { key: 'track', href: '/track', labelKey: 'tabTrack' },
+  { key: 'menu',  href: null,     labelKey: 'tabMenu'  },  // null = triggers menu sheet
 ] as const
 export type TabKey = typeof TAB_ROUTES[number]['key']
 
