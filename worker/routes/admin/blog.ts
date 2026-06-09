@@ -17,7 +17,7 @@ import * as schema from 'worker/db/schema'
 import { blogPostCreate, blogPostUpdate } from '@/lib/schemas/blog'
 import { parseBody } from 'worker/lib/http'
 import { bumpDataVersion } from 'worker/lib/version'
-import { sanitizeHtml } from '@/lib/html'
+import { sanitizeHtml } from 'worker/lib/sanitize'
 import type { AdminEnv } from 'worker/lib/access'
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'] as const
