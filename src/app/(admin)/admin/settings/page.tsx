@@ -12,7 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { RichText } from '@/components/shared/RichText'
 import { en } from '@/lib/i18n/en'
-import { CURRENCIES, RADIUS_PRESETS, FONT_PRESETS, THEME_PRESETS, DEFAULT_PRODUCT_PAGE_SIZE, MIN_PRODUCT_PAGE_SIZE, MAX_PRODUCT_PAGE_SIZE } from '@/lib/constants'
+import { CURRENCIES, RADIUS_PRESETS, FONT_PRESETS, STYLE_PRESETS, DENSITY_PRESETS, HERO_STYLES, DEFAULT_PRODUCT_PAGE_SIZE, MIN_PRODUCT_PAGE_SIZE, MAX_PRODUCT_PAGE_SIZE } from '@/lib/constants'
 import { apiPut, apiUpload, apiDelete } from '@/lib/api'
 import { contrastColor } from '@/lib/utils'
 import { useStoreConfig } from '@/hooks/useStoreConfig'
@@ -41,6 +41,8 @@ export default function AdminSettingsPage() {
   const [radius, setRadius] = useState('md')
   const [fontFamily, setFontFamily] = useState('sans')
   const [colorMode, setColorMode] = useState('light')
+  const [density, setDensity] = useState('comfortable')
+  const [heroStyle, setHeroStyle] = useState('image-left')
   const [logoUrl, setLogoUrl] = useState('')
   const [logoUploading, setLogoUploading] = useState(false)
   const [faviconUploading, setFaviconUploading] = useState(false)
@@ -97,6 +99,8 @@ export default function AdminSettingsPage() {
     setRadius(config.radius ?? 'md')
     setFontFamily(config.fontFamily ?? 'sans')
     setColorMode(config.colorMode ?? 'light')
+    setDensity(config.density ?? 'comfortable')
+    setHeroStyle(config.heroStyle ?? 'image-left')
     setLogoUrl(config.logoUrl ?? '')
     setTaxEnabled(config.taxEnabled ?? false)
     setTaxRateInput(String(config.taxRate ?? 0))
@@ -190,6 +194,8 @@ export default function AdminSettingsPage() {
         radius,
         fontFamily,
         colorMode,
+        density,
+        heroStyle,
         taxEnabled,
         taxRate:               Number(taxRateInput) || 0,
         taxName:               taxName.trim() || 'Tax',
@@ -233,20 +239,51 @@ export default function AdminSettingsPage() {
           <p className="text-xs text-muted-foreground">{en.admin.appearanceHint}</p>
         </div>
 
-        {/* Quick presets */}
-        <div className="flex flex-wrap gap-2">
-          {THEME_PRESETS.map((preset) => (
-            <button
-              key={preset.name}
-              type="button"
-              onClick={() => { setPrimaryColor(preset.primaryColor); setAccentColor(preset.accentColor) }}
-              className="flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs hover:bg-muted transition-colors"
-            >
-              <span className="inline-block h-3 w-3 rounded-full border" style={{ backgroundColor: preset.primaryColor }} />
-              <span className="inline-block h-3 w-3 rounded-full border" style={{ backgroundColor: preset.accentColor }} />
-              {preset.name}
-            </button>
-          ))}
+        {/* Style presets — each card sets all appearance fields at once */}
+        <div className="flex flex-col gap-1.5">
+          <span className="text-xs font-medium">{en.admin.stylePresets}</span>
+          <p className="text-xs text-muted-foreground">{en.admin.stylePresetsHint}</p>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {STYLE_PRESETS.map((preset) => {
+            const isActive =
+              primaryColor === preset.primaryColor &&
+              accentColor  === preset.accentColor  &&
+              fontFamily   === preset.fontFamily   &&
+              radius       === preset.radius       &&
+              density      === preset.density      &&
+              heroStyle    === preset.heroStyle
+            return (
+              <button
+                key={preset.name}
+                type="button"
+                onClick={() => {
+                  setPrimaryColor(preset.primaryColor)
+                  setAccentColor(preset.accentColor)
+                  setFontFamily(preset.fontFamily)
+                  setRadius(preset.radius)
+                  setDensity(preset.density)
+                  setHeroStyle(preset.heroStyle)
+                }}
+                className={`flex flex-col gap-1.5 rounded-lg border p-2.5 text-left text-xs hover:bg-muted transition-colors ${isActive ? 'border-accent ring-1 ring-accent' : ''}`}
+              >
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className="inline-block h-4 w-4 rounded-full border shrink-0"
+                    style={{ backgroundColor: preset.primaryColor }}
+                  />
+                  <span
+                    className="inline-block h-4 w-4 rounded-full border shrink-0"
+                    style={{ backgroundColor: preset.accentColor }}
+                  />
+                  <span className="font-medium truncate">{preset.name}</span>
+                </div>
+                <span className="text-muted-foreground truncate">
+                  {preset.fontFamily} · {preset.radius} · {preset.density}
+                </span>
+              </button>
+            )
+          })}
         </div>
 
         {/* Color pickers */}
@@ -324,6 +361,34 @@ export default function AdminSettingsPage() {
                 <SelectItem value="light">{en.admin.colorModeLight}</SelectItem>
                 <SelectItem value="dark">{en.admin.colorModeDark}</SelectItem>
                 <SelectItem value="system">{en.admin.colorModeSystem}</SelectItem>
+              </SelectContent>
+            </Select>
+          </FormField>
+        </div>
+
+        {/* Selects: density / hero style */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <FormField label={en.admin.styleDensity} htmlFor="a-density" help={en.tooltips.settings.density}>
+            <Select value={density} onValueChange={(v: string | null) => setDensity(v ?? 'comfortable')}>
+              <SelectTrigger id="a-density" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.keys(DENSITY_PRESETS).map((key) => (
+                  <SelectItem key={key} value={key}>{key}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormField>
+          <FormField label={en.admin.styleHeroStyle} htmlFor="a-hero-style" help={en.tooltips.settings.heroStyle}>
+            <Select value={heroStyle} onValueChange={(v: string | null) => setHeroStyle(v ?? 'image-left')}>
+              <SelectTrigger id="a-hero-style" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {HERO_STYLES.map((key) => (
+                  <SelectItem key={key} value={key}>{key}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </FormField>
