@@ -367,6 +367,7 @@ Domain setup: [docs/setup/domain-setup.md](docs/setup/domain-setup.md).
 - Decisions: [docs/adr/](docs/adr/)
 - Features: [Stripe](docs/features/stripe-checkout.md) · [COD](docs/features/cod-orders.md) · [coupons](docs/features/coupons.md) · [inventory](docs/features/inventory.md) · [reviews/notify](docs/features/pwa-notifications.md) · [WhatsApp](docs/features/whatsapp.md)
 - Admin guide: [docs/admin-guide/](docs/admin-guide/)
+- Runbooks: [payments verification](docs/runbooks/payments-verification.md) (Stripe test-mode + bank transfer)
 
 ---
 

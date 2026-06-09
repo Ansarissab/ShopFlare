@@ -17,7 +17,7 @@ npx wrangler secret put STRIPE_SECRET_KEY
 ## 4. Set up webhook
 Dashboard → Developers → Webhooks → Add endpoint
 - URL: `https://your-worker.workers.dev/api/stripe/webhook`
-- Events: `checkout.session.completed`, `payment_intent.payment_failed`
+- Events: `checkout.session.completed`, `checkout.session.expired`, `payment_intent.payment_failed`
 - Copy signing secret → `npx wrangler secret put STRIPE_WEBHOOK_SECRET`
 
 ## 5. Create return policy page
@@ -27,3 +27,6 @@ Add your store URL + `/return-policy` in Stripe Dashboard → Settings → Check
 ## Test mode
 Use `pk_test_` and `sk_test_` keys during development.
 Test card: `4242 4242 4242 4242`, any future date, any CVC.
+
+To verify a test deploy end-to-end (Stripe test-card flow + bank transfer checklist),
+see [docs/runbooks/payments-verification.md](../runbooks/payments-verification.md).

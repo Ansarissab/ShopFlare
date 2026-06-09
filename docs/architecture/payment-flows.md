@@ -5,24 +5,32 @@
 ```
 1. Customer selects items + applies coupon
 2. Client → POST /api/stripe/checkout-session
-   body: { items: [{stripePriceId, qty}], orderId, couponCode? }
+   body: { items: [{stripePriceId, quantity}], couponCode? }
 3. CF Worker:
-   - Validates items against D1
-   - Checks stock (D1 transaction)
-   - Creates Stripe Checkout Session
+   - Rate-limit + Turnstile gate
+   - Creates a PENDING order in D1 (stock reserved, coupon counted)
+   - Stores orderId in Stripe session metadata so the webhook can confirm it
+   - Creates Stripe Checkout Session (line_items from stripePriceId)
+   - Persists stripeSessionId on the order row
    - Returns { url }
 4. Client redirects to Stripe URL
-5. Customer completes payment
+5. Customer completes payment on Stripe hosted page
 6. Stripe → POST /api/stripe/webhook (checkout.session.completed)
 7. CF Worker:
-   - Verifies Stripe signature
-   - Checks stripe_events (idempotency)
-   - Decrements stock (D1 transaction)
-   - Creates order in D1
-   - Sends Resend email (BCC merchant)
-   - Fires Web Push to merchant
-   - Logs to CF Analytics Engine
-8. Stripe redirects to /track/ORD-XXXXX?session_id=...
+   - Verifies Stripe signature (constructEventAsync)
+   - Checks stripe_events table (idempotency guard — skips duplicate event.id)
+   - Updates order status pending→confirmed + populates customer details
+   - Writes stripe_events row (idempotency record)
+   - Fires notifyNewOrder via waitUntil (Resend email BCC merchant + Web Push)
+8. Stripe redirects customer to /checkout/success?session_id=...
+
+If the session expires without payment:
+6b. Stripe → POST /api/stripe/webhook (checkout.session.expired)
+7b. CF Worker:
+    - Verifies signature + idempotency guard
+    - Cancels the order (only if still pending — guard against clobbering confirmed)
+    - Calls releaseOrderInventory: restores stock + reverts coupon usage
+    - Writes stripe_events row
 ```
 
 ## COD (Cash on Delivery)
