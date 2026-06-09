@@ -57,6 +57,7 @@ export default function AdminSettingsPage() {
   const [llmDiscoveryEnabled, setLlmDiscoveryEnabled] = useState(true)
   const [aiTrainingAllowed, setAiTrainingAllowed] = useState(true)
   const [faqEnabled, setFaqEnabled] = useState(false)
+  const [blogEnabled, setBlogEnabled] = useState(false)
   const [faqContent, setFaqContent] = useState('')
 
   // Tax
@@ -84,6 +85,7 @@ export default function AdminSettingsPage() {
     setLlmDiscoveryEnabled(config.llmDiscoveryEnabled ?? true)
     setAiTrainingAllowed(config.aiTrainingAllowed ?? true)
     setFaqEnabled(config.faqEnabled ?? false)
+    setBlogEnabled(config.blogEnabled ?? false)
     setFaqContent(config.faqContent ?? '')
     setContactEmail(config.contactEmail ?? '')
     setCurrency(config.currency)
@@ -177,6 +179,7 @@ export default function AdminSettingsPage() {
         llmDiscoveryEnabled,
         aiTrainingAllowed,
         faqEnabled,
+        blogEnabled,
         faqContent: faqContent.trim() || undefined,
         contactEmail: contactEmail.trim() || undefined,
         currency,
@@ -703,6 +706,19 @@ export default function AdminSettingsPage() {
             />
           </FormField>
         )}
+
+        <FormField label={en.admin.enableBlog} htmlFor="s-blog-enabled">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="s-blog-enabled"
+              checked={blogEnabled}
+              onChange={(e) => setBlogEnabled(e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300"
+            />
+          </div>
+        </FormField>
+        <p className="text-sm text-muted-foreground -mt-2">{en.admin.enableBlogHint}</p>
       </div>
 
       {/* Payments & Shipping */}

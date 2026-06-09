@@ -93,6 +93,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  // TODO: blog routes — add here when phase-23 ships
-  return [...staticRoutes, ...productRoutes, ...categoryRoutes]
+  let blogRoutes: MetadataRoute.Sitemap = []
+  if (workerUrl) {
+    try {
+      const res = await fetch(`${workerUrl}/api/blog`, { next: { revalidate: 3600 } })
+      if (res.ok) {
+        const data = (await res.json()) as { posts: Array<{ slug: string; publishedAt?: string }> }
+        blogRoutes = [
+          { url: `${siteUrl}/blog`, changeFrequency: 'weekly' as const, priority: 0.7 },
+          ...data.posts.map((p) => ({
+            url: `${siteUrl}/blog/${p.slug}`,
+            changeFrequency: 'weekly' as const,
+            priority: 0.5,
+            ...(p.publishedAt ? { lastModified: new Date(p.publishedAt) } : {}),
+          })),
+        ]
+      }
+    } catch {
+      // worker unavailable at build time — blog routes skipped
+    }
+  }
+  return [...staticRoutes, ...productRoutes, ...categoryRoutes, ...blogRoutes]
 }
