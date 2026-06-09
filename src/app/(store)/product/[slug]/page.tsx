@@ -40,9 +40,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ProductDetailPage({ params }: PageProps) {
   const { slug } = await params
-  const [item, config] = await Promise.all([
+  const [item, config, reviewsData] = await Promise.all([
     fetchFromWorker<ProductWithVariants>(`/api/products/${slug}`, { revalidate: 60 }),
     fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: 300 }),
+    fetchFromWorker<{ reviews: unknown[]; average: number; count: number }>(`/api/reviews/product/${slug}`, { revalidate: 120 }),
   ])
 
   if (!item) notFound()
@@ -55,16 +56,23 @@ export default async function ProductDetailPage({ params }: PageProps) {
     { name: item.product.name, url: `${siteUrl}/product/${slug}` },
   ])
 
-  const product = productJsonLd(item, {
+  const productLd = productJsonLd(item, {
     currency: config?.currency,
     storeUrl,
     storeName: config?.storeName,
+    rating: reviewsData && reviewsData.count > 0
+      ? { average: reviewsData.average, count: reviewsData.count }
+      : null,
   })
+  if (siteUrl) { productLd['@id'] = `${siteUrl}/product/${slug}#product` }
+  if (siteUrl && productLd.brand) {
+    ;(productLd.brand as Record<string, unknown>)['@id'] = `${siteUrl}#org`
+  }
 
   return (
     <div className={layout.page}>
       <JsonLd data={breadcrumb} />
-      <JsonLd data={product} />
+      <JsonLd data={productLd} />
 
       <nav className="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
         <Link href="/" className="hover:text-foreground transition-colors">
