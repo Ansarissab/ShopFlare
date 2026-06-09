@@ -245,3 +245,8 @@ export const MAX_CATEGORIES_PER_PRODUCT = 10
 export const MAX_CATEGORY_NAME_LENGTH = 60
 export const MAX_CATEGORY_DESCRIPTION_LENGTH = 500
 export const CATEGORY_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+
+// ─── Blog ─────────────────────────────────────────────────────────────────────
+
+export const BLOG_STATUSES = ['draft', 'published'] as const
+export type BlogStatus = (typeof BLOG_STATUSES)[number]
