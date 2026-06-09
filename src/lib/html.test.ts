@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { sanitizeHtml } from '@/lib/html'
+import { sanitizeHtml, parseFaq } from '@/lib/html'
 
 describe('sanitizeHtml', () => {
   it('passes through safe block content', () => {
@@ -53,5 +53,72 @@ describe('sanitizeHtml', () => {
 
   it('handles empty string', () => {
     expect(sanitizeHtml('')).toBe('')
+  })
+})
+
+describe('parseFaq', () => {
+  it('returns empty array for empty string', () => {
+    expect(parseFaq('')).toEqual([])
+  })
+
+  it('returns empty array when no h3/h4 headings', () => {
+    expect(parseFaq('<p>Just a paragraph</p>')).toEqual([])
+  })
+
+  it('parses a single h3 question + paragraph answer', () => {
+    const html = '<h3>What is your return policy?</h3><p>We accept returns within 30 days.</p>'
+    const items = parseFaq(html)
+    expect(items).toHaveLength(1)
+    expect(items[0].question).toBe('What is your return policy?')
+    expect(items[0].answer).toContain('We accept returns within 30 days.')
+  })
+
+  it('parses a single h4 question + paragraph answer', () => {
+    const html = '<h4>Do you ship internationally?</h4><p>Yes, we ship worldwide.</p>'
+    const items = parseFaq(html)
+    expect(items).toHaveLength(1)
+    expect(items[0].question).toBe('Do you ship internationally?')
+  })
+
+  it('parses multiple Q&A pairs', () => {
+    const html = [
+      '<h3>Question one?</h3><p>Answer one.</p>',
+      '<h3>Question two?</h3><p>Answer two.</p>',
+      '<h4>Question three?</h4><p>Answer three.</p>',
+    ].join('')
+    const items = parseFaq(html)
+    expect(items).toHaveLength(3)
+    expect(items[0].question).toBe('Question one?')
+    expect(items[1].question).toBe('Question two?')
+    expect(items[2].question).toBe('Question three?')
+  })
+
+  it('strips inline HTML from question text', () => {
+    const html = '<h3><strong>Bold question?</strong></h3><p>Answer.</p>'
+    const items = parseFaq(html)
+    expect(items[0].question).toBe('Bold question?')
+  })
+
+  it('strips HTML tags from answer text', () => {
+    const html = '<h3>Q?</h3><p>Answer with <strong>bold</strong> and <a href="#">link</a>.</p>'
+    const items = parseFaq(html)
+    expect(items[0].answer).not.toContain('<strong>')
+    expect(items[0].answer).not.toContain('<a')
+    expect(items[0].answer).toContain('Answer with')
+    expect(items[0].answer).toContain('bold')
+  })
+
+  it('skips pairs where answer is empty', () => {
+    const html = '<h3>Question with no answer?</h3><h3>Question with answer?</h3><p>Has answer.</p>'
+    const items = parseFaq(html)
+    expect(items).toHaveLength(1)
+    expect(items[0].question).toBe('Question with answer?')
+  })
+
+  it('handles content before first heading gracefully', () => {
+    const html = '<p>Intro text</p><h3>Q?</h3><p>A.</p>'
+    const items = parseFaq(html)
+    expect(items).toHaveLength(1)
+    expect(items[0].question).toBe('Q?')
   })
 })

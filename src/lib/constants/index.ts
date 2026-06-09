@@ -149,9 +149,10 @@ export const SEARCH_DEBOUNCE_MS = 250
 export const FEATURE_FLAGS = {
   whatsappEnabled:     false, // phase 19
   reviewsEnabled:      true,  // phase 20 (on by default — already live)
+  faqEnabled:          false, // phase 21 (sitewide FAQ — off by default until merchant adds content)
+  llmDiscoveryEnabled: true,  // phase 21
   landingEnabled:      false, // phase 22
   blogEnabled:         false, // phase 23
-  llmDiscoveryEnabled: true,  // phase 21
 } as const
 export type FeatureFlagKey = keyof typeof FEATURE_FLAGS
 
