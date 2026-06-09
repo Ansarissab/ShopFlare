@@ -185,6 +185,11 @@ export const BLOCKED_SCRAPER_BOTS = [
   'DotBot',
 ] as const
 
+// ─── Landing Page ────────────────────────────────────────────────────────────
+
+export const LANDING_SECTION_KEYS = ['hero', 'story', 'featured', 'reviews', 'cta'] as const
+export type LandingSectionKey = (typeof LANDING_SECTION_KEYS)[number]
+
 // ─── Categories ────────────────────────────────────────────────────────────────
 export const MAX_CATEGORY_DEPTH = 2
 export const MAX_CATEGORIES_PER_PRODUCT = 10

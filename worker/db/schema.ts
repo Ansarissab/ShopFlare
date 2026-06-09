@@ -1,6 +1,7 @@
 import { sqliteTable, text, integer, primaryKey } from 'drizzle-orm/sqlite-core'
 import type { AnySQLiteColumn } from 'drizzle-orm/sqlite-core'
 import { sql } from 'drizzle-orm'
+import type { LandingSectionKey } from '@/lib/constants'
 
 // ─── Products ───────────────────────────────────────────────────────────────
 
@@ -165,9 +166,6 @@ export const notifyMe = sqliteTable('notify_me', {
 })
 
 // ─── Landing Page ────────────────────────────────────────────────────────────
-
-export const LANDING_SECTION_KEYS = ['hero', 'story', 'featured', 'reviews', 'cta'] as const
-export type LandingSectionKey = (typeof LANDING_SECTION_KEYS)[number]
 
 export const landingContent = sqliteTable('landing_content', {
   sectionKey: text('section_key').$type<LandingSectionKey>().primaryKey(),
