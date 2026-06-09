@@ -2,6 +2,10 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono, Merriweather, Nunito } from 'next/font/google'
 import '@/app/globals.css'
 import { ServiceWorkerProvider } from '@/components/pwa/ServiceWorkerProvider'
+import { JsonLd } from '@/components/shared/JsonLd'
+import { organizationJsonLd } from '@/lib/seo/jsonld'
+import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
+import type { StoreConfig } from '@/lib/types/common'
 
 const geistSans    = Geist({ variable: '--font-geist-sans', subsets: ['latin'], display: 'swap' })
 const geistMono    = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'], display: 'swap' })
@@ -64,13 +68,28 @@ const bootScript = [
 
 const workerOrigin = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
+  const config = await fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: 300 })
+  const orgBase = organizationJsonLd({
+    name: config?.storeName ?? 'ShopFlare',
+    url: siteUrl || undefined,
+    logoUrl: config?.logoUrl ?? undefined,
+    email: config?.contactEmail ?? undefined,
+  })
+  const org = {
+    ...orgBase,
+    ...(siteUrl ? { '@id': `${siteUrl}#org` } : {}),
+  }
+
   const fontVars = `${geistSans.variable} ${geistMono.variable} ${merriweather.variable} ${nunito.variable}`
   return (
     <html lang="en" className={`${fontVars} h-full antialiased`} suppressHydrationWarning>
       <head>
         {/* No-flash theme boot: applies cached theme vars pre-paint */}
         <script dangerouslySetInnerHTML={{ __html: bootScript }} />
+        {/* Organization JSON-LD — sitewide entity anchor for structured data */}
+        <JsonLd data={org} />
         {/* Preconnect to worker/CDN origin (logo, product images, API) */}
         {workerOrigin && <link rel="preconnect" href={workerOrigin} />}
         {workerOrigin && <link rel="dns-prefetch" href={workerOrigin} />}
