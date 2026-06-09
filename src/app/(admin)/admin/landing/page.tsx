@@ -50,17 +50,14 @@ export default function AdminLandingPage() {
   const [sectionSaving, setSectionSaving] = useState<Record<string, boolean>>({})
   const [featuredSaving, setFeaturedSaving] = useState(false)
 
-  // landingEnabled toggle
-  const [landingEnabled, setLandingEnabled] = useState(false)
+  // landingEnabled: optimistic local override (null = defer to config)
+  const [landingOverride, setLandingOverride] = useState<boolean | null>(null)
+  const landingEnabled = landingOverride ?? config?.landingEnabled ?? false
   const [flagSaving, setFlagSaving] = useState(false)
 
   // Featured products state
   const [allProducts, setAllProducts] = useState<ProductWithVariants[]>([])
   const [featuredIds, setFeaturedIds] = useState<string[]>([])
-
-  useEffect(() => {
-    if (config) setLandingEnabled(config.landingEnabled ?? false)
-  }, [config])
 
   useEffect(() => {
     Promise.all([
@@ -77,13 +74,14 @@ export default function AdminLandingPage() {
   }, [])
 
   async function handleToggleLanding(enabled: boolean) {
-    setLandingEnabled(enabled)
+    setLandingOverride(enabled)
     setFlagSaving(true)
     try {
       await apiPut('/api/admin/config/store', { landingEnabled: enabled })
       broadcastUpdated()
+      setLandingOverride(null) // let config refresh take over
     } catch {
-      setLandingEnabled(!enabled)
+      setLandingOverride(!enabled)
       toast.error(en.errors.networkError)
     } finally {
       setFlagSaving(false)
