@@ -31,13 +31,33 @@ Set **Account Resources** → include your account. No Zone permissions needed.
 
 Repository → **Settings → Secrets and variables → Actions → Secrets**:
 
-| Secret | Value |
-|---|---|
-| `CLOUDFLARE_API_TOKEN` | the token created above |
-| `CLOUDFLARE_ACCOUNT_ID` | your CF account id (`npx wrangler whoami` or dashboard URL) |
+| Secret | Required | Value |
+| --- | --- | --- |
+| `CLOUDFLARE_API_TOKEN` | Yes | the token created above |
+| `CLOUDFLARE_ACCOUNT_ID` | Yes | your CF account id (`npx wrangler whoami` or dashboard URL) |
+| `WRANGLER_TOML_OVERRIDE` | Existing resources only | base64-encoded `wrangler.toml` with real D1/KV ids (see below) |
 
 Worker runtime secrets (Stripe keys, RESEND_API_KEY, etc.) are **not** needed here —
 they were set via `wrangler secret put` during `pnpm setup` and live in CF, not GitHub.
+
+#### WRANGLER_TOML_OVERRIDE (existing setups only)
+
+The committed `wrangler.toml` has no D1/KV ids so fresh forks auto-provision new
+resources. For existing setups with real resources:
+
+- **D1** re-links by `database_name = "shopflare-db0"` — safe without the override.
+- **R2** re-links by `bucket_name = "shopflare-images0"` — safe without the override.
+- **KV** has no name, only a binding (`KV`) — without an id, wrangler provisions a
+  **new** namespace, disconnecting your existing KV data.
+
+To preserve your existing KV (and D1/R2 for certainty): base64-encode your local
+`wrangler.local.toml` (which has the real ids) and add it as a secret:
+
+```bash
+base64 -i wrangler.local.toml | pbcopy   # macOS — pastes into the secret field
+```
+
+The workflow decodes this secret over `wrangler.toml` before deploying.
 
 ### 3. Set the enable variable
 

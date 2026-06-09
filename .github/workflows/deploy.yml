@@ -11,7 +11,11 @@
 #                                Workers Scripts:Edit, Workers KV Storage:Edit,
 #                                Workers R2 Storage:Edit, D1:Edit
 #        CLOUDFLARE_ACCOUNT_ID — your CF account id (dashboard URL or wrangler whoami)
-#   3. Trigger manually: Actions → "Deploy to Cloudflare" → Run workflow
+#   3. (Existing resources only) Add optional secret:
+#        WRANGLER_TOML_OVERRIDE — base64-encoded wrangler.toml with real D1/KV ids.
+#        Without this, D1 + R2 re-link by name; KV auto-provisions a new namespace.
+#        Generate: base64 -i wrangler.local.toml | pbcopy  (macOS)
+#   4. Trigger manually: Actions → "Deploy to Cloudflare" → Run workflow
 #
 # See docs/setup/github-deploy.md for the full guide.
 #
@@ -36,6 +40,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Inject wrangler.toml override (existing resources)
+        if: secrets.WRANGLER_TOML_OVERRIDE != ''
+        env:
+          WRANGLER_TOML_OVERRIDE: ${{ secrets.WRANGLER_TOML_OVERRIDE }}
+        run: echo "$WRANGLER_TOML_OVERRIDE" | base64 -d > wrangler.toml
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
