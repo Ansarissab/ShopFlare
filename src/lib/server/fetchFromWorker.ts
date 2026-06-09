@@ -12,6 +12,11 @@ export function r2Url(key: string | null | undefined): string | null {
 export interface FetchOptions {
   /** ISR revalidation in seconds. 0 = no-store. Default: 60. */
   revalidate?: number | false
+  /**
+   * When true, non-2xx responses are still parsed as JSON and returned.
+   * Use for endpoints like /healthz where a 503 body is valid data (degraded report).
+   */
+  allowNonOk?: boolean
 }
 
 export async function fetchFromWorker<T>(
@@ -30,7 +35,7 @@ export async function fetchFromWorker<T>(
     if (!workerUrl) throw new Error('NEXT_PUBLIC_WORKER_URL not set')
     const res = await fetch(`${workerUrl}${path}`, { next: cacheConfig })
     if (res.status === 404) return null
-    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
+    if (!res.ok && !opts.allowNonOk) throw new Error(`${res.status} ${res.statusText}`)
     return (await res.json()) as T
   } catch {
     return null

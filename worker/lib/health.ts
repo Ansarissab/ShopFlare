@@ -13,13 +13,9 @@
 // healthProbe() never throws — a caught exception becomes { ok: false, error: label }.
 
 import type { Bindings } from '../types'
+import type { CheckResult, HealthReport } from '@/lib/types/health'
 
-export type CheckResult = { ok: boolean; latencyMs: number; error?: string }
-export type HealthReport = {
-  checks: { db: CheckResult; kv: CheckResult; r2: CheckResult }
-  overall: 'ok' | 'degraded'
-  ts: string
-}
+export type { CheckResult, HealthReport }
 
 const TIMEOUT_MS = 1500
 const SENTINEL_KEY = '__health'
