@@ -53,7 +53,8 @@ export default function AdminBlogListPage() {
             ? {
                 ...p,
                 status: isPublished ? 'draft' : 'published',
-                publishedAt: isPublished ? null : new Date().toISOString(),
+                // Server preserves publishedAt on unpublish; on first publish, stamp client-side.
+                publishedAt: isPublished ? post.publishedAt : (post.publishedAt ?? new Date().toISOString()),
               }
             : p,
         ),
@@ -183,7 +184,7 @@ export default function AdminBlogListPage() {
               onClick={handleDelete}
               disabled={deleting}
             >
-              {deleting ? en.admin.blogEditorSaving : en.admin.deleteReview}
+              {deleting ? en.admin.blogEditorDeleting : en.admin.deleteReview}
             </Button>
           </DialogFooter>
         </DialogContent>

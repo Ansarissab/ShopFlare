@@ -1,5 +1,7 @@
 # Plan 23 — Blog (SEO content + R2 image storage)
 
+Please talk to me with grill me skill before starting this phase, I need to make sure if alongside Trix editor if we need to add MDX as well.
+
 Roadmap items: **#8** (blog for SEO) + **#9** (blog image storage — research-settled: R2).
 
 Dynamic-First: the Merchant writes and publishes posts from the Admin Dashboard. No

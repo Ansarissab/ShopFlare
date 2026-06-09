@@ -531,6 +531,7 @@ export const en = {
     blogEditorUnpublish:     'Unpublish',
     blogEditorSave:          'Save',
     blogEditorSaving:        'Saving…',
+    blogEditorDeleting:      'Deleting…',
     blogEditorSaved:         'Post saved',
     blogEditorDeleteConfirm: 'Delete this post? This cannot be undone.',
     blogEditorCreated:       'Post created',
