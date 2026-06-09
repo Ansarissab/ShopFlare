@@ -17,7 +17,6 @@ import { bumpDataVersion } from 'worker/lib/version'
 import type { AdminEnv } from 'worker/lib/access'
 import { LANDING_SECTION_KEYS } from '@/lib/constants'
 import type { LandingSectionKey } from '@/lib/constants'
-import type { LandingSection } from '@/lib/types'
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'] as const
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024
@@ -37,7 +36,7 @@ app.get('/', async (c) => {
   const sections = Object.fromEntries(
     LANDING_SECTION_KEYS.map(key => {
       const row = sectionRows.find(r => r.sectionKey === key)
-      const section: LandingSection = {
+      return [key, {
         sectionKey: key as LandingSectionKey,
         enabled:    row?.enabled ?? true,
         heading:    row?.heading ?? null,
@@ -47,8 +46,7 @@ app.get('/', async (c) => {
         ctaHref:    row?.ctaHref ?? null,
         imageR2Key: row?.imageR2Key ?? null,
         updatedAt:  row?.updatedAt ?? '',
-      }
-      return [key, section]
+      }]
     }),
   )
 

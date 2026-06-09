@@ -8,7 +8,6 @@ import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import { isFeatureEnabled } from 'worker/lib/features'
 import type { Bindings } from 'worker/types'
-import type { LandingSection } from '@/lib/types'
 import { LANDING_SECTION_KEYS } from '@/lib/constants'
 import type { LandingSectionKey } from '@/lib/constants'
 
@@ -37,7 +36,7 @@ app.get('/', async (c) => {
   const sections = Object.fromEntries(
     LANDING_SECTION_KEYS.map(key => {
       const row = sectionRows.find(r => r.sectionKey === key)
-      const section: LandingSection = {
+      return [key, {
         sectionKey: key as LandingSectionKey,
         enabled:    row?.enabled ?? true,
         heading:    row?.heading ?? null,
@@ -47,10 +46,9 @@ app.get('/', async (c) => {
         ctaHref:    row?.ctaHref ?? null,
         imageR2Key: row?.imageR2Key ?? null,
         updatedAt:  row?.updatedAt ?? '',
-      }
-      return [key, section]
+      }]
     }),
-  ) as Record<LandingSectionKey, LandingSection>
+  )
 
   return c.json({
     sections,
