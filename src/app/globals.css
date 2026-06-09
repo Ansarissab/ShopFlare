@@ -58,6 +58,10 @@
     --accent:       var(--store-accent, #6366f1);
     --accent-fg:    var(--store-accent-fg, #ffffff);
 
+    /* Spacing density: 0.75=compact, 1=comfortable (default), 1.25=spacious.
+       Multiply padding/gap by this factor in components that should scale with density. */
+    --density: 1;
+
     /* shadcn/ui compat aliases */
     --background:           var(--bg);
     --foreground:           var(--fg);

@@ -88,12 +88,61 @@ export type FontPreset = keyof typeof FONT_PRESETS
 export const COLOR_MODES = ['light', 'dark', 'system'] as const
 export type ColorMode = (typeof COLOR_MODES)[number]
 
-export const THEME_PRESETS = [
-  { name: 'Midnight', primaryColor: '#18181b', accentColor: '#6366f1' },
-  { name: 'Emerald',  primaryColor: '#065f46', accentColor: '#10b981' },
-  { name: 'Sunset',   primaryColor: '#9a3412', accentColor: '#f97316' },
-  { name: 'Ocean',    primaryColor: '#0c4a6e', accentColor: '#0ea5e9' },
+export const DENSITY_PRESETS = {
+  compact:      '0.75',
+  comfortable:  '1',
+  spacious:     '1.25',
+} as const
+export type DensityPreset = keyof typeof DENSITY_PRESETS
+
+export const HERO_STYLES = ['image-left', 'full-bleed', 'centered', 'split'] as const
+export type HeroStyle = (typeof HERO_STYLES)[number]
+
+// Full style presets — each bundles all appearance vars.
+// Supersedes the old color-only THEME_PRESETS (kept for backwards compat).
+export const STYLE_PRESETS = [
+  {
+    name: 'Midnight',
+    primaryColor: '#18181b', accentColor: '#6366f1',
+    fontFamily: 'sans' as const, radius: 'md' as const,
+    density: 'comfortable' as const, heroStyle: 'image-left' as const,
+  },
+  {
+    name: 'Emerald',
+    primaryColor: '#065f46', accentColor: '#10b981',
+    fontFamily: 'sans' as const, radius: 'lg' as const,
+    density: 'comfortable' as const, heroStyle: 'full-bleed' as const,
+  },
+  {
+    name: 'Sunset',
+    primaryColor: '#9a3412', accentColor: '#f97316',
+    fontFamily: 'serif' as const, radius: 'none' as const,
+    density: 'compact' as const, heroStyle: 'split' as const,
+  },
+  {
+    name: 'Ocean',
+    primaryColor: '#0c4a6e', accentColor: '#0ea5e9',
+    fontFamily: 'sans' as const, radius: 'full' as const,
+    density: 'spacious' as const, heroStyle: 'centered' as const,
+  },
+  {
+    name: 'Elegant',
+    primaryColor: '#1a1a2e', accentColor: '#e8d5b7',
+    fontFamily: 'serif' as const, radius: 'sm' as const,
+    density: 'spacious' as const, heroStyle: 'centered' as const,
+  },
+  {
+    name: 'Playful',
+    primaryColor: '#7c3aed', accentColor: '#f59e0b',
+    fontFamily: 'rounded' as const, radius: 'full' as const,
+    density: 'comfortable' as const, heroStyle: 'image-left' as const,
+  },
 ] as const
+export type StylePreset = (typeof STYLE_PRESETS)[number]
+
+export const THEME_PRESETS = STYLE_PRESETS.map(({ name, primaryColor, accentColor }) => ({
+  name, primaryColor, accentColor,
+}))
 
 // ─── Tax ─────────────────────────────────────────────────────────────────────
 

@@ -1,13 +1,14 @@
 'use client'
 
-import { RADIUS_PRESETS, FONT_PRESETS } from '@/lib/constants'
+import { RADIUS_PRESETS, FONT_PRESETS, DENSITY_PRESETS } from '@/lib/constants'
 import { contrastColor } from '@/lib/utils'
 import type { ThemeSnapshot } from '@/lib/types'
 
 export const THEME_STORAGE_KEY = 'shopflare-theme'
 
 /** Applies theme snapshot to CSS custom properties and data-theme on <html>.
- *  Used live by ThemeProvider and mirrored by the inline boot script in layout.tsx. */
+ *  Used live by ThemeProvider and mirrored by the inline boot script in layout.tsx.
+ *  Keep in sync: any new var added here MUST also be added to the boot script. */
 export function applyTheme(t: Partial<ThemeSnapshot>): void {
   if (typeof document === 'undefined') return
   const root = document.documentElement
@@ -20,6 +21,8 @@ export function applyTheme(t: Partial<ThemeSnapshot>): void {
 
   if (t.radius)     set('--radius',     RADIUS_PRESETS[t.radius     as keyof typeof RADIUS_PRESETS])
   if (t.fontFamily) set('--store-font', FONT_PRESETS[t.fontFamily   as keyof typeof FONT_PRESETS])
+  if (t.density)    set('--density',    DENSITY_PRESETS[t.density   as keyof typeof DENSITY_PRESETS])
+  if (t.heroStyle)  root.setAttribute('data-hero-style', t.heroStyle)
 
   if (t.colorMode) {
     const dark =

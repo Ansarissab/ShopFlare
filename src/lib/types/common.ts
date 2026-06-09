@@ -8,7 +8,7 @@ export type StoreConfig = Omit<StoreConfigData, 'currency'> & {
 
 export type ThemeSnapshot = Pick<StoreConfig,
   'primaryColor' | 'primaryColorFg' | 'accentColor' | 'accentColorFg' |
-  'radius' | 'fontFamily' | 'colorMode'> & {
+  'radius' | 'fontFamily' | 'colorMode' | 'density' | 'heroStyle'> & {
   logoUrl?: string
 }
 

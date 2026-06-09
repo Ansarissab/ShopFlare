@@ -66,6 +66,8 @@ app.get('/store', async (c) => {
     radius:         (kv['radius']        as StoreConfigData['radius'])     || 'md',
     fontFamily:     (kv['fontFamily']    as StoreConfigData['fontFamily']) || 'sans',
     colorMode:      (kv['colorMode']     as StoreConfigData['colorMode'])  || 'light',
+    density:        (kv['density']       as StoreConfigData['density'])    || 'comfortable',
+    heroStyle:      (kv['heroStyle']     as StoreConfigData['heroStyle'])  || 'image-left',
     logoUrl:        kv['logoUrl']        || undefined,
     logoR2Key:      kv['logoR2Key']      || undefined,
     faviconUrl:     kv['faviconUrl']     || undefined,

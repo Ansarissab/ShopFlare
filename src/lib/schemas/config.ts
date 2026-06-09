@@ -2,7 +2,7 @@
 // validation) and the client (useStoreConfig). Composed so Admin forms (Phase 2)
 // can .pick()/.partial() individual slices instead of redefining fields.
 import { z } from 'zod/v4'
-import { CURRENCIES, RADIUS_PRESETS, FONT_PRESETS, COLOR_MODES, TAX_BASIS, MIN_PRODUCT_PAGE_SIZE, MAX_PRODUCT_PAGE_SIZE } from '@/lib/constants'
+import { CURRENCIES, RADIUS_PRESETS, FONT_PRESETS, COLOR_MODES, DENSITY_PRESETS, HERO_STYLES, TAX_BASIS, MIN_PRODUCT_PAGE_SIZE, MAX_PRODUCT_PAGE_SIZE } from '@/lib/constants'
 import { emailField, phoneField, hexColorField } from './base'
 
 export const featureFlagsSchema = z.object({
@@ -26,9 +26,11 @@ export const appearanceSchema = z.object({
   primaryColorFg: hexColorField.optional(),
   accentColor:    hexColorField.optional(),
   accentColorFg:  hexColorField.optional(),
-  radius:     z.enum(Object.keys(RADIUS_PRESETS) as [string, ...string[]]).optional(),
-  fontFamily: z.enum(Object.keys(FONT_PRESETS)  as [string, ...string[]]).optional(),
+  radius:     z.enum(Object.keys(RADIUS_PRESETS)  as [string, ...string[]]).optional(),
+  fontFamily: z.enum(Object.keys(FONT_PRESETS)   as [string, ...string[]]).optional(),
   colorMode:  z.enum(COLOR_MODES).optional(),
+  density:    z.enum(Object.keys(DENSITY_PRESETS) as [string, ...string[]]).optional(),
+  heroStyle:  z.enum(HERO_STYLES).optional(),
   logoUrl:    z.string().url().optional(),
   logoR2Key:  z.string().optional(),
   faviconUrl:   z.string().url().optional(),

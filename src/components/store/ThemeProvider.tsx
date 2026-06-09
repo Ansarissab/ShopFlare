@@ -20,6 +20,8 @@ export function ThemeProvider({ children }: { children?: React.ReactNode }) {
       radius:         config.radius,
       fontFamily:     config.fontFamily,
       colorMode:      config.colorMode,
+      density:        config.density,
+      heroStyle:      config.heroStyle,
       logoUrl:        config.logoUrl,
     }
     applyTheme(snapshot)
