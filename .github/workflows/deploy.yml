@@ -1,0 +1,57 @@
+# ShopFlare — GitHub → Cloudflare deploy pipeline (DISABLED by default)
+#
+# Deploys both workers: API (wrangler.toml) + frontend (wrangler.frontend.jsonc).
+# Mirrors the CLI commands: pnpm worker:deploy + pnpm web:deploy.
+#
+# HOW TO ENABLE:
+#   1. Set repo variable ENABLE_GH_DEPLOY = true
+#      (Settings → Secrets and variables → Actions → Variables → New)
+#   2. Add repo secrets:
+#        CLOUDFLARE_API_TOKEN  — minimal scopes: Account Settings:Read,
+#                                Workers Scripts:Edit, Workers KV Storage:Edit,
+#                                Workers R2 Storage:Edit, D1:Edit
+#        CLOUDFLARE_ACCOUNT_ID — your CF account id (dashboard URL or wrangler whoami)
+#   3. Trigger manually: Actions → "Deploy to Cloudflare" → Run workflow
+#
+# See docs/setup/github-deploy.md for the full guide.
+#
+# This workflow intentionally has NO push/PR trigger. The CLI (pnpm setup /
+# pnpm worker:deploy / pnpm web:deploy) remains the default deploy path.
+
+name: Deploy to Cloudflare
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy both workers
+    runs-on: ubuntu-latest
+    if: vars.ENABLE_GH_DEPLOY == 'true'
+
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .tool-versions
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Deploy API worker
+        run: pnpm worker:deploy
+
+      - name: Deploy frontend worker
+        # opennextjs-cloudflare build + deploy -c wrangler.frontend.jsonc
+        run: pnpm web:deploy
