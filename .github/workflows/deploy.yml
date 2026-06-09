@@ -36,15 +36,16 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      # Job-level so the inject step can check it via env context (secrets aren't
+      # accessible in step if: conditions directly — GHA security restriction).
+      WRANGLER_TOML_OVERRIDE: ${{ secrets.WRANGLER_TOML_OVERRIDE }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Inject wrangler.toml override (existing resources)
-        if: secrets.WRANGLER_TOML_OVERRIDE != ''
-        env:
-          WRANGLER_TOML_OVERRIDE: ${{ secrets.WRANGLER_TOML_OVERRIDE }}
+        if: env.WRANGLER_TOML_OVERRIDE != ''
         run: echo "$WRANGLER_TOML_OVERRIDE" | base64 -d > wrangler.toml
 
       - name: Setup pnpm

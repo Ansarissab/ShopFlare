@@ -266,19 +266,18 @@ async function main(): Promise<void> {
           log.warn("To get STRIPE_WEBHOOK_SECRET: Stripe Dashboard → Webhooks → this endpoint → reveal signing secret.");
           log.warn("Then: npx wrangler secret put STRIPE_WEBHOOK_SECRET");
         } else {
+          const webhookParams = new URLSearchParams();
+          webhookParams.append("url", webhookUrl);
+          webhookParams.append("enabled_events[]", "checkout.session.completed");
+          webhookParams.append("enabled_events[]", "checkout.session.expired");
+          webhookParams.append("enabled_events[]", "payment_intent.payment_failed");
           const createRes = await fetch("https://api.stripe.com/v1/webhook_endpoints", {
             method: "POST",
             headers: {
               Authorization: `Bearer ${stripeSecretKey}`,
               "Content-Type": "application/x-www-form-urlencoded",
             },
-            body: new URLSearchParams({
-              url: webhookUrl,
-              "enabled_events[]": "checkout.session.completed",
-              // additional events added as separate params
-            }).toString() +
-              "&enabled_events[]=checkout.session.expired" +
-              "&enabled_events[]=payment_intent.payment_failed",
+            body: webhookParams.toString(),
           });
           if (!createRes.ok) {
             const errBody = await createRes.text();
