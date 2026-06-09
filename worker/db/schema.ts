@@ -164,6 +164,28 @@ export const notifyMe = sqliteTable('notify_me', {
   createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),
 })
 
+// ─── Landing Page ────────────────────────────────────────────────────────────
+
+export const LANDING_SECTION_KEYS = ['hero', 'story', 'featured', 'reviews', 'cta'] as const
+export type LandingSectionKey = (typeof LANDING_SECTION_KEYS)[number]
+
+export const landingContent = sqliteTable('landing_content', {
+  sectionKey: text('section_key').$type<LandingSectionKey>().primaryKey(),
+  enabled:    integer('enabled', { mode: 'boolean' }).notNull().default(true),
+  heading:    text('heading'),
+  subtext:    text('subtext'),
+  bodyHtml:   text('body_html'),
+  ctaText:    text('cta_text'),
+  ctaHref:    text('cta_href'),
+  imageR2Key: text('image_r2_key'),
+  updatedAt:  text('updated_at').notNull().default(sql`(datetime('now'))`),
+})
+
+export const featuredProducts = sqliteTable('featured_products', {
+  productId: text('product_id').primaryKey().references(() => products.id, { onDelete: 'cascade' }),
+  sortOrder: integer('sort_order').notNull().default(0),
+})
+
 // ─── Store Config ────────────────────────────────────────────────────────────
 
 export const storeConfig = sqliteTable('store_config', {
@@ -244,6 +266,8 @@ export type NewOrder = typeof orders.$inferInsert
 export type OrderItem = typeof orderItems.$inferSelect
 export type Coupon = typeof coupons.$inferSelect
 export type Review = typeof reviews.$inferSelect
+export type LandingContent = typeof landingContent.$inferSelect
+export type FeaturedProduct = typeof featuredProducts.$inferSelect
 export type StoreConfig = typeof storeConfig.$inferSelect
 export type Page = typeof pages.$inferSelect
 export type AnalyticsDaily = typeof analyticsDaily.$inferSelect
