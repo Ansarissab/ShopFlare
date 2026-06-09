@@ -49,7 +49,7 @@ Replaces Shopify Basic ($29/month) for stores that don't need the heavyweight pl
 - Verified-purchase **reviews + ratings** (only delivered orders, admin-moderated; toggleable site-wide and per-product — no redeploy needed)
 - **Notify-me** restock requests on out-of-stock sizes, with automatic restock emails
 - PWA: installable, with Web Push order alerts
-- SEO: sitemap + JSON-LD product structured data
+- **SEO / GEO / AEO**: server-rendered metadata + JSON-LD on every page (Product, Category, Organization, BreadcrumbList, FAQPage); sitemap with `lastModified`; toggleable LLM discovery (`/llms.txt`, Markdown `.md` twins, AI-bot policy in `robots.txt`)
 
 **Admin dashboard** (app-level password login → Bearer session token)
 - Product / variant / size CRUD with R2 image upload (client-compressed; large images auto-optimized with a before/after confirm step)

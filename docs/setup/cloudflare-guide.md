@@ -140,7 +140,45 @@ Cloudflare Dashboard → **Manage Account → Billing → Billable Usage** → *
 Alert** → threshold (e.g. **$1**) → **Create**. Stay on the **Workers free plan**
 (over-limit = HTTP 429, never billed). See `docs/architecture/cost-breakdown-normal.md`.
 
-## Step 12 — Custom domain (optional)
+## Step 12 — AI-scraper audit (post-deploy, required for LLM discovery)
+
+Even a perfect `robots.txt` is moot if Cloudflare's edge 403s the UAs first.
+
+**Check these two settings in the CF dashboard for both Workers:**
+
+1. **Security → Bots → "Block AI Scrapers & Crawlers"** managed toggle — if ON, it
+   silently blocks GPTBot, Bytespider, and others, overriding your `robots.txt`.
+2. **Security → WAF → Bot Fight Mode** — same risk; managed rules can catch search/answer
+   bots you want to allow.
+
+Decide per your `aiTrainingAllowed` choice:
+
+- **Allow AI training:** ensure "Block AI Scrapers & Crawlers" is **OFF** (or scoped to
+  exclude the search/answer UAs in `AI_SEARCH_BOTS`).
+- **Block training only:** keep the CF toggle OFF, rely on `robots.txt` — it's a
+  directive, not a hard block, but avoids the edge blocking the bots you do want.
+
+**Verify after deploy:**
+
+```bash
+# Search/answer bots — must return 200, never 403 or challenge
+curl -sI -A "OAI-SearchBot"    https://{your-store}/
+curl -sI -A "PerplexityBot"    https://{your-store}/llms.txt
+curl -sI -A "Claude-SearchBot" https://{your-store}/product/{slug}
+
+# llms.txt must serve text/plain
+curl -s https://{your-store}/llms.txt | head -5
+
+# robots.txt must be dynamic (shows AI stanzas when llmDiscoveryEnabled=true)
+curl -s https://{your-store}/robots.txt
+```
+
+All search-bot requests should return `HTTP 200`. If you see `403` or a Cloudflare
+challenge page, the managed AI-scraper block is intercepting before your app.
+
+---
+
+## Step 13 — Custom domain (optional)
 
 Add a domain you own to Cloudflare (as a zone), then map both workers to subdomains
 (Workers & Pages → each worker → Settings → Domains & Routes), e.g.
