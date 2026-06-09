@@ -6,6 +6,8 @@
 [![Cloudflare](https://img.shields.io/badge/Cloudflare-Stack-orange)](https://cloudflare.com)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
+🧪 **1360** unit tests &nbsp;·&nbsp; 🔗 **153** integration tests &nbsp;·&nbsp; 📊 **95%** coverage
+
 A free, open-source, self-hosted online store. Fork it, run the setup wizard, start selling.
 No monthly platform fees — it runs entirely on Cloudflare's free tier and Stripe's
 pay-per-transaction pricing. Built for small merchants selling a handful of products,
@@ -329,8 +331,8 @@ Two Vitest projects (a workspace), both run by `pnpm test`:
   the review verified-purchase gate, Stripe webhook signature rejection, and admin CRUD.
 
 ```bash
-pnpm test            # all projects (73 tests)
-pnpm test:coverage   # unit coverage report
+pnpm test            # all projects (1360 unit + 153 integration)
+pnpm test:coverage   # unit coverage report (gate: 95%)
 pnpm typecheck && pnpm test && pnpm build
 ```
 
