@@ -1,19 +1,16 @@
 /**
  * ShopFlare — interactive setup wizard.
  *
- * Automates the CLI-driven half of docs/setup/cloudflare-guide.md:
- *   prerequisites → CF login → create D1/KV/R2 → patch wrangler.toml →
- *   migrate + seed → worker secrets → deploy worker → write .env.local.
+ * Automates initial deployment: CF login → migrate + seed → worker secrets →
+ * Stripe webhook auto-create → deploy both workers → write .env.local.
  *
- * Dashboard-only steps (Pages, CF Access, Stripe webhook) are printed at the
- * end with pointers back to the guide — they can't be scripted.
- *
+ * Requires wrangler ≥ 4.45.0 (auto-provisions D1/KV/R2 on first deploy).
  * Run via `pnpm setup`. Plain TS (type annotations only) so Node's built-in
  * type stripping runs it with no extra dependency. ESM (.mts) because
  * @clack/prompts is ESM-only and the repo defaults to CommonJS.
  */
 import { spawnSync } from "node:child_process";
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { writeFileSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -30,9 +27,7 @@ import {
 } from "@clack/prompts";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
-const WRANGLER_TOML = resolve(ROOT, "wrangler.toml");
 const ENV_LOCAL = resolve(ROOT, ".env.local");
-const PLACEHOLDER = "placeholder-replace-after-cf-setup";
 
 // ── shell helpers ──────────────────────────────────────────────────────────
 
@@ -77,28 +72,16 @@ function guard<T>(value: T | symbol): T {
   return value as T;
 }
 
-/**
- * Pulls a resource id out of wrangler's create output. Prefers the precise
- * `<key> = "<id>"` TOML line wrangler v4 prints (so KV's `id = "…"` can't be
- * confused with an unrelated 32-hex token earlier in the output); falls back to
- * the first bare 32-hex run for older formats. The `\b` before the key stops
- * `id` from matching inside `database_id`.
- */
-function extractId(output: string, key: "database_id" | "id"): string | null {
-  const keyed = output.match(new RegExp(`\\b${key}\\s*=\\s*"([0-9a-f-]{32,})"`, "i"));
-  if (keyed) return keyed[1];
-  return output.match(/[0-9a-f]{32}/i)?.[0] ?? null;
-}
-
-/** Replace `key = "<placeholder>"` in wrangler.toml with a real id. */
-function patchToml(key: "database_id" | "id", value: string): void {
-  const toml = readFileSync(WRANGLER_TOML, "utf8");
-  const re = new RegExp(`(${key}\\s*=\\s*")${PLACEHOLDER}(")`);
-  if (!re.test(toml)) {
-    log.warn(`Could not find ${key} placeholder in wrangler.toml — set it manually.`);
-    return;
+/** Parse wrangler version string into [major, minor, patch]. */
+function parseWranglerVersion(): [number, number, number] | null {
+  try {
+    const out = capture("npx", ["wrangler", "--version"]);
+    const m = out.match(/(\d+)\.(\d+)\.(\d+)/);
+    if (!m) return null;
+    return [Number(m[1]), Number(m[2]), Number(m[3])];
+  } catch {
+    return null;
   }
-  writeFileSync(WRANGLER_TOML, toml.replace(re, `$1${value}$2`));
 }
 
 // ── secret + env definitions ────────────────────────────────────────────────
@@ -112,15 +95,17 @@ type SecretSpec = {
 };
 
 // Worker secrets — mirrors the Bindings type in worker/types.ts.
+// STRIPE_WEBHOOK_SECRET is auto-derived after deploy; not listed here.
 const SECRETS: SecretSpec[] = [
   { name: "STRIPE_SECRET_KEY", label: "Stripe secret key (sk_…)", masked: true, required: true },
   { name: "STRIPE_PUBLISHABLE_KEY", label: "Stripe publishable key (pk_…)", masked: false, required: true },
-  { name: "STRIPE_WEBHOOK_SECRET", label: "Stripe webhook signing secret (whsec_…)", masked: true, required: false, hint: "Created in Stripe step 9 — skip for now, set later." },
   { name: "RESEND_API_KEY", label: "Resend API key (re_…)", masked: true, required: true },
   { name: "VAPID_PUBLIC_KEY", label: "Web Push VAPID public key", masked: false, required: false, hint: "Generate with: npx web-push generate-vapid-keys" },
   { name: "VAPID_PRIVATE_KEY", label: "Web Push VAPID private key", masked: true, required: false },
   { name: "TURNSTILE_SITE_KEY", label: "Turnstile site key (0x…)", masked: false, required: true },
   { name: "TURNSTILE_SECRET_KEY", label: "Turnstile secret key", masked: true, required: true },
+  { name: "ADMIN_PASSWORD", label: "Admin password (your login)", masked: true, required: true },
+  { name: "ADMIN_SESSION_SECRET", label: "Admin session secret (openssl rand -hex 32)", masked: true, required: true },
 ];
 
 // ── wizard ──────────────────────────────────────────────────────────────────
@@ -128,7 +113,8 @@ const SECRETS: SecretSpec[] = [
 async function main(): Promise<void> {
   intro("ShopFlare — setup wizard");
   note(
-    "This drives the CLI half of docs/setup/cloudflare-guide.md.\n" +
+    "Handles: CF login → D1/KV/R2 auto-provision → DB migrate+seed →\n" +
+      "secrets → Stripe webhook → both worker deploys → .env.local.\n\n" +
       "Nothing is changed until each step asks you to confirm.",
     "What this does",
   );
@@ -139,11 +125,22 @@ async function main(): Promise<void> {
     log.error(`Node ${process.versions.node} detected — Node 22+ required.`);
     process.exit(1);
   }
-  if (!probe("npx", ["wrangler", "--version"])) {
+
+  const ver = parseWranglerVersion();
+  if (!ver) {
     log.error("wrangler not available. Run `pnpm install` first.");
     process.exit(1);
   }
-  log.success(`Node ${process.versions.node} + wrangler ready.`);
+  const [wMajor, wMinor] = ver;
+  const autoProvision = wMajor > 4 || (wMajor === 4 && wMinor >= 45);
+  if (!autoProvision) {
+    log.warn(
+      `wrangler ${ver.join(".")} detected — auto-provisioning requires ≥ 4.45.0.\n` +
+        "Create D1/KV/R2 manually and re-link ids before deploying, or run:\n" +
+        "  pnpm up wrangler --latest",
+    );
+  }
+  log.success(`Node ${process.versions.node} + wrangler ${ver.join(".")} ready.`);
 
   // 2 ── Cloudflare auth ─────────────────────────────────────────────────────
   if (!probe("npx", ["wrangler", "whoami"])) {
@@ -161,53 +158,24 @@ async function main(): Promise<void> {
   }
   log.success("Cloudflare account authenticated.");
 
-  // 3 ── Provision D1 / KV / R2 ──────────────────────────────────────────────
-  const provision = guard(
-    await confirm({ message: "Create D1 database, KV namespace, and R2 bucket?" }),
+  // 3 ── Migrate + seed remote D1 ────────────────────────────────────────────
+  // D1/KV are auto-provisioned on first wrangler deploy (Step 6).
+  // R2 must exist before deploy; create it if needed.
+  const createR2 = guard(
+    await confirm({ message: "Create R2 bucket `shopflare-images0`? (skip if it already exists)" }),
   );
-  if (provision) {
+  if (createR2) {
     const s = spinner();
-
-    s.start("Creating D1 database `store-db`");
+    s.start("Creating R2 bucket `shopflare-images0`");
     try {
-      const out = capture("npx", ["wrangler", "d1", "create", "store-db"]);
-      const id = extractId(out, "database_id");
-      if (id) {
-        patchToml("database_id", id);
-        s.stop(`D1 created → ${id}`);
-      } else {
-        s.stop("D1 create ran but no id parsed — check wrangler.toml.");
-      }
+      capture("npx", ["wrangler", "r2", "bucket", "create", "shopflare-images0"]);
+      s.stop("R2 bucket ready.");
     } catch (e) {
-      s.stop("D1 step skipped.");
-      log.warn(`${(e as Error).message}\n(If it already exists, paste its id into wrangler.toml.)`);
-    }
-
-    s.start("Creating KV namespace `STORE_KV`");
-    try {
-      const out = capture("npx", ["wrangler", "kv", "namespace", "create", "STORE_KV"]);
-      const id = extractId(out, "id");
-      if (id) {
-        patchToml("id", id);
-        s.stop(`KV created → ${id}`);
-      } else {
-        s.stop("KV create ran but no id parsed — check wrangler.toml.");
-      }
-    } catch (e) {
-      s.stop("KV step skipped.");
-      log.warn(`${(e as Error).message}\n(If it already exists, paste its id into wrangler.toml.)`);
-    }
-
-    s.start("Creating R2 bucket `store-images`");
-    try {
-      capture("npx", ["wrangler", "r2", "bucket", "create", "store-images"]);
-      s.stop("R2 bucket created.");
-    } catch {
       s.stop("R2 step skipped (may already exist).");
+      log.warn((e as Error).message);
     }
   }
 
-  // 4 ── Migrate + seed remote D1 ────────────────────────────────────────────
   const migrate = guard(
     await confirm({ message: "Apply migrations and seed defaults to remote D1?" }),
   );
@@ -219,10 +187,11 @@ async function main(): Promise<void> {
     log.success("Database ready.");
   }
 
-  // 5 ── Worker secrets ──────────────────────────────────────────────────────
+  // 4 ── Worker secrets ──────────────────────────────────────────────────────
   const setSecrets = guard(
     await confirm({ message: "Set worker secrets now?" }),
   );
+  let stripeSecretKey = "";
   let turnstileSiteKey = "";
   if (setSecrets) {
     for (const spec of SECRETS) {
@@ -240,6 +209,7 @@ async function main(): Promise<void> {
         if (spec.required) log.warn(`${spec.name} left blank — set later via \`npx wrangler secret put ${spec.name}\`.`);
         continue;
       }
+      if (spec.name === "STRIPE_SECRET_KEY") stripeSecretKey = v;
       if (spec.name === "TURNSTILE_SITE_KEY") turnstileSiteKey = v;
       const ok = runLive("npx", ["wrangler", "secret", "put", spec.name], v + "\n");
       if (ok) log.success(`${spec.name} set.`);
@@ -247,33 +217,17 @@ async function main(): Promise<void> {
     }
   }
 
-  // FRONTEND_URL is both a worker secret (CORS/redirects) and the Pages origin.
-  const frontendUrl = (guard(
-    await text({
-      message: "Pages site URL (FRONTEND_URL, e.g. https://yourstore.pages.dev)",
-      placeholder: "https://yourstore.pages.dev",
-    }),
-  ) ?? "").trim();
-  if (frontendUrl) {
-    if (runLive("npx", ["wrangler", "secret", "put", "FRONTEND_URL"], frontendUrl + "\n")) {
-      log.success("FRONTEND_URL set.");
-    }
-  }
-
-  // 6 ── Deploy worker ───────────────────────────────────────────────────────
-  // Capture (not inherit) so we can parse the printed *.workers.dev URL. We do
-  // NOT re-emit the full deploy output — it can contain binding/account detail
-  // that would otherwise land in terminal scrollback / CI logs. Only the parsed
-  // URL is surfaced.
+  // 5 ── Deploy API worker ───────────────────────────────────────────────────
+  // D1 and KV are auto-provisioned here on first deploy (wrangler ≥ 4.45.0).
   let workerUrl = "";
-  const deploy = guard(await confirm({ message: "Deploy the worker now?" }));
+  const deploy = guard(await confirm({ message: "Deploy the API worker now? (auto-provisions D1 + KV on first deploy)" }));
   if (deploy) {
     const s = spinner();
-    s.start("Deploying worker (ENVIRONMENT=production)");
+    s.start("Deploying API worker (ENVIRONMENT=production)");
     try {
       const out = capture("pnpm", ["worker:deploy"]);
       workerUrl = out.match(/https:\/\/[^\s]+\.workers\.dev/)?.[0] ?? "";
-      s.stop(workerUrl ? `Worker deployed → ${workerUrl}` : "Worker deployed.");
+      s.stop(workerUrl ? `API worker deployed → ${workerUrl}` : "API worker deployed.");
     } catch (e) {
       s.stop("Deploy failed.");
       log.warn((e as Error).message);
@@ -282,18 +236,97 @@ async function main(): Promise<void> {
   if (!workerUrl) {
     workerUrl = (guard(
       await text({
-        message: "Worker URL (NEXT_PUBLIC_WORKER_URL)",
+        message: "API worker URL (NEXT_PUBLIC_WORKER_URL)",
         placeholder: "https://shopflare-worker.YOUR.workers.dev",
       }),
     ) ?? "").trim();
   }
 
-  // 7 ── Write .env.local ────────────────────────────────────────────────────
+  // 6 ── Auto-create Stripe webhook ──────────────────────────────────────────
+  // Requires STRIPE_SECRET_KEY + API worker URL. Falls back to manual if anything fails.
+  if (stripeSecretKey && workerUrl) {
+    const webhookUrl = `${workerUrl}/api/stripe/webhook`;
+    const createWebhook = guard(
+      await confirm({ message: `Auto-create Stripe webhook at ${webhookUrl}?` }),
+    );
+    if (createWebhook) {
+      const s = spinner();
+      s.start("Creating Stripe webhook endpoint…");
+      try {
+        // Check for existing endpoint first (idempotency)
+        const listRes = await fetch("https://api.stripe.com/v1/webhook_endpoints?limit=100", {
+          headers: { Authorization: `Bearer ${stripeSecretKey}` },
+        });
+        if (!listRes.ok) throw new Error(`Stripe list webhooks failed: ${listRes.status}`);
+        const listData = await listRes.json() as { data: Array<{ url: string; id: string }> };
+        const existing = listData.data.find((ep) => ep.url === webhookUrl);
+
+        if (existing) {
+          s.stop(`Endpoint already exists (id: ${existing.id}). Signing secret only shown at creation time.`);
+          log.warn("To get STRIPE_WEBHOOK_SECRET: Stripe Dashboard → Webhooks → this endpoint → reveal signing secret.");
+          log.warn("Then: npx wrangler secret put STRIPE_WEBHOOK_SECRET");
+        } else {
+          const createRes = await fetch("https://api.stripe.com/v1/webhook_endpoints", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${stripeSecretKey}`,
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+              url: webhookUrl,
+              "enabled_events[]": "checkout.session.completed",
+              // additional events added as separate params
+            }).toString() +
+              "&enabled_events[]=checkout.session.expired" +
+              "&enabled_events[]=payment_intent.payment_failed",
+          });
+          if (!createRes.ok) {
+            const errBody = await createRes.text();
+            throw new Error(`Stripe create webhook failed: ${createRes.status} — ${errBody}`);
+          }
+          const created = await createRes.json() as { secret: string; id: string };
+          s.stop(`Stripe webhook created (id: ${created.id}).`);
+
+          // Pipe secret straight to wrangler — never log it
+          const ok = runLive("npx", ["wrangler", "secret", "put", "STRIPE_WEBHOOK_SECRET"], created.secret + "\n");
+          if (ok) log.success("STRIPE_WEBHOOK_SECRET set.");
+          else log.warn("STRIPE_WEBHOOK_SECRET wrangler put failed — set manually via `npx wrangler secret put STRIPE_WEBHOOK_SECRET`.");
+        }
+      } catch (e) {
+        s.stop("Stripe webhook step failed — falling back to manual.");
+        log.warn((e as Error).message);
+        log.warn(
+          "Manual fallback:\n" +
+            "  1. Stripe Dashboard → Developers → Webhooks → Add endpoint\n" +
+            `  2. URL: ${webhookUrl}\n` +
+            "  3. Events: checkout.session.completed, checkout.session.expired, payment_intent.payment_failed\n" +
+            "  4. npx wrangler secret put STRIPE_WEBHOOK_SECRET",
+        );
+      }
+    }
+  } else if (!stripeSecretKey) {
+    log.info("STRIPE_SECRET_KEY not set — skipping Stripe webhook auto-create. Set it later and re-run or configure manually.");
+  }
+
+  // 7 ── FRONTEND_URL secret (CORS + Stripe redirects) ───────────────────────
+  const frontendUrl = (guard(
+    await text({
+      message: "Frontend worker URL for FRONTEND_URL secret (set after web:deploy if unknown)",
+      placeholder: "https://shopflare-web.YOUR.workers.dev",
+    }),
+  ) ?? "").trim();
+  if (frontendUrl) {
+    if (runLive("npx", ["wrangler", "secret", "put", "FRONTEND_URL"], frontendUrl + "\n")) {
+      log.success("FRONTEND_URL set.");
+    }
+  }
+
+  // 8 ── Write .env.local ────────────────────────────────────────────────────
+  const siteUrl = frontendUrl || workerUrl;
   const writeEnv = !existsSync(ENV_LOCAL)
     ? true
     : guard(await confirm({ message: ".env.local exists — overwrite?" }));
   if (writeEnv) {
-    const siteUrl = frontendUrl || workerUrl;
     const env =
       `# Generated by \`pnpm setup\`. Safe to edit.\n` +
       `NEXT_PUBLIC_WORKER_URL=${workerUrl}\n` +
@@ -303,15 +336,48 @@ async function main(): Promise<void> {
     log.success(".env.local written.");
   }
 
-  // 8 ── Remaining manual steps ──────────────────────────────────────────────
+  // 9 ── Deploy frontend worker ──────────────────────────────────────────────
+  const deployFrontend = guard(
+    await confirm({ message: "Deploy the frontend (storefront) worker now? (pnpm web:deploy)" }),
+  );
+  if (deployFrontend) {
+    log.step("Building + deploying frontend worker…");
+    runLive("pnpm", ["web:deploy"]);
+  }
+
+  // 10 ── Post-deploy smoke check ────────────────────────────────────────────
+  if (workerUrl) {
+    const s = spinner();
+    s.start(`Smoke check: GET ${workerUrl}/api/ping`);
+    try {
+      const res = await fetch(`${workerUrl}/api/ping`);
+      const body = await res.json() as { ok?: boolean };
+      if (res.ok && body?.ok === true) {
+        s.stop("API worker is live and healthy.");
+      } else {
+        s.stop(`Smoke check returned unexpected response (status ${res.status}).`);
+        log.warn(`Response: ${JSON.stringify(body)}`);
+      }
+    } catch (e) {
+      s.stop("Smoke check failed — worker may still be propagating.");
+      log.warn((e as Error).message);
+    }
+  }
+
+  // 11 ── Remaining manual steps ─────────────────────────────────────────────
   note(
     [
-      "1. Connect the repo in Cloudflare Pages (build: `pnpm build`, output: `out`).",
-      "2. Protect /admin and /api/admin* with CF Access (guide steps 8a/8b),",
-      "   then `wrangler secret put CF_ACCESS_AUD` + `CF_ACCESS_TEAM_DOMAIN`.",
-      "3. Add the Stripe webhook → /api/stripe/webhook, then set STRIPE_WEBHOOK_SECRET.",
+      "Manual steps remaining:",
+      "",
+      "1. Set CF budget alert: Dashboard → Manage Account → Billing →",
+      "   Billable Usage → Set Budget Alert (e.g. $1).",
+      "2. (Optional) Add a custom domain: Workers → each worker →",
+      "   Settings → Domains & Routes.",
       "",
       "Full details: docs/setup/cloudflare-guide.md",
+      "",
+      "Admin login: <your-frontend-url>/admin → enter ADMIN_PASSWORD.",
+      "Bearer auth: admin sessions use Authorization: Bearer — no CF Access needed.",
     ].join("\n"),
     "Finish in the dashboard",
   );
