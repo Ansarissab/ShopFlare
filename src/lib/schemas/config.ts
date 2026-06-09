@@ -11,6 +11,7 @@ export const featureFlagsSchema = z.object({
   landingEnabled:      z.boolean().optional(),
   blogEnabled:         z.boolean().optional(),
   llmDiscoveryEnabled: z.boolean().optional(),
+  faqEnabled:          z.boolean().optional(),
 })
 
 // Derive the currency enum from the single CURRENCIES source (DRY).
@@ -63,6 +64,8 @@ export const storeConfigSchema = z.object({
   bankIban:           z.string().optional(),
   bankInstructions:   z.string().optional(),
   productPageSize: z.number().int().min(MIN_PRODUCT_PAGE_SIZE).max(MAX_PRODUCT_PAGE_SIZE).optional(),
+  faqContent:        z.string().optional(),
+  aiTrainingAllowed: z.boolean().optional(),
 }).merge(appearanceSchema).merge(taxConfigSchema).merge(featureFlagsSchema)
 
 export type StoreConfigData = z.infer<typeof storeConfigSchema>

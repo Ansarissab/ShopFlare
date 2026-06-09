@@ -155,6 +155,35 @@ export const FEATURE_FLAGS = {
 } as const
 export type FeatureFlagKey = keyof typeof FEATURE_FLAGS
 
+// ─── AI Bot User-Agents ────────────────────────────────────────────────────────
+// Search/answer bots — should always be allowed (they power citations).
+export const AI_SEARCH_BOTS = [
+  'OAI-SearchBot',
+  'PerplexityBot',
+  'Claude-SearchBot',
+  'ChatGPT-User',
+  'Claude-User',
+  'Amazonbot',
+] as const
+
+// Training bots — governed by aiTrainingAllowed flag.
+export const AI_TRAINING_BOTS = [
+  'GPTBot',
+  'Google-Extended',
+  'Applebot-Extended',
+  'CCBot',
+  'anthropic-ai',
+  'Bytespider',
+] as const
+
+// SEO scraper bots — always blocked (crawl-budget abuse).
+export const BLOCKED_SCRAPER_BOTS = [
+  'AhrefsBot',
+  'SemrushBot',
+  'MJ12bot',
+  'DotBot',
+] as const
+
 // ─── Categories ────────────────────────────────────────────────────────────────
 export const MAX_CATEGORY_DEPTH = 2
 export const MAX_CATEGORIES_PER_PRODUCT = 10

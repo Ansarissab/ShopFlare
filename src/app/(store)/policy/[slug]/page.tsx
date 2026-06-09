@@ -8,12 +8,17 @@ import { formatDate } from '@/lib/utils/index'
 import { en } from '@/lib/i18n/en'
 import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
 import { buildPageMetadata } from '@/lib/seo/metadata'
+import { JsonLd } from '@/components/shared/JsonLd'
+import { breadcrumbListJsonLd } from '@/lib/seo/jsonld'
 import type { StorePage } from '@/lib/types/admin'
 import type { StoreConfig } from '@/lib/types/common'
 
 interface PageProps {
   params: Promise<{ slug: string }>
 }
+
+const plainText = (html: string) =>
+  html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 155)
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
@@ -28,6 +33,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   return buildPageMetadata({
     title: page.title,
+    description: page.content ? plainText(page.content) : undefined,
     canonical: `${siteUrl}/policy/${slug}`,
     storeName: config?.storeName,
   })
@@ -35,9 +41,25 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function PolicyPage({ params }: PageProps) {
   const { slug } = await params
-  const page = await fetchFromWorker<StorePage>(`/api/pages/${slug}`, { revalidate: 300 })
+  const [page, config] = await Promise.all([
+    fetchFromWorker<StorePage>(`/api/pages/${slug}`, { revalidate: 300 }),
+    fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: 300 }),
+  ])
 
   if (!page) notFound()
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
+  const breadcrumb = breadcrumbListJsonLd([
+    { name: config?.storeName ?? 'Home', url: `${siteUrl}/` },
+    { name: page.title, url: `${siteUrl}/policy/${slug}` },
+  ])
+  const webPage: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: page.title,
+    url: `${siteUrl}/policy/${slug}`,
+    ...(page.updatedAt ? { dateModified: page.updatedAt } : {}),
+  }
 
   const updatedDate = formatDate(
     page.updatedAt,
@@ -50,6 +72,8 @@ export default async function PolicyPage({ params }: PageProps) {
 
   return (
     <div className={cn(layout.detailPage, 'max-w-3xl')}>
+      <JsonLd data={breadcrumb} />
+      <JsonLd data={webPage} />
       <h1 className="text-2xl font-bold tracking-tight">{page.title}</h1>
       <p className="text-xs text-muted-foreground">
         {en.policies.lastUpdated.replace('{date}', updatedDate)}

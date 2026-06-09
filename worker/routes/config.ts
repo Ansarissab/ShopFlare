@@ -83,6 +83,9 @@ app.get('/store', async (c) => {
     landingEnabled:      kv['landingEnabled']  !== undefined ? kv['landingEnabled']  === 'true' : false,
     blogEnabled:         kv['blogEnabled']     !== undefined ? kv['blogEnabled']     === 'true' : false,
     llmDiscoveryEnabled: kv['llmDiscoveryEnabled'] !== undefined ? kv['llmDiscoveryEnabled'] === 'true' : true,
+    faqEnabled:          kv['faqEnabled']          !== undefined ? kv['faqEnabled']          === 'true' : false,
+    faqContent:          kv['faqContent'] || undefined,
+    aiTrainingAllowed:   kv['aiTrainingAllowed']   !== undefined ? kv['aiTrainingAllowed']   === 'true' : true,
   }
 
   const validation = storeConfigSchema.safeParse(assembled)

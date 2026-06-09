@@ -473,6 +473,18 @@ export const en = {
     enableReviewsHint: 'Show customer reviews across the store. Turning this off hides reviews everywhere and stops new submissions; existing reviews are kept.',
     enableReviewsProduct: 'Enable reviews for this product',
   },
+  // SEO / LLM discovery settings (phase 21)
+  seo: {
+    faqSectionTitle:     'FAQ / Q&A',
+    faqEnabledLabel:     'Show FAQ section on store',
+    faqContentLabel:     'FAQ content',
+    faqContentHelp:      'Use headings (H3/H4) for questions, paragraphs below for answers. Shown visibly on the store and used for AI citation.',
+    descriptionHelp:     "Answer the buyer's main question in the first two sentences for better search and AI visibility.",
+    aiTrainingLabel:     'Allow AI training bots',
+    aiTrainingHelp:      'When enabled, AI training crawlers (GPTBot, CCBot, etc.) may use your content for model training.',
+    llmDiscoveryLabel:   'Enable LLM discovery',
+    llmDiscoveryHelp:    'Shows your store in /llms.txt and allows AI answer bots to index your content.',
+  },
   // Tooltip copy — short, plain, merchant-friendly. Rendered via <HelpTip>.
   // Never inline these strings in JSX; always reference en.tooltips.*
   tooltips: {
