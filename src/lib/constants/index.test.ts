@@ -234,9 +234,9 @@ describe('AI bot user-agent lists', () => {
   })
 
   it('three lists are mutually disjoint', () => {
-    const searchSet = new Set(AI_SEARCH_BOTS)
-    const trainingSet = new Set(AI_TRAINING_BOTS)
-    const scraperSet = new Set(BLOCKED_SCRAPER_BOTS)
+    const searchSet: Set<string> = new Set(AI_SEARCH_BOTS)
+    const trainingSet: Set<string> = new Set(AI_TRAINING_BOTS)
+    const scraperSet: Set<string> = new Set(BLOCKED_SCRAPER_BOTS)
     for (const bot of AI_SEARCH_BOTS) {
       expect(trainingSet.has(bot)).toBe(false)
       expect(scraperSet.has(bot)).toBe(false)
