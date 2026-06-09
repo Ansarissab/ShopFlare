@@ -250,3 +250,9 @@ export const CATEGORY_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
 export const BLOG_STATUSES = ['draft', 'published'] as const
 export type BlogStatus = (typeof BLOG_STATUSES)[number]
+
+// ─── Health / Status ──────────────────────────────────────────────────────────
+// Canonical service keys used by /healthz HealthReport and the /status page.
+// Must match the keys in healthProbe() checks object.
+export const HEALTH_SERVICE_KEYS = ['db', 'kv', 'r2'] as const
+export type HealthServiceKey = (typeof HEALTH_SERVICE_KEYS)[number]

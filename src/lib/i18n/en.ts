@@ -805,6 +805,23 @@ export const en = {
     restockPushTitle: '{productName} is back in stock!',
     restockPushBody: 'The {size} you wanted is now available.',
   },
+  // Status page — /status SSR page (Phase 25)
+  status: {
+    title: 'System Status',
+    description: 'Live operational status of the store backend services.',
+    allOperational: 'All systems operational',
+    degraded: 'Some services are experiencing issues',
+    lastChecked: 'Last checked {time}',
+    service: {
+      database: 'Database',
+      storage: 'Storage cache',
+      media: 'Media storage',
+    },
+    up: 'Operational',
+    down: 'Degraded',
+    checkFailed: 'Check failed',
+    latency: '{ms}ms',
+  },
 } as const
 
 export type TranslationKey = keyof typeof en
