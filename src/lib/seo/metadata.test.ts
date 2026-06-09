@@ -38,4 +38,33 @@ describe('buildPageMetadata', () => {
     expect(meta.description).toBeUndefined()
     expect(meta.alternates?.canonical).toBeUndefined()
   })
+
+  it('includes markdown alternate link when mdUrl provided', () => {
+    const meta = buildPageMetadata({ title: 'Test', mdUrl: 'https://example.com/product/abc.md' })
+    const types = (meta.alternates as Record<string, unknown>)?.types as Record<string, string> | undefined
+    expect(types?.['text/markdown']).toBe('https://example.com/product/abc.md')
+  })
+
+  it('omits alternates when neither canonical nor mdUrl provided', () => {
+    const meta = buildPageMetadata({ title: 'Test' })
+    expect(meta.alternates).toBeUndefined()
+  })
+
+  it('includes both canonical and mdUrl in alternates', () => {
+    const meta = buildPageMetadata({
+      title: 'Test',
+      canonical: 'https://example.com/product/abc',
+      mdUrl: 'https://example.com/product/abc.md',
+    })
+    expect(meta.alternates?.canonical).toBe('https://example.com/product/abc')
+    const types = (meta.alternates as Record<string, unknown>)?.types as Record<string, string> | undefined
+    expect(types?.['text/markdown']).toBe('https://example.com/product/abc.md')
+  })
+
+  it('includes mdUrl without canonical', () => {
+    const meta = buildPageMetadata({ title: 'Test', mdUrl: 'https://example.com/p.md' })
+    expect(meta.alternates?.canonical).toBeUndefined()
+    const types = (meta.alternates as Record<string, unknown>)?.types as Record<string, string> | undefined
+    expect(types?.['text/markdown']).toBe('https://example.com/p.md')
+  })
 })

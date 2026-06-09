@@ -31,6 +31,9 @@ import {
   MIN_PRODUCT_PAGE_SIZE,
   MAX_PRODUCT_PAGE_SIZE,
   SEARCH_DEBOUNCE_MS,
+  AI_SEARCH_BOTS,
+  AI_TRAINING_BOTS,
+  BLOCKED_SCRAPER_BOTS,
 } from '@/lib/constants'
 
 describe('order + payment enums', () => {
@@ -194,5 +197,53 @@ describe('CATEGORY_SLUG_PATTERN', () => {
     expect(CATEGORY_SLUG_PATTERN.test('-shoes')).toBe(false)
     expect(CATEGORY_SLUG_PATTERN.test('shoes-')).toBe(false)
     expect(CATEGORY_SLUG_PATTERN.test('Mens Shoes')).toBe(false)
+  })
+})
+
+describe('AI bot user-agent lists', () => {
+  it('AI_SEARCH_BOTS is a non-empty array', () => {
+    expect(Array.isArray(AI_SEARCH_BOTS)).toBe(true)
+    expect(AI_SEARCH_BOTS.length).toBeGreaterThan(0)
+  })
+
+  it('AI_SEARCH_BOTS includes well-known answer bots', () => {
+    expect(AI_SEARCH_BOTS).toContain('PerplexityBot')
+    expect(AI_SEARCH_BOTS).toContain('OAI-SearchBot')
+    expect(AI_SEARCH_BOTS).toContain('Claude-SearchBot')
+  })
+
+  it('AI_TRAINING_BOTS is a non-empty array', () => {
+    expect(Array.isArray(AI_TRAINING_BOTS)).toBe(true)
+    expect(AI_TRAINING_BOTS.length).toBeGreaterThan(0)
+  })
+
+  it('AI_TRAINING_BOTS includes well-known training crawlers', () => {
+    expect(AI_TRAINING_BOTS).toContain('GPTBot')
+    expect(AI_TRAINING_BOTS).toContain('Google-Extended')
+    expect(AI_TRAINING_BOTS).toContain('CCBot')
+  })
+
+  it('BLOCKED_SCRAPER_BOTS is a non-empty array', () => {
+    expect(Array.isArray(BLOCKED_SCRAPER_BOTS)).toBe(true)
+    expect(BLOCKED_SCRAPER_BOTS.length).toBeGreaterThan(0)
+  })
+
+  it('BLOCKED_SCRAPER_BOTS includes known SEO crawlers', () => {
+    expect(BLOCKED_SCRAPER_BOTS).toContain('AhrefsBot')
+    expect(BLOCKED_SCRAPER_BOTS).toContain('SemrushBot')
+  })
+
+  it('three lists are mutually disjoint', () => {
+    const searchSet = new Set(AI_SEARCH_BOTS)
+    const trainingSet = new Set(AI_TRAINING_BOTS)
+    const scraperSet = new Set(BLOCKED_SCRAPER_BOTS)
+    for (const bot of AI_SEARCH_BOTS) {
+      expect(trainingSet.has(bot)).toBe(false)
+      expect(scraperSet.has(bot)).toBe(false)
+    }
+    for (const bot of AI_TRAINING_BOTS) {
+      expect(searchSet.has(bot)).toBe(false)
+      expect(scraperSet.has(bot)).toBe(false)
+    }
   })
 })
