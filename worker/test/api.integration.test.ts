@@ -10,6 +10,8 @@ import { eq } from 'drizzle-orm'
 import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import { createOrder } from 'worker/lib/orders'
+import { healthProbe } from 'worker/lib/health'
+import type { HealthReport } from 'worker/lib/health'
 
 const db = () => createDb(env.DB)
 const BASE = 'https://shop.test'
@@ -66,6 +68,33 @@ describe('health + public config', () => {
     expect(body).toHaveProperty('stripePublishableKey')
     expect(body).toHaveProperty('turnstileSiteKey')
     expect(body).toHaveProperty('vapidPublicKey')
+  })
+
+  it('GET /healthz → 200 + overall:ok when all bindings healthy', async () => {
+    const res = await get('/healthz')
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as HealthReport
+    expect(body.overall).toBe('ok')
+    expect(body.checks.db.ok).toBe(true)
+    expect(body.checks.kv.ok).toBe(true)
+    expect(body.checks.r2.ok).toBe(true)
+    expect(typeof body.ts).toBe('string')
+  })
+
+  it('healthProbe → 503 shape when DB binding rejects; KV + R2 still ok', async () => {
+    // Call healthProbe directly with a DB stub that throws, proving:
+    //   (a) the DB failure is caught (ok: false, error set)
+    //   (b) KV and R2 checks are NOT short-circuited (still ok: true)
+    //   (c) healthProbe never throws — returns a HealthReport, not an exception
+    const failingDb = {
+      prepare: () => { throw new Error('simulated D1 failure') },
+    } as unknown as D1Database
+    const report = await healthProbe({ ...env, DB: failingDb })
+    expect(report.overall).toBe('degraded')
+    expect(report.checks.db.ok).toBe(false)
+    expect(report.checks.db.error).toBeDefined()
+    expect(report.checks.kv.ok).toBe(true)
+    expect(report.checks.r2.ok).toBe(true)
   })
 })
 
