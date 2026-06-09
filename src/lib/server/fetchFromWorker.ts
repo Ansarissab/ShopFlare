@@ -2,6 +2,13 @@
 // Use only in async server components and generateMetadata functions (never in
 // 'use client' code — for client fetches use lib/api.ts).
 
+/** Convert an R2 key to its public CDN URL (server-side only). */
+export function r2Url(key: string | null | undefined): string | null {
+  if (!key) return null
+  const workerUrl = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
+  return `${workerUrl}/cdn/${key}`
+}
+
 export interface FetchOptions {
   /** ISR revalidation in seconds. 0 = no-store. Default: 60. */
   revalidate?: number | false

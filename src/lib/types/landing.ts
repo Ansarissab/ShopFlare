@@ -1,5 +1,5 @@
 import type { LandingSectionKey } from '@/lib/constants'
-import type { Product } from './product'
+import type { ProductWithVariants } from './product'
 
 export interface LandingSection {
   sectionKey: LandingSectionKey
@@ -15,7 +15,7 @@ export interface LandingSection {
 
 export interface LandingData {
   sections:         Record<LandingSectionKey, LandingSection>
-  featuredProducts: Product[]
+  featuredProducts: ProductWithVariants[]
 }
 
 // Props consumed by the server LandingPage component and its children.
@@ -35,7 +35,7 @@ export interface StorySectionProps {
 
 export interface FeaturedProductsStripProps {
   section: LandingSection
-  products: Product[]
+  products: ProductWithVariants[]
 }
 
 export interface ReviewsStripProps {
