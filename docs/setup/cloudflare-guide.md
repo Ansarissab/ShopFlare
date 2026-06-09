@@ -196,3 +196,11 @@ redeploy. A custom domain is also what would let you use Cloudflare Access for a
   → enter `ADMIN_PASSWORD`.
 
 **Setup time: ~15 minutes. Monthly cost: $0.**
+
+---
+
+## Uptime monitoring (optional, recommended)
+
+Set up an external monitor that polls `GET /healthz` on the API worker every 3 minutes.
+See [status-monitoring.md](status-monitoring.md) for the full Better Stack free-tier setup
+(monitor + hosted status page + alert contacts).
