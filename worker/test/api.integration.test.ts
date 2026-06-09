@@ -9,6 +9,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { eq } from 'drizzle-orm'
 import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
+import { createOrder } from 'worker/lib/orders'
 
 const db = () => createDb(env.DB)
 const BASE = 'https://shop.test'
@@ -152,6 +153,34 @@ describe('bank transfer', () => {
     }
     expect(order).toMatchObject({ status: 'pending', paymentMethod: 'bank_transfer', totalCents: 1500 })
   })
+
+  it('merchant confirms bank_transfer order via admin PATCH: pending→confirmed, stock unchanged', async () => {
+    await seedProduct({ stock: 5, priceCents: 2000 })
+    const placeRes = await post('/api/orders/bank-transfer', {
+      items: [{ sizeOptionId: 's1', quantity: 2 }],
+      shippingAddress: ADDRESS,
+    })
+    expect(placeRes.status).toBe(201)
+    const { orderNumber } = (await placeRes.json()) as { orderNumber: string }
+
+    expect(await stockOf('s1')).toBe(3) // reserved at order creation
+
+    const patchRes = await SELF.fetch(`${BASE}/api/admin/orders/${orderNumber}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'confirmed' }),
+    })
+    expect(patchRes.status).toBe(200)
+    expect(await patchRes.json()).toMatchObject({ ok: true, status: 'confirmed' })
+
+    const { order } = (await (await get(`/api/orders/track/${orderNumber}`)).json()) as {
+      order: { status: string }
+    }
+    expect(order.status).toBe('confirmed')
+
+    // Confirm does not re-decrement stock
+    expect(await stockOf('s1')).toBe(3)
+  })
 })
 
 describe('coupons', () => {
@@ -195,6 +224,47 @@ describe('reviews gate', () => {
   })
 })
 
+// Build a validly-signed Stripe webhook POST. The integration env injects
+// STRIPE_WEBHOOK_SECRET: 'whsec_dummy' — we sign against the same secret so
+// constructEventAsync accepts the request.
+//
+// Uses Web Crypto (crypto.subtle) instead of stripe.webhooks.generateTestHeaderString
+// because that helper calls computeHMACSignature synchronously and throws
+// "SubtleCryptoProvider cannot be used in a synchronous context" in workerd.
+// The algorithm mirrors the Stripe SDK: HMAC-SHA256(key=utf8(secret), msg="${ts}.${payload}").
+async function signedWebhook(eventPayload: object) {
+  const payload = JSON.stringify(eventPayload)
+  const timestamp = Math.floor(Date.now() / 1000)
+  const enc = new TextEncoder()
+  const key = await crypto.subtle.importKey(
+    'raw',
+    enc.encode('whsec_dummy'),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  )
+  const sigBytes = await crypto.subtle.sign('HMAC', key, enc.encode(`${timestamp}.${payload}`))
+  const hex = Array.from(new Uint8Array(sigBytes)).map(b => b.toString(16).padStart(2, '0')).join('')
+  return SELF.fetch(`${BASE}/api/stripe/webhook`, {
+    method: 'POST',
+    headers: { 'stripe-signature': `t=${timestamp},v1=${hex}` },
+    body: payload,
+  })
+}
+
+// Insert a pending stripe_checkout order (mirrors the state left by POST
+// /api/stripe/checkout-session before the hosted checkout completes).
+async function seedStripeOrder(opts: { stock?: number; couponCode?: string } = {}) {
+  const { stock = 5, couponCode } = opts
+  await seedProduct({ stock, priceCents: 1000 })
+  const { orderId } = await createOrder(db(), {
+    paymentMethod: 'stripe_checkout',
+    items: [{ sizeOptionId: 's1', quantity: 2 }],
+    couponCode,
+  })
+  return orderId
+}
+
 describe('stripe webhook', () => {
   it('rejects a request with a missing/invalid signature (400)', async () => {
     const noSig = await post('/api/stripe/webhook', { type: 'checkout.session.completed' })
@@ -206,6 +276,130 @@ describe('stripe webhook', () => {
       body: '{}',
     })
     expect(badSig.status).toBe(400)
+  })
+
+  it('checkout.session.completed confirms order + populates customer + records stripe_events', async () => {
+    const orderId = await seedStripeOrder()
+    const stockAfterReserve = await stockOf('s1') // 5 - 2 = 3 (reserved at session create)
+
+    const res = await signedWebhook({
+      id: 'evt_completed_1',
+      type: 'checkout.session.completed',
+      data: {
+        object: {
+          id: 'cs_test_x',
+          metadata: { orderId },
+          payment_intent: 'pi_test_x',
+          customer_details: { name: 'Jane Doe', email: 'jane@example.com' },
+        },
+      },
+    })
+    expect(res.status).toBe(200)
+
+    const order = await db().select().from(schema.orders).where(eq(schema.orders.id, orderId)).get()
+    expect(order?.status).toBe('confirmed')
+    expect(order?.customerName).toBe('Jane Doe')
+    expect(order?.customerEmail).toBe('jane@example.com')
+    expect(order?.stripePaymentIntentId).toBe('pi_test_x')
+
+    const evtRow = await db().select().from(schema.stripeEvents).where(eq(schema.stripeEvents.eventId, 'evt_completed_1')).get()
+    expect(evtRow).toBeTruthy()
+    expect(evtRow?.type).toBe('checkout.session.completed')
+
+    // Stock was reserved at checkout-session creation, NOT at webhook time
+    expect(await stockOf('s1')).toBe(stockAfterReserve)
+  })
+
+  it('checkout.session.completed is idempotent: same event id processed exactly once', async () => {
+    const orderId = await seedStripeOrder()
+    const event = {
+      id: 'evt_idem_complete',
+      type: 'checkout.session.completed',
+      data: {
+        object: {
+          id: 'cs_test_idem',
+          metadata: { orderId },
+          payment_intent: 'pi_idem',
+          customer_details: { name: 'Bob', email: 'bob@example.com' },
+        },
+      },
+    }
+
+    await signedWebhook(event)
+    const res2 = await signedWebhook(event)
+    expect(res2.status).toBe(200)
+
+    const rows = await db().select().from(schema.stripeEvents).where(eq(schema.stripeEvents.eventId, 'evt_idem_complete')).all()
+    expect(rows).toHaveLength(1)
+
+    const order = await db().select({ status: schema.orders.status }).from(schema.orders).where(eq(schema.orders.id, orderId)).get()
+    expect(order?.status).toBe('confirmed')
+  })
+
+  it('checkout.session.expired cancels pending order + releases inventory + reverts coupon', async () => {
+    await db().insert(schema.coupons).values({
+      id: 'c_exp', code: 'EXPIRE10', type: 'percentage', value: 10,
+      perCustomerLimit: 1, usedCount: 0, active: true,
+    })
+    const orderId = await seedStripeOrder({ stock: 5, couponCode: 'EXPIRE10' })
+
+    expect(await stockOf('s1')).toBe(3) // 5 - 2 reserved
+    const usesBefore = await db().select().from(schema.couponUses).where(eq(schema.couponUses.couponId, 'c_exp')).all()
+    expect(usesBefore).toHaveLength(1)
+
+    const res = await signedWebhook({
+      id: 'evt_expired_1',
+      type: 'checkout.session.expired',
+      data: { object: { id: 'cs_test_exp', metadata: { orderId } } },
+    })
+    expect(res.status).toBe(200)
+
+    const order = await db().select({ status: schema.orders.status }).from(schema.orders).where(eq(schema.orders.id, orderId)).get()
+    expect(order?.status).toBe('cancelled')
+
+    expect(await stockOf('s1')).toBe(5) // restored
+
+    const usesAfter = await db().select().from(schema.couponUses).where(eq(schema.couponUses.couponId, 'c_exp')).all()
+    expect(usesAfter).toHaveLength(0) // coupon_uses row deleted
+
+    const evtRow = await db().select().from(schema.stripeEvents).where(eq(schema.stripeEvents.eventId, 'evt_expired_1')).get()
+    expect(evtRow).toBeTruthy()
+  })
+
+  it('checkout.session.expired does not cancel an already-confirmed order', async () => {
+    const orderId = await seedStripeOrder({ stock: 5 })
+    // Manually confirm (simulates completed webhook already fired)
+    await db().update(schema.orders).set({ status: 'confirmed' }).where(eq(schema.orders.id, orderId))
+    const stockAtConfirm = await stockOf('s1') // 3 (reserved, not released)
+
+    await signedWebhook({
+      id: 'evt_guard_1',
+      type: 'checkout.session.expired',
+      data: { object: { id: 'cs_test_guard', metadata: { orderId } } },
+    })
+
+    const order = await db().select({ status: schema.orders.status }).from(schema.orders).where(eq(schema.orders.id, orderId)).get()
+    expect(order?.status).toBe('confirmed') // guard: status unchanged
+
+    expect(await stockOf('s1')).toBe(stockAtConfirm) // stock unchanged (release not triggered)
+  })
+
+  it('checkout.session.expired is idempotent: inventory released exactly once on replay', async () => {
+    const orderId = await seedStripeOrder({ stock: 5 })
+    expect(await stockOf('s1')).toBe(3)
+
+    const event = {
+      id: 'evt_idem_exp',
+      type: 'checkout.session.expired',
+      data: { object: { id: 'cs_test_idem_exp', metadata: { orderId } } },
+    }
+    await signedWebhook(event)
+    await signedWebhook(event) // replay
+
+    expect(await stockOf('s1')).toBe(5) // restored once, not double-credited
+
+    const rows = await db().select().from(schema.stripeEvents).where(eq(schema.stripeEvents.eventId, 'evt_idem_exp')).all()
+    expect(rows).toHaveLength(1) // idempotency row written once
   })
 })
 
