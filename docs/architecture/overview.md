@@ -24,11 +24,16 @@ The Next.js app is server-rendered (SSR/RSC), deployed as its own Worker via
 `@opennextjs/cloudflare` — not a static export, not Cloudflare Pages. Data is
 fetched from the API Worker (client-side, and server-side during SSR).
 
-Public store pages (`/product/[slug]`, `/category/[slug]`, `/policy/[slug]`) are
-async Server Components that fetch their entity via `fetchFromWorker()`, call
-`generateMetadata()` server-side, and emit JSON-LD structured data in the initial
-HTML. Client islands (`ProductHeroWrapper`, `CategoryProductSection`) receive
-server-fetched data as props — no duplicate fetch on hydration.
+Public store pages (`/product/[slug]`, `/category/[slug]`, `/policy/[slug]`,
+`/blog`, `/blog/[slug]`) are async Server Components that fetch their entity via
+`fetchFromWorker()`, call `generateMetadata()` server-side, and emit JSON-LD
+structured data in the initial HTML. Client islands (`ProductHeroWrapper`,
+`CategoryProductSection`) receive server-fetched data as props — no duplicate
+fetch on hydration.
+
+`/blog` and `/blog/[slug]` are gated by the `blogEnabled` feature flag (stored in
+`store_config`). When off, the API Worker returns 404 and the SSR pages call
+`notFound()`. The RSS feed at `/blog/rss.xml` follows the same pattern.
 
 ## Flag-aware routing: `/` vs `/shop`
 

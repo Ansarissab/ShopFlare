@@ -20,6 +20,7 @@ TypeScript types auto-inferred — never manually duplicated.
 | `store_config` | Key-value store for merchant settings |
 | `stripe_events` | Processed webhook event IDs (idempotency) |
 | `push_subscriptions` | Web Push endpoints — `admin` kind (merchant order alerts) + `order` kind (customer, tied to an order number) |
+| `blog_posts` | Merchant-authored articles — slug, title, Rich Text body (sanitized HTML), excerpt, cover R2 key, tags (JSON array), draft/published state, publishedAt timestamp |
 
 ## Key design decisions
 

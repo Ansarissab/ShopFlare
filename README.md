@@ -50,7 +50,8 @@ Replaces Shopify Basic ($29/month) for stores that don't need the heavyweight pl
 - **Notify-me** restock requests on out-of-stock sizes, with automatic restock emails
 - **Storytelling landing page** (toggleable): hero, brand story, featured products strip, reviews strip, and CTA band — all editable from admin without redeploy. When enabled, the product catalog moves to `/shop`.
 - PWA: installable, with Web Push order alerts
-- **SEO / GEO / AEO**: server-rendered metadata + JSON-LD on every page (Product, Category, Organization, BreadcrumbList, FAQPage); sitemap with `lastModified`; toggleable LLM discovery (`/llms.txt`, Markdown `.md` twins, AI-bot policy in `robots.txt`)
+- **SEO / GEO / AEO**: server-rendered metadata + JSON-LD on every page (Product, Category, Organization, BreadcrumbList, FAQPage, Article); sitemap with `lastModified`; toggleable LLM discovery (`/llms.txt`, Markdown `.md` twins, AI-bot policy in `robots.txt`)
+- **Blog**: toggleable merchant blog at `/blog` — Trix rich text editor, cover images (R2), tags, draft/published workflow, RSS feed at `/blog/rss.xml`, Article structured data, included in sitemap
 
 **Admin dashboard** (app-level password login → Bearer session token)
 - Product / variant / size CRUD with R2 image upload (client-compressed; large images auto-optimized with a before/after confirm step)
