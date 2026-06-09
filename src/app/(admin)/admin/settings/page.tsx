@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { FormField } from '@/components/common/FormField'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
+import { RichText } from '@/components/shared/RichText'
 import { en } from '@/lib/i18n/en'
 import { CURRENCIES, RADIUS_PRESETS, FONT_PRESETS, THEME_PRESETS, DEFAULT_PRODUCT_PAGE_SIZE, MIN_PRODUCT_PAGE_SIZE, MAX_PRODUCT_PAGE_SIZE } from '@/lib/constants'
 import { apiPut, apiUpload, apiDelete } from '@/lib/api'
@@ -50,6 +51,12 @@ export default function AdminSettingsPage() {
   // Reviews
   const [reviewsEnabled, setReviewsEnabled] = useState(true)
 
+  // SEO / LLM discovery
+  const [llmDiscoveryEnabled, setLlmDiscoveryEnabled] = useState(true)
+  const [aiTrainingAllowed, setAiTrainingAllowed] = useState(true)
+  const [faqEnabled, setFaqEnabled] = useState(false)
+  const [faqContent, setFaqContent] = useState('')
+
   // Tax
   const [taxEnabled, setTaxEnabled] = useState(false)
   const [taxRateInput, setTaxRateInput] = useState('0')
@@ -72,6 +79,10 @@ export default function AdminSettingsPage() {
     setWhatsappNumber(config.whatsappNumber ?? '')
     setWhatsappEnabled(config.whatsappEnabled ?? false)
     setReviewsEnabled(config.reviewsEnabled ?? true)
+    setLlmDiscoveryEnabled(config.llmDiscoveryEnabled ?? true)
+    setAiTrainingAllowed(config.aiTrainingAllowed ?? true)
+    setFaqEnabled(config.faqEnabled ?? false)
+    setFaqContent(config.faqContent ?? '')
     setContactEmail(config.contactEmail ?? '')
     setCurrency(config.currency)
     setFlatShipping(String(config.flatShippingRateCents))
@@ -159,6 +170,10 @@ export default function AdminSettingsPage() {
         whatsappNumber: whatsappNumber.trim() || undefined,
         whatsappEnabled,
         reviewsEnabled,
+        llmDiscoveryEnabled,
+        aiTrainingAllowed,
+        faqEnabled,
+        faqContent: faqContent.trim() || undefined,
         contactEmail: contactEmail.trim() || undefined,
         currency,
         flatShippingRateCents: Number(flatShipping),
@@ -568,6 +583,61 @@ export default function AdminSettingsPage() {
         <FormField label={en.admin.contactEmail} htmlFor="s-email">
           <Input id="s-email" type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
         </FormField>
+      </div>
+
+      {/* SEO / LLM Discovery */}
+      <div className="flex flex-col gap-4 rounded-lg border p-5">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-sm font-semibold">SEO / LLM Discovery</h2>
+        </div>
+
+        <FormField label={en.seo.llmDiscoveryLabel} htmlFor="s-llm-discovery">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="s-llm-discovery"
+              checked={llmDiscoveryEnabled}
+              onChange={(e) => setLlmDiscoveryEnabled(e.target.checked)}
+              className="h-4 w-4 cursor-pointer rounded border"
+            />
+            <span className="text-xs text-muted-foreground">{en.seo.llmDiscoveryHelp}</span>
+          </div>
+        </FormField>
+
+        <FormField label={en.seo.aiTrainingLabel} htmlFor="s-ai-training">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="s-ai-training"
+              checked={aiTrainingAllowed}
+              onChange={(e) => setAiTrainingAllowed(e.target.checked)}
+              className="h-4 w-4 cursor-pointer rounded border"
+            />
+            <span className="text-xs text-muted-foreground">{en.seo.aiTrainingHelp}</span>
+          </div>
+        </FormField>
+
+        <FormField label={en.seo.faqEnabledLabel} htmlFor="s-faq-enabled">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="s-faq-enabled"
+              checked={faqEnabled}
+              onChange={(e) => setFaqEnabled(e.target.checked)}
+              className="h-4 w-4 cursor-pointer rounded border"
+            />
+          </div>
+        </FormField>
+
+        {faqEnabled && (
+          <FormField label={en.seo.faqContentLabel} htmlFor="s-faq-content">
+            <p className="text-xs text-muted-foreground mb-2">{en.seo.faqContentHelp}</p>
+            <RichText
+              value={faqContent}
+              onChange={setFaqContent}
+            />
+          </FormField>
+        )}
       </div>
 
       {/* Payments & Shipping */}
