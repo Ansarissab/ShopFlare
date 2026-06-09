@@ -73,6 +73,7 @@ app.route('/api/reviews', (await import('./routes/reviews')).default)
 app.route('/api/pages', (await import('./routes/pages')).default)
 app.route('/api/categories', (await import('./routes/categories')).default)
 app.route('/api/landing', (await import('./routes/landing')).default)
+app.route('/api/blog', (await import('./routes/blog')).default)
 
 // Admin API — every sub-route is gated by CF Access JWT verification.
 app.route('/api/admin', (await import('./routes/admin/index')).default)

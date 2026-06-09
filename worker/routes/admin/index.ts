@@ -17,6 +17,7 @@ import notify from './notify'
 import pages from './pages'
 import analytics from './analytics'
 import landing from './landing'
+import blog from './blog'
 import push from 'worker/routes/push'
 
 const app = new Hono<AdminEnv>()
@@ -44,6 +45,7 @@ app.route('/notify', notify)
 app.route('/pages', pages)
 app.route('/analytics', analytics)
 app.route('/landing', landing)
+app.route('/blog', blog)
 // Push subscription mgmt is merchant-only (order alerts to merchant devices),
 // so it lives behind CF Access here — not on the public /api router.
 app.route('/push', push)
