@@ -30,6 +30,19 @@ async Server Components that fetch their entity via `fetchFromWorker()`, call
 HTML. Client islands (`ProductHeroWrapper`, `CategoryProductSection`) receive
 server-fetched data as props — no duplicate fetch on hydration.
 
+## Flag-aware routing: `/` vs `/shop`
+
+The `landingEnabled` feature flag (stored in `store_config`) controls the home-route:
+
+| Flag state | `/` renders | `/shop` |
+| --- | --- | --- |
+| **OFF** (default) | product catalog (`StorePageClient`) | `notFound()` |
+| **ON** | storytelling landing page (`LandingPage`) | product catalog (`Catalog`) |
+
+`src/lib/nav.ts:catalogHref(landingEnabled)` is the single resolver used by server
+breadcrumbs, `StorefrontHeader`, `AppTabBar`, and `sitemap.ts`. All references go
+through this helper — never a hardcoded `/` or `/shop` string.
+
 ## Admin access
 
 App-level password — no Cloudflare Access (it can't path-scope `/admin` on

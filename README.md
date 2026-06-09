@@ -48,6 +48,7 @@ Replaces Shopify Basic ($29/month) for stores that don't need the heavyweight pl
 - Order tracking page and self-service cancellation (while pending/confirmed)
 - Verified-purchase **reviews + ratings** (only delivered orders, admin-moderated; toggleable site-wide and per-product — no redeploy needed)
 - **Notify-me** restock requests on out-of-stock sizes, with automatic restock emails
+- **Storytelling landing page** (toggleable): hero, brand story, featured products strip, reviews strip, and CTA band — all editable from admin without redeploy. When enabled, the product catalog moves to `/shop`.
 - PWA: installable, with Web Push order alerts
 - **SEO / GEO / AEO**: server-rendered metadata + JSON-LD on every page (Product, Category, Organization, BreadcrumbList, FAQPage); sitemap with `lastModified`; toggleable LLM discovery (`/llms.txt`, Markdown `.md` twins, AI-bot policy in `robots.txt`)
 
@@ -59,6 +60,7 @@ Replaces Shopify Basic ($29/month) for stores that don't need the heavyweight pl
 - Restock-request inbox
 - **POS** (in-person cash register mode)
 - Store settings: name, tagline, logo, currency, shipping, contact, **products per page** — all editable, **no redeploy**
+- **Style Presets**: 6 named looks (Midnight, Emerald, Sunset, Ocean, Elegant, Playful), each setting colors, font, radius, density, and hero layout in one click via the CSS-variable theme engine
 
 **Dynamic-first:** anything a non-developer needs to change lives in D1 and is editable from the
 admin dashboard. Code redeploys are only for actual code changes.
