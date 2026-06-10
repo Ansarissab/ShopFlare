@@ -20,6 +20,7 @@
     "test": "vitest run --project unit && vitest run --project integration",
     "test:watch": "vitest",
     "test:unit": "vitest run --project unit",
+    "test:changed": "vitest run --project unit --changed --passWithNoTests",
     "test:coverage": "vitest run --project unit --coverage",
     "test:integration": "vitest run --project integration",
     "test:e2e": "playwright test",
