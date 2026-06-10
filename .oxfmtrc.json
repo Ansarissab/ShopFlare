@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "semi": false,
+  "singleQuote": true,
+  "ignorePatterns": [
+    ".next/**",
+    ".open-next/**",
+    ".wrangler/**",
+    "coverage/**",
+    "playwright-report/**",
+    "test-results/**",
+    ".visual-baselines/**",
+    "public/sw.js",
+    "public/sw.js.map",
+    "pnpm-lock.yaml"
+  ]
+}
