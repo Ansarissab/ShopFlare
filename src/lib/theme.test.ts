@@ -33,8 +33,10 @@ describe('applyTheme', () => {
 
   it('uses explicit FG overrides when provided (skips contrastColor)', () => {
     applyTheme({
-      primaryColor: '#123456', primaryColorFg: '#abcdef',
-      accentColor: '#654321', accentColorFg: '#fedcba',
+      primaryColor: '#123456',
+      primaryColorFg: '#abcdef',
+      accentColor: '#654321',
+      accentColorFg: '#fedcba',
     })
     expect(root().style.getPropertyValue('--store-primary-fg')).toBe('#abcdef')
     expect(root().style.getPropertyValue('--store-accent-fg')).toBe('#fedcba')
@@ -68,17 +70,29 @@ describe('applyTheme', () => {
   })
 
   it('colorMode system resolves dark when prefers-color-scheme matches', () => {
-    vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({
-      matches: true, media: '', addEventListener: vi.fn(), removeEventListener: vi.fn(),
-    }))
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn().mockReturnValue({
+        matches: true,
+        media: '',
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      }),
+    )
     applyTheme({ colorMode: 'system' })
     expect(root().getAttribute('data-theme')).toBe('dark')
   })
 
   it('colorMode system resolves light when prefers-color-scheme does not match', () => {
-    vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({
-      matches: false, media: '', addEventListener: vi.fn(), removeEventListener: vi.fn(),
-    }))
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn().mockReturnValue({
+        matches: false,
+        media: '',
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      }),
+    )
     applyTheme({ colorMode: 'system' })
     expect(root().getAttribute('data-theme')).toBe('light')
   })

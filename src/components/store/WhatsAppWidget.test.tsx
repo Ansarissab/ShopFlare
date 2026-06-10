@@ -55,14 +55,18 @@ describe('WhatsAppWidget gating matrix', () => {
   it('flag ON + number set → href contains the phone number', () => {
     mockConfig = withNumber({ whatsappEnabled: true })
     render(<WhatsAppWidget />)
-    const link = screen.getByRole('link', { name: en.store.whatsappWidgetLabel }) as HTMLAnchorElement
+    const link = screen.getByRole('link', {
+      name: en.store.whatsappWidgetLabel,
+    }) as HTMLAnchorElement
     expect(link.href).toContain(phone)
   })
 
   it('flag ON + number set → href encodes contactGreeting', () => {
     mockConfig = withNumber({ whatsappEnabled: true })
     render(<WhatsAppWidget />)
-    const link = screen.getByRole('link', { name: en.store.whatsappWidgetLabel }) as HTMLAnchorElement
+    const link = screen.getByRole('link', {
+      name: en.store.whatsappWidgetLabel,
+    }) as HTMLAnchorElement
     expect(link.href).toContain(encodeURIComponent(en.whatsapp.contactGreeting))
   })
 

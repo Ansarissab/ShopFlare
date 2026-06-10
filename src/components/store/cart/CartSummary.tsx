@@ -16,10 +16,10 @@ export function CartSummary({
   onApplyCoupon,
   couponApplied = false,
   discountCents = 0,
-  taxCents      = 0,
-  taxName       = 'Tax',
-  taxRate       = 0,
-  taxInclusive  = false,
+  taxCents = 0,
+  taxName = 'Tax',
+  taxRate = 0,
+  taxInclusive = false,
   onClose,
 }: CartSummaryProps) {
   const router = useRouter()
@@ -27,7 +27,13 @@ export function CartSummary({
   const [couponState, setCouponState] = useState<'idle' | 'applied' | 'invalid'>('idle')
   const [applying, setApplying] = useState(false)
 
-  const totalCents = calculateGrandTotal(subtotalCents, shippingCents, discountCents, taxCents, taxInclusive)
+  const totalCents = calculateGrandTotal(
+    subtotalCents,
+    shippingCents,
+    discountCents,
+    taxCents,
+    taxInclusive,
+  )
 
   async function handleApplyCoupon() {
     if (!couponCode.trim()) return
@@ -62,7 +68,7 @@ export function CartSummary({
               ? 'border-success focus-visible:ring-success/30'
               : couponState === 'invalid'
                 ? 'aria-invalid'
-                : ''
+                : '',
           )}
           aria-invalid={couponState === 'invalid'}
           disabled={couponApplied || couponState === 'applied'}
@@ -79,9 +85,7 @@ export function CartSummary({
 
       {/* Feedback */}
       {(couponApplied || couponState === 'applied') && (
-        <p className="text-xs font-medium text-success">
-          {en.cart.couponApplied}
-        </p>
+        <p className="text-xs font-medium text-success">{en.cart.couponApplied}</p>
       )}
       {couponState === 'invalid' && (
         <p className="text-xs text-destructive">{en.cart.couponInvalid}</p>
@@ -97,18 +101,16 @@ export function CartSummary({
         </div>
         <div className="flex justify-between">
           <span className="text-muted-foreground">{en.cart.shipping}</span>
-          <span>
-            {shippingCents === 0
-              ? en.cart.shippingFree
-              : formatPrice(shippingCents)}
-          </span>
+          <span>{shippingCents === 0 ? en.cart.shippingFree : formatPrice(shippingCents)}</span>
         </div>
         {taxCents > 0 && (
           <div className="flex justify-between">
             <span className="text-muted-foreground">
               {taxInclusive
                 ? en.cart.taxIncluded.replace('{name}', taxName)
-                : en.cart.taxRateLabel.replace('{name}', taxName).replace('{rate}', String(taxRate))}
+                : en.cart.taxRateLabel
+                    .replace('{name}', taxName)
+                    .replace('{rate}', String(taxRate))}
             </span>
             <span className={taxInclusive ? 'text-xs text-muted-foreground' : ''}>
               {formatPrice(taxCents)}
@@ -129,19 +131,10 @@ export function CartSummary({
       </div>
 
       {/* CTAs */}
-      <Button
-        size="lg"
-        className="w-full"
-        onClick={handleCheckout}
-      >
+      <Button size="lg" className="w-full" onClick={handleCheckout}>
         {en.store.checkout}
       </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="w-full"
-        onClick={onClose}
-      >
+      <Button variant="ghost" size="sm" className="w-full" onClick={onClose}>
         {en.store.continueShopping}
       </Button>
     </div>

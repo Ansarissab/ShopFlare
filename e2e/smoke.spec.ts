@@ -10,39 +10,49 @@ import { test, expect } from './fixtures'
 
 const ROUTES: { path: string; heading: RegExp; needsCart?: boolean }[] = [
   // ── Store ────────────────────────────────────────────────────────────────────
-  { path: '/',                    heading: /./i },           // any heading (store name or tagline)
-  { path: '/checkout',            heading: /checkout|complete/i, needsCart: true }, // empty cart redirects to home
+  { path: '/', heading: /./i }, // any heading (store name or tagline)
+  { path: '/checkout', heading: /checkout|complete/i, needsCart: true }, // empty cart redirects to home
 
-  { path: '/checkout/success',    heading: /order|success|thank/i },
-  { path: '/track',               heading: /track/i },
-  { path: '/offline',             heading: /offline|unavailable/i },
+  { path: '/checkout/success', heading: /order|success|thank/i },
+  { path: '/track', heading: /track/i },
+  { path: '/offline', heading: /offline|unavailable/i },
 
   // ── Admin ─────────────────────────────────────────────────────────────────────
-  { path: '/admin',               heading: /dashboard|admin|overview/i },
-  { path: '/admin/analytics',     heading: /analytic/i },
-  { path: '/admin/categories',    heading: /categor/i },
-  { path: '/admin/categories/new',heading: /categor|new/i },
-  { path: '/admin/coupons',       heading: /coupon/i },
-  { path: '/admin/notify',        heading: /notif|restock/i },
-  { path: '/admin/orders',        heading: /order/i },
-  { path: '/admin/pages',         heading: /page/i },
-  { path: '/admin/pos',           heading: /pos|point.of.sale/i },
-  { path: '/admin/products',      heading: /product/i },
-  { path: '/admin/products/new',  heading: /product|new/i },
-  { path: '/admin/reviews',       heading: /review/i },
-  { path: '/admin/settings',      heading: /setting/i },
-  { path: '/admin/unauthorized',  heading: /unauthorized|access|denied/i },
+  { path: '/admin', heading: /dashboard|admin|overview/i },
+  { path: '/admin/analytics', heading: /analytic/i },
+  { path: '/admin/categories', heading: /categor/i },
+  { path: '/admin/categories/new', heading: /categor|new/i },
+  { path: '/admin/coupons', heading: /coupon/i },
+  { path: '/admin/notify', heading: /notif|restock/i },
+  { path: '/admin/orders', heading: /order/i },
+  { path: '/admin/pages', heading: /page/i },
+  { path: '/admin/pos', heading: /pos|point.of.sale/i },
+  { path: '/admin/products', heading: /product/i },
+  { path: '/admin/products/new', heading: /product|new/i },
+  { path: '/admin/reviews', heading: /review/i },
+  { path: '/admin/settings', heading: /setting/i },
+  { path: '/admin/unauthorized', heading: /unauthorized|access|denied/i },
 ]
 
 // A minimal valid cart entry so stateful routes (checkout) don't redirect to home.
 const SEED_CART = {
   state: {
-    items: [{
-      sizeOptionId: 's1', productId: 'p1', variantId: 'v1',
-      productName: 'Demo', variantLabel: 'Black', size: 'M',
-      priceCents: 1000, imageUrl: '', quantity: 1,
-    }],
-    isOpen: false, couponCode: null, discountCents: 0,
+    items: [
+      {
+        sizeOptionId: 's1',
+        productId: 'p1',
+        variantId: 'v1',
+        productName: 'Demo',
+        variantLabel: 'Black',
+        size: 'M',
+        priceCents: 1000,
+        imageUrl: '',
+        quantity: 1,
+      },
+    ],
+    isOpen: false,
+    couponCode: null,
+    discountCents: 0,
   },
   version: 0,
 }

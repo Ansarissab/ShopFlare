@@ -3,11 +3,11 @@
 import { z } from 'zod/v4'
 import { MIN_COUPON_CODE_LENGTH, MAX_COUPON_CODE_LENGTH } from '@/lib/constants'
 
-export const idField       = z.string().min(1)
+export const idField = z.string().min(1)
 export const quantityField = z.number().int().positive().max(999)
-export const emailField    = z.string().email()
-export const phoneField    = z.string().regex(/^\+?[1-9]\d{6,14}$/)
-export const couponField   = z
+export const emailField = z.string().email()
+export const phoneField = z.string().regex(/^\+?[1-9]\d{6,14}$/)
+export const couponField = z
   .string()
   .min(MIN_COUPON_CODE_LENGTH)
   .max(MAX_COUPON_CODE_LENGTH)
@@ -32,4 +32,6 @@ export const contactSchema = z.object({
 
 export type OrderItem = z.infer<typeof orderItemSchema>
 
-export const hexColorField = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a 6-digit hex color (#rrggbb)')
+export const hexColorField = z
+  .string()
+  .regex(/^#[0-9a-fA-F]{6}$/, 'Must be a 6-digit hex color (#rrggbb)')

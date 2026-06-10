@@ -32,7 +32,9 @@ export function useStoreConfig(): UseStoreConfigResult {
   // linter's static trace into fetchConfig, which can't see that the setState
   // calls are post-await and therefore asynchronous, not render-cascading.
   // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount; all setState is post-await (async), not synchronous
-  useEffect(() => { fetchConfig() }, [fetchConfig])
+  useEffect(() => {
+    fetchConfig()
+  }, [fetchConfig])
 
   // Refetch when tab regains focus (covers same-browser tab switching)
   useEffect(() => {

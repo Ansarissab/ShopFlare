@@ -204,7 +204,10 @@ app.post('/:id/image', async (c) => {
     return c.json({ error: `Unsupported image type: ${file.type || 'unknown'}` }, 415)
   }
   if (file.size > MAX_IMAGE_BYTES) {
-    return c.json({ error: `Image exceeds ${Math.round(MAX_IMAGE_BYTES / 1024 / 1024)}MB limit` }, 413)
+    return c.json(
+      { error: `Image exceeds ${Math.round(MAX_IMAGE_BYTES / 1024 / 1024)}MB limit` },
+      413,
+    )
   }
 
   // Delete old R2 object if one existed
@@ -213,7 +216,7 @@ app.post('/:id/image', async (c) => {
   }
 
   // Extension derived from the validated MIME type (not the client filename).
-  const ext = file.type === 'image/jpeg' ? 'jpg' : file.type.split('/')[1] ?? 'jpg'
+  const ext = file.type === 'image/jpeg' ? 'jpg' : (file.type.split('/')[1] ?? 'jpg')
   const imageId = nanoid()
   const r2Key = `categories/${id}/${imageId}.${ext}`
 

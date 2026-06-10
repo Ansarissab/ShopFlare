@@ -41,7 +41,9 @@ describe('buildPageMetadata', () => {
 
   it('includes markdown alternate link when mdUrl provided', () => {
     const meta = buildPageMetadata({ title: 'Test', mdUrl: 'https://example.com/product/abc.md' })
-    const types = (meta.alternates as Record<string, unknown>)?.types as Record<string, string> | undefined
+    const types = (meta.alternates as Record<string, unknown>)?.types as
+      | Record<string, string>
+      | undefined
     expect(types?.['text/markdown']).toBe('https://example.com/product/abc.md')
   })
 
@@ -57,14 +59,18 @@ describe('buildPageMetadata', () => {
       mdUrl: 'https://example.com/product/abc.md',
     })
     expect(meta.alternates?.canonical).toBe('https://example.com/product/abc')
-    const types = (meta.alternates as Record<string, unknown>)?.types as Record<string, string> | undefined
+    const types = (meta.alternates as Record<string, unknown>)?.types as
+      | Record<string, string>
+      | undefined
     expect(types?.['text/markdown']).toBe('https://example.com/product/abc.md')
   })
 
   it('includes mdUrl without canonical', () => {
     const meta = buildPageMetadata({ title: 'Test', mdUrl: 'https://example.com/p.md' })
     expect(meta.alternates?.canonical).toBeUndefined()
-    const types = (meta.alternates as Record<string, unknown>)?.types as Record<string, string> | undefined
+    const types = (meta.alternates as Record<string, unknown>)?.types as
+      | Record<string, string>
+      | undefined
     expect(types?.['text/markdown']).toBe('https://example.com/p.md')
   })
 })

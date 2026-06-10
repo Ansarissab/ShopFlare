@@ -30,9 +30,7 @@ export default async function StorePage() {
   const config = await fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: 300 })
 
   const faqItems =
-    isFeatureEnabled(config, 'faqEnabled') && config?.faqContent
-      ? parseFaq(config.faqContent)
-      : []
+    isFeatureEnabled(config, 'faqEnabled') && config?.faqContent ? parseFaq(config.faqContent) : []
 
   if (isFeatureEnabled(config, 'landingEnabled')) {
     const [landingRaw, productsRaw] = await Promise.all([
@@ -46,28 +44,30 @@ export default async function StorePage() {
     const allProducts = productsRaw?.products ?? []
     const featuredIds = landingRaw?.featuredProductIds ?? []
     const featuredProducts = featuredIds
-      .map(id => allProducts.find(p => p.product.id === id))
+      .map((id) => allProducts.find((p) => p.product.id === id))
       .filter((p): p is ProductWithVariants => Boolean(p))
 
     const landing: LandingData = {
-      sections:         landingRaw?.sections ?? ({} as LandingData['sections']),
+      sections: landingRaw?.sections ?? ({} as LandingData['sections']),
       featuredProducts,
     }
 
     return (
       <>
-        <JsonLd data={organizationJsonLd({
-          name: config?.storeName ?? 'Store',
-          url: siteUrl,
-          logoUrl: config?.logoUrl,
-        })} />
+        <JsonLd
+          data={organizationJsonLd({
+            name: config?.storeName ?? 'Store',
+            url: siteUrl,
+            logoUrl: config?.logoUrl,
+          })}
+        />
         {faqItems.length > 0 && <JsonLd data={faqPageJsonLd(faqItems)} />}
         <LandingPage
           landing={landing}
           storeConfig={{
             storeName: config?.storeName ?? 'Store',
-            tagline:   config?.tagline,
-            logoUrl:   config?.logoUrl,
+            tagline: config?.tagline,
+            logoUrl: config?.logoUrl,
           }}
         />
         {faqItems.length > 0 && (

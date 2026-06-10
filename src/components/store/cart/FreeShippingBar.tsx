@@ -10,16 +10,13 @@ export function FreeShippingBar({ subtotalCents, thresholdCents }: FreeShippingB
   if (thresholdCents === 0) return null
 
   const qualified = subtotalCents >= thresholdCents
-  const progressValue = Math.min(
-    Math.round((subtotalCents / thresholdCents) * 100),
-    100
-  )
+  const progressValue = Math.min(Math.round((subtotalCents / thresholdCents) * 100), 100)
 
   if (qualified) {
     return (
       <div
         className={cn(
-          'rounded-md bg-success/10 px-3 py-2 text-center text-xs font-medium text-success'
+          'rounded-md bg-success/10 px-3 py-2 text-center text-xs font-medium text-success',
         )}
       >
         {en.store.freeShipping}!
@@ -28,10 +25,7 @@ export function FreeShippingBar({ subtotalCents, thresholdCents }: FreeShippingB
   }
 
   const remaining = thresholdCents - subtotalCents
-  const message = en.store.freeShippingProgress.replace(
-    '{amount}',
-    formatPrice(remaining)
-  )
+  const message = en.store.freeShippingProgress.replace('{amount}', formatPrice(remaining))
 
   return (
     <div className="space-y-1.5 px-1">

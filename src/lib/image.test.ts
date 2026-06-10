@@ -12,7 +12,9 @@ import 'browser-image-compression'
 
 function defaultImpl(file: File, opts: Record<string, unknown>) {
   const blob = new Blob(['compressed'], { type: (opts.fileType as string) ?? 'image/webp' })
-  return Promise.resolve(new File([blob], file.name, { type: (opts.fileType as string) ?? 'image/webp' }))
+  return Promise.resolve(
+    new File([blob], file.name, { type: (opts.fileType as string) ?? 'image/webp' }),
+  )
 }
 
 beforeEach(() => {
@@ -38,13 +40,16 @@ describe('compressImage', () => {
   it('tries AVIF first by default', async () => {
     const file = new File(['x'], 'a.png', { type: 'image/png' })
     await compressImage(file)
-    expect(mockCompress).toHaveBeenCalledWith(file, expect.objectContaining({
-      maxSizeMB: 1,
-      maxWidthOrHeight: 2000,
-      initialQuality: 0.8,
-      useWebWorker: true,
-      fileType: 'image/avif',
-    }))
+    expect(mockCompress).toHaveBeenCalledWith(
+      file,
+      expect.objectContaining({
+        maxSizeMB: 1,
+        maxWidthOrHeight: 2000,
+        initialQuality: 0.8,
+        useWebWorker: true,
+        fileType: 'image/avif',
+      }),
+    )
   })
 
   it('falls back to WebP when AVIF throws', async () => {
@@ -75,17 +80,23 @@ describe('compressImage', () => {
     const file = new File(['x'], 'a.png', { type: 'image/png' })
     await compressImage(file, { fileType: 'image/png' })
     expect(mockCompress).toHaveBeenCalledTimes(1)
-    expect(mockCompress).toHaveBeenCalledWith(file, expect.objectContaining({
-      fileType: 'image/png',
-    }))
+    expect(mockCompress).toHaveBeenCalledWith(
+      file,
+      expect.objectContaining({
+        fileType: 'image/png',
+      }),
+    )
   })
 
   it('passes custom opts when provided', async () => {
     const file = new File(['x'], 'a.png', { type: 'image/png' })
     await compressImage(file, { maxSizeMB: 2, maxWidthOrHeight: 1200 })
-    expect(mockCompress).toHaveBeenCalledWith(file, expect.objectContaining({
-      maxSizeMB: 2,
-      maxWidthOrHeight: 1200,
-    }))
+    expect(mockCompress).toHaveBeenCalledWith(
+      file,
+      expect.objectContaining({
+        maxSizeMB: 2,
+        maxWidthOrHeight: 1200,
+      }),
+    )
   })
 })

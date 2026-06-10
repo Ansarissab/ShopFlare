@@ -26,7 +26,14 @@ const layer2On: AnalyticsFunnelResponse = {
   ],
   checkoutAbandonmentRatePct: 40,
   abandonedCheckouts: [
-    { orderNumber: 'A-1', customerName: 'Jane Doe', contactHint: 'ja***@x.com', totalCents: 12000, createdAt: '', hoursAgo: 3 },
+    {
+      orderNumber: 'A-1',
+      customerName: 'Jane Doe',
+      contactHint: 'ja***@x.com',
+      totalCents: 12000,
+      createdAt: '',
+      hoursAgo: 3,
+    },
   ],
   layer2Enabled: true,
   layer2Stages: [
@@ -51,7 +58,11 @@ afterEach(() => {
 describe('FunnelTab', () => {
   it('shows skeleton while loading then fetches with period', async () => {
     let resolve!: (v: AnalyticsFunnelResponse) => void
-    vi.mocked(apiGet).mockReturnValueOnce(new Promise(r => { resolve = r }))
+    vi.mocked(apiGet).mockReturnValueOnce(
+      new Promise((r) => {
+        resolve = r
+      }),
+    )
     const { container } = render(<FunnelTab period="90d" />)
     expect(container.querySelector('.animate-pulse')).toBeTruthy()
     resolve(layer2On)

@@ -122,10 +122,9 @@ describe('useApiResource', () => {
     const b = uniquePath()
     mockApiGet.mockImplementation((p: string) => Promise.resolve({ p }))
 
-    const { result, rerender } = renderHook(
-      ({ path }) => useApiResource<{ p: string }>(path),
-      { initialProps: { path: a } },
-    )
+    const { result, rerender } = renderHook(({ path }) => useApiResource<{ p: string }>(path), {
+      initialProps: { path: a },
+    })
     await waitFor(() => expect(result.current.data).toEqual({ p: a }))
 
     rerender({ path: b })
@@ -137,9 +136,7 @@ describe('useApiResource', () => {
   it('refetchOnFocus triggers a silent refetch on visibility change', async () => {
     const path = uniquePath()
     mockApiGet.mockResolvedValue({ v: 1 })
-    const { result } = renderHook(() =>
-      useApiResource(path, { refetchOnFocus: true }),
-    )
+    const { result } = renderHook(() => useApiResource(path, { refetchOnFocus: true }))
     await waitFor(() => expect(result.current.loading).toBe(false))
     const callsBefore = mockApiGet.mock.calls.length
 
@@ -150,17 +147,13 @@ describe('useApiResource', () => {
       })
       document.dispatchEvent(new Event('visibilitychange'))
     })
-    await waitFor(() =>
-      expect(mockApiGet.mock.calls.length).toBeGreaterThan(callsBefore),
-    )
+    await waitFor(() => expect(mockApiGet.mock.calls.length).toBeGreaterThan(callsBefore))
   })
 
   it('refetchOnFocus ignores a hidden visibility change', async () => {
     const path = uniquePath()
     mockApiGet.mockResolvedValue({ v: 1 })
-    const { result } = renderHook(() =>
-      useApiResource(path, { refetchOnFocus: true }),
-    )
+    const { result } = renderHook(() => useApiResource(path, { refetchOnFocus: true }))
     await waitFor(() => expect(result.current.loading).toBe(false))
     const callsBefore = mockApiGet.mock.calls.length
 
@@ -179,9 +172,7 @@ describe('useApiResource', () => {
   it('refetchOnChannel refetches on a BroadcastChannel message', async () => {
     const path = uniquePath()
     mockApiGet.mockResolvedValue({ v: 1 })
-    const { result } = renderHook(() =>
-      useApiResource(path, { refetchOnChannel: true }),
-    )
+    const { result } = renderHook(() => useApiResource(path, { refetchOnChannel: true }))
     await waitFor(() => expect(result.current.loading).toBe(false))
     const callsBefore = mockApiGet.mock.calls.length
 
@@ -190,18 +181,14 @@ describe('useApiResource', () => {
       ch.postMessage('invalidate')
       ch.close()
     })
-    await waitFor(() =>
-      expect(mockApiGet.mock.calls.length).toBeGreaterThan(callsBefore),
-    )
+    await waitFor(() => expect(mockApiGet.mock.calls.length).toBeGreaterThan(callsBefore))
   })
 
   it('refetchInterval refetches on the timer', async () => {
     vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] })
     const path = uniquePath()
     mockApiGet.mockResolvedValue({ v: 1 })
-    const { result } = renderHook(() =>
-      useApiResource(path, { refetchInterval: 1000 }),
-    )
+    const { result } = renderHook(() => useApiResource(path, { refetchInterval: 1000 }))
     // Initial fetch resolves under fake timers; flush the microtask queue.
     await vi.waitFor(() => expect(result.current.loading).toBe(false))
     const callsBefore = mockApiGet.mock.calls.length
@@ -215,9 +202,7 @@ describe('useApiResource', () => {
   it('ignores a non-positive refetchInterval', async () => {
     const path = uniquePath()
     mockApiGet.mockResolvedValue({ v: 1 })
-    const { result } = renderHook(() =>
-      useApiResource(path, { refetchInterval: 0 }),
-    )
+    const { result } = renderHook(() => useApiResource(path, { refetchInterval: 0 }))
     await waitFor(() => expect(result.current.loading).toBe(false))
     // No interval scheduled — only the initial fetch.
     expect(mockApiGet).toHaveBeenCalledTimes(1)

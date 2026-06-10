@@ -94,7 +94,9 @@ describe('InstallPrompt', () => {
     act(() => {
       window.dispatchEvent(makeBeforeInstallEvent())
     })
-    const dismissBtn = screen.getByText(en.pwa.installTitle).closest('div')
+    const dismissBtn = screen
+      .getByText(en.pwa.installTitle)
+      .closest('div')
       ?.parentElement?.querySelectorAll('button')[1] as HTMLButtonElement
     fireEvent.click(dismissBtn)
     expect(localStorage.getItem(INSTALL_DISMISSED_KEY)).toBe('1')
@@ -168,7 +170,9 @@ describe('InstallPrompt', () => {
     act(() => {
       window.dispatchEvent(makeBeforeInstallEvent())
     })
-    const dismissBtn = screen.getByText(en.pwa.installTitle).closest('div')
+    const dismissBtn = screen
+      .getByText(en.pwa.installTitle)
+      .closest('div')
       ?.parentElement?.querySelectorAll('button')[1] as HTMLButtonElement
     // Click must not throw even though setItem throws inside markDismissed.
     expect(() => fireEvent.click(dismissBtn)).not.toThrow()

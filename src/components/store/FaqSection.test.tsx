@@ -4,7 +4,9 @@ import { render, screen, cleanup } from '@testing-library/react'
 import { FaqSection } from './FaqSection'
 import type { FaqItem } from '@/lib/seo/jsonld'
 
-afterEach(() => { cleanup() })
+afterEach(() => {
+  cleanup()
+})
 
 const items: FaqItem[] = [
   { question: 'What is your return policy?', answer: 'Returns accepted within 30 days.' },

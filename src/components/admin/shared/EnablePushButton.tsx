@@ -18,21 +18,15 @@ export function EnablePushButton() {
   const { supported, permission, enabled, enable, loading } = usePushSubscription()
 
   if (!supported) {
-    return (
-      <p className="text-xs text-muted-foreground">{en.notifications.pushUnsupported}</p>
-    )
+    return <p className="text-xs text-muted-foreground">{en.notifications.pushUnsupported}</p>
   }
 
   if (permission === 'denied') {
-    return (
-      <p className="text-xs text-muted-foreground">{en.notifications.pushBlocked}</p>
-    )
+    return <p className="text-xs text-muted-foreground">{en.notifications.pushBlocked}</p>
   }
 
   if (enabled) {
-    return (
-      <p className="text-xs text-muted-foreground">{en.notifications.pushEnabled}</p>
-    )
+    return <p className="text-xs text-muted-foreground">{en.notifications.pushEnabled}</p>
   }
 
   async function handleClick() {
@@ -45,12 +39,7 @@ export function EnablePushButton() {
   }
 
   return (
-    <Button
-      size="sm"
-      variant="outline"
-      onClick={handleClick}
-      disabled={loading}
-    >
+    <Button size="sm" variant="outline" onClick={handleClick} disabled={loading}>
       {loading ? en.notifications.enabling : en.notifications.enablePush}
     </Button>
   )

@@ -49,7 +49,9 @@ describe('vibrate', () => {
   })
 
   it('does not throw when navigator.vibrate throws', () => {
-    vibrateSpy.mockImplementation(() => { throw new Error('unsupported') })
+    vibrateSpy.mockImplementation(() => {
+      throw new Error('unsupported')
+    })
     expect(() => vibrate('light')).not.toThrow()
   })
 

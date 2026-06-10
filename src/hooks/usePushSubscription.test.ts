@@ -132,7 +132,9 @@ describe('usePushSubscription — enable()', () => {
     const { result } = renderHook(() => usePushSubscription())
     await waitFor(() => expect(result.current.supported).toBe(false))
     let ret: boolean | undefined
-    await act(async () => { ret = await result.current.enable() })
+    await act(async () => {
+      ret = await result.current.enable()
+    })
     expect(ret).toBe(false)
     expect(apiPost).not.toHaveBeenCalled()
   })
@@ -146,7 +148,9 @@ describe('usePushSubscription — enable()', () => {
     await waitFor(() => expect(result.current.supported).toBe(true))
 
     let ret: boolean | undefined
-    await act(async () => { ret = await result.current.enable() })
+    await act(async () => {
+      ret = await result.current.enable()
+    })
 
     expect(ret).toBe(true)
     expect(result.current.enabled).toBe(true)
@@ -166,7 +170,9 @@ describe('usePushSubscription — enable()', () => {
     installSupportedEnv()
     const { result } = renderHook(() => usePushSubscription({ endpoint: '/api/cust/sub' }))
     await waitFor(() => expect(result.current.supported).toBe(true))
-    await act(async () => { await result.current.enable() })
+    await act(async () => {
+      await result.current.enable()
+    })
     expect(apiPost).toHaveBeenCalledWith('/api/cust/sub', expect.any(Object))
     expect(localStorage.getItem('pwa-push-/api/cust/sub')).toBe('1')
   })
@@ -177,7 +183,9 @@ describe('usePushSubscription — enable()', () => {
     const { result } = renderHook(() => usePushSubscription())
     await waitFor(() => expect(result.current.supported).toBe(true))
     let ret: boolean | undefined
-    await act(async () => { ret = await result.current.enable() })
+    await act(async () => {
+      ret = await result.current.enable()
+    })
     expect(ret).toBe(false)
     expect(result.current.permission).toBe('denied')
     expect(apiPost).not.toHaveBeenCalled()
@@ -189,7 +197,9 @@ describe('usePushSubscription — enable()', () => {
     const { result } = renderHook(() => usePushSubscription())
     await waitFor(() => expect(result.current.supported).toBe(true))
     let ret: boolean | undefined
-    await act(async () => { ret = await result.current.enable() })
+    await act(async () => {
+      ret = await result.current.enable()
+    })
     expect(ret).toBe(false)
     expect(apiPost).not.toHaveBeenCalled()
   })
@@ -201,7 +211,9 @@ describe('usePushSubscription — enable()', () => {
     const { result } = renderHook(() => usePushSubscription())
     await waitFor(() => expect(result.current.supported).toBe(true))
     let ret: boolean | undefined
-    await act(async () => { ret = await result.current.enable() })
+    await act(async () => {
+      ret = await result.current.enable()
+    })
     expect(ret).toBe(false)
     expect(warn).toHaveBeenCalled()
     expect(apiPost).not.toHaveBeenCalled()
@@ -215,7 +227,9 @@ describe('usePushSubscription — enable()', () => {
     const { result } = renderHook(() => usePushSubscription())
     await waitFor(() => expect(result.current.supported).toBe(true))
     let ret: boolean | undefined
-    await act(async () => { ret = await result.current.enable() })
+    await act(async () => {
+      ret = await result.current.enable()
+    })
     expect(ret).toBe(false)
     expect(warn).toHaveBeenCalled()
     warn.mockRestore()
@@ -229,7 +243,9 @@ describe('usePushSubscription — enable()', () => {
     const { result } = renderHook(() => usePushSubscription())
     await waitFor(() => expect(result.current.supported).toBe(true))
     let ret: boolean | undefined
-    await act(async () => { ret = await result.current.enable() })
+    await act(async () => {
+      ret = await result.current.enable()
+    })
     // setItem threw but the catch {} swallows it → enable still succeeds
     expect(ret).toBe(true)
     expect(result.current.enabled).toBe(true)
@@ -241,7 +257,10 @@ describe('usePushSubscription — enable()', () => {
     installSupportedEnv()
     let release: (v: unknown) => void = () => {}
     vi.mocked(apiGet).mockImplementationOnce(
-      () => new Promise((r) => { release = r }) as never,
+      () =>
+        new Promise((r) => {
+          release = r
+        }) as never,
     )
     const { result } = renderHook(() => usePushSubscription())
     await waitFor(() => expect(result.current.supported).toBe(true))

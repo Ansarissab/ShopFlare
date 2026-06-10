@@ -8,12 +8,12 @@ import { en } from '@/lib/i18n/en'
 import type { AdminOrder } from '@/lib/types/admin'
 
 const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-  pending:    'outline',
-  confirmed:  'secondary',
+  pending: 'outline',
+  confirmed: 'secondary',
   processing: 'secondary',
-  shipped:    'default',
-  delivered:  'default',
-  cancelled:  'destructive',
+  shipped: 'default',
+  delivered: 'default',
+  cancelled: 'destructive',
 }
 
 interface OrdersTableProps {
@@ -22,9 +22,7 @@ interface OrdersTableProps {
 
 export function OrdersTable({ orders }: OrdersTableProps) {
   if (orders.length === 0) {
-    return (
-      <p className="py-12 text-center text-sm text-muted-foreground">No orders found.</p>
-    )
+    return <p className="py-12 text-center text-sm text-muted-foreground">No orders found.</p>
   }
 
   return (
@@ -35,18 +33,29 @@ export function OrdersTable({ orders }: OrdersTableProps) {
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Order</th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Customer</th>
             <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5">Method<HelpTip text={en.tooltips.orders.method} /></span>
+              <span className="inline-flex items-center gap-1.5">
+                Method
+                <HelpTip text={en.tooltips.orders.method} />
+              </span>
             </th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5">Status<HelpTip text={en.tooltips.orders.status} /></span>
+              <span className="inline-flex items-center gap-1.5">
+                Status
+                <HelpTip text={en.tooltips.orders.status} />
+              </span>
             </th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Total</th>
-            <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">Date</th>
+            <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">
+              Date
+            </th>
           </tr>
         </thead>
         <tbody>
           {orders.map((order) => (
-            <tr key={order.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+            <tr
+              key={order.id}
+              className="border-b last:border-0 hover:bg-muted/30 transition-colors"
+            >
               <td className="px-4 py-3 font-mono text-xs">
                 <Link href={`/admin/orders/${order.id}`} className="text-primary hover:underline">
                   {order.orderNumber}
@@ -59,14 +68,19 @@ export function OrdersTable({ orders }: OrdersTableProps) {
                 </p>
               </td>
               <td className="hidden sm:table-cell px-4 py-3 text-muted-foreground">
-                {en.paymentMethodLabels[order.paymentMethod as keyof typeof en.paymentMethodLabels] ?? order.paymentMethod}
+                {en.paymentMethodLabels[
+                  order.paymentMethod as keyof typeof en.paymentMethodLabels
+                ] ?? order.paymentMethod}
               </td>
               <td className="px-4 py-3">
                 <Badge variant={statusVariant[order.status] ?? 'outline'} className="capitalize">
-                  {en.orderStatusLabels[order.status as keyof typeof en.orderStatusLabels] ?? order.status}
+                  {en.orderStatusLabels[order.status as keyof typeof en.orderStatusLabels] ??
+                    order.status}
                 </Badge>
               </td>
-              <td className="px-4 py-3 font-medium whitespace-nowrap">{formatPrice(order.totalCents)}</td>
+              <td className="px-4 py-3 font-medium whitespace-nowrap">
+                {formatPrice(order.totalCents)}
+              </td>
               <td className="hidden sm:table-cell px-4 py-3 text-muted-foreground text-xs whitespace-nowrap">
                 {formatDate(order.createdAt)}
               </td>

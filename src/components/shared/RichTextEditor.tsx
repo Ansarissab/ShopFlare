@@ -39,7 +39,10 @@ export function RichTextEditor({ value, onChange, uploadEndpoint }: RichTextEdit
     if (!el) return
 
     function handleChange() {
-      const html = (el?.value ?? '').replace(/<action-text-attachment[^>]*>[\s\S]*?<\/action-text-attachment>/g, '')
+      const html = (el?.value ?? '').replace(
+        /<action-text-attachment[^>]*>[\s\S]*?<\/action-text-attachment>/g,
+        '',
+      )
       onChangeRef.current(el?.innerHTML ?? html)
     }
 
@@ -75,11 +78,7 @@ export function RichTextEditor({ value, onChange, uploadEndpoint }: RichTextEdit
 
   return (
     <div className="trix-wrapper">
-      <input
-        id={inputId}
-        type="hidden"
-        defaultValue={value}
-      />
+      <input id={inputId} type="hidden" defaultValue={value} />
       <trix-editor
         ref={editorRef as React.RefObject<TrixEditorElement>}
         input={inputId}

@@ -13,11 +13,7 @@ afterEach(() => {
 // Minimal-but-valid ProductWithVariants builders. Only the fields the search /
 // pagination logic touches (product.name, variants.label, categoryIds) need to
 // be realistic; the rest are filled to satisfy the shape used at runtime.
-function makeProduct(
-  id: string,
-  name: string,
-  categoryIds: string[] = [],
-): ProductWithVariants {
+function makeProduct(id: string, name: string, categoryIds: string[] = []): ProductWithVariants {
   return {
     product: {
       id,
@@ -40,10 +36,7 @@ function makeProduct(
   }
 }
 
-function makeCategory(
-  id: string,
-  children: CategoryNode[] = [],
-): CategoryNode {
+function makeCategory(id: string, children: CategoryNode[] = []): CategoryNode {
   return {
     id,
     name: id,
@@ -163,18 +156,15 @@ describe('useProductSearch', () => {
   })
 
   it('resets to page 1 when the query changes', () => {
-    const { result, rerender } = renderHook(
-      (props) => useProductSearch(props),
-      {
-        initialProps: {
-          items,
-          pageSize: 2,
-          query: '',
-          activeCategoryId: null as string | null,
-          allCategories: [] as CategoryNode[],
-        },
+    const { result, rerender } = renderHook((props) => useProductSearch(props), {
+      initialProps: {
+        items,
+        pageSize: 2,
+        query: '',
+        activeCategoryId: null as string | null,
+        allCategories: [] as CategoryNode[],
       },
-    )
+    })
     // Advance to page 2.
     act(() => result.current.loadMore())
     expect(result.current.visibleItems).toHaveLength(4)
@@ -192,18 +182,15 @@ describe('useProductSearch', () => {
 
   it('resets to page 1 when the active category changes', () => {
     const tree: CategoryNode[] = [makeCategory('cat-tops'), makeCategory('cat-hats')]
-    const { result, rerender } = renderHook(
-      (props) => useProductSearch(props),
-      {
-        initialProps: {
-          items,
-          pageSize: 1,
-          query: '',
-          activeCategoryId: null as string | null,
-          allCategories: tree,
-        },
+    const { result, rerender } = renderHook((props) => useProductSearch(props), {
+      initialProps: {
+        items,
+        pageSize: 1,
+        query: '',
+        activeCategoryId: null as string | null,
+        allCategories: tree,
       },
-    )
+    })
     act(() => result.current.loadMore())
     expect(result.current.visibleItems).toHaveLength(2)
 

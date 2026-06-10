@@ -5,8 +5,8 @@ export const revalidate = 3600
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const workerUrl = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
-    ?? (workerUrl ? workerUrl.replace(/\/api$/, '') : '')
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ?? (workerUrl ? workerUrl.replace(/\/api$/, '') : '')
 
   // Fetch per-page updatedAt timestamps to populate lastModified on policy routes
   const policyUpdates: Record<string, string> = {}
@@ -40,7 +40,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: siteUrl || '/', changeFrequency: 'daily', priority: 1 },
-    ...(landingEnabled ? [{ url: `${siteUrl}/shop`, changeFrequency: 'daily' as const, priority: 0.9 }] : []),
+    ...(landingEnabled
+      ? [{ url: `${siteUrl}/shop`, changeFrequency: 'daily' as const, priority: 0.9 }]
+      : []),
     ...POLICY_SLUGS.map((slug) => ({
       url: `${siteUrl}/policy/${slug}`,
       changeFrequency: 'monthly' as const,
@@ -54,7 +56,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     try {
       const res = await fetch(`${workerUrl}/api/products`, { next: { revalidate: 3600 } })
       if (res.ok) {
-        const products = (await res.json()) as Array<{ slug?: string; id: string; updatedAt?: string }>
+        const products = (await res.json()) as Array<{
+          slug?: string
+          id: string
+          updatedAt?: string
+        }>
         productRoutes = products
           .filter((p) => p.slug)
           .map((p) => ({
@@ -74,7 +80,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     try {
       const res = await fetch(`${workerUrl}/api/categories`, { next: { revalidate: 3600 } })
       if (res.ok) {
-        const data = (await res.json()) as { categories: Array<{ slug: string; children?: Array<{ slug: string }> }> }
+        const data = (await res.json()) as {
+          categories: Array<{ slug: string; children?: Array<{ slug: string }> }>
+        }
         const allSlugs: string[] = []
         for (const cat of data.categories) {
           allSlugs.push(cat.slug)

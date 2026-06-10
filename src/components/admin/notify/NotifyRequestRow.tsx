@@ -10,7 +10,11 @@ import { formatDate } from '@/lib/utils/index'
 export function NotifyRequestRow({ request }: NotifyRequestRowProps) {
   const { productName, variantLabel, size, waiting, lastRequestedAt, inStock } = request
 
-  const formattedDate = formatDate(lastRequestedAt, { year: 'numeric', month: 'short', day: 'numeric' }, undefined)
+  const formattedDate = formatDate(
+    lastRequestedAt,
+    { year: 'numeric', month: 'short', day: 'numeric' },
+    undefined,
+  )
 
   return (
     <div className={cn(layout.mobileStack, 'rounded-md border px-4 py-3 text-sm')}>

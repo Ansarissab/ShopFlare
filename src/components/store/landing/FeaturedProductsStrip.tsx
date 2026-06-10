@@ -17,8 +17,8 @@ export function FeaturedProductsStrip({ section, products }: FeaturedProductsStr
             key={item.product.id}
             product={item.product}
             variants={item.variants}
-            sizes={item.variants.flatMap(v => v.sizes)}
-            images={item.variants.flatMap(v => v.images)}
+            sizes={item.variants.flatMap((v) => v.sizes)}
+            images={item.variants.flatMap((v) => v.images)}
           />
         ))}
       </div>

@@ -7,11 +7,22 @@ import { organizationJsonLd } from '@/lib/seo/jsonld'
 import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
 import type { StoreConfig } from '@/lib/types/common'
 
-const geistSans    = Geist({ variable: '--font-geist-sans', subsets: ['latin'], display: 'swap' })
-const geistMono    = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'], display: 'swap' })
+const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'], display: 'swap' })
+const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'], display: 'swap' })
 // Curated extra fonts — preload:false so they're only downloaded when selected by the merchant
-const merriweather = Merriweather({ variable: '--font-merriweather', subsets: ['latin'], weight: ['400', '700'], display: 'swap', preload: false })
-const nunito       = Nunito({ variable: '--font-nunito', subsets: ['latin'], display: 'swap', preload: false })
+const merriweather = Merriweather({
+  variable: '--font-merriweather',
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  display: 'swap',
+  preload: false,
+})
+const nunito = Nunito({
+  variable: '--font-nunito',
+  subsets: ['latin'],
+  display: 'swap',
+  preload: false,
+})
 
 // Dynamic store metadata — cached 5 min, fails gracefully when worker is unavailable.
 export async function generateMetadata(): Promise<Metadata> {
@@ -20,22 +31,30 @@ export async function generateMetadata(): Promise<Metadata> {
     if (!workerUrl) throw new Error('no worker url')
     const res = await fetch(`${workerUrl}/api/config/store`, { next: { revalidate: 300 } })
     if (!res.ok) throw new Error('config fetch failed')
-    const config = await res.json() as { storeName?: string; tagline?: string; logoUrl?: string; faviconUrl?: string }
+    const config = (await res.json()) as {
+      storeName?: string
+      tagline?: string
+      logoUrl?: string
+      faviconUrl?: string
+    }
     return {
-      title:       { default: config.storeName ?? 'ShopFlare', template: `%s — ${config.storeName ?? 'ShopFlare'}` },
+      title: {
+        default: config.storeName ?? 'ShopFlare',
+        template: `%s — ${config.storeName ?? 'ShopFlare'}`,
+      },
       description: config.tagline ?? 'White-label ecommerce store',
-      icons:       config.faviconUrl ? { icon: config.faviconUrl } : undefined,
+      icons: config.faviconUrl ? { icon: config.faviconUrl } : undefined,
       openGraph: {
-        title:       config.storeName ?? 'ShopFlare',
-        description: config.tagline   ?? 'White-label ecommerce store',
-        images:      config.logoUrl ? [{ url: config.logoUrl }] : [],
-        type:        'website',
+        title: config.storeName ?? 'ShopFlare',
+        description: config.tagline ?? 'White-label ecommerce store',
+        images: config.logoUrl ? [{ url: config.logoUrl }] : [],
+        type: 'website',
       },
       twitter: { card: 'summary', title: config.storeName ?? 'ShopFlare' },
     }
   } catch {
     return {
-      title:       { default: 'ShopFlare', template: '%s — ShopFlare' },
+      title: { default: 'ShopFlare', template: '%s — ShopFlare' },
       description: 'White-label ecommerce store',
     }
   }
@@ -47,13 +66,13 @@ export async function generateMetadata(): Promise<Metadata> {
 const bootScript = [
   '(function(){',
   "try{var s=localStorage.getItem('shopflare-theme');if(!s)return;var t=JSON.parse(s);",
-  "var r=document.documentElement;",
+  'var r=document.documentElement;',
   "var rad={none:'0rem',sm:'0.25rem',md:'0.5rem',lg:'0.75rem',full:'1.5rem'};",
   "var fnt={sans:'var(--font-geist-sans)',serif:'var(--font-merriweather)',mono:'var(--font-geist-mono)',rounded:'var(--font-nunito)'};",
   "var den={compact:'0.75',comfortable:'1',spacious:'1.25'};",
-  "function lum(h){var rv=parseInt(h.slice(1,3),16)/255,g=parseInt(h.slice(3,5),16)/255,b=parseInt(h.slice(5,7),16)/255;",
-  "function l(c){return c<=0.04045?c/12.92:Math.pow((c+0.055)/1.055,2.4);}",
-  "return 0.2126*l(rv)+0.7152*l(g)+0.0722*l(b);}",
+  'function lum(h){var rv=parseInt(h.slice(1,3),16)/255,g=parseInt(h.slice(3,5),16)/255,b=parseInt(h.slice(5,7),16)/255;',
+  'function l(c){return c<=0.04045?c/12.92:Math.pow((c+0.055)/1.055,2.4);}',
+  'return 0.2126*l(rv)+0.7152*l(g)+0.0722*l(b);}',
   "function fg(h){return lum(h)>0.179?'#000000':'#ffffff';}",
   "if(t.primaryColor){r.style.setProperty('--store-primary',t.primaryColor);",
   "r.style.setProperty('--store-primary-fg',t.primaryColorFg||fg(t.primaryColor));}",
@@ -65,7 +84,7 @@ const bootScript = [
   "if(t.heroStyle)r.setAttribute('data-hero-style',t.heroStyle);",
   "if(t.colorMode){var dark=t.colorMode==='dark'||(t.colorMode==='system'&&window.matchMedia('(prefers-color-scheme:dark)').matches);",
   "r.setAttribute('data-theme',dark?'dark':'light');}",
-  "}catch(e){}",
+  '}catch(e){}',
   '})();',
 ].join('')
 
@@ -108,9 +127,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       {/* suppressHydrationWarning: browser extensions inject attrs before React hydrates */}
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
-        <ServiceWorkerProvider>
-          {children}
-        </ServiceWorkerProvider>
+        <ServiceWorkerProvider>{children}</ServiceWorkerProvider>
       </body>
     </html>
   )

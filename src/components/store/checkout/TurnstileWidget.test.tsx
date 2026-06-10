@@ -80,15 +80,12 @@ describe('TurnstileWidget', () => {
 
   it('injects the turnstile script when not yet present and renders via onload callback', () => {
     render(<TurnstileWidget onVerify={vi.fn()} />)
-    const script = document.querySelector(
-      'script[src*="turnstile"]',
-    ) as HTMLScriptElement | null
+    const script = document.querySelector('script[src*="turnstile"]') as HTMLScriptElement | null
     expect(script).toBeTruthy()
     expect(script?.async).toBe(true)
     expect(script?.defer).toBe(true)
     // onload callback registered
-    const onLoad = (window as unknown as { onTurnstileLoad?: () => void })
-      .onTurnstileLoad
+    const onLoad = (window as unknown as { onTurnstileLoad?: () => void }).onTurnstileLoad
     expect(typeof onLoad).toBe('function')
 
     // simulate script finishing load
@@ -110,8 +107,7 @@ describe('TurnstileWidget', () => {
   it('removes the widget on unmount when rendered via the script-load callback', () => {
     // Script-injection path registers the cleanup that calls remove.
     render(<TurnstileWidget onVerify={vi.fn()} />)
-    const onLoad = (window as unknown as { onTurnstileLoad?: () => void })
-      .onTurnstileLoad
+    const onLoad = (window as unknown as { onTurnstileLoad?: () => void }).onTurnstileLoad
     installTurnstile()
     onLoad?.()
     cleanup()
@@ -127,8 +123,7 @@ describe('TurnstileWidget', () => {
 
   it('renderWidget is a no-op when called twice (already rendered guard)', () => {
     render(<TurnstileWidget onVerify={vi.fn()} />)
-    const onLoad = (window as unknown as { onTurnstileLoad?: () => void })
-      .onTurnstileLoad
+    const onLoad = (window as unknown as { onTurnstileLoad?: () => void }).onTurnstileLoad
     installTurnstile()
     onLoad?.()
     onLoad?.() // second invocation hits the widgetIdRef guard

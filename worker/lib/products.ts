@@ -56,9 +56,7 @@ function groupVariants(
     .sort((a, b) => a.sortOrder - b.sortOrder)
 
   return productVariants.map((variant) => {
-    const images = (imagesByVariant.get(variant.id) ?? []).sort(
-      (a, b) => a.sortOrder - b.sortOrder,
-    )
+    const images = (imagesByVariant.get(variant.id) ?? []).sort((a, b) => a.sortOrder - b.sortOrder)
     const sizes = (sizesByVariant.get(variant.id) ?? []).filter((s) => s.active)
 
     return { ...variant, images, sizes }
@@ -93,13 +91,12 @@ export async function assembleProductList(
       : undefined
 
   const whereClause =
-    activeFilter && idFilter
-      ? and(activeFilter, idFilter)
-      : activeFilter ?? idFilter
+    activeFilter && idFilter ? and(activeFilter, idFilter) : (activeFilter ?? idFilter)
 
-  const activeProducts = await (whereClause
-    ? db.select().from(schema.products).where(whereClause)
-    : db.select().from(schema.products)
+  const activeProducts = await (
+    whereClause
+      ? db.select().from(schema.products).where(whereClause)
+      : db.select().from(schema.products)
   ).all()
 
   if (activeProducts.length === 0) return []

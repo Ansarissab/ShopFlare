@@ -3,8 +3,17 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, PieChart, Pie, Cell, Legend,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
 } from 'recharts'
 import { StatCard } from '@/components/admin/shared/StatCard'
 import { buttonVariants } from '@/components/ui/button'
@@ -19,12 +28,12 @@ import type { AdminOrdersResponse } from '@/lib/types/admin'
 // ─── Chart helpers ────────────────────────────────────────────────────────────
 
 const STATUS_COLORS: Record<string, string> = {
-  pending:    '#f59e0b',
-  confirmed:  '#6366f1',
+  pending: '#f59e0b',
+  confirmed: '#6366f1',
   processing: '#3b82f6',
-  shipped:    '#8b5cf6',
-  delivered:  '#22c55e',
-  cancelled:  '#ef4444',
+  shipped: '#8b5cf6',
+  delivered: '#22c55e',
+  cancelled: '#ef4444',
 }
 
 function getLast14Days(): string[] {
@@ -67,28 +76,35 @@ interface DashboardStats {
 function computeStats(data: AdminOrdersResponse | null): DashboardStats {
   if (!data) {
     return {
-      total: 0, pending: 0, cancelled: 0, delivered: 0,
-      revenueCents: 0, avgOrderCents: 0, lowStock: 0,
-      revenueByDay: [], statusBreakdown: [], recentOrders: [],
+      total: 0,
+      pending: 0,
+      cancelled: 0,
+      delivered: 0,
+      revenueCents: 0,
+      avgOrderCents: 0,
+      lowStock: 0,
+      revenueByDay: [],
+      statusBreakdown: [],
+      recentOrders: [],
     }
   }
 
   const orders = data.orders
-  const pending   = orders.filter(o => o.status === 'pending').length
-  const cancelled = orders.filter(o => o.status === 'cancelled').length
-  const delivered = orders.filter(o => o.status === 'delivered').length
-  const active    = orders.filter(o => o.status !== 'cancelled')
-  const revenueCents  = active.reduce((s, o) => s + o.totalCents, 0)
+  const pending = orders.filter((o) => o.status === 'pending').length
+  const cancelled = orders.filter((o) => o.status === 'cancelled').length
+  const delivered = orders.filter((o) => o.status === 'delivered').length
+  const active = orders.filter((o) => o.status !== 'cancelled')
+  const revenueCents = active.reduce((s, o) => s + o.totalCents, 0)
   const avgOrderCents = active.length > 0 ? Math.round(revenueCents / active.length) : 0
 
   // Revenue by day — last 14 days, stored as major currency unit for Y-axis readability
   const days = getLast14Days()
-  const dayMap: Record<string, number> = Object.fromEntries(days.map(d => [d, 0]))
+  const dayMap: Record<string, number> = Object.fromEntries(days.map((d) => [d, 0]))
   for (const o of active) {
     const day = o.createdAt.slice(0, 10)
     if (day in dayMap) dayMap[day] += o.totalCents
   }
-  const revenueByDay = days.map(d => ({
+  const revenueByDay = days.map((d) => ({
     label: shortDay(d),
     revenue: Math.round(dayMap[d] / 100),
   }))
@@ -110,9 +126,16 @@ function computeStats(data: AdminOrdersResponse | null): DashboardStats {
     .slice(0, 5)
 
   return {
-    total: data.total, pending, cancelled, delivered,
-    revenueCents, avgOrderCents, lowStock: 0,
-    revenueByDay, statusBreakdown, recentOrders,
+    total: data.total,
+    pending,
+    cancelled,
+    delivered,
+    revenueCents,
+    avgOrderCents,
+    lowStock: 0,
+    revenueByDay,
+    statusBreakdown,
+    recentOrders,
   }
 }
 
@@ -128,7 +151,10 @@ export default function AdminDashboardPage() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold tracking-tight">{en.admin.dashboard}</h1>
         <div className="flex flex-wrap gap-2">
-          <Link href="/admin/products/new" className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}>
+          <Link
+            href="/admin/products/new"
+            className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
+          >
             {en.admin.addProduct}
           </Link>
           <Link href="/admin/pos" className={cn(buttonVariants({ size: 'sm' }))}>
@@ -192,7 +218,7 @@ export default function AdminDashboardPage() {
                 >
                   <defs>
                     <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%"  stopColor="#18181b" stopOpacity={0.12} />
+                      <stop offset="5%" stopColor="#18181b" stopOpacity={0.12} />
                       <stop offset="95%" stopColor="#18181b" stopOpacity={0} />
                     </linearGradient>
                   </defs>
@@ -208,7 +234,7 @@ export default function AdminDashboardPage() {
                     tick={{ fontSize: 11, fill: '#71717a' }}
                     tickLine={false}
                     axisLine={false}
-                    tickFormatter={v => (v === 0 ? '0' : `${v}`)}
+                    tickFormatter={(v) => (v === 0 ? '0' : `${v}`)}
                   />
                   <Tooltip
                     formatter={(val) => [formatPrice(Number(val) * 100), 'Revenue']}
@@ -293,7 +319,7 @@ export default function AdminDashboardPage() {
               <p className="px-5 py-6 text-sm text-muted-foreground">{en.admin.noOrdersYet}</p>
             ) : (
               <div className="flex flex-col divide-y">
-                {stats.recentOrders.map(o => (
+                {stats.recentOrders.map((o) => (
                   <Link
                     key={o.id}
                     href={`/admin/orders/${o.id}`}
@@ -305,10 +331,14 @@ export default function AdminDashboardPage() {
                     <span className="flex-1 truncate font-medium">{o.customerName}</span>
                     <span className="shrink-0 font-semibold">{formatPrice(o.totalCents)}</span>
                     <Badge variant="secondary" className="capitalize shrink-0">
-                      {en.orderStatusLabels[o.status as keyof typeof en.orderStatusLabels] ?? o.status}
+                      {en.orderStatusLabels[o.status as keyof typeof en.orderStatusLabels] ??
+                        o.status}
                     </Badge>
                     <span className="w-16 shrink-0 text-right text-xs text-muted-foreground">
-                      {new Date(o.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      {new Date(o.createdAt).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                      })}
                     </span>
                     <ArrowRight className="size-3 shrink-0 text-muted-foreground" />
                   </Link>

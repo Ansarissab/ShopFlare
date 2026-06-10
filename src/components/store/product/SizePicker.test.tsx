@@ -10,17 +10,55 @@ afterEach(() => {
 })
 
 const activeSizes = [
-  { id: 'sz-s', size: 'S', priceCents: 1500, stock: 10, active: true, variantId: 'v1', sortOrder: 0, sku: null, stripePriceId: null },
-  { id: 'sz-m', size: 'M', priceCents: 1500, stock: 5,  active: true, variantId: 'v1', sortOrder: 1, sku: null, stripePriceId: null },
-  { id: 'sz-l', size: 'L', priceCents: 1500, stock: 0,  active: true, variantId: 'v1', sortOrder: 2, sku: null, stripePriceId: null },
-  { id: 'sz-xl', size: 'XL', priceCents: 2000, stock: 3, active: false, variantId: 'v1', sortOrder: 3, sku: null, stripePriceId: null },
+  {
+    id: 'sz-s',
+    size: 'S',
+    priceCents: 1500,
+    stock: 10,
+    active: true,
+    variantId: 'v1',
+    sortOrder: 0,
+    sku: null,
+    stripePriceId: null,
+  },
+  {
+    id: 'sz-m',
+    size: 'M',
+    priceCents: 1500,
+    stock: 5,
+    active: true,
+    variantId: 'v1',
+    sortOrder: 1,
+    sku: null,
+    stripePriceId: null,
+  },
+  {
+    id: 'sz-l',
+    size: 'L',
+    priceCents: 1500,
+    stock: 0,
+    active: true,
+    variantId: 'v1',
+    sortOrder: 2,
+    sku: null,
+    stripePriceId: null,
+  },
+  {
+    id: 'sz-xl',
+    size: 'XL',
+    priceCents: 2000,
+    stock: 3,
+    active: false,
+    variantId: 'v1',
+    sortOrder: 3,
+    sku: null,
+    stripePriceId: null,
+  },
 ]
 
 describe('SizePicker', () => {
   it('renders nothing when sizes array is empty', () => {
-    const { container } = render(
-      <SizePicker sizes={[]} selectedSizeId={null} onSelect={vi.fn()} />,
-    )
+    const { container } = render(<SizePicker sizes={[]} selectedSizeId={null} onSelect={vi.fn()} />)
     expect(container.firstChild).toBeNull()
   })
 

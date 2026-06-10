@@ -18,10 +18,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const config = await fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: 300 })
   return {
     ...buildPageMetadata({
-      title:    en.blog.pageTitle,
+      title: en.blog.pageTitle,
       description: en.blog.pageDescription,
-      canonical:   `${siteUrl}/blog`,
-      storeName:   config?.storeName,
+      canonical: `${siteUrl}/blog`,
+      storeName: config?.storeName,
     }),
     alternates: {
       canonical: `${siteUrl}/blog`,
@@ -38,7 +38,7 @@ export default async function BlogIndexPage() {
 
   if (!data) notFound()
 
-  const siteUrl   = process.env.NEXT_PUBLIC_SITE_URL ?? ''
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
   const workerUrl = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
   const { posts } = data
 
@@ -60,7 +60,7 @@ export default async function BlogIndexPage() {
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {posts.map((post) => {
               const coverUrl = post.coverR2Key
-                ? r2Url(post.coverR2Key) ?? `${workerUrl}/cdn/${post.coverR2Key}`
+                ? (r2Url(post.coverR2Key) ?? `${workerUrl}/cdn/${post.coverR2Key}`)
                 : null
               return (
                 <Link
@@ -84,20 +84,17 @@ export default async function BlogIndexPage() {
                       {post.title}
                     </h2>
                     {post.excerpt && (
-                      <p className="text-sm text-muted-foreground line-clamp-3">
-                        {post.excerpt}
-                      </p>
+                      <p className="text-sm text-muted-foreground line-clamp-3">{post.excerpt}</p>
                     )}
                     <div className="flex items-center justify-between mt-auto pt-2">
                       {post.publishedAt && (
-                        <time
-                          dateTime={post.publishedAt}
-                          className="text-xs text-muted-foreground"
-                        >
+                        <time dateTime={post.publishedAt} className="text-xs text-muted-foreground">
                           {en.blog.publishedOn.replace(
                             '{date}',
                             new Date(post.publishedAt).toLocaleDateString('en-US', {
-                              year: 'numeric', month: 'short', day: 'numeric',
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
                             }),
                           )}
                         </time>

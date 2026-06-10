@@ -21,7 +21,7 @@ declare global {
           'error-callback': () => void
           'expired-callback': () => void
           theme?: 'light' | 'dark' | 'auto'
-        }
+        },
       ) => string
       reset: (widgetId: string) => void
       remove: (widgetId: string) => void
@@ -60,9 +60,7 @@ export function TurnstileWidget({ onVerify, onError }: TurnstileWidgetProps) {
     // Script not yet loaded — attach a callback and inject script once
     window.onTurnstileLoad = renderWidget
 
-    const existing = document.querySelector(
-      'script[src*="turnstile"]'
-    ) as HTMLScriptElement | null
+    const existing = document.querySelector('script[src*="turnstile"]') as HTMLScriptElement | null
 
     if (!existing) {
       const script = document.createElement('script')
@@ -79,7 +77,7 @@ export function TurnstileWidget({ onVerify, onError }: TurnstileWidgetProps) {
         widgetIdRef.current = null
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return <div ref={containerRef} className="mt-2" />

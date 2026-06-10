@@ -6,10 +6,10 @@ import { idField, contactSchema } from './base'
 // (orderId-keyed) and public (orderNumber+contact) review shapes. Compose, never
 // copy-paste (DRY rule 4).
 const reviewBase = z.object({
-  productId:    idField,
+  productId: idField,
   customerName: z.string().min(1).max(120),
-  rating:       z.number().int().min(1).max(5),
-  body:         z.string().max(1000).optional(),
+  rating: z.number().int().min(1).max(5),
+  body: z.string().max(1000).optional(),
 })
 
 // Review — verified purchase, keyed by internal orderId.
@@ -21,10 +21,10 @@ export const reviewSchema = reviewBase.extend({
 // + contact (email/phone). The Worker resolves these to an order, verifies it is
 // `delivered` and contains productId, then inserts a review with approved=false.
 export const submitReviewSchema = reviewBase.extend({
-  orderNumber:  z.string().min(1).max(40),
+  orderNumber: z.string().min(1).max(40),
   // min 4 chars: prevents a 1-2 digit `contact` from matching any order via the
   // phone digits-suffix check in the Worker (see worker/routes/reviews.ts).
-  contact:      z.string().min(4).max(160),
+  contact: z.string().min(4).max(160),
 })
 
 // Admin moderation — approve / unapprove a review.
@@ -36,12 +36,11 @@ export const moderateReviewSchema = z.object({
 const notifyMeBase = contactSchema.extend({ sizeOptionId: idField })
 
 // Full schema with server-side refinement (email OR phone required)
-export const notifyMeSchema = notifyMeBase.refine(
-  d => d.email || d.phone,
-  { message: 'Email or phone required' },
-)
+export const notifyMeSchema = notifyMeBase.refine((d) => d.email || d.phone, {
+  message: 'Email or phone required',
+})
 
-export type ReviewInput        = z.infer<typeof reviewSchema>
-export type SubmitReviewInput  = z.infer<typeof submitReviewSchema>
+export type ReviewInput = z.infer<typeof reviewSchema>
+export type SubmitReviewInput = z.infer<typeof submitReviewSchema>
 export type ModerateReviewInput = z.infer<typeof moderateReviewSchema>
-export type NotifyMeInput      = z.infer<typeof notifyMeSchema>
+export type NotifyMeInput = z.infer<typeof notifyMeSchema>

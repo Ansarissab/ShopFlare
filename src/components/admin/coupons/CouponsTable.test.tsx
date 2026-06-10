@@ -69,20 +69,34 @@ describe('CouponsTable', () => {
 
   it('shows used count alone when usageLimit is null', () => {
     render(
-      <CouponsTable coupons={[makeCoupon({ usedCount: 3, usageLimit: null })]} onEdit={vi.fn()} onDeleted={vi.fn()} />,
+      <CouponsTable
+        coupons={[makeCoupon({ usedCount: 3, usageLimit: null })]}
+        onEdit={vi.fn()}
+        onDeleted={vi.fn()}
+      />,
     )
     expect(screen.getByText('3')).toBeTruthy()
   })
 
   it('shows used / limit when usageLimit is set', () => {
     render(
-      <CouponsTable coupons={[makeCoupon({ usedCount: 3, usageLimit: 10 })]} onEdit={vi.fn()} onDeleted={vi.fn()} />,
+      <CouponsTable
+        coupons={[makeCoupon({ usedCount: 3, usageLimit: 10 })]}
+        onEdit={vi.fn()}
+        onDeleted={vi.fn()}
+      />,
     )
     expect(screen.getByText('3 / 10')).toBeTruthy()
   })
 
   it('renders em dash when no expiry', () => {
-    render(<CouponsTable coupons={[makeCoupon({ expiresAt: null })]} onEdit={vi.fn()} onDeleted={vi.fn()} />)
+    render(
+      <CouponsTable
+        coupons={[makeCoupon({ expiresAt: null })]}
+        onEdit={vi.fn()}
+        onDeleted={vi.fn()}
+      />,
+    )
     // both the expiry cell and the (null) stripe cell render an em dash
     expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(1)
   })
@@ -99,26 +113,46 @@ describe('CouponsTable', () => {
   })
 
   it('renders active badge (active=true)', () => {
-    render(<CouponsTable coupons={[makeCoupon({ active: true })]} onEdit={vi.fn()} onDeleted={vi.fn()} />)
+    render(
+      <CouponsTable
+        coupons={[makeCoupon({ active: true })]}
+        onEdit={vi.fn()}
+        onDeleted={vi.fn()}
+      />,
+    )
     // 'Active' also appears as a column header, so the badge makes 2 matches
     expect(screen.getAllByText(en.admin.active).length).toBeGreaterThanOrEqual(2)
   })
 
   it('renders inactive badge (active=false)', () => {
-    render(<CouponsTable coupons={[makeCoupon({ active: false })]} onEdit={vi.fn()} onDeleted={vi.fn()} />)
+    render(
+      <CouponsTable
+        coupons={[makeCoupon({ active: false })]}
+        onEdit={vi.fn()}
+        onDeleted={vi.fn()}
+      />,
+    )
     expect(screen.getByText(en.admin.inactive)).toBeTruthy()
   })
 
   it('renders the stripe-synced badge when stripeCouponId is present', () => {
     render(
-      <CouponsTable coupons={[makeCoupon({ stripeCouponId: 'co_123' })]} onEdit={vi.fn()} onDeleted={vi.fn()} />,
+      <CouponsTable
+        coupons={[makeCoupon({ stripeCouponId: 'co_123' })]}
+        onEdit={vi.fn()}
+        onDeleted={vi.fn()}
+      />,
     )
     expect(screen.getByText(en.admin.syncStripeCoupon)).toBeTruthy()
   })
 
   it('does not render the stripe-synced badge when stripeCouponId is null', () => {
     render(
-      <CouponsTable coupons={[makeCoupon({ stripeCouponId: null })]} onEdit={vi.fn()} onDeleted={vi.fn()} />,
+      <CouponsTable
+        coupons={[makeCoupon({ stripeCouponId: null })]}
+        onEdit={vi.fn()}
+        onDeleted={vi.fn()}
+      />,
     )
     expect(screen.queryByText(en.admin.syncStripeCoupon)).toBeNull()
   })
@@ -143,7 +177,13 @@ describe('CouponsTable', () => {
   it('deletes, toasts success, and calls onDeleted when confirmed', async () => {
     const onDeleted = vi.fn()
     vi.spyOn(window, 'confirm').mockReturnValue(true)
-    render(<CouponsTable coupons={[makeCoupon({ id: 'cpn-9' })]} onEdit={vi.fn()} onDeleted={onDeleted} />)
+    render(
+      <CouponsTable
+        coupons={[makeCoupon({ id: 'cpn-9' })]}
+        onEdit={vi.fn()}
+        onDeleted={onDeleted}
+      />,
+    )
     fireEvent.click(screen.getByLabelText(en.admin.deleteCoupon))
     await waitFor(() => {
       expect(apiDelete).toHaveBeenCalledWith('/api/admin/coupons/cpn-9')

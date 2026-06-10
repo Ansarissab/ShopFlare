@@ -32,13 +32,7 @@ export function OrderLineItem({
       {/* Thumbnail */}
       {imageUrl ? (
         <div className="relative size-16 shrink-0 overflow-hidden rounded-md border bg-muted">
-          <Image
-            src={imageUrl}
-            alt={productName}
-            fill
-            className="object-cover"
-            sizes="64px"
-          />
+          <Image src={imageUrl} alt={productName} fill className="object-cover" sizes="64px" />
         </div>
       ) : (
         <div className="size-16 shrink-0 rounded-md border bg-muted" />
@@ -56,9 +50,7 @@ export function OrderLineItem({
       </div>
 
       {/* Line total */}
-      <span className="shrink-0 text-sm font-semibold">
-        {formatPrice(priceCents * quantity)}
-      </span>
+      <span className="shrink-0 text-sm font-semibold">{formatPrice(priceCents * quantity)}</span>
     </li>
   )
 }

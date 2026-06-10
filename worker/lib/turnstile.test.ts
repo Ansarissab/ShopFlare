@@ -103,9 +103,7 @@ describe('verifyTurnstile', () => {
   })
 
   it('returns false on JSON parse error (fail-closed)', async () => {
-    vi.mocked(fetch).mockResolvedValueOnce(
-      new Response('not-json', { status: 200 }),
-    )
+    vi.mocked(fetch).mockResolvedValueOnce(new Response('not-json', { status: 200 }))
     const result = await verifyTurnstile('my-token', 'secret123')
     expect(result).toBe(false)
   })

@@ -20,7 +20,7 @@ export async function edgeCached<T>(
   const { etag, cacheControl, build } = opts
 
   if (c.req.header('If-None-Match') === etag) {
-    return c.newResponse(null, 304, { 'Cache-Control': cacheControl, 'ETag': etag })
+    return c.newResponse(null, 304, { 'Cache-Control': cacheControl, ETag: etag })
   }
 
   // Edge cache is a production optimisation only. Skip it in development/test:
@@ -38,7 +38,7 @@ export async function edgeCached<T>(
   }
 
   const body = await build()
-  const res = c.json(body, 200, { 'Cache-Control': cacheControl, 'ETag': etag })
+  const res = c.json(body, 200, { 'Cache-Control': cacheControl, ETag: etag })
 
   if (cache) {
     try {

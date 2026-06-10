@@ -4,9 +4,9 @@ import type { CTABandProps } from '@/lib/types'
 
 export function CTABand({ section }: CTABandProps) {
   const heading = section.heading || en.store.ctaDefaultHeading
-  const subtext  = section.subtext  || en.store.ctaDefaultSubtext
-  const ctaText  = section.ctaText  || en.store.ctaDefaultCta
-  const ctaHref  = section.ctaHref  || '/shop'
+  const subtext = section.subtext || en.store.ctaDefaultSubtext
+  const ctaText = section.ctaText || en.store.ctaDefaultCta
+  const ctaHref = section.ctaHref || '/shop'
 
   return (
     <section className="bg-primary py-16 text-center" aria-label={heading}>

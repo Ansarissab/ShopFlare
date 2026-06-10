@@ -7,7 +7,9 @@ import type { ProductImage } from '@/lib/types/product'
 vi.mock('next/image', async () => {
   const { createElement } = await import('react')
   return {
-    default: (props: React.ImgHTMLAttributes<HTMLImageElement> & { fill?: boolean; priority?: boolean }) => {
+    default: (
+      props: React.ImgHTMLAttributes<HTMLImageElement> & { fill?: boolean; priority?: boolean },
+    ) => {
       const { fill, priority, ...rest } = props
       return createElement('img', rest)
     },
@@ -24,7 +26,13 @@ let capturedSetApi: ((api: unknown) => void) | undefined
 vi.mock('@/components/ui/carousel', async () => {
   const { createElement } = await import('react')
   return {
-    Carousel: ({ setApi, children }: { setApi?: (a: unknown) => void; children: React.ReactNode }) => {
+    Carousel: ({
+      setApi,
+      children,
+    }: {
+      setApi?: (a: unknown) => void
+      children: React.ReactNode
+    }) => {
       capturedSetApi = setApi
       return createElement('div', { 'data-testid': 'carousel' }, children)
     },

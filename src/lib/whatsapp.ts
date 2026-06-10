@@ -7,7 +7,8 @@ function waUrl(phoneNumber: string, message: string): string {
 }
 
 export function buildWhatsAppOrderUrl(params: WhatsAppOrderParams): string {
-  const { phoneNumber, productName, variantLabel, size, sku, priceCents, currency, quantity } = params
+  const { phoneNumber, productName, variantLabel, size, sku, priceCents, currency, quantity } =
+    params
 
   const formattedPrice = formatPrice(priceCents * quantity, currency)
   const w = en.whatsapp

@@ -31,14 +31,7 @@ afterEach(() => {
 
 describe('CategoryTree', () => {
   it('renders empty state when no categories', () => {
-    render(
-      <CategoryTree
-        categories={[]}
-        onReorder={vi.fn()}
-        onEdit={vi.fn()}
-        onDelete={vi.fn()}
-      />,
-    )
+    render(<CategoryTree categories={[]} onReorder={vi.fn()} onEdit={vi.fn()} onDelete={vi.fn()} />)
     expect(screen.getByText(en.admin.noCategories)).toBeTruthy()
   })
 
@@ -73,7 +66,12 @@ describe('CategoryTree', () => {
     const onReorder = vi.fn()
     const node = makeNode({ id: 'x1' })
     render(
-      <CategoryTree categories={[node]} onReorder={onReorder} onEdit={vi.fn()} onDelete={vi.fn()} />,
+      <CategoryTree
+        categories={[node]}
+        onReorder={onReorder}
+        onEdit={vi.fn()}
+        onDelete={vi.fn()}
+      />,
     )
     fireEvent.click(screen.getByLabelText('Move up'))
     expect(onReorder).toHaveBeenCalledWith('x1', 'up')

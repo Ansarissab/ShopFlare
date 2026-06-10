@@ -53,7 +53,8 @@ export function productJsonLd(
   } = {},
 ): Record<string, unknown> {
   const currency = opts.currency ?? DEFAULT_CURRENCY
-  const currencyMeta = CURRENCIES[currency as keyof typeof CURRENCIES] ?? CURRENCIES[DEFAULT_CURRENCY]
+  const currencyMeta =
+    CURRENCIES[currency as keyof typeof CURRENCIES] ?? CURRENCIES[DEFAULT_CURRENCY]
   const divisor = Math.pow(10, currencyMeta.decimals)
 
   const images: string[] = []

@@ -42,15 +42,13 @@ export const useCart = create<CartState>()(
 
       addItem: (item) =>
         set((state) => {
-          const existing = state.items.find(
-            (i) => i.sizeOptionId === item.sizeOptionId
-          )
+          const existing = state.items.find((i) => i.sizeOptionId === item.sizeOptionId)
           if (existing) {
             return {
               items: state.items.map((i) =>
                 i.sizeOptionId === item.sizeOptionId
                   ? { ...i, quantity: i.quantity + item.quantity }
-                  : i
+                  : i,
               ),
             }
           }
@@ -71,7 +69,7 @@ export const useCart = create<CartState>()(
           }
           return {
             items: state.items.map((i) =>
-              i.sizeOptionId === sizeOptionId ? { ...i, quantity: qty } : i
+              i.sizeOptionId === sizeOptionId ? { ...i, quantity: qty } : i,
             ),
           }
         }),
@@ -86,19 +84,17 @@ export const useCart = create<CartState>()(
 
       removeCoupon: () => set({ couponCode: null, discountCents: 0 }),
     }),
-    { name: 'cart' }
-  )
+    { name: 'cart' },
+  ),
 )
 
 // Selectors
 export function useCartItemCount() {
-  return useCart((state) =>
-    state.items.reduce((sum, item) => sum + item.quantity, 0)
-  )
+  return useCart((state) => state.items.reduce((sum, item) => sum + item.quantity, 0))
 }
 
 export function useCartSubtotalCents() {
   return useCart((state) =>
-    state.items.reduce((sum, item) => sum + item.priceCents * item.quantity, 0)
+    state.items.reduce((sum, item) => sum + item.priceCents * item.quantity, 0),
   )
 }

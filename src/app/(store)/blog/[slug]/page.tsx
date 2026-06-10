@@ -27,15 +27,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!post) return { title: en.blog.pageTitle }
 
-  const siteUrl  = process.env.NEXT_PUBLIC_SITE_URL ?? ''
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
   const coverUrl = r2Url(post.coverR2Key)
 
   return buildPageMetadata({
-    title:     post.title,
+    title: post.title,
     description: post.excerpt || undefined,
-    canonical:   `${siteUrl}/blog/${slug}`,
-    imageUrl:    coverUrl ?? undefined,
-    storeName:   config?.storeName,
+    canonical: `${siteUrl}/blog/${slug}`,
+    imageUrl: coverUrl ?? undefined,
+    storeName: config?.storeName,
   })
 }
 
@@ -48,28 +48,30 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   if (!post) notFound()
 
-  const siteUrl  = process.env.NEXT_PUBLIC_SITE_URL ?? ''
-  const postUrl  = `${siteUrl}/blog/${slug}`
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
+  const postUrl = `${siteUrl}/blog/${slug}`
   const coverUrl = r2Url(post.coverR2Key)
 
   const article = articleJsonLd({
-    title:         post.title,
-    description:   post.excerpt || undefined,
-    url:           postUrl,
-    imageUrl:      coverUrl ?? undefined,
+    title: post.title,
+    description: post.excerpt || undefined,
+    url: postUrl,
+    imageUrl: coverUrl ?? undefined,
     datePublished: post.publishedAt ?? undefined,
-    dateModified:  post.updatedAt,
+    dateModified: post.updatedAt,
   })
 
   const breadcrumb = breadcrumbListJsonLd([
     { name: config?.storeName ?? 'Home', url: siteUrl || '/' },
-    { name: en.blog.breadcrumbBlog,      url: `${siteUrl}/blog` },
-    { name: post.title,                  url: null },
+    { name: en.blog.breadcrumbBlog, url: `${siteUrl}/blog` },
+    { name: post.title, url: null },
   ])
 
   const publishedDate = post.publishedAt
     ? new Date(post.publishedAt).toLocaleDateString('en-US', {
-        year: 'numeric', month: 'long', day: 'numeric',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
       })
     : null
 
@@ -80,10 +82,17 @@ export default async function BlogPostPage({ params }: PageProps) {
 
       <article className="mx-auto w-full max-w-3xl px-4 py-10">
         {/* Breadcrumb */}
-        <nav aria-label="breadcrumb" className="mb-6 flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Link href="/" className="hover:underline">{config?.storeName ?? 'Home'}</Link>
+        <nav
+          aria-label="breadcrumb"
+          className="mb-6 flex items-center gap-1.5 text-xs text-muted-foreground"
+        >
+          <Link href="/" className="hover:underline">
+            {config?.storeName ?? 'Home'}
+          </Link>
           <span aria-hidden>/</span>
-          <Link href="/blog" className="hover:underline">{en.blog.breadcrumbBlog}</Link>
+          <Link href="/blog" className="hover:underline">
+            {en.blog.breadcrumbBlog}
+          </Link>
           <span aria-hidden>/</span>
           <span className="truncate max-w-[20ch]">{post.title}</span>
         </nav>
@@ -104,9 +113,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
         {/* Header */}
         <header className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight leading-tight mb-3">
-            {post.title}
-          </h1>
+          <h1 className="text-3xl font-bold tracking-tight leading-tight mb-3">{post.title}</h1>
           {publishedDate && (
             <time dateTime={post.publishedAt ?? ''} className="text-sm text-muted-foreground">
               {en.blog.publishedOn.replace('{date}', publishedDate)}
@@ -127,10 +134,7 @@ export default async function BlogPostPage({ params }: PageProps) {
         </header>
 
         {/* Body */}
-        <RenderHtml
-          html={post.bodyHtml}
-          className="prose prose-sm sm:prose max-w-none"
-        />
+        <RenderHtml html={post.bodyHtml} className="prose prose-sm sm:prose max-w-none" />
       </article>
     </div>
   )

@@ -66,7 +66,11 @@ vi.mock('@/components/store/checkout/ManualOrderForm', async () => {
   const { createElement } = await import('react')
   return {
     ManualOrderForm: ({ endpoint, successMethod }: { endpoint: string; successMethod: string }) =>
-      createElement('div', { 'data-testid': 'manual-form', 'data-endpoint': endpoint, 'data-method': successMethod }),
+      createElement('div', {
+        'data-testid': 'manual-form',
+        'data-endpoint': endpoint,
+        'data-method': successMethod,
+      }),
   }
 })
 

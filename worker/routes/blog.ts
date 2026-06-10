@@ -25,7 +25,7 @@ function parseTags(raw: string): string[] {
 
 async function getBlogEnabled(db: ReturnType<typeof createDb>): Promise<boolean> {
   const configRows = await db.select().from(schema.storeConfig).all()
-  const kv = Object.fromEntries(configRows.map(r => [r.key, r.value]))
+  const kv = Object.fromEntries(configRows.map((r) => [r.key, r.value]))
   const raw = kv['blogEnabled']
   return raw !== undefined ? raw === 'true' : false
 }
@@ -48,19 +48,19 @@ app.get('/', async (c) => {
   if (cursorParam) {
     const [d, i] = cursorParam.split('|')
     cursorDate = d ?? null
-    cursorId   = i ?? null
+    cursorId = i ?? null
   }
 
   const rows = await db
     .select({
-      slug:        schema.blogPosts.slug,
-      title:       schema.blogPosts.title,
-      excerpt:     schema.blogPosts.excerpt,
-      coverR2Key:  schema.blogPosts.coverR2Key,
-      coverAlt:    schema.blogPosts.coverAlt,
-      tags:        schema.blogPosts.tags,
+      slug: schema.blogPosts.slug,
+      title: schema.blogPosts.title,
+      excerpt: schema.blogPosts.excerpt,
+      coverR2Key: schema.blogPosts.coverR2Key,
+      coverAlt: schema.blogPosts.coverAlt,
+      tags: schema.blogPosts.tags,
       publishedAt: schema.blogPosts.publishedAt,
-      id:          schema.blogPosts.id,
+      id: schema.blogPosts.id,
     })
     .from(schema.blogPosts)
     .where(
@@ -83,7 +83,7 @@ app.get('/', async (c) => {
   const last = items[items.length - 1]
   const nextCursor = hasMore && last ? `${last.publishedAt}|${last.id}` : null
 
-  const posts = items.map(r => ({
+  const posts = items.map((r) => ({
     ...r,
     tags: parseTags(r.tags),
     publishedAt: r.publishedAt ?? '',

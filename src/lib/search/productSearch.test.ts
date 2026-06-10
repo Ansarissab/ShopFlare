@@ -1,12 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import type { ProductWithVariants } from '@/lib/types/product'
 import type { CategoryNode } from '@/lib/types/category'
-import {
-  buildProductFuse,
-  collectDescendantIds,
-  filterProducts,
-  paginate,
-} from './productSearch'
+import { buildProductFuse, collectDescendantIds, filterProducts, paginate } from './productSearch'
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
@@ -54,10 +49,7 @@ describe('collectDescendantIds', () => {
 
   it('handles undefined children while walking past a non-target node (?? [] in walk)', () => {
     // First node has no children and is not the target → walk must recurse into []
-    const sparse = [
-      { id: 'a' } as unknown as CategoryNode,
-      mkNode('b', [mkNode('b-child')]),
-    ]
+    const sparse = [{ id: 'a' } as unknown as CategoryNode, mkNode('b', [mkNode('b-child')])]
     expect(collectDescendantIds(sparse, 'b')).toEqual(new Set(['b', 'b-child']))
   })
 })

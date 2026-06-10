@@ -8,14 +8,21 @@ type ShopFlareFixtures = {
 }
 
 export const test = base.extend<ShopFlareFixtures>({
-  consoleErrors: [async ({ page }, use) => {
-    const errors: string[] = []
-    page.on('console', msg => { if (msg.type() === 'error') errors.push(msg.text()) })
-    page.on('pageerror', err => errors.push(String(err)))
-    await use(errors)
-    const real = errors.filter(e => !e.includes('favicon') && !e.includes('404') && !e.includes('ERR_ABORTED'))
-    if (real.length > 0) throw new Error('Console errors: ' + real.join('; '))
-  }, { auto: true }],
+  consoleErrors: [
+    async ({ page }, use) => {
+      const errors: string[] = []
+      page.on('console', (msg) => {
+        if (msg.type() === 'error') errors.push(msg.text())
+      })
+      page.on('pageerror', (err) => errors.push(String(err)))
+      await use(errors)
+      const real = errors.filter(
+        (e) => !e.includes('favicon') && !e.includes('404') && !e.includes('ERR_ABORTED'),
+      )
+      if (real.length > 0) throw new Error('Console errors: ' + real.join('; '))
+    },
+    { auto: true },
+  ],
 
   checkA11y: async ({}, use) => {
     await use(async (page) => {
@@ -25,9 +32,11 @@ export const test = base.extend<ShopFlareFixtures>({
         // contrast is the merchant's choice, not a fixed app a11y defect.
         .exclude('[data-color-preview]')
         .analyze()
-      const critical = results.violations.filter(v => v.impact === 'serious' || v.impact === 'critical')
+      const critical = results.violations.filter(
+        (v) => v.impact === 'serious' || v.impact === 'critical',
+      )
       if (critical.length > 0) {
-        throw new Error('A11y violations: ' + critical.map(v => v.description).join('; '))
+        throw new Error('A11y violations: ' + critical.map((v) => v.description).join('; '))
       }
     })
   },

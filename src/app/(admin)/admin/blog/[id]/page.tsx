@@ -29,11 +29,7 @@ function deriveSlug(title: string): string {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function BlogEditorPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
+export default function BlogEditorPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = React.use(params)
   const isNew = id === 'new'
   const router = useRouter()
@@ -42,21 +38,21 @@ export default function BlogEditorPage({
   const [loading, setLoading] = useState(!isNew)
 
   // ── form fields ──
-  const [title, setTitle]       = useState('')
-  const [slug, setSlug]         = useState('')
-  const [excerpt, setExcerpt]   = useState('')
-  const [tags, setTags]         = useState('')          // comma-separated string
+  const [title, setTitle] = useState('')
+  const [slug, setSlug] = useState('')
+  const [excerpt, setExcerpt] = useState('')
+  const [tags, setTags] = useState('') // comma-separated string
   const [bodyHtml, setBodyHtml] = useState('')
   const [coverR2Key, setCoverR2Key] = useState<string | null>(null)
   const [coverAlt, setCoverAlt] = useState('')
-  const [status, setStatus]     = useState<'draft' | 'published'>('draft')
+  const [status, setStatus] = useState<'draft' | 'published'>('draft')
   const [publishedAt, setPublishedAt] = useState<string | null>(null)
 
   // ── derived UI state ──
-  const [slugTouched, setSlugTouched] = useState(false)   // user manually edited slug
-  const [saving, setSaving]           = useState(false)
-  const [publishing, setPublishing]   = useState(false)
-  const [slugError, setSlugError]     = useState<string | undefined>()
+  const [slugTouched, setSlugTouched] = useState(false) // user manually edited slug
+  const [saving, setSaving] = useState(false)
+  const [publishing, setPublishing] = useState(false)
+  const [slugError, setSlugError] = useState<string | undefined>()
 
   // ── load existing post ──
   useEffect(() => {
@@ -74,11 +70,17 @@ export default function BlogEditorPage({
         setCoverAlt(post.coverAlt ?? '')
         setStatus(post.status)
         setPublishedAt(post.publishedAt ?? null)
-        setSlugTouched(true)  // existing slug — treat as manually set
+        setSlugTouched(true) // existing slug — treat as manually set
       })
-      .catch(() => { if (!cancelled) toast.error(en.errors.networkError) })
-      .finally(() => { if (!cancelled) setLoading(false) })
-    return () => { cancelled = true }
+      .catch(() => {
+        if (!cancelled) toast.error(en.errors.networkError)
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
   }, [id, isNew])
 
   // ── auto-derive slug from title ──
@@ -168,9 +170,7 @@ export default function BlogEditorPage({
   }
 
   // ── cover image items for ImageUpload ──
-  const coverImages = coverR2Key
-    ? [{ id: coverR2Key, url: `${WORKER_URL}/cdn/${coverR2Key}` }]
-    : []
+  const coverImages = coverR2Key ? [{ id: coverR2Key, url: `${WORKER_URL}/cdn/${coverR2Key}` }] : []
 
   // ── editor title ──
   const pageTitle = isNew ? en.admin.addPost : title || en.admin.blog
@@ -193,15 +193,9 @@ export default function BlogEditorPage({
               disabled={publishing || saving}
               onClick={handleTogglePublish}
             >
-              {status === 'published'
-                ? en.admin.blogEditorUnpublish
-                : en.admin.blogEditorPublish}
+              {status === 'published' ? en.admin.blogEditorUnpublish : en.admin.blogEditorPublish}
             </Button>
-            <Button
-              size="sm"
-              disabled={saving || publishing}
-              onClick={handleSave}
-            >
+            <Button size="sm" disabled={saving || publishing} onClick={handleSave}>
               {saving ? en.admin.blogEditorSaving : en.admin.blogEditorSave}
             </Button>
           </div>
@@ -229,28 +223,18 @@ export default function BlogEditorPage({
           </FormField>
 
           {/* Slug */}
-          <FormField
-            label={en.admin.blogEditorSlug}
-            htmlFor="blog-slug"
-            error={slugError}
-          >
+          <FormField label={en.admin.blogEditorSlug} htmlFor="blog-slug" error={slugError}>
             <Input
               id="blog-slug"
               value={slug}
               onChange={(e) => handleSlugChange(e.target.value)}
               placeholder="my-post-slug"
             />
-            <p className="text-xs text-muted-foreground">
-              {en.admin.blogEditorSlugHint}
-            </p>
+            <p className="text-xs text-muted-foreground">{en.admin.blogEditorSlugHint}</p>
           </FormField>
 
           {/* Excerpt */}
-          <FormField
-            label={en.admin.blogEditorExcerpt}
-            htmlFor="blog-excerpt"
-            optional
-          >
+          <FormField label={en.admin.blogEditorExcerpt} htmlFor="blog-excerpt" optional>
             <Textarea
               id="blog-excerpt"
               rows={3}
@@ -258,26 +242,18 @@ export default function BlogEditorPage({
               onChange={(e) => setExcerpt(e.target.value)}
               placeholder={en.admin.blogEditorExcerpt}
             />
-            <p className="text-xs text-muted-foreground">
-              {en.admin.blogEditorExcerptHint}
-            </p>
+            <p className="text-xs text-muted-foreground">{en.admin.blogEditorExcerptHint}</p>
           </FormField>
 
           {/* Tags */}
-          <FormField
-            label={en.admin.blogEditorTags}
-            htmlFor="blog-tags"
-            optional
-          >
+          <FormField label={en.admin.blogEditorTags} htmlFor="blog-tags" optional>
             <Input
               id="blog-tags"
               value={tags}
               onChange={(e) => setTags(e.target.value)}
               placeholder="tag1, tag2, tag3"
             />
-            <p className="text-xs text-muted-foreground">
-              {en.admin.blogEditorTagsHint}
-            </p>
+            <p className="text-xs text-muted-foreground">{en.admin.blogEditorTagsHint}</p>
           </FormField>
 
           {/* Cover image */}
@@ -321,15 +297,9 @@ export default function BlogEditorPage({
               disabled={publishing || saving}
               onClick={handleTogglePublish}
             >
-              {status === 'published'
-                ? en.admin.blogEditorUnpublish
-                : en.admin.blogEditorPublish}
+              {status === 'published' ? en.admin.blogEditorUnpublish : en.admin.blogEditorPublish}
             </Button>
-            <Button
-              size="sm"
-              disabled={saving || publishing}
-              onClick={handleSave}
-            >
+            <Button size="sm" disabled={saving || publishing} onClick={handleSave}>
               {saving ? en.admin.blogEditorSaving : en.admin.blogEditorSave}
             </Button>
           </div>

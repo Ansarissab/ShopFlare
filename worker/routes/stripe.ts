@@ -128,7 +128,11 @@ app.post('/checkout-session', async (c) => {
   // 5. Create Stripe Checkout session, passing orderId in metadata so the
   //    webhook can confirm the correct order row.
   try {
-    const lineItems: Array<{ price?: string; price_data?: { currency: string; unit_amount: number; product_data: { name: string } }; quantity: number }> = items.map((item) => ({
+    const lineItems: Array<{
+      price?: string
+      price_data?: { currency: string; unit_amount: number; product_data: { name: string } }
+      quantity: number
+    }> = items.map((item) => ({
       price: item.stripePriceId,
       quantity: item.quantity,
     }))
@@ -184,11 +188,7 @@ app.post('/webhook', async (c) => {
   // 3. Verify signature
   let event: ReturnType<typeof stripe.webhooks.constructEvent>
   try {
-    event = await stripe.webhooks.constructEventAsync(
-      rawBody,
-      sig,
-      c.env.STRIPE_WEBHOOK_SECRET,
-    )
+    event = await stripe.webhooks.constructEventAsync(rawBody, sig, c.env.STRIPE_WEBHOOK_SECRET)
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Webhook signature verification failed'
     return c.json({ error: message }, 400)
@@ -304,12 +304,7 @@ app.post('/webhook', async (c) => {
       const cancelRes = await db
         .update(schema.orders)
         .set({ status: 'cancelled', updatedAt: new Date().toISOString() })
-        .where(
-          and(
-            eq(schema.orders.id, orderId),
-            eq(schema.orders.status, 'pending'),
-          ),
-        )
+        .where(and(eq(schema.orders.id, orderId), eq(schema.orders.status, 'pending')))
 
       if ((cancelRes as unknown as D1Result).meta?.changes === 1) {
         // Return the stock + coupon quota reserved at checkout creation to the
@@ -323,7 +318,10 @@ app.post('/webhook', async (c) => {
         type: event.type,
       })
 
-      console.info('[stripe/webhook] pending order cancelled (session expired)', { orderId, sessionId: session.id })
+      console.info('[stripe/webhook] pending order cancelled (session expired)', {
+        orderId,
+        sessionId: session.id,
+      })
       break
     }
 

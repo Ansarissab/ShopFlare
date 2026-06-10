@@ -7,7 +7,11 @@ export function formatPrice(cents: number, currency: CurrencyCode = DEFAULT_CURR
   return `${symbol}${amount.toLocaleString('en', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`
 }
 
-export function calculateShipping(subtotalCents: number, flatRateCents: number, thresholdCents: number): number {
+export function calculateShipping(
+  subtotalCents: number,
+  flatRateCents: number,
+  thresholdCents: number,
+): number {
   if (thresholdCents > 0 && subtotalCents >= thresholdCents) return 0
   return flatRateCents
 }
@@ -16,9 +20,9 @@ export interface TaxCalculationInput {
   subtotalCents: number
   shippingCents: number
   discountCents: number
-  taxRate:       number
-  taxInclusive:  boolean
-  taxBasis:      string
+  taxRate: number
+  taxInclusive: boolean
+  taxBasis: string
 }
 
 export function calculateTax(input: TaxCalculationInput): number {
@@ -35,15 +39,15 @@ export function calculateTax(input: TaxCalculationInput): number {
       ? Math.max(0, subtotalCents - discountCents) + shippingCents
       : Math.max(0, subtotalCents - discountCents)
 
-  return Math.round(taxableBase * taxRate / 100)
+  return Math.round((taxableBase * taxRate) / 100)
 }
 
 export function calculateGrandTotal(
   subtotalCents: number,
   shippingCents: number,
   discountCents: number,
-  taxCents:      number,
-  taxInclusive:  boolean,
+  taxCents: number,
+  taxInclusive: boolean,
 ): number {
   if (taxInclusive) return Math.max(0, subtotalCents + shippingCents - discountCents)
   return Math.max(0, subtotalCents + shippingCents - discountCents + taxCents)
@@ -67,10 +71,11 @@ export function buildProductMaps(variants: VariantWithDetails[]): {
  * Returns the min/max priceCents across active, in-stock sizes.
  * Returns null for both if no eligible sizes exist.
  */
-export function getPriceRange(sizes: SizeOption[]): { minPrice: number | null; maxPrice: number | null } {
-  const prices = sizes
-    .filter(s => s.active && s.stock !== 0)
-    .map(s => s.priceCents)
+export function getPriceRange(sizes: SizeOption[]): {
+  minPrice: number | null
+  maxPrice: number | null
+} {
+  const prices = sizes.filter((s) => s.active && s.stock !== 0).map((s) => s.priceCents)
   if (prices.length === 0) return { minPrice: null, maxPrice: null }
   return {
     minPrice: Math.min(...prices),

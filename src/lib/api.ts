@@ -60,17 +60,29 @@ const ADMIN_TOKEN_KEY = 'shopflare_admin_token'
 
 export function getAdminToken(): string | null {
   if (typeof window === 'undefined') return null
-  try { return localStorage.getItem(ADMIN_TOKEN_KEY) } catch { return null }
+  try {
+    return localStorage.getItem(ADMIN_TOKEN_KEY)
+  } catch {
+    return null
+  }
 }
 
 export function setAdminToken(token: string): void {
   if (typeof window === 'undefined') return
-  try { localStorage.setItem(ADMIN_TOKEN_KEY, token) } catch { /* storage disabled */ }
+  try {
+    localStorage.setItem(ADMIN_TOKEN_KEY, token)
+  } catch {
+    /* storage disabled */
+  }
 }
 
 export function clearAdminToken(): void {
   if (typeof window === 'undefined') return
-  try { localStorage.removeItem(ADMIN_TOKEN_KEY) } catch { /* storage disabled */ }
+  try {
+    localStorage.removeItem(ADMIN_TOKEN_KEY)
+  } catch {
+    /* storage disabled */
+  }
 }
 
 // Protected admin endpoints — everything under /api/admin except the public login.
@@ -107,10 +119,16 @@ async function request<T>(path: string, init?: RequestInit & { signal?: AbortSig
     }
     const raw = await res.text()
     let parsed: unknown
-    try { parsed = JSON.parse(raw) } catch { parsed = undefined }
+    try {
+      parsed = JSON.parse(raw)
+    } catch {
+      parsed = undefined
+    }
     const msg =
       parsed && typeof parsed === 'object' && parsed !== null
-        ? ((parsed as Record<string, unknown>).error ?? (parsed as Record<string, unknown>).message ?? `HTTP ${res.status}`)
+        ? ((parsed as Record<string, unknown>).error ??
+          (parsed as Record<string, unknown>).message ??
+          `HTTP ${res.status}`)
         : `HTTP ${res.status}`
     throw new ApiError(res.status, String(msg), parsed)
   }
@@ -158,7 +176,12 @@ export function apiPatch<T>(path: string, body?: unknown, opts?: ApiOptions): Pr
 // Multipart upload (FormData) — used for R2 image uploads. The browser sets the
 // multipart Content-Type/boundary itself, so we pass the FormData straight through.
 export function apiUpload<T>(path: string, form: FormData, opts?: ApiOptions): Promise<T> {
-  return request<T>(path, { method: 'POST', body: form, headers: opts?.headers, signal: opts?.signal })
+  return request<T>(path, {
+    method: 'POST',
+    body: form,
+    headers: opts?.headers,
+    signal: opts?.signal,
+  })
 }
 
 // In-flight dedup — prevents burst fetches when user quickly hovers many cards.
@@ -190,7 +213,11 @@ async function openOfflineDB(): Promise<IDBDatabase> {
   })
 }
 
-async function enqueueOfflineRequest(url: string, body: unknown, headers?: Record<string, string>): Promise<void> {
+async function enqueueOfflineRequest(
+  url: string,
+  body: unknown,
+  headers?: Record<string, string>,
+): Promise<void> {
   const db = await openOfflineDB()
   const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`
   const entry = { id, url: `${WORKER_URL}${url}`, body: JSON.stringify(body), headers }
@@ -201,9 +228,13 @@ async function enqueueOfflineRequest(url: string, body: unknown, headers?: Recor
     tx.oncomplete = () => {
       // Request background sync if supported
       if ('serviceWorker' in navigator && 'SyncManager' in window) {
-        navigator.serviceWorker.ready.then((reg) => {
-          return (reg as ServiceWorkerRegistration & { sync?: { register(tag: string): Promise<void> } }).sync?.register('offline-post-queue')
-        }).catch(() => {})
+        navigator.serviceWorker.ready
+          .then((reg) => {
+            return (
+              reg as ServiceWorkerRegistration & { sync?: { register(tag: string): Promise<void> } }
+            ).sync?.register('offline-post-queue')
+          })
+          .catch(() => {})
       }
       resolve()
     }
@@ -219,13 +250,17 @@ export async function drainOfflineQueue(): Promise<void> {
   if (typeof window === 'undefined') return
   try {
     const db = await openOfflineDB()
-    const items: Array<{ id: string; url: string; body: string; headers?: Record<string, string> }> =
-      await new Promise((resolve, reject) => {
-        const tx = db.transaction('offline_queue', 'readonly')
-        const req = tx.objectStore('offline_queue').getAll()
-        req.onsuccess = () => resolve(req.result as typeof items)
-        req.onerror = () => reject(req.error)
-      })
+    const items: Array<{
+      id: string
+      url: string
+      body: string
+      headers?: Record<string, string>
+    }> = await new Promise((resolve, reject) => {
+      const tx = db.transaction('offline_queue', 'readonly')
+      const req = tx.objectStore('offline_queue').getAll()
+      req.onsuccess = () => resolve(req.result as typeof items)
+      req.onerror = () => reject(req.error)
+    })
 
     for (const item of items) {
       try {
@@ -254,7 +289,9 @@ export async function drainOfflineQueue(): Promise<void> {
 // Registered once per page session; drains the IDB queue on reconnect for
 // browsers that don't support Background Sync (e.g. iOS Safari).
 if (typeof window !== 'undefined') {
-  window.addEventListener('online', () => { void drainOfflineQueue() })
+  window.addEventListener('online', () => {
+    void drainOfflineQueue()
+  })
 }
 
 /**
@@ -262,7 +299,11 @@ if (typeof window !== 'undefined') {
  * replayed by the SW Background Sync when connectivity returns.
  * Returns null when queued (not sent immediately).
  */
-export async function apiPostQueued<T>(path: string, body?: unknown, opts?: ApiOptions): Promise<T | null> {
+export async function apiPostQueued<T>(
+  path: string,
+  body?: unknown,
+  opts?: ApiOptions,
+): Promise<T | null> {
   if (typeof window !== 'undefined' && !navigator.onLine) {
     await enqueueOfflineRequest(path, body, opts?.headers)
     return null

@@ -51,12 +51,12 @@ export function CategoryForm({ category, parentOptions, onSuccess }: CategoryFor
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(createCategorySchema) as any,
     defaultValues: {
-      name:        category?.name        ?? '',
-      slug:        category?.slug        ?? '',
+      name: category?.name ?? '',
+      slug: category?.slug ?? '',
       description: category?.description ?? '',
-      parentId:    category?.parentId    ?? null,
-      sortOrder:   category?.sortOrder   ?? 0,
-      active:      category?.active      ?? true,
+      parentId: category?.parentId ?? null,
+      sortOrder: category?.sortOrder ?? 0,
+      active: category?.active ?? true,
     },
   })
 
@@ -73,7 +73,7 @@ export function CategoryForm({ category, parentOptions, onSuccess }: CategoryFor
         // No-op here — handled in onChange below
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -117,9 +117,8 @@ export function CategoryForm({ category, parentOptions, onSuccess }: CategoryFor
   }
 
   // Exclude self from parent options on edit
-  const filteredParentOptions = isEdit && category
-    ? parentOptions.filter((c) => c.id !== category.id)
-    : parentOptions
+  const filteredParentOptions =
+    isEdit && category ? parentOptions.filter((c) => c.id !== category.id) : parentOptions
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 max-w-2xl">
@@ -163,7 +162,11 @@ export function CategoryForm({ category, parentOptions, onSuccess }: CategoryFor
         />
       </FormField>
 
-      <FormField label={en.admin.categoryParent} htmlFor="cat-parent" error={errors.parentId?.message}>
+      <FormField
+        label={en.admin.categoryParent}
+        htmlFor="cat-parent"
+        error={errors.parentId?.message}
+      >
         <Select
           defaultValue={category?.parentId ?? '__none__'}
           onValueChange={(val) =>
@@ -184,7 +187,11 @@ export function CategoryForm({ category, parentOptions, onSuccess }: CategoryFor
         </Select>
       </FormField>
 
-      <FormField label={en.admin.categorySortOrder} htmlFor="cat-sort" error={errors.sortOrder?.message}>
+      <FormField
+        label={en.admin.categorySortOrder}
+        htmlFor="cat-sort"
+        error={errors.sortOrder?.message}
+      >
         <Input
           id="cat-sort"
           type="number"
@@ -208,11 +215,7 @@ export function CategoryForm({ category, parentOptions, onSuccess }: CategoryFor
 
       <div className="pt-2">
         <Button type="submit" size="sm" disabled={isSubmitting}>
-          {isSubmitting
-            ? en.admin.saving
-            : isEdit
-              ? en.admin.editCategory
-              : en.admin.addCategory}
+          {isSubmitting ? en.admin.saving : isEdit ? en.admin.editCategory : en.admin.addCategory}
         </Button>
       </div>
     </form>

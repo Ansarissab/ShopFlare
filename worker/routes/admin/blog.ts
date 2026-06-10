@@ -54,7 +54,7 @@ app.get('/', async (c) => {
     .orderBy(desc(schema.blogPosts.createdAt))
     .all()
 
-  const posts = rows.map(r => ({ ...r, tags: parseTags(r.tags) }))
+  const posts = rows.map((r) => ({ ...r, tags: parseTags(r.tags) }))
   return c.json({ posts })
 })
 
@@ -92,16 +92,16 @@ app.post('/', async (c) => {
   await db.insert(schema.blogPosts).values({
     id,
     slug,
-    title:      parsed.data.title,
-    bodyHtml:   sanitizeHtml(parsed.data.bodyHtml),
-    excerpt:    parsed.data.excerpt,
+    title: parsed.data.title,
+    bodyHtml: sanitizeHtml(parsed.data.bodyHtml),
+    excerpt: parsed.data.excerpt,
     coverR2Key: parsed.data.coverR2Key,
-    coverAlt:   parsed.data.coverAlt,
-    tags:       JSON.stringify(parsed.data.tags),
-    status:     parsed.data.status,
+    coverAlt: parsed.data.coverAlt,
+    tags: JSON.stringify(parsed.data.tags),
+    status: parsed.data.status,
     publishedAt,
-    createdAt:  now,
-    updatedAt:  now,
+    createdAt: now,
+    updatedAt: now,
   })
 
   await bumpDataVersion(db)
@@ -114,11 +114,7 @@ app.get('/:id', async (c) => {
   const id = c.req.param('id')
   const db = createDb(c.env.DB)
 
-  const [row] = await db
-    .select()
-    .from(schema.blogPosts)
-    .where(eq(schema.blogPosts.id, id))
-    .limit(1)
+  const [row] = await db.select().from(schema.blogPosts).where(eq(schema.blogPosts.id, id)).limit(1)
 
   if (!row) return c.notFound()
   return c.json({ ...row, tags: parseTags(row.tags) })
@@ -162,19 +158,19 @@ app.patch('/:id', async (c) => {
   // Stamp publishedAt when first transitioning to published
   let publishedAt = existing.publishedAt
   if (d.status === 'published' && !publishedAt) publishedAt = now
-  if (d.status === 'draft') publishedAt = existing.publishedAt  // preserve original
+  if (d.status === 'draft') publishedAt = existing.publishedAt // preserve original
 
   await db
     .update(schema.blogPosts)
     .set({
-      ...(d.slug       !== undefined ? { slug: d.slug }               : {}),
-      ...(d.title      !== undefined ? { title: d.title }             : {}),
-      ...(d.bodyHtml   !== undefined ? { bodyHtml: sanitizeHtml(d.bodyHtml) } : {}),
-      ...(d.excerpt    !== undefined ? { excerpt: d.excerpt }         : {}),
-      ...(d.coverR2Key !== undefined ? { coverR2Key: d.coverR2Key }   : {}),
-      ...(d.coverAlt   !== undefined ? { coverAlt: d.coverAlt }       : {}),
-      ...(d.tags       !== undefined ? { tags: JSON.stringify(d.tags) } : {}),
-      ...(d.status     !== undefined ? { status: d.status }           : {}),
+      ...(d.slug !== undefined ? { slug: d.slug } : {}),
+      ...(d.title !== undefined ? { title: d.title } : {}),
+      ...(d.bodyHtml !== undefined ? { bodyHtml: sanitizeHtml(d.bodyHtml) } : {}),
+      ...(d.excerpt !== undefined ? { excerpt: d.excerpt } : {}),
+      ...(d.coverR2Key !== undefined ? { coverR2Key: d.coverR2Key } : {}),
+      ...(d.coverAlt !== undefined ? { coverAlt: d.coverAlt } : {}),
+      ...(d.tags !== undefined ? { tags: JSON.stringify(d.tags) } : {}),
+      ...(d.status !== undefined ? { status: d.status } : {}),
       publishedAt,
       updatedAt: now,
     })
@@ -263,7 +259,11 @@ app.post('/image', async (c) => {
   if (!file || !(file instanceof File)) {
     return c.json({ error: 'Missing file field' }, 400)
   }
-  if (!(ALLOWED_IMAGE_TYPES as readonly string[]).includes(file.type as typeof ALLOWED_IMAGE_TYPES[number])) {
+  if (
+    !(ALLOWED_IMAGE_TYPES as readonly string[]).includes(
+      file.type as (typeof ALLOWED_IMAGE_TYPES)[number],
+    )
+  ) {
     return c.json({ error: 'Unsupported image type' }, 400)
   }
   if (file.size > MAX_IMAGE_BYTES) {

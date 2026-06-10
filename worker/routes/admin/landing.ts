@@ -33,25 +33,28 @@ app.get('/', async (c) => {
   ])
 
   const sections = Object.fromEntries(
-    LANDING_SECTION_KEYS.map(key => {
-      const row = sectionRows.find(r => r.sectionKey === key)
-      return [key, {
-        sectionKey: key as LandingSectionKey,
-        enabled:    row?.enabled ?? true,
-        heading:    row?.heading ?? null,
-        subtext:    row?.subtext ?? null,
-        bodyHtml:   row?.bodyHtml ?? null,
-        ctaText:    row?.ctaText ?? null,
-        ctaHref:    row?.ctaHref ?? null,
-        imageR2Key: row?.imageR2Key ?? null,
-        updatedAt:  row?.updatedAt ?? '',
-      }]
+    LANDING_SECTION_KEYS.map((key) => {
+      const row = sectionRows.find((r) => r.sectionKey === key)
+      return [
+        key,
+        {
+          sectionKey: key as LandingSectionKey,
+          enabled: row?.enabled ?? true,
+          heading: row?.heading ?? null,
+          subtext: row?.subtext ?? null,
+          bodyHtml: row?.bodyHtml ?? null,
+          ctaText: row?.ctaText ?? null,
+          ctaHref: row?.ctaHref ?? null,
+          imageR2Key: row?.imageR2Key ?? null,
+          updatedAt: row?.updatedAt ?? '',
+        },
+      ]
     }),
   )
 
   return c.json({
     sections,
-    featuredProductIds: featuredRows.map(r => r.productId),
+    featuredProductIds: featuredRows.map((r) => r.productId),
   })
 })
 
@@ -82,14 +85,14 @@ app.put('/sections/:key', async (c) => {
 
   const row = {
     sectionKey,
-    enabled:    data.enabled ?? true,
-    heading:    data.heading    ?? null,
-    subtext:    data.subtext    ?? null,
-    bodyHtml:   data.bodyHtml   ?? null,
-    ctaText:    data.ctaText    ?? null,
-    ctaHref:    data.ctaHref    ?? null,
+    enabled: data.enabled ?? true,
+    heading: data.heading ?? null,
+    subtext: data.subtext ?? null,
+    bodyHtml: data.bodyHtml ?? null,
+    ctaText: data.ctaText ?? null,
+    ctaHref: data.ctaHref ?? null,
     imageR2Key: data.imageR2Key ?? null,
-    updatedAt:  now,
+    updatedAt: now,
   }
 
   await db
@@ -120,9 +123,9 @@ app.put('/featured', async (c) => {
   await db.delete(schema.featuredProducts).execute()
 
   if (parsed.data.productIds.length > 0) {
-    await db.insert(schema.featuredProducts).values(
-      parsed.data.productIds.map((productId, i) => ({ productId, sortOrder: i })),
-    )
+    await db
+      .insert(schema.featuredProducts)
+      .values(parsed.data.productIds.map((productId, i) => ({ productId, sortOrder: i })))
   }
 
   await bumpDataVersion(db)

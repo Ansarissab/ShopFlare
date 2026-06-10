@@ -116,20 +116,32 @@ describe('createSizeOptionSchema', () => {
   })
 
   it('accepts priceCents of 0', () => {
-    expect(createSizeOptionSchema.safeParse({ variantId: 'v1', size: 'M', priceCents: 0 }).success).toBe(true)
+    expect(
+      createSizeOptionSchema.safeParse({ variantId: 'v1', size: 'M', priceCents: 0 }).success,
+    ).toBe(true)
   })
 
   it('rejects negative priceCents', () => {
-    expect(createSizeOptionSchema.safeParse({ variantId: 'v1', size: 'M', priceCents: -1 }).success).toBe(false)
+    expect(
+      createSizeOptionSchema.safeParse({ variantId: 'v1', size: 'M', priceCents: -1 }).success,
+    ).toBe(false)
   })
 
   it('accepts stock of -1 (unlimited)', () => {
-    const r = createSizeOptionSchema.safeParse({ variantId: 'v1', size: 'M', priceCents: 100, stock: -1 })
+    const r = createSizeOptionSchema.safeParse({
+      variantId: 'v1',
+      size: 'M',
+      priceCents: 100,
+      stock: -1,
+    })
     expect(r.success).toBe(true)
   })
 
   it('rejects stock below -1', () => {
-    expect(createSizeOptionSchema.safeParse({ variantId: 'v1', size: 'M', priceCents: 100, stock: -2 }).success).toBe(false)
+    expect(
+      createSizeOptionSchema.safeParse({ variantId: 'v1', size: 'M', priceCents: 100, stock: -2 })
+        .success,
+    ).toBe(false)
   })
 })
 

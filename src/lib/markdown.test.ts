@@ -14,23 +14,43 @@ const mockConfig = {
   flatShippingRateCents: 0,
 } as unknown as StoreConfig
 
-function makeProduct(opts: {
-  name?: string
-  description?: string | null
-  stock?: number
-  minPrice?: number
-  maxPrice?: number
-  active?: boolean
-} = {}): ProductWithVariants {
+function makeProduct(
+  opts: {
+    name?: string
+    description?: string | null
+    stock?: number
+    minPrice?: number
+    maxPrice?: number
+    active?: boolean
+  } = {},
+): ProductWithVariants {
   const stock = opts.stock ?? 10
   const minPrice = opts.minPrice ?? 2000
   const maxPrice = opts.maxPrice ?? minPrice
 
   const sizes: ProductWithVariants['variants'][0]['sizes'] = [
-    { id: 's1', variantId: 'v1', label: 'M', priceCents: minPrice, stock, active: true, sku: null, sortOrder: 0 } as unknown as ProductWithVariants['variants'][0]['sizes'][0],
+    {
+      id: 's1',
+      variantId: 'v1',
+      label: 'M',
+      priceCents: minPrice,
+      stock,
+      active: true,
+      sku: null,
+      sortOrder: 0,
+    } as unknown as ProductWithVariants['variants'][0]['sizes'][0],
   ]
   if (maxPrice !== minPrice) {
-    sizes.push({ id: 's2', variantId: 'v1', label: 'XL', priceCents: maxPrice, stock, active: true, sku: null, sortOrder: 1 } as unknown as ProductWithVariants['variants'][0]['sizes'][0])
+    sizes.push({
+      id: 's2',
+      variantId: 'v1',
+      label: 'XL',
+      priceCents: maxPrice,
+      stock,
+      active: true,
+      sku: null,
+      sortOrder: 1,
+    } as unknown as ProductWithVariants['variants'][0]['sizes'][0])
   }
 
   return {
@@ -51,7 +71,15 @@ function makeProduct(opts: {
         label: 'Default',
         colorHex: null,
         sortOrder: 0,
-        images: [{ id: 'i1', variantId: 'v1', url: 'https://cdn.test/img.jpg', r2Key: 'key', sortOrder: 0 }],
+        images: [
+          {
+            id: 'i1',
+            variantId: 'v1',
+            url: 'https://cdn.test/img.jpg',
+            r2Key: 'key',
+            sortOrder: 0,
+          },
+        ],
         sizes,
       } as unknown as ProductWithVariants['variants'][0],
     ],
@@ -59,14 +87,16 @@ function makeProduct(opts: {
   }
 }
 
-function makeCategoryDetail(opts: {
-  name?: string
-  description?: string | null
-  productCount?: number
-} = {}): CategoryDetailResponse {
+function makeCategoryDetail(
+  opts: {
+    name?: string
+    description?: string | null
+    productCount?: number
+  } = {},
+): CategoryDetailResponse {
   const count = opts.productCount ?? 2
   const products: ProductWithVariants[] = Array.from({ length: count }, (_, i) =>
-    makeProduct({ name: `Product ${i + 1}` })
+    makeProduct({ name: `Product ${i + 1}` }),
   )
   return {
     category: {
@@ -86,11 +116,13 @@ function makeCategoryDetail(opts: {
   }
 }
 
-function makeStorePage(opts: {
-  title?: string
-  content?: string
-  updatedAt?: string
-} = {}): StorePage {
+function makeStorePage(
+  opts: {
+    title?: string
+    content?: string
+    updatedAt?: string
+  } = {},
+): StorePage {
   return {
     slug: 'shipping',
     title: opts.title ?? 'Shipping Policy',
@@ -108,7 +140,11 @@ describe('productToMarkdown', () => {
   })
 
   it('strips HTML from description', () => {
-    const md = productToMarkdown(makeProduct({ description: '<p>Great <b>shoes</b></p>' }), mockConfig, { siteUrl: '' })
+    const md = productToMarkdown(
+      makeProduct({ description: '<p>Great <b>shoes</b></p>' }),
+      mockConfig,
+      { siteUrl: '' },
+    )
     expect(md).toContain('Great shoes')
     expect(md).not.toContain('<p>')
     expect(md).not.toContain('<b>')
@@ -127,7 +163,9 @@ describe('productToMarkdown', () => {
   })
 
   it('shows price range when min !== max', () => {
-    const md = productToMarkdown(makeProduct({ minPrice: 1000, maxPrice: 3000 }), mockConfig, { siteUrl: '' })
+    const md = productToMarkdown(makeProduct({ minPrice: 1000, maxPrice: 3000 }), mockConfig, {
+      siteUrl: '',
+    })
     expect(md).toContain('USD 10.00 – USD 30.00')
   })
 
@@ -181,50 +219,68 @@ describe('productToMarkdown', () => {
 
 describe('categoryToMarkdown', () => {
   it('includes category name as h1', () => {
-    const md = categoryToMarkdown(makeCategoryDetail({ name: 'Sneakers' }), mockConfig, { siteUrl: '' })
+    const md = categoryToMarkdown(makeCategoryDetail({ name: 'Sneakers' }), mockConfig, {
+      siteUrl: '',
+    })
     expect(md).toContain('# Sneakers')
   })
 
   it('strips HTML from category description', () => {
-    const md = categoryToMarkdown(makeCategoryDetail({ description: '<b>Best shoes</b>' }), mockConfig, { siteUrl: '' })
+    const md = categoryToMarkdown(
+      makeCategoryDetail({ description: '<b>Best shoes</b>' }),
+      mockConfig,
+      { siteUrl: '' },
+    )
     expect(md).toContain('Best shoes')
     expect(md).not.toContain('<b>')
   })
 
   it('omits description when null', () => {
-    const md = categoryToMarkdown(makeCategoryDetail({ description: null }), mockConfig, { siteUrl: '' })
+    const md = categoryToMarkdown(makeCategoryDetail({ description: null }), mockConfig, {
+      siteUrl: '',
+    })
     expect(md).toContain('# ')
     expect(md).not.toContain('null')
   })
 
   it('shows product count', () => {
-    const md = categoryToMarkdown(makeCategoryDetail({ productCount: 3 }), mockConfig, { siteUrl: '' })
+    const md = categoryToMarkdown(makeCategoryDetail({ productCount: 3 }), mockConfig, {
+      siteUrl: '',
+    })
     expect(md).toContain('**Products:** 3')
   })
 
   it('lists products as markdown links when siteUrl provided', () => {
-    const md = categoryToMarkdown(makeCategoryDetail({ productCount: 2 }), mockConfig, { siteUrl: 'https://shop.test' })
+    const md = categoryToMarkdown(makeCategoryDetail({ productCount: 2 }), mockConfig, {
+      siteUrl: 'https://shop.test',
+    })
     expect(md).toContain('[Product 1](https://shop.test/product/p1)')
     expect(md).toContain('[Product 2](https://shop.test/product/p1)')
   })
 
   it('lists products as plain names when siteUrl is empty', () => {
-    const md = categoryToMarkdown(makeCategoryDetail({ productCount: 2 }), mockConfig, { siteUrl: '' })
+    const md = categoryToMarkdown(makeCategoryDetail({ productCount: 2 }), mockConfig, {
+      siteUrl: '',
+    })
     expect(md).toContain('- Product 1')
     expect(md).not.toContain('](')
   })
 
   it('caps product listing at 20 items', () => {
-    const md = categoryToMarkdown(makeCategoryDetail({ productCount: 25 }), mockConfig, { siteUrl: '' })
+    const md = categoryToMarkdown(makeCategoryDetail({ productCount: 25 }), mockConfig, {
+      siteUrl: '',
+    })
     // Only first 20 product lines should appear; product 21 should not
-    const lines = md.split('\n').filter(l => l.startsWith('- '))
+    const lines = md.split('\n').filter((l) => l.startsWith('- '))
     expect(lines.length).toBe(20)
   })
 
   it('handles empty product list', () => {
-    const md = categoryToMarkdown(makeCategoryDetail({ productCount: 0 }), mockConfig, { siteUrl: '' })
+    const md = categoryToMarkdown(makeCategoryDetail({ productCount: 0 }), mockConfig, {
+      siteUrl: '',
+    })
     expect(md).toContain('**Products:** 0')
-    const lines = md.split('\n').filter(l => l.startsWith('- '))
+    const lines = md.split('\n').filter((l) => l.startsWith('- '))
     expect(lines.length).toBe(0)
   })
 })
@@ -266,6 +322,6 @@ describe('policyToMarkdown', () => {
     // content is falsy — should not add a blank body line
     const lines = md.split('\n').filter(Boolean)
     // only h1 + updatedAt expected
-    expect(lines.every(l => !l.startsWith('<'))).toBe(true)
+    expect(lines.every((l) => !l.startsWith('<'))).toBe(true)
   })
 })

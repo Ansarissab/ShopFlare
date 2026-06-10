@@ -45,7 +45,10 @@ export default async function ProductDetailPage({ params }: PageProps) {
   const [item, config, reviewsData] = await Promise.all([
     fetchFromWorker<ProductWithVariants>(`/api/products/${slug}`, { revalidate: 60 }),
     fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: 300 }),
-    fetchFromWorker<{ reviews: unknown[]; average: number; count: number }>(`/api/reviews/product/${slug}`, { revalidate: 120 }),
+    fetchFromWorker<{ reviews: unknown[]; average: number; count: number }>(
+      `/api/reviews/product/${slug}`,
+      { revalidate: 120 },
+    ),
   ])
 
   if (!item) notFound()
@@ -63,11 +66,14 @@ export default async function ProductDetailPage({ params }: PageProps) {
     currency: config?.currency,
     storeUrl,
     storeName: config?.storeName,
-    rating: reviewsData && reviewsData.count > 0
-      ? { average: reviewsData.average, count: reviewsData.count }
-      : null,
+    rating:
+      reviewsData && reviewsData.count > 0
+        ? { average: reviewsData.average, count: reviewsData.count }
+        : null,
   })
-  if (siteUrl) { productLd['@id'] = `${siteUrl}/product/${slug}#product` }
+  if (siteUrl) {
+    productLd['@id'] = `${siteUrl}/product/${slug}#product`
+  }
   if (siteUrl && productLd.brand) {
     ;(productLd.brand as Record<string, unknown>)['@id'] = `${siteUrl}#org`
   }
@@ -78,7 +84,10 @@ export default async function ProductDetailPage({ params }: PageProps) {
       <JsonLd data={productLd} />
 
       <nav className="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
-        <Link href={catalogHref(config?.landingEnabled)} className="hover:text-foreground transition-colors">
+        <Link
+          href={catalogHref(config?.landingEnabled)}
+          className="hover:text-foreground transition-colors"
+        >
           {en.store.allProducts}
         </Link>
         <span aria-hidden>/</span>

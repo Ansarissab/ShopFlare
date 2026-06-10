@@ -23,14 +23,28 @@ const post = (path: string, body: unknown) =>
 // ─── Cleanup ──────────────────────────────────────────────────────────────────
 
 const TABLES = [
-  'coupon_uses', 'reviews', 'notify_me', 'order_items', 'orders', 'coupons',
-  'size_options', 'product_images', 'variants', 'products', 'store_config',
-  'stripe_events', 'push_subscriptions', 'analytics_daily', 'carts',
+  'coupon_uses',
+  'reviews',
+  'notify_me',
+  'order_items',
+  'orders',
+  'coupons',
+  'size_options',
+  'product_images',
+  'variants',
+  'products',
+  'store_config',
+  'stripe_events',
+  'push_subscriptions',
+  'analytics_daily',
+  'carts',
 ]
 beforeEach(async () => {
   for (const t of TABLES) await env.DB.prepare(`DELETE FROM ${t}`).run()
   // Also clear customer push subscriptions if table exists
-  await env.DB.prepare('DELETE FROM customer_push_subscriptions').run().catch(() => {})
+  await env.DB.prepare('DELETE FROM customer_push_subscriptions')
+    .run()
+    .catch(() => {})
 })
 
 // ─── Shared subscription fixture ─────────────────────────────────────────────
@@ -52,25 +66,31 @@ const CUSTOMER_SUB = {
 async function seedOrder(orderNumber = 'ORD-PUSH0001') {
   const now = new Date().toISOString()
   await db().insert(schema.products).values({ id: 'pp1', name: 'Push Product', active: true })
-  await db().insert(schema.variants).values({ id: 'pv1', productId: 'pp1', label: 'Black', sortOrder: 0 })
-  await db().insert(schema.sizeOptions).values({ id: 'ps1', variantId: 'pv1', size: 'M', priceCents: 1000, stock: 5, active: true })
+  await db()
+    .insert(schema.variants)
+    .values({ id: 'pv1', productId: 'pp1', label: 'Black', sortOrder: 0 })
+  await db()
+    .insert(schema.sizeOptions)
+    .values({ id: 'ps1', variantId: 'pv1', size: 'M', priceCents: 1000, stock: 5, active: true })
 
-  await db().insert(schema.orders).values({
-    id: `pord-${Date.now()}`,
-    orderNumber,
-    status: 'pending',
-    paymentMethod: 'cod',
-    subtotalCents: 1000,
-    shippingCents: 0,
-    discountCents: 0,
-    totalCents: 1000,
-    customerName: 'Push User',
-    customerEmail: 'push@example.com',
-    customerPhone: '+923000000001',
-    shippingAddress: '{}',
-    createdAt: now,
-    updatedAt: now,
-  })
+  await db()
+    .insert(schema.orders)
+    .values({
+      id: `pord-${Date.now()}`,
+      orderNumber,
+      status: 'pending',
+      paymentMethod: 'cod',
+      subtotalCents: 1000,
+      shippingCents: 0,
+      discountCents: 0,
+      totalCents: 1000,
+      customerName: 'Push User',
+      customerEmail: 'push@example.com',
+      customerPhone: '+923000000001',
+      shippingAddress: '{}',
+      createdAt: now,
+      updatedAt: now,
+    })
   return orderNumber
 }
 
@@ -121,7 +141,10 @@ describe('POST /api/admin/push/subscribe', () => {
   })
 
   it('returns 400 for missing auth (400)', async () => {
-    const res = await post('/api/admin/push/subscribe', { endpoint: 'https://example.com/push', p256dh: 'b' })
+    const res = await post('/api/admin/push/subscribe', {
+      endpoint: 'https://example.com/push',
+      p256dh: 'b',
+    })
     expect(res.status).toBe(400)
   })
 })
@@ -144,7 +167,9 @@ describe('POST /api/admin/push/unsubscribe', () => {
   })
 
   it('is idempotent: unsubscribing non-existent endpoint still returns ok', async () => {
-    const res = await post('/api/admin/push/unsubscribe', { endpoint: 'https://nonexistent.endpoint/push' })
+    const res = await post('/api/admin/push/unsubscribe', {
+      endpoint: 'https://nonexistent.endpoint/push',
+    })
     expect(res.status).toBe(200)
     const body = (await res.json()) as { ok: boolean }
     expect(body.ok).toBe(true)

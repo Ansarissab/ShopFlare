@@ -72,8 +72,7 @@ app.post('/', async (c) => {
   const contactDigits = digitsOnly(contact)
 
   const emailMatch =
-    order.customerEmail !== null &&
-    order.customerEmail.toLowerCase() === contactLower
+    order.customerEmail !== null && order.customerEmail.toLowerCase() === contactLower
 
   const phoneMatch =
     contactDigits.length > 0 &&
@@ -87,12 +86,7 @@ app.post('/', async (c) => {
   const orderItem = await db
     .select({ id: schema.orderItems.id })
     .from(schema.orderItems)
-    .where(
-      and(
-        eq(schema.orderItems.orderId, order.id),
-        eq(schema.orderItems.productId, productId),
-      ),
-    )
+    .where(and(eq(schema.orderItems.orderId, order.id), eq(schema.orderItems.productId, productId)))
     .get()
 
   if (!orderItem) {
@@ -103,12 +97,7 @@ app.post('/', async (c) => {
   const duplicate = await db
     .select({ id: schema.reviews.id })
     .from(schema.reviews)
-    .where(
-      and(
-        eq(schema.reviews.orderId, order.id),
-        eq(schema.reviews.productId, productId),
-      ),
-    )
+    .where(and(eq(schema.reviews.orderId, order.id), eq(schema.reviews.productId, productId)))
     .get()
 
   if (duplicate) {
@@ -151,20 +140,13 @@ app.get('/product/:productId', async (c) => {
       createdAt: schema.reviews.createdAt,
     })
     .from(schema.reviews)
-    .where(
-      and(
-        eq(schema.reviews.productId, productId),
-        eq(schema.reviews.approved, true),
-      ),
-    )
+    .where(and(eq(schema.reviews.productId, productId), eq(schema.reviews.approved, true)))
     .orderBy(desc(schema.reviews.createdAt))
     .all()
 
   const count = rows.length
   const average =
-    count === 0
-      ? 0
-      : Math.round((rows.reduce((sum, r) => sum + r.rating, 0) / count) * 10) / 10
+    count === 0 ? 0 : Math.round((rows.reduce((sum, r) => sum + r.rating, 0) / count) * 10) / 10
 
   return c.json({ reviews: rows, average, count })
 })
@@ -176,11 +158,11 @@ app.get('/store', async (c) => {
 
   const rows = await db
     .select({
-      id:           schema.reviews.id,
+      id: schema.reviews.id,
       customerName: schema.reviews.customerName,
-      rating:       schema.reviews.rating,
-      body:         schema.reviews.body,
-      createdAt:    schema.reviews.createdAt,
+      rating: schema.reviews.rating,
+      body: schema.reviews.body,
+      createdAt: schema.reviews.createdAt,
     })
     .from(schema.reviews)
     .where(eq(schema.reviews.approved, true))

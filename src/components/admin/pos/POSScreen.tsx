@@ -8,7 +8,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { FormField } from '@/components/common/FormField'
 import { en } from '@/lib/i18n/en'
@@ -40,8 +46,12 @@ export function POSScreen() {
   const products = data?.products ?? []
 
   const selectedProduct = products.find((p) => p.product.id === selectedProductId)
-  const selectedVariant = selectedProduct?.variants.find((v) => v.id === selectedVariantId) as VariantWithDetails | undefined
-  const selectedSize = selectedVariant?.sizes.find((s) => s.id === selectedSizeId) as SizeOption | undefined
+  const selectedVariant = selectedProduct?.variants.find((v) => v.id === selectedVariantId) as
+    | VariantWithDetails
+    | undefined
+  const selectedSize = selectedVariant?.sizes.find((s) => s.id === selectedSizeId) as
+    | SizeOption
+    | undefined
 
   function handleAddToSale() {
     if (!selectedProduct || !selectedVariant || !selectedSize) return
@@ -139,9 +149,7 @@ export function POSScreen() {
               {en.pos.sendWhatsApp}
             </Button>
           )}
-          <Button onClick={() => setCompletedOrderNumber(null)}>
-            {en.pos.newSale}
-          </Button>
+          <Button onClick={() => setCompletedOrderNumber(null)}>{en.pos.newSale}</Button>
         </div>
       </div>
     )
@@ -155,34 +163,44 @@ export function POSScreen() {
 
         {loading ? (
           <div className="flex flex-col gap-3">
-            {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-full" />
+            ))}
           </div>
         ) : products.length === 0 ? (
           <p className="text-sm text-muted-foreground">{en.pos.noProducts}</p>
         ) : (
           <div className="flex flex-col gap-3">
             {/* Product */}
-            <Select value={selectedProductId} onValueChange={(v: string | null) => {
-              setSelectedProductId(v ?? '')
-              setSelectedVariantId('')
-              setSelectedSizeId('')
-            }}>
+            <Select
+              value={selectedProductId}
+              onValueChange={(v: string | null) => {
+                setSelectedProductId(v ?? '')
+                setSelectedVariantId('')
+                setSelectedSizeId('')
+              }}
+            >
               <SelectTrigger aria-label={en.pos.selectProduct}>
                 <SelectValue placeholder={en.pos.selectProduct} />
               </SelectTrigger>
               <SelectContent>
                 {products.map(({ product }) => (
-                  <SelectItem key={product.id} value={product.id}>{product.name}</SelectItem>
+                  <SelectItem key={product.id} value={product.id}>
+                    {product.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
 
             {/* Variant */}
             {selectedProduct && (
-              <Select value={selectedVariantId} onValueChange={(v: string | null) => {
-                setSelectedVariantId(v ?? '')
-                setSelectedSizeId('')
-              }}>
+              <Select
+                value={selectedVariantId}
+                onValueChange={(v: string | null) => {
+                  setSelectedVariantId(v ?? '')
+                  setSelectedSizeId('')
+                }}
+              >
                 <SelectTrigger aria-label={en.pos.selectVariant}>
                   <SelectValue placeholder={en.pos.selectVariant} />
                 </SelectTrigger>
@@ -205,7 +223,10 @@ export function POSScreen() {
 
             {/* Size */}
             {selectedVariant && (
-              <Select value={selectedSizeId} onValueChange={(v: string | null) => setSelectedSizeId(v ?? '')}>
+              <Select
+                value={selectedSizeId}
+                onValueChange={(v: string | null) => setSelectedSizeId(v ?? '')}
+              >
                 <SelectTrigger aria-label={en.pos.selectSize}>
                   <SelectValue placeholder={en.pos.selectSize} />
                 </SelectTrigger>
@@ -213,18 +234,18 @@ export function POSScreen() {
                   {selectedVariant.sizes.map((s) => (
                     <SelectItem key={s.id} value={s.id} disabled={s.stock === 0}>
                       {s.size} — {formatPrice(s.priceCents, config?.currency)}
-                      {s.stock === 0 && <Badge variant="destructive" className="ml-2 text-xs">{en.store.outOfStock}</Badge>}
+                      {s.stock === 0 && (
+                        <Badge variant="destructive" className="ml-2 text-xs">
+                          {en.store.outOfStock}
+                        </Badge>
+                      )}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             )}
 
-            <Button
-              onClick={handleAddToSale}
-              disabled={!selectedSize}
-              size="sm"
-            >
+            <Button onClick={handleAddToSale} disabled={!selectedSize} size="sm">
               <Plus className="size-4 mr-1.5" aria-hidden />
               {en.pos.addToSale}
             </Button>
@@ -237,9 +258,7 @@ export function POSScreen() {
         <h2 className="text-sm font-semibold">{en.pos.currentSale}</h2>
 
         {saleItems.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-4 text-center">
-            No items added.
-          </p>
+          <p className="text-sm text-muted-foreground py-4 text-center">No items added.</p>
         ) : (
           <ul className="flex flex-col gap-3">
             {saleItems.map((item) => (
@@ -251,7 +270,9 @@ export function POSScreen() {
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{item.productName}</p>
-                  <p className="text-xs text-muted-foreground">{item.variantLabel} · {item.size}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {item.variantLabel} · {item.size}
+                  </p>
                 </div>
                 <div className="flex items-center gap-1 sm:gap-2">
                   <Button
@@ -282,7 +303,9 @@ export function POSScreen() {
                   size="icon"
                   variant="ghost"
                   className="size-7 text-muted-foreground"
-                  onClick={() => setSaleItems((prev) => prev.filter((i) => i.sizeOptionId !== item.sizeOptionId))}
+                  onClick={() =>
+                    setSaleItems((prev) => prev.filter((i) => i.sizeOptionId !== item.sizeOptionId))
+                  }
                   aria-label="Remove"
                 >
                   <Trash2 className="size-3.5" aria-hidden />
@@ -299,7 +322,11 @@ export function POSScreen() {
           <span>{formatPrice(subtotalCents, config?.currency)}</span>
         </div>
 
-        <FormField label={en.pos.customerPhone} htmlFor="pos-phone" help={en.tooltips.pos.customerPhone}>
+        <FormField
+          label={en.pos.customerPhone}
+          htmlFor="pos-phone"
+          help={en.tooltips.pos.customerPhone}
+        >
           <Input
             id="pos-phone"
             type="tel"

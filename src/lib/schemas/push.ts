@@ -6,8 +6,8 @@ import { z } from 'zod/v4'
 // Browser PushSubscription → the subset the worker persists.
 export const pushSubscriptionSchema = z.object({
   endpoint: z.string().url().max(2048),
-  auth:     z.string().min(1).max(256),
-  p256dh:   z.string().min(1).max(256),
+  auth: z.string().min(1).max(256),
+  p256dh: z.string().min(1).max(256),
 })
 
 // Unsubscribe — endpoint only (project from the subscription schema).
@@ -19,13 +19,17 @@ export const pushUnsubscribeSchema = pushSubscriptionSchema.pick({ endpoint: tru
 // into an open redirect / off-site link.
 export const pushSendSchema = z.object({
   title: z.string().min(1).max(120).optional(),
-  body:  z.string().max(500).optional(),
-  url:   z.string().regex(/^\/[^\s]*$/, 'must be a relative path').max(512).optional(),
+  body: z.string().max(500).optional(),
+  url: z
+    .string()
+    .regex(/^\/[^\s]*$/, 'must be a relative path')
+    .max(512)
+    .optional(),
 })
 
 export type PushSubscriptionInput = z.infer<typeof pushSubscriptionSchema>
-export type PushUnsubscribeInput  = z.infer<typeof pushUnsubscribeSchema>
-export type PushSendInput         = z.infer<typeof pushSendSchema>
+export type PushUnsubscribeInput = z.infer<typeof pushUnsubscribeSchema>
+export type PushSendInput = z.infer<typeof pushSendSchema>
 
 // Customer push subscription — public endpoint, tied to an order.
 // `kind` is not accepted from the client; the route always inserts 'order'.
@@ -36,4 +40,4 @@ export const customerPushSubscriptionSchema = pushSubscriptionSchema.extend({
 export const customerPushUnsubscribeSchema = pushSubscriptionSchema.pick({ endpoint: true })
 
 export type CustomerPushSubscriptionInput = z.infer<typeof customerPushSubscriptionSchema>
-export type CustomerPushUnsubscribeInput  = z.infer<typeof customerPushUnsubscribeSchema>
+export type CustomerPushUnsubscribeInput = z.infer<typeof customerPushUnsubscribeSchema>

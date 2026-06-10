@@ -50,7 +50,9 @@ describe('pushSubscriptionSchema', () => {
 
 describe('pushUnsubscribeSchema', () => {
   it('accepts endpoint only', () => {
-    const r = pushUnsubscribeSchema.safeParse({ endpoint: 'https://fcm.googleapis.com/fcm/send/abc' })
+    const r = pushUnsubscribeSchema.safeParse({
+      endpoint: 'https://fcm.googleapis.com/fcm/send/abc',
+    })
     expect(r.success).toBe(true)
   })
 

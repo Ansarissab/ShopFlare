@@ -4,11 +4,15 @@ import { cn } from '@/lib/utils'
 import { en } from '@/lib/i18n/en'
 import type { HeroSectionProps } from '@/lib/types'
 
-export function HeroSection({ section, heroStyle = 'image-left', imageUrl }: HeroSectionProps & { imageUrl: string | null }) {
+export function HeroSection({
+  section,
+  heroStyle = 'image-left',
+  imageUrl,
+}: HeroSectionProps & { imageUrl: string | null }) {
   const heading = section.heading || en.store.heroDefaultHeading
-  const subtext  = section.subtext  || en.store.heroDefaultSubtext
-  const ctaText  = section.ctaText  || en.store.heroDefaultCta
-  const ctaHref  = section.ctaHref  || '/shop'
+  const subtext = section.subtext || en.store.heroDefaultSubtext
+  const ctaText = section.ctaText || en.store.heroDefaultCta
+  const ctaHref = section.ctaHref || '/shop'
 
   return (
     <section

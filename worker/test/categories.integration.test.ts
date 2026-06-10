@@ -27,8 +27,7 @@ const adminPut = (path: string, body: unknown) =>
     body: JSON.stringify(body),
   })
 
-const adminDelete = (path: string) =>
-  SELF.fetch(`${BASE}${path}`, { method: 'DELETE' })
+const adminDelete = (path: string) => SELF.fetch(`${BASE}${path}`, { method: 'DELETE' })
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -40,8 +39,12 @@ async function createCategory(body: Record<string, unknown>) {
 
 async function seedProduct() {
   await db().insert(schema.products).values({ id: 'p1', name: 'Demo Tee', active: true })
-  await db().insert(schema.variants).values({ id: 'v1', productId: 'p1', label: 'Black', sortOrder: 0 })
-  await db().insert(schema.sizeOptions).values({ id: 's1', variantId: 'v1', size: 'M', priceCents: 1000, stock: 5, active: true })
+  await db()
+    .insert(schema.variants)
+    .values({ id: 'v1', productId: 'p1', label: 'Black', sortOrder: 0 })
+  await db()
+    .insert(schema.sizeOptions)
+    .values({ id: 's1', variantId: 'v1', size: 'M', priceCents: 1000, stock: 5, active: true })
   return 'p1'
 }
 
@@ -49,8 +52,12 @@ async function seedProduct() {
 
 beforeEach(async () => {
   for (const t of [
-    'product_categories', 'categories',
-    'size_options', 'product_images', 'variants', 'products',
+    'product_categories',
+    'categories',
+    'size_options',
+    'product_images',
+    'variants',
+    'products',
   ]) {
     await env.DB.prepare(`DELETE FROM ${t}`).run()
   }
@@ -98,7 +105,10 @@ describe('category CRUD + slug rules', () => {
 
   it('update keeps the same slug without conflict', async () => {
     const { category } = await createCategory({ name: 'Alpha', slug: 'alpha' })
-    const res = await adminPut(`/api/admin/categories/${category.id}`, { name: 'Alpha Updated', slug: 'alpha' })
+    const res = await adminPut(`/api/admin/categories/${category.id}`, {
+      name: 'Alpha Updated',
+      slug: 'alpha',
+    })
     expect(res.status).toBe(200)
     const body = (await res.json()) as { category: { name: string } }
     expect(body.category.name).toBe('Alpha Updated')
@@ -108,7 +118,10 @@ describe('category CRUD + slug rules', () => {
 describe('category depth rules', () => {
   it('creates a valid parent->child hierarchy (depth 2)', async () => {
     const { category: parent } = await createCategory({ name: 'Men' })
-    const { status, category: child } = await createCategory({ name: 'Shirts', parentId: parent.id })
+    const { status, category: child } = await createCategory({
+      name: 'Shirts',
+      parentId: parent.id,
+    })
     expect(status).toBe(201)
     expect(child.parentId).toBe(parent.id)
   })
@@ -127,7 +140,10 @@ describe('category depth rules', () => {
   })
 
   it('setting parentId to a non-existent category -> 422', async () => {
-    const res = await adminPost('/api/admin/categories', { name: 'Orphan', parentId: 'nonexistent' })
+    const res = await adminPost('/api/admin/categories', {
+      name: 'Orphan',
+      parentId: 'nonexistent',
+    })
     expect(res.status).toBe(422)
   })
 })
@@ -187,17 +203,29 @@ describe('product-category assignment', () => {
     const { category: cat2 } = await createCategory({ name: 'Cat2' })
 
     // Assign to cat1
-    const r1 = await adminPut(`/api/admin/products/${productId}/categories`, { categoryIds: [cat1.id] })
+    const r1 = await adminPut(`/api/admin/products/${productId}/categories`, {
+      categoryIds: [cat1.id],
+    })
     expect(r1.status).toBe(200)
 
-    let rows = await db().select().from(schema.productCategories).where(eq(schema.productCategories.productId, productId)).all()
+    let rows = await db()
+      .select()
+      .from(schema.productCategories)
+      .where(eq(schema.productCategories.productId, productId))
+      .all()
     expect(rows.map((r) => r.categoryId)).toEqual([cat1.id])
 
     // Re-assign to cat2 only (replaces)
-    const r2 = await adminPut(`/api/admin/products/${productId}/categories`, { categoryIds: [cat2.id] })
+    const r2 = await adminPut(`/api/admin/products/${productId}/categories`, {
+      categoryIds: [cat2.id],
+    })
     expect(r2.status).toBe(200)
 
-    rows = await db().select().from(schema.productCategories).where(eq(schema.productCategories.productId, productId)).all()
+    rows = await db()
+      .select()
+      .from(schema.productCategories)
+      .where(eq(schema.productCategories.productId, productId))
+      .all()
     expect(rows.map((r) => r.categoryId)).toEqual([cat2.id])
   })
 
@@ -207,7 +235,9 @@ describe('product-category assignment', () => {
     await adminPut(`/api/admin/products/${productId}/categories`, { categoryIds: [category.id] })
 
     const res = await get('/api/products')
-    const { products } = (await res.json()) as { products: Array<{ product: { id: string }; categoryIds: string[] }> }
+    const { products } = (await res.json()) as {
+      products: Array<{ product: { id: string }; categoryIds: string[] }>
+    }
     const p = products.find((p) => p.product.id === productId)
     expect(p?.categoryIds).toContain(category.id)
   })
@@ -235,7 +265,11 @@ describe('product-category assignment', () => {
     await adminPut(`/api/admin/products/${productId}/categories`, { categoryIds: [category.id] })
     await adminPut(`/api/admin/products/${productId}/categories`, { categoryIds: [] })
 
-    const rows = await db().select().from(schema.productCategories).where(eq(schema.productCategories.productId, productId)).all()
+    const rows = await db()
+      .select()
+      .from(schema.productCategories)
+      .where(eq(schema.productCategories.productId, productId))
+      .all()
     expect(rows).toHaveLength(0)
   })
 })
@@ -253,7 +287,9 @@ describe('/api/categories public routes', () => {
     await createCategory({ name: 'Child', parentId: parent.id })
 
     const res = await get('/api/categories')
-    const { categories } = (await res.json()) as { categories: Array<{ id: string; children: Array<{ id: string }> }> }
+    const { categories } = (await res.json()) as {
+      categories: Array<{ id: string; children: Array<{ id: string }> }>
+    }
 
     expect(categories).toHaveLength(1)
     expect(categories[0].id).toBe(parent.id)
@@ -262,7 +298,11 @@ describe('/api/categories public routes', () => {
 
   it('GET /api/categories/:slug returns category + breadcrumb', async () => {
     const { category: parent } = await createCategory({ name: 'Men', slug: 'men' })
-    const { category: child } = await createCategory({ name: 'Shirts', slug: 'shirts', parentId: parent.id })
+    const { category: child } = await createCategory({
+      name: 'Shirts',
+      slug: 'shirts',
+      parentId: parent.id,
+    })
 
     const res = await get('/api/categories/shirts')
     expect(res.status).toBe(200)
@@ -277,7 +317,11 @@ describe('/api/categories public routes', () => {
   it('/api/categories/:slug includes descendant products (parent shows child products)', async () => {
     const productId = await seedProduct()
     const { category: parent } = await createCategory({ name: 'Tops', slug: 'tops' })
-    const { category: child } = await createCategory({ name: 'T-Shirts', slug: 't-shirts', parentId: parent.id })
+    const { category: child } = await createCategory({
+      name: 'T-Shirts',
+      slug: 't-shirts',
+      parentId: parent.id,
+    })
 
     // Assign product to CHILD category only
     await adminPut(`/api/admin/products/${productId}/categories`, { categoryIds: [child.id] })

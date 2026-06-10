@@ -13,7 +13,8 @@ describe('fetchFromWorker', () => {
   it('returns parsed JSON on success', async () => {
     vi.stubEnv('NEXT_PUBLIC_WORKER_URL', 'https://worker.test')
     fetchMock.mockResolvedValueOnce({
-      ok: true, status: 200,
+      ok: true,
+      status: 200,
       json: async () => ({ storeName: 'Acme' }),
     })
     const result = await fetchFromWorker('/api/config/store')

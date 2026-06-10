@@ -18,7 +18,10 @@ test.describe('cart and checkout', () => {
     await expect(page.getByRole('heading', { name: 'Your Cart' })).toBeVisible({ timeout: 8_000 })
   })
 
-  test('COD checkout: fills ManualOrderForm and reaches success page', async ({ page, addToCart }) => {
+  test('COD checkout: fills ManualOrderForm and reaches success page', async ({
+    page,
+    addToCart,
+  }) => {
     await addToCart(page)
     await page.waitForLoadState('networkidle')
 
@@ -60,7 +63,9 @@ test.describe('cart and checkout', () => {
     await page.goto('/checkout/success?method=cod&orderId=ORD-TEST123')
     await page.waitForLoadState('networkidle')
 
-    await expect(page.getByRole('heading', { name: 'Order Confirmed!' })).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByRole('heading', { name: 'Order Confirmed!' })).toBeVisible({
+      timeout: 10_000,
+    })
     await expect(page.getByText('Thank you for your order')).toBeVisible()
   })
 })

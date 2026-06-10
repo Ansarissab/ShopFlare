@@ -8,7 +8,10 @@ import type { StoreConfig } from '@/lib/types/common'
 
 // Strip HTML tags for plain-text markdown output.
 function stripHtml(html: string): string {
-  return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+  return html
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 export function productToMarkdown(
@@ -36,9 +39,7 @@ export function productToMarkdown(
     lines.push('', min === max ? `**Price:** ${fmt(min)}` : `**Price:** ${fmt(min)} – ${fmt(max)}`)
   }
 
-  const hasStock = variants
-    .flatMap((v) => v.sizes)
-    .some((s) => s.active && s.stock !== 0)
+  const hasStock = variants.flatMap((v) => v.sizes).some((s) => s.active && s.stock !== 0)
   lines.push(`**Availability:** ${hasStock ? 'In Stock' : 'Out of Stock'}`)
 
   if (siteUrl) lines.push('', `[View product](${siteUrl}/product/${product.id})`)
@@ -61,9 +62,7 @@ export function categoryToMarkdown(
 
   for (const item of products.slice(0, 20)) {
     const slug = item.product.id
-    const link = siteUrl
-      ? `[${item.product.name}](${siteUrl}/product/${slug})`
-      : item.product.name
+    const link = siteUrl ? `[${item.product.name}](${siteUrl}/product/${slug})` : item.product.name
     lines.push(`- ${link}`)
   }
 

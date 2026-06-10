@@ -29,9 +29,7 @@ export function ProductHero({
   isAddingToCart = false,
   className,
 }: ProductHeroProps) {
-  const [selectedVariantId, setSelectedVariantId] = React.useState<string>(
-    variants[0]?.id ?? '',
-  )
+  const [selectedVariantId, setSelectedVariantId] = React.useState<string>(variants[0]?.id ?? '')
   const [selectedSizeId, setSelectedSizeId] = React.useState<string | null>(null)
   const [notifyOpen, setNotifyOpen] = React.useState(false)
 
@@ -49,12 +47,10 @@ export function ProductHero({
   const selectedSize = currentSizes.find((s) => s.id === selectedSizeId) ?? null
 
   // All sizes OOS when every active size has stock === 0
-  const allSizesOOS =
-    currentSizes.length > 0 && currentSizes.every((s) => s.stock === 0)
+  const allSizesOOS = currentSizes.length > 0 && currentSizes.every((s) => s.stock === 0)
 
   // Target for Notify Me: first OOS size of current variant, fallback to first size
-  const notifyTarget =
-    currentSizes.find((s) => s.stock === 0) ?? currentSizes[0] ?? null
+  const notifyTarget = currentSizes.find((s) => s.stock === 0) ?? currentSizes[0] ?? null
 
   const currentVariant = variants.find((v) => v.id === selectedVariantId) ?? null
 
@@ -68,12 +64,7 @@ export function ProductHero({
       : null
 
   return (
-    <div
-      className={cn(
-        'grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 md:gap-12',
-        className,
-      )}
-    >
+    <div className={cn('grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 md:gap-12', className)}>
       {/* Left: Image carousel */}
       <ImageCarousel images={currentImages} />
 
@@ -83,9 +74,7 @@ export function ProductHero({
         {(isNew || isPopular) && (
           <div className="flex gap-2">
             {isNew && <Badge>{en.product.new}</Badge>}
-            {isPopular && (
-              <Badge variant="secondary">{en.product.popularChoice}</Badge>
-            )}
+            {isPopular && <Badge variant="secondary">{en.product.popularChoice}</Badge>}
           </div>
         )}
 
@@ -95,22 +84,16 @@ export function ProductHero({
         </h1>
 
         {/* Price */}
-        {priceLabel && (
-          <p className="text-xl font-semibold text-primary">{priceLabel}</p>
-        )}
+        {priceLabel && <p className="text-xl font-semibold text-primary">{priceLabel}</p>}
         {allSizesOOS && (
-          <p className="text-sm font-medium text-muted-foreground">
-            {en.store.outOfStock}
-          </p>
+          <p className="text-sm font-medium text-muted-foreground">{en.store.outOfStock}</p>
         )}
 
         <Separator />
 
         {/* Description */}
         {product.description && (
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            {product.description}
-          </p>
+          <p className="text-sm leading-relaxed text-muted-foreground">{product.description}</p>
         )}
 
         {/* Variant selector — only show when >1 variant */}

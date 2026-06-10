@@ -26,18 +26,14 @@ export async function assembleCategoryTree(
 ): Promise<CategoryNode[]> {
   // 1. Fetch all categories; storefront sees active only
   const baseQuery = db.select().from(schema.categories)
-  const allCategories = await (opts.includeInactive
-    ? baseQuery
-    : baseQuery.where(eq(schema.categories.active, true))
+  const allCategories = await (
+    opts.includeInactive ? baseQuery : baseQuery.where(eq(schema.categories.active, true))
   ).all()
 
   if (allCategories.length === 0) return []
 
   // 2. Count product assignments per category
-  const allAssignments = await db
-    .select()
-    .from(schema.productCategories)
-    .all()
+  const allAssignments = await db.select().from(schema.productCategories).all()
 
   const countByCategory = new Map<string, number>()
   for (const row of allAssignments) {

@@ -56,12 +56,14 @@ export default function AdminCouponsPage() {
     <div className="flex flex-col gap-5">
       <AdminPageHeader
         title={en.admin.coupons}
-        actions={!showForm ? (
-          <Button size="sm" onClick={handleAdd}>
-            <Plus className="size-3.5 mr-1" aria-hidden />
-            {en.admin.addCoupon}
-          </Button>
-        ) : undefined}
+        actions={
+          !showForm ? (
+            <Button size="sm" onClick={handleAdd}>
+              <Plus className="size-3.5 mr-1" aria-hidden />
+              {en.admin.addCoupon}
+            </Button>
+          ) : undefined
+        }
       />
 
       {/* Inline create/edit form */}
@@ -86,11 +88,7 @@ export default function AdminCouponsPage() {
           ))}
         </div>
       ) : (
-        <CouponsTable
-          coupons={data?.coupons ?? []}
-          onEdit={handleEdit}
-          onDeleted={handleDeleted}
-        />
+        <CouponsTable coupons={data?.coupons ?? []} onEdit={handleEdit} onDeleted={handleDeleted} />
       )}
     </div>
   )

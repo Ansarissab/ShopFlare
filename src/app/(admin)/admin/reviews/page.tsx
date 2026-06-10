@@ -16,12 +16,24 @@ function ReviewTable({ reviews, onChanged }: ReviewTableProps) {
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b bg-muted/50">
-            <th className="px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">{en.admin.reviewStatus}</th>
-            <th className="px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">{en.admin.reviewProduct}</th>
-            <th className="hidden md:table-cell px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">{en.admin.reviewCustomer}</th>
-            <th className="px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">{en.admin.reviewRating}</th>
-            <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">{en.reviews.yourReview}</th>
-            <th className="hidden md:table-cell px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">{en.admin.reviewDate}</th>
+            <th className="px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">
+              {en.admin.reviewStatus}
+            </th>
+            <th className="px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">
+              {en.admin.reviewProduct}
+            </th>
+            <th className="hidden md:table-cell px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">
+              {en.admin.reviewCustomer}
+            </th>
+            <th className="px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">
+              {en.admin.reviewRating}
+            </th>
+            <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">
+              {en.reviews.yourReview}
+            </th>
+            <th className="hidden md:table-cell px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">
+              {en.admin.reviewDate}
+            </th>
             <th className="px-4 py-3" />
           </tr>
         </thead>

@@ -26,8 +26,13 @@ const skipBuild = args.has('--no-build')
 const quick = args.has('--quick')
 
 const C = {
-  reset: '\x1b[0m', bold: '\x1b[1m', dim: '\x1b[2m',
-  green: '\x1b[32m', red: '\x1b[31m', yellow: '\x1b[33m', cyan: '\x1b[36m',
+  reset: '\x1b[0m',
+  bold: '\x1b[1m',
+  dim: '\x1b[2m',
+  green: '\x1b[32m',
+  red: '\x1b[31m',
+  yellow: '\x1b[33m',
+  cyan: '\x1b[36m',
 }
 const tag = (s) => `${C.cyan}${C.bold}[ci]${C.reset} ${s}`
 
@@ -46,11 +51,11 @@ function run(cmd, argv) {
 }
 
 const steps = [
-  { name: 'typecheck',   cmd: 'pnpm', argv: ['typecheck'] },
-  { name: 'lint',        cmd: 'pnpm', argv: ['lint'] },
+  { name: 'typecheck', cmd: 'pnpm', argv: ['typecheck'] },
+  { name: 'lint', cmd: 'pnpm', argv: ['lint'] },
   { name: 'unit + 95% coverage', cmd: 'pnpm', argv: ['test:coverage'] },
   { name: 'integration', cmd: 'pnpm', argv: ['test:integration'], skip: quick },
-  { name: 'build',       cmd: 'pnpm', argv: ['build'], skip: quick || skipBuild },
+  { name: 'build', cmd: 'pnpm', argv: ['build'], skip: quick || skipBuild },
 ]
 
 const fmt = (ms) => (ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${Math.round(ms)}ms`)
@@ -80,9 +85,12 @@ for (const step of steps) {
 // ── Summary ──────────────────────────────────────────────────────────────────
 console.log('\n' + tag(`${C.bold}summary${C.reset}`))
 for (const r of results) {
-  const mark = r.status === 'pass' ? `${C.green}✓${C.reset}`
-    : r.status === 'fail' ? `${C.red}✗${C.reset}`
-    : `${C.dim}–${C.reset}`
+  const mark =
+    r.status === 'pass'
+      ? `${C.green}✓${C.reset}`
+      : r.status === 'fail'
+        ? `${C.red}✗${C.reset}`
+        : `${C.dim}–${C.reset}`
   const time = r.ms != null ? ` ${C.dim}${fmt(r.ms)}${C.reset}` : ''
   console.log(`  ${mark} ${r.name}${time}`)
 }

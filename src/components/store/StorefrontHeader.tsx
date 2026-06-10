@@ -27,7 +27,10 @@ export function StorefrontHeader() {
       <header className="sticky top-0 z-40 w-full border-b bg-background">
         <div className={cn(layout.bar, 'h-16 justify-between')}>
           {/* Store name */}
-          <Link href="/" className="text-lg font-semibold tracking-tight text-foreground hover:opacity-80 transition-opacity">
+          <Link
+            href="/"
+            className="text-lg font-semibold tracking-tight text-foreground hover:opacity-80 transition-opacity"
+          >
             {config?.logoUrl ? (
               <span className="relative block h-6 w-24 sm:h-8 sm:w-32">
                 <Image
@@ -41,7 +44,7 @@ export function StorefrontHeader() {
                 />
               </span>
             ) : (
-              config?.storeName ?? 'ShopFlare'
+              (config?.storeName ?? 'ShopFlare')
             )}
           </Link>
 
@@ -50,13 +53,19 @@ export function StorefrontHeader() {
 
           {/* Shop link — only shown when landing page is enabled so / is the marketing page */}
           {config?.landingEnabled && (
-            <Link href={catalogHref(true)} className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:block">
+            <Link
+              href={catalogHref(true)}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:block"
+            >
               {en.store.shopNav}
             </Link>
           )}
 
           {/* Track Order link */}
-          <Link href="/track" className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:block">
+          <Link
+            href="/track"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:block"
+          >
             {en.store.trackOrder}
           </Link>
 
@@ -70,9 +79,7 @@ export function StorefrontHeader() {
           >
             <ShoppingCart className="h-5 w-5" />
             {itemCount > 0 && (
-              <Badge
-                className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full p-0 text-[10px]"
-              >
+              <Badge className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full p-0 text-[10px]">
                 {itemCount > 99 ? '99+' : itemCount}
               </Badge>
             )}

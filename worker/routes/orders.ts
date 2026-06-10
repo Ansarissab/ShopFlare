@@ -9,7 +9,13 @@ import { eq, and, inArray } from 'drizzle-orm'
 import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import { codOrderSchema, cancelOrderSchema } from '@/lib/schemas'
-import { createOrder, assertItemsAvailable, releaseOrderInventory, CouponError, StockError } from 'worker/lib/orders'
+import {
+  createOrder,
+  assertItemsAvailable,
+  releaseOrderInventory,
+  CouponError,
+  StockError,
+} from 'worker/lib/orders'
 import { parseBody } from 'worker/lib/http'
 import { verifyTurnstile } from 'worker/lib/turnstile'
 import { rateLimit } from 'worker/lib/ratelimit'
@@ -23,7 +29,12 @@ const app = new Hono<{ Bindings: Bindings }>()
 app.get('/track/:orderNumber', async (c) => {
   // Throttle per IP — order numbers are unguessable, but a throttle removes any
   // brute-force enumeration angle on this PII-bearing lookup.
-  if (!(await rateLimit(c.env, 'track', c.req.header('CF-Connecting-IP'), { limit: 30, windowSeconds: 60 }))) {
+  if (
+    !(await rateLimit(c.env, 'track', c.req.header('CF-Connecting-IP'), {
+      limit: 30,
+      windowSeconds: 60,
+    }))
+  ) {
     return c.json({ error: 'Too many requests' }, 429)
   }
 
@@ -44,8 +55,7 @@ app.get('/track/:orderNumber', async (c) => {
   if (contact) {
     const contactLower = contact.trim().toLowerCase()
     const emailMatch =
-      order.customerEmail !== null &&
-      order.customerEmail.toLowerCase() === contactLower
+      order.customerEmail !== null && order.customerEmail.toLowerCase() === contactLower
     const digitsOnly = (s: string) => s.replace(/\D/g, '')
     const contactDigits = digitsOnly(contact)
     const phoneMatch =
@@ -69,36 +79,49 @@ app.get('/track/:orderNumber', async (c) => {
     quantity: item.quantity,
     priceCents: item.priceCents,
     snapshot: (() => {
-      try { return JSON.parse(item.snapshot) } catch { return {} }
+      try {
+        return JSON.parse(item.snapshot)
+      } catch {
+        return {}
+      }
     })(),
   }))
 
-  return c.json({
-    order: {
-      orderNumber: order.orderNumber,
-      status: order.status,
-      paymentMethod: order.paymentMethod,
-      // Only expose PII when the caller proved they own the order.
-      ...(contactVerified ? { customerName: order.customerName } : {}),
-      subtotalCents:  order.subtotalCents,
-      shippingCents:  order.shippingCents,
-      discountCents:  order.discountCents,
-      taxCents:       order.taxCents,
-      totalCents:     order.totalCents,
-      trackingNumber: order.trackingNumber ?? undefined,
-      carrier: order.carrier ?? undefined,
-      createdAt: order.createdAt,
-      updatedAt: order.updatedAt,
+  return c.json(
+    {
+      order: {
+        orderNumber: order.orderNumber,
+        status: order.status,
+        paymentMethod: order.paymentMethod,
+        // Only expose PII when the caller proved they own the order.
+        ...(contactVerified ? { customerName: order.customerName } : {}),
+        subtotalCents: order.subtotalCents,
+        shippingCents: order.shippingCents,
+        discountCents: order.discountCents,
+        taxCents: order.taxCents,
+        totalCents: order.totalCents,
+        trackingNumber: order.trackingNumber ?? undefined,
+        carrier: order.carrier ?? undefined,
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt,
+      },
+      items: safeItems,
     },
-    items: safeItems,
-  }, 200, { 'Cache-Control': 'no-store' })
+    200,
+    { 'Cache-Control': 'no-store' },
+  )
 })
 
 // ─── GET /by-session/:sessionId ───────────────────────────────────────────────
 // Used by the frontend success page to build the track link after Stripe checkout.
 
 app.get('/by-session/:sessionId', async (c) => {
-  if (!(await rateLimit(c.env, 'by-session', c.req.header('CF-Connecting-IP'), { limit: 30, windowSeconds: 60 }))) {
+  if (
+    !(await rateLimit(c.env, 'by-session', c.req.header('CF-Connecting-IP'), {
+      limit: 30,
+      windowSeconds: 60,
+    }))
+  ) {
     return c.json({ error: 'Too many requests' }, 429)
   }
 
@@ -163,9 +186,7 @@ function manualOrderHandler(paymentMethod: 'cod' | 'bank_transfer', bucket: stri
 
       // Fire notifications via waitUntil — never blocks the 201 response.
       // Fresh D1 handle for post-response work (mirrors stripe.ts).
-      c.executionCtx.waitUntil(
-        notifyNewOrder(createDb(c.env.DB), c.env, orderId, orderNumber),
-      )
+      c.executionCtx.waitUntil(notifyNewOrder(createDb(c.env.DB), c.env, orderId, orderNumber))
 
       return c.json({ orderId, orderNumber }, 201)
     } catch (err) {
@@ -186,7 +207,12 @@ app.post('/bank-transfer', manualOrderHandler('bank_transfer', 'bank-transfer'))
 app.post('/:orderNumber/cancel', async (c) => {
   // Throttle per IP — cancellation is a state-changing action keyed only on the
   // (unguessable) order number, so a throttle blocks any mass-cancel attempt.
-  if (!(await rateLimit(c.env, 'cancel', c.req.header('CF-Connecting-IP'), { limit: 10, windowSeconds: 60 }))) {
+  if (
+    !(await rateLimit(c.env, 'cancel', c.req.header('CF-Connecting-IP'), {
+      limit: 10,
+      windowSeconds: 60,
+    }))
+  ) {
     return c.json({ error: 'Too many requests' }, 429)
   }
 
@@ -216,8 +242,7 @@ app.post('/:orderNumber/cancel', async (c) => {
   const contactLower = contact.trim().toLowerCase()
   const digitsOnly = (s: string) => s.replace(/\D/g, '')
   const emailMatch =
-    order.customerEmail !== null &&
-    order.customerEmail.toLowerCase() === contactLower
+    order.customerEmail !== null && order.customerEmail.toLowerCase() === contactLower
   const contactDigits = digitsOnly(contact)
   const phoneMatch =
     contactDigits.length > 0 &&
@@ -243,10 +268,7 @@ app.post('/:orderNumber/cancel', async (c) => {
       updatedAt: new Date().toISOString(),
     })
     .where(
-      and(
-        eq(schema.orders.id, order.id),
-        inArray(schema.orders.status, ['pending', 'confirmed']),
-      ),
+      and(eq(schema.orders.id, order.id), inArray(schema.orders.status, ['pending', 'confirmed'])),
     )
 
   if ((cancelRes as unknown as D1Result).meta?.changes === 1) {

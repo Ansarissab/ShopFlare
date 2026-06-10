@@ -79,7 +79,12 @@ describe('buildWhatsAppOrderUrl', () => {
 
   it('multiplies priceCents by quantity for total price', () => {
     // 1000 PKR each × 2 = 2000 PKR displayed
-    const url = buildWhatsAppOrderUrl({ ...baseParams, priceCents: 1000, quantity: 2, currency: 'PKR' })
+    const url = buildWhatsAppOrderUrl({
+      ...baseParams,
+      priceCents: 1000,
+      quantity: 2,
+      currency: 'PKR',
+    })
     const decoded = decodeURIComponent(url.split('?text=')[1])
     expect(decoded).toContain('2,000')
   })

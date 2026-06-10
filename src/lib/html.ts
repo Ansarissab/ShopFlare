@@ -4,10 +4,23 @@ import type { FaqItem } from '@/lib/seo/jsonld'
 // Allowlist mirrors Trix output: block elements, inline formatting, links, images.
 // Strips scripts, event handlers, <style>, data-URIs.
 const ALLOWED_TAGS = [
-  'h1', 'h2', 'h3', 'p', 'br', 'strong', 'em',
-  'ul', 'ol', 'li', 'a', 'blockquote',
-  'img', 'figure', 'figcaption',
-  'pre', 'code',
+  'h1',
+  'h2',
+  'h3',
+  'p',
+  'br',
+  'strong',
+  'em',
+  'ul',
+  'ol',
+  'li',
+  'a',
+  'blockquote',
+  'img',
+  'figure',
+  'figcaption',
+  'pre',
+  'code',
 ]
 
 const ALLOWED_ATTR = ['href', 'rel', 'target', 'src', 'alt']
@@ -35,7 +48,10 @@ export function parseFaq(html: string): FaqItem[] {
     const question = qMatch[1].replace(/<[^>]+>/g, '').trim()
     // Answer = everything after the closing heading tag, stripped of HTML.
     const afterHeading = seg.slice(qMatch[0].length)
-    const answer = afterHeading.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+    const answer = afterHeading
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
     if (question && answer) items.push({ question, answer })
   }
   return items

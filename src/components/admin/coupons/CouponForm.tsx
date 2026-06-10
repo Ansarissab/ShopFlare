@@ -5,7 +5,13 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { FormField } from '@/components/common/FormField'
 import { en } from '@/lib/i18n/en'
@@ -32,7 +38,9 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
   const [maxDiscountCents, setMaxDiscountCents] = useState(String(coupon?.maxDiscountCents ?? ''))
   const [usageLimit, setUsageLimit] = useState(String(coupon?.usageLimit ?? ''))
   const [perCustomerLimit, setPerCustomerLimit] = useState(String(coupon?.perCustomerLimit ?? '1'))
-  const [expiresAt, setExpiresAt] = useState(coupon?.expiresAt ? toLocalDatetimeInput(coupon.expiresAt) : '')
+  const [expiresAt, setExpiresAt] = useState(
+    coupon?.expiresAt ? toLocalDatetimeInput(coupon.expiresAt) : '',
+  )
   const [active, setActive] = useState(coupon?.active ?? true)
   const [saving, setSaving] = useState(false)
 
@@ -123,7 +131,9 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
           max={type === 'percentage' ? 100 : undefined}
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          placeholder={type === 'percentage' ? en.admin.couponValuePercentHint : en.admin.couponValueFixedHint}
+          placeholder={
+            type === 'percentage' ? en.admin.couponValuePercentHint : en.admin.couponValueFixedHint
+          }
           disabled={isEdit}
         />
         <p className="text-xs text-muted-foreground">
@@ -134,7 +144,12 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
       <Separator />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <FormField label={en.admin.minOrderCents} htmlFor="coupon-min-order" optional help={en.tooltips.coupon.minOrder}>
+        <FormField
+          label={en.admin.minOrderCents}
+          htmlFor="coupon-min-order"
+          optional
+          help={en.tooltips.coupon.minOrder}
+        >
           <Input
             id="coupon-min-order"
             type="number"
@@ -144,7 +159,12 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
           />
         </FormField>
 
-        <FormField label={en.admin.maxDiscountCents} htmlFor="coupon-max-discount" optional help={en.tooltips.coupon.maxDiscount}>
+        <FormField
+          label={en.admin.maxDiscountCents}
+          htmlFor="coupon-max-discount"
+          optional
+          help={en.tooltips.coupon.maxDiscount}
+        >
           <Input
             id="coupon-max-discount"
             type="number"
@@ -154,7 +174,12 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
           />
         </FormField>
 
-        <FormField label={en.admin.usageLimit} htmlFor="coupon-usage-limit" optional help={en.tooltips.coupon.usageLimit}>
+        <FormField
+          label={en.admin.usageLimit}
+          htmlFor="coupon-usage-limit"
+          optional
+          help={en.tooltips.coupon.usageLimit}
+        >
           <Input
             id="coupon-usage-limit"
             type="number"
@@ -164,7 +189,11 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
           />
         </FormField>
 
-        <FormField label={en.admin.perCustomerLimit} htmlFor="coupon-per-customer" help={en.tooltips.coupon.perCustomer}>
+        <FormField
+          label={en.admin.perCustomerLimit}
+          htmlFor="coupon-per-customer"
+          help={en.tooltips.coupon.perCustomer}
+        >
           <Input
             id="coupon-per-customer"
             type="number"
@@ -175,7 +204,12 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
         </FormField>
       </div>
 
-      <FormField label={en.admin.expiresAt} htmlFor="coupon-expires" optional help={en.tooltips.coupon.expiresAt}>
+      <FormField
+        label={en.admin.expiresAt}
+        htmlFor="coupon-expires"
+        optional
+        help={en.tooltips.coupon.expiresAt}
+      >
         <Input
           id="coupon-expires"
           type="datetime-local"
@@ -199,7 +233,14 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
         <Button type="submit" size="sm" disabled={saving} className="w-full sm:w-auto">
           {saving ? en.admin.saving : en.admin.save}
         </Button>
-        <Button type="button" size="sm" variant="outline" onClick={onCancel} disabled={saving} className="w-full sm:w-auto">
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={onCancel}
+          disabled={saving}
+          className="w-full sm:w-auto"
+        >
           {en.admin.cancel}
         </Button>
       </div>

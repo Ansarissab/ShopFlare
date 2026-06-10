@@ -44,10 +44,7 @@ function escHtml(s: string): string {
 
 // ─── Config helpers ───────────────────────────────────────────────────────────
 
-async function getStoreConfigValues(
-  db: Database,
-  keys: string[],
-): Promise<Record<string, string>> {
+async function getStoreConfigValues(db: Database, keys: string[]): Promise<Record<string, string>> {
   const rows = await db
     .select()
     .from(schema.storeConfig)
@@ -112,18 +109,23 @@ function buildOrderEmailHtml(opts: {
   /** Pre-rendered bank-transfer instructions block (HTML), inserted before the CTA. */
   bankBlock?: string
 }): string {
-  const { heading, body, orderNumber, items, subtotalCents, shippingCents, discountCents, totalCents, currency, trackUrl, bankBlock } = opts
+  const {
+    heading,
+    body,
+    orderNumber,
+    items,
+    subtotalCents,
+    shippingCents,
+    discountCents,
+    totalCents,
+    currency,
+    trackUrl,
+    bankBlock,
+  } = opts
   const fmt = (c: number) => formatCents(c, currency)
 
   const itemRows = items
-    .map((i) =>
-      tableRow([
-        i.name,
-        String(i.qty),
-        fmt(i.priceCents),
-        fmt(i.priceCents * i.qty),
-      ]),
-    )
+    .map((i) => tableRow([i.name, String(i.qty), fmt(i.priceCents), fmt(i.priceCents * i.qty)]))
     .join('')
 
   const discountRow =
@@ -231,11 +233,7 @@ export async function sendOrderEmails(db: Database, env: Bindings, orderId: stri
     if (!env.RESEND_API_KEY) return
 
     // Load order row
-    const order = await db
-      .select()
-      .from(schema.orders)
-      .where(eq(schema.orders.id, orderId))
-      .get()
+    const order = await db.select().from(schema.orders).where(eq(schema.orders.id, orderId)).get()
 
     if (!order || !order.customerEmail) return
 
@@ -249,8 +247,14 @@ export async function sendOrderEmails(db: Database, env: Bindings, orderId: stri
     // Load store config: currency + contactEmail (BCC + reply-to) + senderEmail
     // (from) + bank-transfer details (only used for bank_transfer orders).
     const cfg = await getStoreConfigValues(db, [
-      'currency', 'contactEmail', 'senderEmail',
-      'bankName', 'bankAccountTitle', 'bankAccountNumber', 'bankIban', 'bankInstructions',
+      'currency',
+      'contactEmail',
+      'senderEmail',
+      'bankName',
+      'bankAccountTitle',
+      'bankAccountNumber',
+      'bankIban',
+      'bankInstructions',
     ])
 
     const currency = (cfg['currency'] as CurrencyCode | undefined) ?? DEFAULT_CURRENCY
@@ -336,9 +340,7 @@ export async function sendRestockEmail(
     const subject = en.email.restockSubject.replace('{productName}', productName)
     const safeName = escHtml(productName)
     const safeSize = escHtml(size)
-    const body = en.email.restockBody
-      .replace('{productName}', safeName)
-      .replace('{size}', safeSize)
+    const body = en.email.restockBody.replace('{productName}', safeName).replace('{size}', safeSize)
 
     const html = `<!DOCTYPE html>
 <html lang="en">

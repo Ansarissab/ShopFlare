@@ -27,7 +27,11 @@ vi.mock('@/components/store/checkout/TurnstileWidget', async () => {
       onError?: () => void
     }) =>
       createElement('div', null, [
-        createElement('button', { key: 'v', type: 'button', onClick: () => onVerify('tok-123') }, 'verify'),
+        createElement(
+          'button',
+          { key: 'v', type: 'button', onClick: () => onVerify('tok-123') },
+          'verify',
+        ),
         createElement('button', { key: 'e', type: 'button', onClick: () => onError?.() }, 'fail'),
       ]),
   }
@@ -69,7 +73,9 @@ describe('ReviewForm', () => {
     expect(screen.getByLabelText(en.reviews.orderNumber)).toBeTruthy()
     expect(screen.getByLabelText(en.reviews.contact)).toBeTruthy()
     // disabled until turnstile token arrives
-    expect(screen.getByRole('button', { name: en.reviews.submit }).hasAttribute('disabled')).toBe(true)
+    expect(screen.getByRole('button', { name: en.reviews.submit }).hasAttribute('disabled')).toBe(
+      true,
+    )
   })
 
   it('submits successfully, posts with the turnstile header, resets and calls onSubmitted', async () => {
@@ -82,7 +88,9 @@ describe('ReviewForm', () => {
     await waitFor(() => expect(apiPostMock).toHaveBeenCalledTimes(1))
     const [path, , opts] = apiPostMock.mock.calls[0]
     expect(path).toBe('/api/reviews')
-    expect((opts as { headers: Record<string, string> }).headers['X-Turnstile-Token']).toBe('tok-123')
+    expect((opts as { headers: Record<string, string> }).headers['X-Turnstile-Token']).toBe(
+      'tok-123',
+    )
     await waitFor(() => expect(toastSuccess).toHaveBeenCalledWith(en.reviews.submitted))
     expect(onSubmitted).toHaveBeenCalledTimes(1)
   })
@@ -170,7 +178,10 @@ describe('ReviewForm', () => {
   it('shows the submitting label while the request is in flight', async () => {
     let resolve!: () => void
     apiPostMock.mockImplementationOnce(
-      () => new Promise<Record<string, never>>((r) => { resolve = () => r({}) }),
+      () =>
+        new Promise<Record<string, never>>((r) => {
+          resolve = () => r({})
+        }),
     )
     render(<ReviewForm productId="p1" productName="Hoodie" onSubmitted={vi.fn()} />)
     verify()

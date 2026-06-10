@@ -31,16 +31,24 @@ export function AppTabBar() {
   if (!isStandalone) return null
 
   const tabs: Tab[] = [
-    { key: 'home',  label: en.pwa.tabHome,  href: '/',                                      icon: Home },
-    { key: 'shop',  label: en.pwa.tabShop,  href: catalogHref(config?.landingEnabled), icon: ShoppingBag },
+    { key: 'home', label: en.pwa.tabHome, href: '/', icon: Home },
+    {
+      key: 'shop',
+      label: en.pwa.tabShop,
+      href: catalogHref(config?.landingEnabled),
+      icon: ShoppingBag,
+    },
     {
       key: 'cart',
       label: en.pwa.tabCart,
       icon: ShoppingCart,
-      onClick: () => { vibrate('light'); openCart() },
+      onClick: () => {
+        vibrate('light')
+        openCart()
+      },
     },
-    { key: 'track', label: en.pwa.tabTrack, href: '/track',   icon: Package },
-    { key: 'menu',  label: en.pwa.tabMenu,  href: '/#menu',   icon: Menu },
+    { key: 'track', label: en.pwa.tabTrack, href: '/track', icon: Package },
+    { key: 'menu', label: en.pwa.tabMenu, href: '/#menu', icon: Menu },
   ]
 
   return (
@@ -50,20 +58,32 @@ export function AppTabBar() {
       aria-label="Main navigation"
     >
       {tabs.map((tab) => {
-        const isActive = tab.href ? pathname === tab.href || pathname.startsWith(tab.href + '/') : false
+        const isActive = tab.href
+          ? pathname === tab.href || pathname.startsWith(tab.href + '/')
+          : false
         const Icon = tab.icon
 
         const inner = (
           <span className="flex flex-col items-center gap-0.5 relative">
             <span className="relative">
-              <Icon className={cn('h-5 w-5 transition-colors', isActive ? 'text-primary' : 'text-muted-foreground')} />
+              <Icon
+                className={cn(
+                  'h-5 w-5 transition-colors',
+                  isActive ? 'text-primary' : 'text-muted-foreground',
+                )}
+              />
               {tab.key === 'cart' && cartCount > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground">
                   {cartCount > 9 ? '9+' : cartCount}
                 </span>
               )}
             </span>
-            <span className={cn('text-[10px] transition-colors', isActive ? 'text-primary font-medium' : 'text-muted-foreground')}>
+            <span
+              className={cn(
+                'text-[10px] transition-colors',
+                isActive ? 'text-primary font-medium' : 'text-muted-foreground',
+              )}
+            >
               {tab.label}
             </span>
           </span>

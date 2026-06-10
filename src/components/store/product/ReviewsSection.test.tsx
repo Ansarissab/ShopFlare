@@ -23,16 +23,31 @@ vi.mock('@/components/store/product/ReviewStars', async () => {
 vi.mock('@/components/store/product/ReviewForm', async () => {
   const { createElement } = await import('react')
   return {
-    ReviewForm: ({ onSubmitted, productId, productName }: { onSubmitted: () => void; productId: string; productName: string }) =>
+    ReviewForm: ({
+      onSubmitted,
+      productId,
+      productName,
+    }: {
+      onSubmitted: () => void
+      productId: string
+      productName: string
+    }) =>
       createElement(
         'button',
-        { 'data-testid': 'submit-review', 'data-product-id': productId, 'data-product-name': productName, onClick: onSubmitted },
+        {
+          'data-testid': 'submit-review',
+          'data-product-id': productId,
+          'data-product-name': productName,
+          onClick: onSubmitted,
+        },
         'mock-submit',
       ),
   }
 })
 
-function state(overrides: Partial<ApiResourceState<ProductReviewsResponse>>): ApiResourceState<ProductReviewsResponse> {
+function state(
+  overrides: Partial<ApiResourceState<ProductReviewsResponse>>,
+): ApiResourceState<ProductReviewsResponse> {
   return { data: null, loading: false, error: null, notFound: false, ...overrides }
 }
 
@@ -40,7 +55,13 @@ const reviewsData: ProductReviewsResponse = {
   average: 4.5,
   count: 2,
   reviews: [
-    { id: 'r1', customerName: 'Alice', rating: 5, body: 'Great product!', createdAt: '2024-01-02 10:00:00' },
+    {
+      id: 'r1',
+      customerName: 'Alice',
+      rating: 5,
+      body: 'Great product!',
+      createdAt: '2024-01-02 10:00:00',
+    },
     { id: 'r2', customerName: 'Bob', rating: 4, body: null, createdAt: '2024-01-03 10:00:00' },
   ],
 }
@@ -131,9 +152,7 @@ describe('ReviewsSection', () => {
   })
 
   it('renders the no-reviews message when count is 0', () => {
-    useApiResource.mockReturnValue(
-      state({ data: { average: 0, count: 0, reviews: [] } }),
-    )
+    useApiResource.mockReturnValue(state({ data: { average: 0, count: 0, reviews: [] } }))
     render(<ReviewsSection productId="p1" productName="Hoodie" />)
     expect(screen.getByText(en.reviews.noReviews)).toBeTruthy()
   })

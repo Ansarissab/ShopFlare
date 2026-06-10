@@ -49,15 +49,26 @@ const adminPut = (path: string, body: unknown) =>
     body: JSON.stringify(body),
   })
 
-const adminDelete = (path: string) =>
-  SELF.fetch(`${BASE}${path}`, { method: 'DELETE' })
+const adminDelete = (path: string) => SELF.fetch(`${BASE}${path}`, { method: 'DELETE' })
 
 // ─── Cleanup ──────────────────────────────────────────────────────────────────
 
 const TABLES = [
-  'coupon_uses', 'reviews', 'notify_me', 'order_items', 'orders', 'coupons',
-  'size_options', 'product_images', 'variants', 'products', 'store_config',
-  'stripe_events', 'push_subscriptions', 'analytics_daily', 'carts',
+  'coupon_uses',
+  'reviews',
+  'notify_me',
+  'order_items',
+  'orders',
+  'coupons',
+  'size_options',
+  'product_images',
+  'variants',
+  'products',
+  'store_config',
+  'stripe_events',
+  'push_subscriptions',
+  'analytics_daily',
+  'carts',
 ]
 beforeEach(async () => {
   for (const t of TABLES) await env.DB.prepare(`DELETE FROM ${t}`).run()
@@ -68,8 +79,12 @@ beforeEach(async () => {
 async function seedProduct(opts: { stock?: number; priceCents?: number } = {}) {
   const { stock = 5, priceCents = 2000 } = opts
   await db().insert(schema.products).values({ id: 'p1', name: 'Demo Tee', active: true })
-  await db().insert(schema.variants).values({ id: 'v1', productId: 'p1', label: 'Black', sortOrder: 0 })
-  await db().insert(schema.sizeOptions).values({ id: 's1', variantId: 'v1', size: 'M', priceCents, stock, active: true })
+  await db()
+    .insert(schema.variants)
+    .values({ id: 'v1', productId: 'p1', label: 'Black', sortOrder: 0 })
+  await db()
+    .insert(schema.sizeOptions)
+    .values({ id: 's1', variantId: 'v1', size: 'M', priceCents, stock, active: true })
   return { productId: 'p1', variantId: 'v1', sizeId: 's1' }
 }
 
@@ -225,8 +240,13 @@ describe('DELETE /api/admin/coupons/:id', () => {
 describe('POST /api/coupons/validate', () => {
   it('returns valid=true + discountCents for an active percentage coupon', async () => {
     await db().insert(schema.coupons).values({
-      id: 'c1', code: 'WELCOME10', type: 'percentage', value: 10,
-      perCustomerLimit: 1, usedCount: 0, active: true,
+      id: 'c1',
+      code: 'WELCOME10',
+      type: 'percentage',
+      value: 10,
+      perCustomerLimit: 1,
+      usedCount: 0,
+      active: true,
     })
 
     const res = await post('/api/coupons/validate', { code: 'WELCOME10', subtotalCents: 2000 })
@@ -238,8 +258,13 @@ describe('POST /api/coupons/validate', () => {
 
   it('returns valid=true + discountCents for an active flat coupon', async () => {
     await db().insert(schema.coupons).values({
-      id: 'c2', code: 'FLAT100', type: 'fixed', value: 100,
-      perCustomerLimit: 2, usedCount: 0, active: true,
+      id: 'c2',
+      code: 'FLAT100',
+      type: 'fixed',
+      value: 100,
+      perCustomerLimit: 2,
+      usedCount: 0,
+      active: true,
     })
 
     const res = await post('/api/coupons/validate', { code: 'FLAT100', subtotalCents: 1500 })
@@ -258,8 +283,13 @@ describe('POST /api/coupons/validate', () => {
 
   it('returns valid=false for inactive coupon', async () => {
     await db().insert(schema.coupons).values({
-      id: 'c3', code: 'INACTIVE', type: 'percentage', value: 20,
-      perCustomerLimit: 1, usedCount: 0, active: false,
+      id: 'c3',
+      code: 'INACTIVE',
+      type: 'percentage',
+      value: 20,
+      perCustomerLimit: 1,
+      usedCount: 0,
+      active: false,
     })
 
     const res = await post('/api/coupons/validate', { code: 'INACTIVE', subtotalCents: 1000 })
@@ -269,8 +299,14 @@ describe('POST /api/coupons/validate', () => {
 
   it('returns valid=false when subtotal is below minOrderCents', async () => {
     await db().insert(schema.coupons).values({
-      id: 'c4', code: 'MINORDER', type: 'fixed', value: 50,
-      minOrderCents: 1000, perCustomerLimit: 1, usedCount: 0, active: true,
+      id: 'c4',
+      code: 'MINORDER',
+      type: 'fixed',
+      value: 50,
+      minOrderCents: 1000,
+      perCustomerLimit: 1,
+      usedCount: 0,
+      active: true,
     })
 
     const res = await post('/api/coupons/validate', { code: 'MINORDER', subtotalCents: 500 })
@@ -288,8 +324,13 @@ describe('POST /api/orders/cod with coupon', () => {
   it('applies a valid coupon and reduces total correctly', async () => {
     await seedProduct({ priceCents: 2000, stock: 5 })
     await db().insert(schema.coupons).values({
-      id: 'coup1', code: 'ORDER10', type: 'percentage', value: 10,
-      perCustomerLimit: 1, usedCount: 0, active: true,
+      id: 'coup1',
+      code: 'ORDER10',
+      type: 'percentage',
+      value: 10,
+      perCustomerLimit: 1,
+      usedCount: 0,
+      active: true,
     })
 
     const res = await post('/api/orders/cod', {

@@ -66,7 +66,13 @@ export function usePushSubscription(opts: PushSubscriptionOptions = {}): UsePush
       // Check per-endpoint registration in localStorage first (avoids cross-endpoint
       // false-positives where an admin sub would suppress the customer opt-in).
       const storageKey = `pwa-push-${opts.endpoint ?? 'admin'}`
-      const wasRegistered = (() => { try { return localStorage.getItem(storageKey) === '1' } catch { return false } })()
+      const wasRegistered = (() => {
+        try {
+          return localStorage.getItem(storageKey) === '1'
+        } catch {
+          return false
+        }
+      })()
       if (wasRegistered) {
         setEnabled(true)
         return
@@ -78,7 +84,9 @@ export function usePushSubscription(opts: PushSubscriptionOptions = {}): UsePush
         .then((sub) => {
           if (!cancelled && sub) setEnabled(true)
         })
-        .catch(() => {/* no-op */})
+        .catch(() => {
+          /* no-op */
+        })
     })
 
     return () => {
@@ -134,7 +142,9 @@ export function usePushSubscription(opts: PushSubscriptionOptions = {}): UsePush
       })
 
       setEnabled(true)
-      try { localStorage.setItem(`pwa-push-${opts.endpoint ?? 'admin'}`, '1') } catch {}
+      try {
+        localStorage.setItem(`pwa-push-${opts.endpoint ?? 'admin'}`, '1')
+      } catch {}
       return true
     } catch (err) {
       console.warn('[usePushSubscription] enable error', err)
@@ -142,7 +152,7 @@ export function usePushSubscription(opts: PushSubscriptionOptions = {}): UsePush
     } finally {
       setLoading(false)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supported, loading, opts.endpoint, extraPayloadKey])
 
   return { supported, permission, enabled, enable, loading }

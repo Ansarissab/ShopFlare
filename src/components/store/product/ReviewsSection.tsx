@@ -11,7 +11,12 @@ import { en } from '@/lib/i18n/en'
 import type { ReviewsSectionProps, ProductReviewsResponse } from '@/lib/types/product'
 import { formatDate } from '@/lib/utils/index'
 
-export function ReviewsSection({ productId, productName, reviewsEnabled = true, className }: ReviewsSectionProps) {
+export function ReviewsSection({
+  productId,
+  productName,
+  reviewsEnabled = true,
+  className,
+}: ReviewsSectionProps) {
   const [showForm, setShowForm] = useState(false)
   const { data, loading, error } = useApiResource<ProductReviewsResponse>(
     reviewsEnabled ? `/api/reviews/product/${productId}` : null,
@@ -43,12 +48,7 @@ export function ReviewsSection({ productId, productName, reviewsEnabled = true, 
             productName={productName}
             onSubmitted={handleSubmitted}
           />
-          <Button
-            variant="ghost"
-            size="sm"
-            className="mt-2"
-            onClick={() => setShowForm(false)}
-          >
+          <Button variant="ghost" size="sm" className="mt-2" onClick={() => setShowForm(false)}>
             {en.reviews.cancel}
           </Button>
           <Separator className="my-6" />
@@ -63,9 +63,7 @@ export function ReviewsSection({ productId, productName, reviewsEnabled = true, 
         </div>
       )}
 
-      {!loading && error && (
-        <p className="text-sm text-destructive">{en.errors.networkError}</p>
-      )}
+      {!loading && error && <p className="text-sm text-destructive">{en.errors.networkError}</p>}
 
       {!loading && !error && data && (
         <>
@@ -95,10 +93,7 @@ export function ReviewsSection({ productId, productName, reviewsEnabled = true, 
                           {en.reviews.verifiedPurchase}
                         </span>
                       </div>
-                      <time
-                        dateTime={review.createdAt}
-                        className="text-xs text-muted-foreground"
-                      >
+                      <time dateTime={review.createdAt} className="text-xs text-muted-foreground">
                         {formatDate(review.createdAt)}
                       </time>
                     </div>

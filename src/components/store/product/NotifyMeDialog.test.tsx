@@ -98,5 +98,4 @@ describe('NotifyMeDialog', () => {
     await waitFor(() => expect(screen.getByText(en.errors.invalidPhone)).toBeTruthy())
     expect(apiPostMock).not.toHaveBeenCalled()
   })
-
 })

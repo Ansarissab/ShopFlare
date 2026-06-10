@@ -36,7 +36,10 @@ app.put('/store', async (c) => {
     await db
       .insert(schema.storeConfig)
       .values({ key, value: String(value), updatedAt: now })
-      .onConflictDoUpdate({ target: schema.storeConfig.key, set: { value: String(value), updatedAt: now } })
+      .onConflictDoUpdate({
+        target: schema.storeConfig.key,
+        set: { value: String(value), updatedAt: now },
+      })
   }
 
   await bumpDataVersion(db)
@@ -73,7 +76,12 @@ app.post('/logo', async (c) => {
   }
 
   // Content-addressed R2 key
-  const ext = file.type === 'image/svg+xml' ? 'svg' : file.type === 'image/jpeg' ? 'jpg' : file.type.split('/')[1]
+  const ext =
+    file.type === 'image/svg+xml'
+      ? 'svg'
+      : file.type === 'image/jpeg'
+        ? 'jpg'
+        : file.type.split('/')[1]
   const r2Key = `branding/logo-${nanoid()}.${ext}`
 
   await c.env.R2.put(r2Key, await file.arrayBuffer(), {
@@ -83,7 +91,10 @@ app.post('/logo', async (c) => {
   const logoUrl = `${new URL(c.req.url).origin}/cdn/${r2Key}`
   const now = new Date().toISOString()
 
-  for (const [key, value] of [['logoUrl', logoUrl], ['logoR2Key', r2Key]] as [string, string][]) {
+  for (const [key, value] of [
+    ['logoUrl', logoUrl],
+    ['logoR2Key', r2Key],
+  ] as [string, string][]) {
     await db
       .insert(schema.storeConfig)
       .values({ key, value, updatedAt: now })
@@ -151,7 +162,12 @@ app.post('/favicon', async (c) => {
     await c.env.R2.delete(oldKeyRow.value).catch(() => {})
   }
 
-  const ext = file.type === 'image/svg+xml' ? 'svg' : file.type === 'image/jpeg' ? 'jpg' : file.type.split('/')[1]
+  const ext =
+    file.type === 'image/svg+xml'
+      ? 'svg'
+      : file.type === 'image/jpeg'
+        ? 'jpg'
+        : file.type.split('/')[1]
   const r2Key = `branding/favicon-${nanoid()}.${ext}`
 
   await c.env.R2.put(r2Key, await file.arrayBuffer(), {
@@ -161,7 +177,10 @@ app.post('/favicon', async (c) => {
   const faviconUrl = `${new URL(c.req.url).origin}/cdn/${r2Key}`
   const now = new Date().toISOString()
 
-  for (const [key, value] of [['faviconUrl', faviconUrl], ['faviconR2Key', r2Key]] as const) {
+  for (const [key, value] of [
+    ['faviconUrl', faviconUrl],
+    ['faviconR2Key', r2Key],
+  ] as const) {
     await db
       .insert(schema.storeConfig)
       .values({ key, value, updatedAt: now })

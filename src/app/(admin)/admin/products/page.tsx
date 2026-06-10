@@ -63,11 +63,19 @@ export default function AdminProductsPage() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Link href={`/product/${product.id}`} target="_blank" rel="noopener noreferrer" className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}>
+                  <Link
+                    href={`/product/${product.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}
+                  >
                     <ExternalLink className="size-3.5 mr-1" aria-hidden />
                     {en.admin.viewProduct}
                   </Link>
-                  <Link href={`/admin/products/${product.id}`} className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}>
+                  <Link
+                    href={`/admin/products/${product.id}`}
+                    className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
+                  >
                     {en.admin.editProduct}
                   </Link>
                 </div>

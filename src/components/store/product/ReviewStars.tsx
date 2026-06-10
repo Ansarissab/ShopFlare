@@ -29,7 +29,10 @@ export function ReviewStars({ rating, onChange, className }: ReviewStarsProps) {
             key={star}
             type="button"
             onClick={() => onChange(star)}
-            aria-label={(star === 1 ? en.reviews.starLabel : en.reviews.starLabelPlural).replace('{count}', String(star))}
+            aria-label={(star === 1 ? en.reviews.starLabel : en.reviews.starLabelPlural).replace(
+              '{count}',
+              String(star),
+            )}
             className="focus-visible:outline-none"
           >
             <Star

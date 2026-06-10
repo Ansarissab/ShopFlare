@@ -32,7 +32,11 @@ vi.mock('@/lib/server/fetchFromWorker', () => ({
 vi.mock('@/components/shared/RenderHtml', async () => {
   const { createElement } = await import('react')
   return {
-    RenderHtml: ({ html }: { html: string }) => createElement('div', { 'data-testid': 'render-html', dangerouslySetInnerHTML: { __html: html } }),
+    RenderHtml: ({ html }: { html: string }) =>
+      createElement('div', {
+        'data-testid': 'render-html',
+        dangerouslySetInnerHTML: { __html: html },
+      }),
   }
 })
 
@@ -125,7 +129,13 @@ describe('HeroSection', () => {
     imageUrl: string | null = null,
   ) {
     const { HeroSection } = await import('./HeroSection')
-    return render(<HeroSection section={makeSection(sectionOverrides)} heroStyle={heroStyle} imageUrl={imageUrl} />)
+    return render(
+      <HeroSection
+        section={makeSection(sectionOverrides)}
+        heroStyle={heroStyle}
+        imageUrl={imageUrl}
+      />,
+    )
   }
 
   it('renders default heading via en.store.heroDefaultHeading', async () => {
@@ -185,7 +195,12 @@ describe('StorySection', () => {
     imageUrl: string | null = null,
   ) {
     const { StorySection } = await import('./StorySection')
-    return render(<StorySection section={makeSection({ sectionKey: 'story', ...sectionOverrides })} imageUrl={imageUrl} />)
+    return render(
+      <StorySection
+        section={makeSection({ sectionKey: 'story', ...sectionOverrides })}
+        imageUrl={imageUrl}
+      />,
+    )
   }
 
   it('renders default heading', async () => {
@@ -224,13 +239,35 @@ describe('StorySection', () => {
 describe('FeaturedProductsStrip', () => {
   const mockVariant = { id: 'v1', name: 'Default', sizes: [], images: [] }
   const mockProduct: ProductWithVariants = {
-    product: { id: 'p1', name: 'Cool Tee', slug: 'cool-tee', price: 2000, description: null, categoryId: null, categorySlug: null, displayOrder: 0, isHidden: false, whatsappEnabled: true, reviewsEnabled: true, reviewSummary: null, updatedAt: '2024-01-01' },
+    product: {
+      id: 'p1',
+      name: 'Cool Tee',
+      slug: 'cool-tee',
+      price: 2000,
+      description: null,
+      categoryId: null,
+      categorySlug: null,
+      displayOrder: 0,
+      isHidden: false,
+      whatsappEnabled: true,
+      reviewsEnabled: true,
+      reviewSummary: null,
+      updatedAt: '2024-01-01',
+    },
     variants: [mockVariant],
   } as unknown as ProductWithVariants
 
-  async function renderFeatured(products: ProductWithVariants[] = [], sectionOverrides: Partial<LandingSection> = {}) {
+  async function renderFeatured(
+    products: ProductWithVariants[] = [],
+    sectionOverrides: Partial<LandingSection> = {},
+  ) {
     const { FeaturedProductsStrip } = await import('./FeaturedProductsStrip')
-    return render(<FeaturedProductsStrip section={makeSection({ sectionKey: 'featured', ...sectionOverrides })} products={products} />)
+    return render(
+      <FeaturedProductsStrip
+        section={makeSection({ sectionKey: 'featured', ...sectionOverrides })}
+        products={products}
+      />,
+    )
   }
 
   it('returns null when products array is empty', async () => {
@@ -279,7 +316,13 @@ describe('ReviewsStrip', () => {
   it('renders review cards when data arrives', async () => {
     mockApiData = {
       reviews: [
-        { id: 'r1', customerName: 'Alice', rating: 5, body: 'Great!', createdAt: '2024-01-15T00:00:00Z' },
+        {
+          id: 'r1',
+          customerName: 'Alice',
+          rating: 5,
+          body: 'Great!',
+          createdAt: '2024-01-15T00:00:00Z',
+        },
       ],
     }
     mockApiLoading = false
@@ -301,17 +344,23 @@ describe('LandingPage', () => {
   function makeAllSections(overrides: Partial<Record<string, Partial<LandingSection>>> = {}) {
     const keys = ['hero', 'story', 'featured', 'reviews', 'cta'] as const
     return Object.fromEntries(
-      keys.map(k => [k, makeSection({ sectionKey: k, ...overrides[k] })]),
+      keys.map((k) => [k, makeSection({ sectionKey: k, ...overrides[k] })]),
     ) as Record<string, LandingSection>
   }
 
-  async function renderLanding(sectionOverrides: Partial<Record<string, Partial<LandingSection>>> = {}, products: ProductWithVariants[] = []) {
+  async function renderLanding(
+    sectionOverrides: Partial<Record<string, Partial<LandingSection>>> = {},
+    products: ProductWithVariants[] = [],
+  ) {
     const { LandingPage } = await import('./LandingPage')
     return render(
       <LandingPage
-        landing={{ sections: makeAllSections(sectionOverrides) as never, featuredProducts: products }}
+        landing={{
+          sections: makeAllSections(sectionOverrides) as never,
+          featuredProducts: products,
+        }}
         storeConfig={{ storeName: 'TestStore' }}
-      />
+      />,
     )
   }
 

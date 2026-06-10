@@ -10,9 +10,7 @@ export function CategoryImageUpload({
   onUploadComplete,
   onRemove,
 }: CategoryImageUploadProps) {
-  const currentImages = currentImageUrl
-    ? [{ id: 'category-image', url: currentImageUrl }]
-    : []
+  const currentImages = currentImageUrl ? [{ id: 'category-image', url: currentImageUrl }] : []
 
   return (
     <div className="flex flex-col gap-3">

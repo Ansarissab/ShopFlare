@@ -30,12 +30,7 @@ export function OrderPushOptIn({ orderNumber }: Props) {
         </div>
       </div>
       <div className="flex gap-2">
-        <Button
-          size="sm"
-          onClick={() => enable()}
-          disabled={loading}
-          className="w-full sm:w-auto"
-        >
+        <Button size="sm" onClick={() => enable()} disabled={loading} className="w-full sm:w-auto">
           {loading ? '…' : en.pwa.orderPushEnableAction}
         </Button>
         <Button

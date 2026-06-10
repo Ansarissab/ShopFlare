@@ -81,10 +81,7 @@ describe('CategoryProductsManager', () => {
       products: [makeProduct('p1', 'Alpha'), makeProduct('p2', 'Beta'), makeProduct('p3', 'Gamma')],
     })
     render(
-      <CategoryProductsManager
-        categoryId="cat-1"
-        initialProducts={[makeProduct('p1', 'Alpha')]}
-      />,
+      <CategoryProductsManager categoryId="cat-1" initialProducts={[makeProduct('p1', 'Alpha')]} />,
     )
     fireEvent.click(screen.getByText(en.admin.addProductsToCategory))
     await waitFor(() => expect(screen.getByText('Beta')).toBeTruthy())
@@ -207,7 +204,9 @@ describe('CategoryProductsManager', () => {
   it('adds a product with undefined categoryIds (item.categoryIds ?? [] fallback)', async () => {
     // product fetched without categoryIds -> nullish coalescing falls back to []
     vi.mocked(apiGet).mockResolvedValueOnce({
-      products: [{ ...makeProduct('p2', 'Beta'), categoryIds: undefined } as unknown as ProductWithVariants],
+      products: [
+        { ...makeProduct('p2', 'Beta'), categoryIds: undefined } as unknown as ProductWithVariants,
+      ],
     })
     render(<CategoryProductsManager categoryId="cat-1" initialProducts={[]} />)
     fireEvent.click(screen.getByText(en.admin.addProductsToCategory))
@@ -222,7 +221,9 @@ describe('CategoryProductsManager', () => {
 
   it('removes a product with undefined categoryIds (remaining ?? [] fallback)', async () => {
     vi.mocked(apiGet).mockResolvedValueOnce({ products: [] })
-    const initial = [{ ...makeProduct('p1', 'Alpha'), categoryIds: undefined } as unknown as ProductWithVariants]
+    const initial = [
+      { ...makeProduct('p1', 'Alpha'), categoryIds: undefined } as unknown as ProductWithVariants,
+    ]
     render(<CategoryProductsManager categoryId="cat-1" initialProducts={initial} />)
     fireEvent.click(screen.getByLabelText('Remove from category'))
     await waitFor(() =>

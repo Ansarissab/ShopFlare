@@ -33,7 +33,10 @@ describe('schemas barrel (index.ts)', () => {
     const ok = schemas.codOrderSchema.safeParse({
       items: [{ sizeOptionId: 'sz1', quantity: 1 }],
       shippingAddress: {
-        name: 'Jane', address: '12 Main St', city: 'Karachi', country: 'PK',
+        name: 'Jane',
+        address: '12 Main St',
+        city: 'Karachi',
+        country: 'PK',
       },
     })
     expect(ok.success).toBe(true)

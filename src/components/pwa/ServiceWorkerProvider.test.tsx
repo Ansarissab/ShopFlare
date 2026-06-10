@@ -25,7 +25,12 @@ function makeWorker(state = 'installed') {
   }
 }
 
-function makeRegistration(opts: { waiting?: ReturnType<typeof makeWorker>; installing?: ReturnType<typeof makeWorker> } = {}) {
+function makeRegistration(
+  opts: {
+    waiting?: ReturnType<typeof makeWorker>
+    installing?: ReturnType<typeof makeWorker>
+  } = {},
+) {
   const listeners: Record<string, Listener[]> = {}
   return {
     waiting: opts.waiting ?? null,
@@ -39,9 +44,11 @@ function makeRegistration(opts: { waiting?: ReturnType<typeof makeWorker>; insta
   }
 }
 
-function installSW(opts: {
-  registerImpl?: () => Promise<unknown>
-} = {}) {
+function installSW(
+  opts: {
+    registerImpl?: () => Promise<unknown>
+  } = {},
+) {
   const containerListeners: Record<string, Listener[]> = {}
   const register = vi.fn(opts.registerImpl ?? (() => Promise.resolve(makeRegistration())))
   const container = {
@@ -112,7 +119,9 @@ describe('ServiceWorkerProvider', () => {
         <div>x</div>
       </ServiceWorkerProvider>,
     )
-    await waitFor(() => expect(toast).toHaveBeenCalledWith(en.pwa.updateAvailable, expect.anything()))
+    await waitFor(() =>
+      expect(toast).toHaveBeenCalledWith(en.pwa.updateAvailable, expect.anything()),
+    )
     // exercise the action onClick -> postMessage SKIP_WAITING
     const opts = toast.mock.calls[0][1] as { action: { onClick: () => void } }
     opts.action.onClick()
@@ -128,7 +137,9 @@ describe('ServiceWorkerProvider', () => {
         <div>x</div>
       </ServiceWorkerProvider>,
     )
-    await waitFor(() => expect(reg.addEventListener).toHaveBeenCalledWith('updatefound', expect.any(Function)))
+    await waitFor(() =>
+      expect(reg.addEventListener).toHaveBeenCalledWith('updatefound', expect.any(Function)),
+    )
 
     // trigger updatefound -> registers statechange listener on installing worker
     reg.emit('updatefound')
@@ -149,7 +160,9 @@ describe('ServiceWorkerProvider', () => {
         <div>x</div>
       </ServiceWorkerProvider>,
     )
-    await waitFor(() => expect(reg.addEventListener).toHaveBeenCalledWith('updatefound', expect.any(Function)))
+    await waitFor(() =>
+      expect(reg.addEventListener).toHaveBeenCalledWith('updatefound', expect.any(Function)),
+    )
     reg.emit('updatefound')
     // statechange fires while still 'installing' → guard false → no toast
     installing.emit('statechange')
@@ -167,7 +180,9 @@ describe('ServiceWorkerProvider', () => {
         <div>x</div>
       </ServiceWorkerProvider>,
     )
-    await waitFor(() => expect(reg.addEventListener).toHaveBeenCalledWith('updatefound', expect.any(Function)))
+    await waitFor(() =>
+      expect(reg.addEventListener).toHaveBeenCalledWith('updatefound', expect.any(Function)),
+    )
     reg.emit('updatefound')
     installing.state = 'installed'
     installing.emit('statechange')
@@ -194,7 +209,9 @@ describe('ServiceWorkerProvider', () => {
         <div>x</div>
       </ServiceWorkerProvider>,
     )
-    await waitFor(() => expect(reg.addEventListener).toHaveBeenCalledWith('updatefound', expect.any(Function)))
+    await waitFor(() =>
+      expect(reg.addEventListener).toHaveBeenCalledWith('updatefound', expect.any(Function)),
+    )
     reg.emit('updatefound')
     expect(toast).not.toHaveBeenCalled()
   })
@@ -212,7 +229,10 @@ describe('ServiceWorkerProvider', () => {
       </ServiceWorkerProvider>,
     )
     await waitFor(() =>
-      expect(container.addEventListener).toHaveBeenCalledWith('controllerchange', expect.any(Function)),
+      expect(container.addEventListener).toHaveBeenCalledWith(
+        'controllerchange',
+        expect.any(Function),
+      ),
     )
     container.emit('controllerchange')
     container.emit('controllerchange') // guarded by reloadingRef — still 1 call

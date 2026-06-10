@@ -14,7 +14,9 @@ vi.mock('next/link', async () => {
 vi.mock('next/image', async () => {
   const { createElement } = await import('react')
   return {
-    default: (props: React.ImgHTMLAttributes<HTMLImageElement> & { fill?: boolean; priority?: boolean }) => {
+    default: (
+      props: React.ImgHTMLAttributes<HTMLImageElement> & { fill?: boolean; priority?: boolean },
+    ) => {
       const { fill, priority, ...rest } = props
       return createElement('img', rest)
     },
@@ -80,65 +82,31 @@ const image = {
 
 describe('ProductCard', () => {
   it('renders product name', () => {
-    render(
-      <ProductCard
-        product={product}
-        variants={[variant]}
-        sizes={[size]}
-        images={[image]}
-      />,
-    )
+    render(<ProductCard product={product} variants={[variant]} sizes={[size]} images={[image]} />)
     expect(screen.getByText('Classic Tee')).toBeTruthy()
   })
 
   it('renders formatted price', () => {
-    render(
-      <ProductCard
-        product={product}
-        variants={[variant]}
-        sizes={[size]}
-        images={[image]}
-      />,
-    )
+    render(<ProductCard product={product} variants={[variant]} sizes={[size]} images={[image]} />)
     // 1500 PKR = ₨1,500
     expect(screen.getByText(/₨1,500/)).toBeTruthy()
   })
 
   it('links to product page with correct href', () => {
-    render(
-      <ProductCard
-        product={product}
-        variants={[variant]}
-        sizes={[size]}
-        images={[image]}
-      />,
-    )
+    render(<ProductCard product={product} variants={[variant]} sizes={[size]} images={[image]} />)
     const link = screen.getByRole('link')
     expect(link.getAttribute('href')).toBe('/product/prod-1')
   })
 
   it('renders product image with alt text', () => {
-    render(
-      <ProductCard
-        product={product}
-        variants={[variant]}
-        sizes={[size]}
-        images={[image]}
-      />,
-    )
+    render(<ProductCard product={product} variants={[variant]} sizes={[size]} images={[image]} />)
     const img = screen.getByAltText('Classic Tee') as HTMLImageElement
     expect(img.src).toContain('/images/tee.jpg')
   })
 
   it('shows New badge when isNew is true', () => {
     render(
-      <ProductCard
-        product={product}
-        variants={[variant]}
-        sizes={[size]}
-        images={[image]}
-        isNew
-      />,
+      <ProductCard product={product} variants={[variant]} sizes={[size]} images={[image]} isNew />,
     )
     expect(screen.getByText('New')).toBeTruthy()
   })
@@ -146,25 +114,13 @@ describe('ProductCard', () => {
   it('shows out-of-stock when all sizes have zero stock', () => {
     const oosSize = { ...size, stock: 0 }
     render(
-      <ProductCard
-        product={product}
-        variants={[variant]}
-        sizes={[oosSize]}
-        images={[image]}
-      />,
+      <ProductCard product={product} variants={[variant]} sizes={[oosSize]} images={[image]} />,
     )
     expect(screen.getByText('Out of Stock')).toBeTruthy()
   })
 
   it('shows no-image placeholder when images array is empty', () => {
-    render(
-      <ProductCard
-        product={product}
-        variants={[variant]}
-        sizes={[size]}
-        images={[]}
-      />,
-    )
+    render(<ProductCard product={product} variants={[variant]} sizes={[size]} images={[]} />)
     expect(screen.getByText('No image')).toBeTruthy()
   })
 
@@ -185,17 +141,13 @@ describe('ProductCard', () => {
   })
 
   it('renders a color dot per color variant with its title', () => {
-    render(
-      <ProductCard product={product} variants={[variant]} sizes={[size]} images={[image]} />,
-    )
+    render(<ProductCard product={product} variants={[variant]} sizes={[size]} images={[image]} />)
     expect(screen.getByTitle('White')).toBeTruthy()
   })
 
   it('renders no color dots when no variant has a colorHex', () => {
     const noColor = { ...variant, colorHex: null }
-    render(
-      <ProductCard product={product} variants={[noColor]} sizes={[size]} images={[image]} />,
-    )
+    render(<ProductCard product={product} variants={[noColor]} sizes={[size]} images={[image]} />)
     expect(screen.queryByTitle('White')).toBeNull()
   })
 
@@ -206,9 +158,7 @@ describe('ProductCard', () => {
       label: `Color ${i}`,
       colorHex: '#123456',
     }))
-    render(
-      <ProductCard product={product} variants={many} sizes={[size]} images={[image]} />,
-    )
+    render(<ProductCard product={product} variants={many} sizes={[size]} images={[image]} />)
     // 7 color variants, 5 dots shown → +2 overflow
     expect(screen.getByText('+2')).toBeTruthy()
   })

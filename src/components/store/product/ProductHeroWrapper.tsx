@@ -26,9 +26,7 @@ export function ProductHeroWrapper({ item }: ProductHeroWrapperProps) {
   // ── Local helper: build a CartItem from a SizeOption ───────────────────────
   const buildCartItem = useCallback(
     (size: SizeOption): CartItem => {
-      const variant = item.variants.find((v) =>
-        v.sizes.some((s: SizeOption) => s.id === size.id),
-      )
+      const variant = item.variants.find((v) => v.sizes.some((s: SizeOption) => s.id === size.id))
       return {
         sizeOptionId: size.id,
         productId: item.product.id,
@@ -82,9 +80,7 @@ export function ProductHeroWrapper({ item }: ProductHeroWrapperProps) {
         toast.error(en.errors.networkError)
         return
       }
-      const variant = item.variants.find((v) =>
-        v.sizes.some((s: SizeOption) => s.id === size.id),
-      )
+      const variant = item.variants.find((v) => v.sizes.some((s: SizeOption) => s.id === size.id))
       const url = buildWhatsAppOrderUrl({
         phoneNumber: config.whatsappNumber,
         productName: item.product.name,

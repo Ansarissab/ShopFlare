@@ -41,14 +41,19 @@ vi.mock('@/components/admin/products/ImageUpload', () => ({
 }))
 vi.mock('@/components/admin/categories/ProductCategoryPicker', () => ({
   ProductCategoryPicker: ({ onChange }: { onChange: (ids: string[]) => void }) => (
-    <button type="button" onClick={() => onChange(['cat-1'])}>pick-cat</button>
+    <button type="button" onClick={() => onChange(['cat-1'])}>
+      pick-cat
+    </button>
   ),
 }))
 
 import { apiGet, apiPost, apiPut, apiDelete } from '@/lib/api'
 import { toast } from 'sonner'
 
-function makeProduct(overrides?: Partial<ProductWithVariants['product']>, variants?: ProductWithVariants['variants']): ProductWithVariants {
+function makeProduct(
+  overrides?: Partial<ProductWithVariants['product']>,
+  variants?: ProductWithVariants['variants'],
+): ProductWithVariants {
   return {
     product: {
       id: 'prod-1',
@@ -66,7 +71,11 @@ function makeProduct(overrides?: Partial<ProductWithVariants['product']>, varian
   }
 }
 
-function makeVariant(id = 'var-1', sizes: ProductWithVariants['variants'][number]['sizes'] = [], images: ProductWithVariants['variants'][number]['images'] = []) {
+function makeVariant(
+  id = 'var-1',
+  sizes: ProductWithVariants['variants'][number]['sizes'] = [],
+  images: ProductWithVariants['variants'][number]['images'] = [],
+) {
   return {
     id,
     productId: 'prod-1',
@@ -122,7 +131,9 @@ describe('ProductForm — create mode (no initial)', () => {
   it('blocks save and toasts required error when name is empty', () => {
     render(<ProductForm />)
     fireEvent.click(screen.getByText(en.admin.createProduct))
-    expect(toast.error).toHaveBeenCalledWith(en.errors.required.replace('{field}', en.admin.productName))
+    expect(toast.error).toHaveBeenCalledWith(
+      en.errors.required.replace('{field}', en.admin.productName),
+    )
     expect(apiPost).not.toHaveBeenCalled()
   })
 
@@ -133,18 +144,34 @@ describe('ProductForm — create mode (no initial)', () => {
     fireEvent.click(screen.getByText(en.admin.createProduct))
 
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith(en.admin.productCreated))
-    expect(apiPost).toHaveBeenCalledWith('/api/admin/products', { name: 'New Tee', description: '', active: true, reviewsEnabled: true })
-    expect(apiPut).toHaveBeenCalledWith('/api/admin/products/new-prod/categories', { categoryIds: ['cat-1'] })
+    expect(apiPost).toHaveBeenCalledWith('/api/admin/products', {
+      name: 'New Tee',
+      description: '',
+      active: true,
+      reviewsEnabled: true,
+    })
+    expect(apiPut).toHaveBeenCalledWith('/api/admin/products/new-prod/categories', {
+      categoryIds: ['cat-1'],
+    })
     expect(pushMock).toHaveBeenCalledWith('/admin/products/new-prod')
   })
 
   it('toggling active checkbox and description updates payload', async () => {
     render(<ProductForm />)
     fireEvent.change(screen.getByLabelText(en.admin.productName), { target: { value: 'X' } })
-    fireEvent.change(screen.getByLabelText(en.admin.productDescription), { target: { value: 'desc' } })
+    fireEvent.change(screen.getByLabelText(en.admin.productDescription), {
+      target: { value: 'desc' },
+    })
     fireEvent.click(byId('product-active'))
     fireEvent.click(screen.getByText(en.admin.createProduct))
-    await waitFor(() => expect(apiPost).toHaveBeenCalledWith('/api/admin/products', { name: 'X', description: 'desc', active: false, reviewsEnabled: true }))
+    await waitFor(() =>
+      expect(apiPost).toHaveBeenCalledWith('/api/admin/products', {
+        name: 'X',
+        description: 'desc',
+        active: false,
+        reviewsEnabled: true,
+      }),
+    )
   })
 
   it('create failure toasts network error', async () => {
@@ -177,7 +204,11 @@ describe('ProductForm — edit mode (with initial)', () => {
   })
 
   it('stats panel renders Never sold + no affinity when lastSoldAt null', async () => {
-    ;(apiGet as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ ...stats, lastSoldAt: null, affinityPartners: [] })
+    ;(apiGet as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ...stats,
+      lastSoldAt: null,
+      affinityPartners: [],
+    })
     render(<ProductForm initial={makeProduct()} />)
     await waitFor(() => expect(screen.getByText(en.admin.analyticsNeverSold)).toBeTruthy())
   })
@@ -195,17 +226,34 @@ describe('ProductForm — edit mode (with initial)', () => {
     render(<ProductForm initial={makeProduct()} />)
     fireEvent.click(screen.getByText(en.admin.saved))
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith(en.admin.productUpdated))
-    expect(apiPut).toHaveBeenCalledWith('/api/admin/products/prod-1', { name: 'Hoodie', description: 'A cozy hoodie', active: true, reviewsEnabled: true })
-    expect(apiPut).toHaveBeenCalledWith('/api/admin/products/prod-1/categories', { categoryIds: [] })
+    expect(apiPut).toHaveBeenCalledWith('/api/admin/products/prod-1', {
+      name: 'Hoodie',
+      description: 'A cozy hoodie',
+      active: true,
+      reviewsEnabled: true,
+    })
+    expect(apiPut).toHaveBeenCalledWith('/api/admin/products/prod-1/categories', {
+      categoryIds: [],
+    })
   })
 
   it('add variant appends and expands it', async () => {
     ;(apiGet as ReturnType<typeof vi.fn>).mockResolvedValue(stats)
-    ;(apiPost as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ id: 'var-new', productId: 'prod-1', label: 'New Variant', colorHex: null, sortOrder: 0 })
+    ;(apiPost as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      id: 'var-new',
+      productId: 'prod-1',
+      label: 'New Variant',
+      colorHex: null,
+      sortOrder: 0,
+    })
     render(<ProductForm initial={makeProduct()} />)
     fireEvent.click(screen.getByText(en.admin.addVariant))
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith(en.admin.variantCreated))
-    expect(apiPost).toHaveBeenCalledWith('/api/admin/products/variants', { productId: 'prod-1', label: 'New Variant', sortOrder: 0 })
+    expect(apiPost).toHaveBeenCalledWith('/api/admin/products/variants', {
+      productId: 'prod-1',
+      label: 'New Variant',
+      sortOrder: 0,
+    })
   })
 
   it('add variant failure toasts network error', async () => {
@@ -234,7 +282,12 @@ describe('ProductForm — edit mode (with initial)', () => {
     fireEvent.change(byId('variant-label-var-1'), { target: { value: 'Red' } })
     fireEvent.change(byId('variant-color-var-1'), { target: { value: '#ff0000' } })
     fireEvent.click(screen.getByText(en.admin.saveVariant))
-    await waitFor(() => expect(apiPut).toHaveBeenCalledWith('/api/admin/products/variants/var-1', { label: 'Red', colorHex: '#ff0000' }))
+    await waitFor(() =>
+      expect(apiPut).toHaveBeenCalledWith('/api/admin/products/variants/var-1', {
+        label: 'Red',
+        colorHex: '#ff0000',
+      }),
+    )
     expect(toast.success).toHaveBeenCalledWith(en.admin.saved)
   })
 
@@ -244,7 +297,12 @@ describe('ProductForm — edit mode (with initial)', () => {
     render(<ProductForm initial={makeProduct(undefined, [v])} />)
     fireEvent.change(byId('variant-color-var-1'), { target: { value: '' } })
     fireEvent.click(screen.getByText(en.admin.saveVariant))
-    await waitFor(() => expect(apiPut).toHaveBeenCalledWith('/api/admin/products/variants/var-1', { label: 'Blue', colorHex: null }))
+    await waitFor(() =>
+      expect(apiPut).toHaveBeenCalledWith('/api/admin/products/variants/var-1', {
+        label: 'Blue',
+        colorHex: null,
+      }),
+    )
   })
 
   it('save variant failure toasts network error', async () => {
@@ -295,12 +353,20 @@ describe('ProductForm — edit mode (with initial)', () => {
 
   it('add size appends a new size row', async () => {
     ;(apiGet as ReturnType<typeof vi.fn>).mockResolvedValue(stats)
-    ;(apiPost as ReturnType<typeof vi.fn>).mockResolvedValueOnce(makeSize('size-new', { size: 'M', priceCents: 0, stock: 0 }))
+    ;(apiPost as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+      makeSize('size-new', { size: 'M', priceCents: 0, stock: 0 }),
+    )
     const v = makeVariant('var-1', [])
     render(<ProductForm initial={makeProduct(undefined, [v])} />)
     fireEvent.click(screen.getByText(en.admin.addSize))
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith(en.admin.sizeCreated))
-    expect(apiPost).toHaveBeenCalledWith('/api/admin/products/sizes', { variantId: 'var-1', size: 'M', priceCents: 0, stock: 0, active: true })
+    expect(apiPost).toHaveBeenCalledWith('/api/admin/products/sizes', {
+      variantId: 'var-1',
+      size: 'M',
+      priceCents: 0,
+      stock: 0,
+      active: true,
+    })
   })
 
   it('add size failure toasts network error', async () => {
@@ -322,7 +388,10 @@ describe('ProductForm — edit mode (with initial)', () => {
     fireEvent.change(byId('size-sku-size-1'), { target: { value: 'SKU-2' } })
     fireEvent.click(screen.getByText(en.admin.saveSize))
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith(en.admin.saved))
-    expect(apiPut).toHaveBeenCalledWith('/api/admin/products/sizes/size-1', expect.objectContaining({ size: 'L', priceCents: 7000, stock: 3, sku: 'SKU-2' }))
+    expect(apiPut).toHaveBeenCalledWith(
+      '/api/admin/products/sizes/size-1',
+      expect.objectContaining({ size: 'L', priceCents: 7000, stock: 3, sku: 'SKU-2' }),
+    )
   })
 
   it('client-side validation error blocks save and shows field error', async () => {
@@ -425,7 +494,9 @@ describe('ProductForm — edit mode (with initial)', () => {
     ;(apiGet as ReturnType<typeof vi.fn>).mockResolvedValue(stats)
     render(<ProductForm initial={makeProduct({ name: '   ' })} />)
     fireEvent.click(screen.getByText(en.admin.saved))
-    expect(toast.error).toHaveBeenCalledWith(en.errors.required.replace('{field}', en.admin.productName))
+    expect(toast.error).toHaveBeenCalledWith(
+      en.errors.required.replace('{field}', en.admin.productName),
+    )
     expect(apiPut).not.toHaveBeenCalled()
   })
 
@@ -440,7 +511,9 @@ describe('ProductForm — edit mode (with initial)', () => {
 
   it('server 400 ApiError without issues falls through to message toast', async () => {
     ;(apiGet as ReturnType<typeof vi.fn>).mockResolvedValue(stats)
-    ;(apiPut as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new ApiError(400, 'no issues here', {}))
+    ;(apiPut as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+      new ApiError(400, 'no issues here', {}),
+    )
     const v = makeVariant('var-1', [makeSize('size-1')])
     render(<ProductForm initial={makeProduct(undefined, [v])} />)
     fireEvent.click(screen.getByText(en.admin.saveSize))

@@ -13,16 +13,16 @@ export function ThemeProvider({ children }: { children?: React.ReactNode }) {
   useEffect(() => {
     if (!config) return
     const snapshot: ThemeSnapshot = {
-      primaryColor:   config.primaryColor,
+      primaryColor: config.primaryColor,
       primaryColorFg: config.primaryColorFg,
-      accentColor:    config.accentColor,
-      accentColorFg:  config.accentColorFg,
-      radius:         config.radius,
-      fontFamily:     config.fontFamily,
-      colorMode:      config.colorMode,
-      density:        config.density,
-      heroStyle:      config.heroStyle,
-      logoUrl:        config.logoUrl,
+      accentColor: config.accentColor,
+      accentColorFg: config.accentColorFg,
+      radius: config.radius,
+      fontFamily: config.fontFamily,
+      colorMode: config.colorMode,
+      density: config.density,
+      heroStyle: config.heroStyle,
+      logoUrl: config.logoUrl,
     }
     applyTheme(snapshot)
     try {

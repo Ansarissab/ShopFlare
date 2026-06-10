@@ -14,8 +14,10 @@ async function getConfig(): Promise<StoreConfig> {
     if (!WORKER_URL) return {}
     const res = await fetch(`${WORKER_URL}/api/config/store`, { next: { revalidate: 300 } })
     if (!res.ok) return {}
-    return await res.json() as StoreConfig
-  } catch { return {} }
+    return (await res.json()) as StoreConfig
+  } catch {
+    return {}
+  }
 }
 
 export async function GET() {

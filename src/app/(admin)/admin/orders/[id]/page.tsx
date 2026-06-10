@@ -10,7 +10,13 @@ import { Button, buttonVariants } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { OrderLineItem } from '@/components/common/OrderLineItem'
 import { cn } from '@/lib/utils'
 import { en } from '@/lib/i18n/en'
@@ -88,7 +94,10 @@ export default function AdminOrderDetailPage() {
   return (
     <div className="flex flex-col gap-6 max-w-3xl">
       <div className="flex items-center gap-3">
-        <Link href="/admin/orders" className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}>
+        <Link
+          href="/admin/orders"
+          className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}
+        >
           <ArrowLeft className="size-4" />
         </Link>
         <h1 className="text-xl font-bold tracking-tight">
@@ -106,7 +115,12 @@ export default function AdminOrderDetailPage() {
         {order.customerPhone && <p className="text-muted-foreground">{order.customerPhone}</p>}
         {shippingAddress && (
           <p className="text-muted-foreground mt-1">
-            {[shippingAddress.address, shippingAddress.city, shippingAddress.state, shippingAddress.country]
+            {[
+              shippingAddress.address,
+              shippingAddress.city,
+              shippingAddress.state,
+              shippingAddress.country,
+            ]
               .filter(Boolean)
               .join(', ')}
           </p>
@@ -141,7 +155,9 @@ export default function AdminOrderDetailPage() {
         </div>
         <div className="flex justify-between">
           <span className="text-muted-foreground">{en.cart.shipping}</span>
-          <span>{order.shippingCents === 0 ? en.cart.shippingFree : formatPrice(order.shippingCents)}</span>
+          <span>
+            {order.shippingCents === 0 ? en.cart.shippingFree : formatPrice(order.shippingCents)}
+          </span>
         </div>
         {order.discountCents > 0 && (
           <div className="flex justify-between text-green-600">
@@ -171,7 +187,12 @@ export default function AdminOrderDetailPage() {
           <p className="text-sm font-medium">{en.admin.updateStatus}</p>
           <Select value={newStatus} onValueChange={(v: string | null) => setNewStatus(v ?? '')}>
             <SelectTrigger>
-              <SelectValue placeholder={en.orderStatusLabels[order.status as keyof typeof en.orderStatusLabels] ?? order.status} />
+              <SelectValue
+                placeholder={
+                  en.orderStatusLabels[order.status as keyof typeof en.orderStatusLabels] ??
+                  order.status
+                }
+              />
             </SelectTrigger>
             <SelectContent>
               {ORDER_STATUSES.map((s) => (
@@ -217,8 +238,14 @@ export default function AdminOrderDetailPage() {
 
       {order.trackingNumber && (
         <div className="rounded-lg border bg-muted/40 p-4 text-sm">
-          <p className="font-medium">{en.admin.trackingNumber}: {order.trackingNumber}</p>
-          {order.carrier && <p className="text-muted-foreground">{en.admin.carrier}: {order.carrier}</p>}
+          <p className="font-medium">
+            {en.admin.trackingNumber}: {order.trackingNumber}
+          </p>
+          {order.carrier && (
+            <p className="text-muted-foreground">
+              {en.admin.carrier}: {order.carrier}
+            </p>
+          )}
         </div>
       )}
     </div>

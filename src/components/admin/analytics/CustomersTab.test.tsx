@@ -57,7 +57,11 @@ afterEach(() => {
 describe('CustomersTab', () => {
   it('shows skeleton while loading then fetches with period', async () => {
     let resolve!: (v: AnalyticsCustomersResponse) => void
-    vi.mocked(apiGet).mockReturnValueOnce(new Promise(r => { resolve = r }))
+    vi.mocked(apiGet).mockReturnValueOnce(
+      new Promise((r) => {
+        resolve = r
+      }),
+    )
     const { container } = render(<CustomersTab period="all" />)
     expect(container.querySelector('.animate-pulse')).toBeTruthy()
     resolve(fullData)

@@ -35,11 +35,16 @@ export function ReviewsStrip({ section }: ReviewsStripProps) {
           </div>
         ) : (
           <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {reviews.map(review => (
-              <li key={review.id} className="rounded-xl bg-background p-6 shadow-sm flex flex-col gap-2">
+            {reviews.map((review) => (
+              <li
+                key={review.id}
+                className="rounded-xl bg-background p-6 shadow-sm flex flex-col gap-2"
+              >
                 <ReviewStars rating={review.rating} />
                 {review.body && (
-                  <p className="text-sm text-foreground/80 leading-relaxed line-clamp-4">{review.body}</p>
+                  <p className="text-sm text-foreground/80 leading-relaxed line-clamp-4">
+                    {review.body}
+                  </p>
                 )}
                 <div className="mt-auto flex items-center justify-between pt-2">
                   <span className="text-sm font-medium">{review.customerName}</span>

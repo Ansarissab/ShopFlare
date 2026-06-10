@@ -20,9 +20,7 @@ export function AppHeader() {
       data-app-header
       className={cn(layout.appHeader, safeArea.x, 'flex items-center justify-between px-4 h-12')}
     >
-      <span className="font-semibold text-sm truncate">
-        {config?.storeName ?? 'Store'}
-      </span>
+      <span className="font-semibold text-sm truncate">{config?.storeName ?? 'Store'}</span>
       <button
         onClick={openCart}
         className="relative flex h-9 w-9 items-center justify-center rounded-lg hover:bg-accent"

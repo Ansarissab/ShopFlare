@@ -27,15 +27,11 @@ export function CartItem({ item }: CartItemProps) {
 
       {/* Details */}
       <div className="flex flex-1 flex-col gap-1 min-w-0">
-        <p className="truncate text-sm font-medium text-foreground">
-          {item.productName}
-        </p>
+        <p className="truncate text-sm font-medium text-foreground">{item.productName}</p>
         <p className="text-xs text-muted-foreground">
           {item.variantLabel} / {item.size}
         </p>
-        {item.sku && (
-          <p className="text-xs text-muted-foreground">SKU: {item.sku}</p>
-        )}
+        {item.sku && <p className="text-xs text-muted-foreground">SKU: {item.sku}</p>}
 
         <div className="mt-auto flex items-center justify-between gap-2">
           {/* Qty controls */}
@@ -48,9 +44,7 @@ export function CartItem({ item }: CartItemProps) {
             >
               <MinusIcon />
             </Button>
-            <span className="w-8 text-center text-sm tabular-nums">
-              {item.quantity}
-            </span>
+            <span className="w-8 text-center text-sm tabular-nums">{item.quantity}</span>
             <Button
               variant="ghost"
               size="icon-xs"

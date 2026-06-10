@@ -12,10 +12,21 @@ import {
 import type { ProductWithVariants } from '@/lib/types/product'
 
 // Minimal product fixture
-function makeProduct(opts: { minPrice?: number; maxPrice?: number; stock?: number } = {}): ProductWithVariants {
+function makeProduct(
+  opts: { minPrice?: number; maxPrice?: number; stock?: number } = {},
+): ProductWithVariants {
   const stock = opts.stock ?? 10
   return {
-    product: { id: 'p1', name: 'Test Product', description: 'A product', slug: 'test-product', active: true, stripeProductId: null, createdAt: '', updatedAt: '' } as unknown as ProductWithVariants['product'],
+    product: {
+      id: 'p1',
+      name: 'Test Product',
+      description: 'A product',
+      slug: 'test-product',
+      active: true,
+      stripeProductId: null,
+      createdAt: '',
+      updatedAt: '',
+    } as unknown as ProductWithVariants['product'],
     variants: [
       {
         id: 'v1',
@@ -23,11 +34,39 @@ function makeProduct(opts: { minPrice?: number; maxPrice?: number; stock?: numbe
         label: 'Default',
         colorHex: null,
         sortOrder: 0,
-        images: [{ id: 'i1', variantId: 'v1', url: 'https://example.com/img.jpg', r2Key: 'k', sortOrder: 0 }],
+        images: [
+          {
+            id: 'i1',
+            variantId: 'v1',
+            url: 'https://example.com/img.jpg',
+            r2Key: 'k',
+            sortOrder: 0,
+          },
+        ],
         sizes: [
-          { id: 's1', variantId: 'v1', label: 'S', priceCents: opts.minPrice ?? 1000, stock, active: true, sku: null, sortOrder: 0 },
+          {
+            id: 's1',
+            variantId: 'v1',
+            label: 'S',
+            priceCents: opts.minPrice ?? 1000,
+            stock,
+            active: true,
+            sku: null,
+            sortOrder: 0,
+          },
           ...(opts.maxPrice && opts.maxPrice !== opts.minPrice
-            ? [{ id: 's2', variantId: 'v1', label: 'L', priceCents: opts.maxPrice, stock, active: true, sku: null, sortOrder: 1 }]
+            ? [
+                {
+                  id: 's2',
+                  variantId: 'v1',
+                  label: 'L',
+                  priceCents: opts.maxPrice,
+                  stock,
+                  active: true,
+                  sku: null,
+                  sortOrder: 1,
+                },
+              ]
             : []),
         ],
       } as unknown as ProductWithVariants['variants'][0],
@@ -123,7 +162,9 @@ describe('productJsonLd', () => {
   })
 
   it('includes url in AggregateOffer when storeUrl provided', () => {
-    const result = productJsonLd(makeProduct({ minPrice: 1000, maxPrice: 2000 }), { storeUrl: 'https://shop.test' })
+    const result = productJsonLd(makeProduct({ minPrice: 1000, maxPrice: 2000 }), {
+      storeUrl: 'https://shop.test',
+    })
     const offers = result.offers as Record<string, unknown>
     expect(offers['@type']).toBe('AggregateOffer')
     expect(offers.url).toBe('https://shop.test/product/p1')
@@ -134,8 +175,13 @@ describe('productJsonLd', () => {
       ...makeProduct(),
       variants: [
         {
-          id: 'v1', productId: 'p1', label: 'Default', colorHex: null, sortOrder: 0,
-          images: [], sizes: [],
+          id: 'v1',
+          productId: 'p1',
+          label: 'Default',
+          colorHex: null,
+          sortOrder: 0,
+          images: [],
+          sizes: [],
         } as unknown as ProductWithVariants['variants'][0],
       ],
     }
@@ -163,7 +209,11 @@ describe('organizationJsonLd', () => {
   })
 
   it('includes logo and email when provided', () => {
-    const r = organizationJsonLd({ name: 'Acme', logoUrl: 'https://logo.jpg', email: 'hi@acme.com' })
+    const r = organizationJsonLd({
+      name: 'Acme',
+      logoUrl: 'https://logo.jpg',
+      email: 'hi@acme.com',
+    })
     expect(r.logo).toBe('https://logo.jpg')
     expect(r.email).toBe('hi@acme.com')
   })
@@ -202,8 +252,10 @@ describe('collectionPageJsonLd', () => {
 
   it('includes description and imageUrl when provided', () => {
     const r = collectionPageJsonLd({
-      name: 'Shoes', url: 'https://example.com/shoes',
-      description: 'Best shoes', imageUrl: 'https://img.jpg',
+      name: 'Shoes',
+      url: 'https://example.com/shoes',
+      description: 'Best shoes',
+      imageUrl: 'https://img.jpg',
     })
     expect(r.description).toBe('Best shoes')
     expect(r.image).toBe('https://img.jpg')
@@ -228,9 +280,12 @@ describe('articleJsonLd', () => {
 
   it('includes all optional fields when provided', () => {
     const r = articleJsonLd({
-      title: 'Post', url: 'https://blog.com/1',
-      description: 'Desc', imageUrl: 'https://img.jpg',
-      datePublished: '2024-01-01', dateModified: '2024-01-02',
+      title: 'Post',
+      url: 'https://blog.com/1',
+      description: 'Desc',
+      imageUrl: 'https://img.jpg',
+      datePublished: '2024-01-01',
+      dateModified: '2024-01-02',
       authorName: 'Alice',
     })
     expect(r.description).toBe('Desc')
@@ -249,7 +304,12 @@ describe('offerJsonLd', () => {
   })
 
   it('includes url when provided', () => {
-    const r = offerJsonLd({ price: 9.99, currency: 'USD', availability: 'InStock', url: 'https://shop.com/p1' })
+    const r = offerJsonLd({
+      price: 9.99,
+      currency: 'USD',
+      availability: 'InStock',
+      url: 'https://shop.com/p1',
+    })
     expect(r.url).toBe('https://shop.com/p1')
   })
 })

@@ -15,10 +15,10 @@ export interface CartSummaryProps {
   onApplyCoupon: (code: string) => Promise<boolean>
   couponApplied?: boolean
   discountCents?: number
-  taxCents?:      number
-  taxName?:       string
-  taxRate?:       number
-  taxInclusive?:  boolean
+  taxCents?: number
+  taxName?: string
+  taxRate?: number
+  taxInclusive?: boolean
   onClose: () => void
 }
 

@@ -3,7 +3,10 @@ import { RenderHtml } from '@/components/shared/RenderHtml'
 import { en } from '@/lib/i18n/en'
 import type { StorySectionProps } from '@/lib/types'
 
-export function StorySection({ section, imageUrl }: StorySectionProps & { imageUrl: string | null }) {
+export function StorySection({
+  section,
+  imageUrl,
+}: StorySectionProps & { imageUrl: string | null }) {
   const heading = section.heading || en.store.storyDefaultHeading
 
   return (

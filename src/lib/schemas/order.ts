@@ -5,19 +5,19 @@ import { idField, baseItemSchema, couponField, orderItemSchema, contactSchema } 
 
 // Shipping address — inherits contact fields, adds physical address
 export const shippingAddressSchema = contactSchema.extend({
-  name:       z.string().min(1),
-  address:    z.string().min(5),
-  city:       z.string().min(1),
-  state:      z.string().optional(),
+  name: z.string().min(1),
+  address: z.string().min(5),
+  city: z.string().min(1),
+  state: z.string().optional(),
   postalCode: z.string().min(2).max(12).optional(),
-  country:    z.string().length(2),
+  country: z.string().length(2),
 })
 
 // COD order — composed from item list + shipping address
 export const codOrderSchema = z.object({
-  items:           z.array(orderItemSchema).min(1).max(MAX_CART_ITEMS),
+  items: z.array(orderItemSchema).min(1).max(MAX_CART_ITEMS),
   shippingAddress: shippingAddressSchema,
-  couponCode:      couponField,
+  couponCode: couponField,
 })
 
 // Stripe checkout — same quantity rules, different price ID key
@@ -26,17 +26,17 @@ const stripeItemSchema = baseItemSchema.extend({
 })
 
 export const createCheckoutSessionSchema = z.object({
-  items:      z.array(stripeItemSchema).min(1).max(MAX_CART_ITEMS),
-  orderId:    idField,
+  items: z.array(stripeItemSchema).min(1).max(MAX_CART_ITEMS),
+  orderId: idField,
   couponCode: couponField,
 })
 
 // Cancel request — contact required for ownership verification
 export const cancelOrderSchema = z.object({
   contact: z.string().min(1).max(254),
-  reason:  z.string().max(500).optional(),
+  reason: z.string().max(500).optional(),
 })
 
-export type ShippingAddress  = z.infer<typeof shippingAddressSchema>
-export type CodOrder         = z.infer<typeof codOrderSchema>
+export type ShippingAddress = z.infer<typeof shippingAddressSchema>
+export type CodOrder = z.infer<typeof codOrderSchema>
 export type CancelOrderInput = z.infer<typeof cancelOrderSchema>

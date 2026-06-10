@@ -30,7 +30,9 @@ function SuccessContent() {
   // only ever calls setState asynchronously in .finally.
   const [resolving, setResolving] = useState(() => Boolean(sessionId) && !orderId)
 
-  useEffect(() => { clearCart() }, [clearCart])
+  useEffect(() => {
+    clearCart()
+  }, [clearCart])
 
   useEffect(() => {
     if (!sessionId || orderId) return
@@ -84,9 +86,7 @@ function SuccessContent() {
         <BankTransferInstructions orderNumber={trackOrderNumber} totalCents={bankTotalCents} />
       )}
 
-      {trackOrderNumber && (
-        <OrderPushOptIn orderNumber={trackOrderNumber} />
-      )}
+      {trackOrderNumber && <OrderPushOptIn orderNumber={trackOrderNumber} />}
 
       <div className="mt-2 flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
         {resolving ? (

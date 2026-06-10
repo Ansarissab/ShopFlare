@@ -19,17 +19,11 @@ export interface FetchOptions {
   allowNonOk?: boolean
 }
 
-export async function fetchFromWorker<T>(
-  path: string,
-  opts: FetchOptions = {},
-): Promise<T | null> {
+export async function fetchFromWorker<T>(path: string, opts: FetchOptions = {}): Promise<T | null> {
   // Read lazily so tests can stub NEXT_PUBLIC_WORKER_URL per-call via vi.stubEnv.
   const workerUrl = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
   const revalidate = opts.revalidate ?? 60
-  const cacheConfig: RequestInit['next'] =
-    revalidate === false
-      ? { revalidate: 0 }
-      : { revalidate }
+  const cacheConfig: RequestInit['next'] = revalidate === false ? { revalidate: 0 } : { revalidate }
 
   try {
     if (!workerUrl) throw new Error('NEXT_PUBLIC_WORKER_URL not set')

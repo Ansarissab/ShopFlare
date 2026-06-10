@@ -134,9 +134,7 @@ export function ReviewForm({ productId, onSubmitted }: ReviewFormProps) {
           rating={rating}
           onChange={(r) => setValue('rating', r, { shouldValidate: true })}
         />
-        {errors.rating && (
-          <p className="text-xs text-destructive">{en.reviews.ratingRequired}</p>
-        )}
+        {errors.rating && <p className="text-xs text-destructive">{en.reviews.ratingRequired}</p>}
       </div>
 
       <FormField
@@ -158,10 +156,7 @@ export function ReviewForm({ productId, onSubmitted }: ReviewFormProps) {
       {turnstileError ? (
         <p className="text-xs text-destructive">{en.checkout.securityCheckFailed}</p>
       ) : (
-        <TurnstileWidget
-          onVerify={setTurnstileToken}
-          onError={() => setTurnstileError(true)}
-        />
+        <TurnstileWidget onVerify={setTurnstileToken} onError={() => setTurnstileError(true)} />
       )}
 
       <Button type="submit" disabled={isSubmitting || !turnstileToken} className="w-full">

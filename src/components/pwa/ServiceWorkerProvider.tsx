@@ -11,7 +11,9 @@ type SWContext = {
 
 const SWCtx = createContext<SWContext>({ registration: null, updateAvailable: false })
 
-export function useServiceWorker() { return useContext(SWCtx) }
+export function useServiceWorker() {
+  return useContext(SWCtx)
+}
 
 export function ServiceWorkerProvider({ children }: { children: React.ReactNode }) {
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null)
@@ -35,21 +37,26 @@ export function ServiceWorkerProvider({ children }: { children: React.ReactNode 
       })
     }
 
-    navigator.serviceWorker.register('/sw.js').then((r) => {
-      setRegistration(r)
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then((r) => {
+        setRegistration(r)
 
-      if (r.waiting) handleWaiting(r.waiting)
+        if (r.waiting) handleWaiting(r.waiting)
 
-      r.addEventListener('updatefound', () => {
-        const newSW = r.installing
-        if (!newSW) return
-        newSW.addEventListener('statechange', () => {
-          if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
-            handleWaiting(newSW)
-          }
+        r.addEventListener('updatefound', () => {
+          const newSW = r.installing
+          if (!newSW) return
+          newSW.addEventListener('statechange', () => {
+            if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+              handleWaiting(newSW)
+            }
+          })
         })
       })
-    }).catch(() => { /* SW unavailable — ignore */ })
+      .catch(() => {
+        /* SW unavailable — ignore */
+      })
 
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if (reloadingRef.current) return
@@ -57,12 +64,10 @@ export function ServiceWorkerProvider({ children }: { children: React.ReactNode 
       window.location.reload()
     })
 
-    return () => { /* cleanup not needed — SW lifecycle survives component unmount */ }
+    return () => {
+      /* cleanup not needed — SW lifecycle survives component unmount */
+    }
   }, [])
 
-  return (
-    <SWCtx.Provider value={{ registration, updateAvailable }}>
-      {children}
-    </SWCtx.Provider>
-  )
+  return <SWCtx.Provider value={{ registration, updateAvailable }}>{children}</SWCtx.Provider>
 }

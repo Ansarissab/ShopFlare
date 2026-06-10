@@ -23,9 +23,21 @@ const post = (path: string, body: unknown) =>
 // ─── Cleanup ──────────────────────────────────────────────────────────────────
 
 const TABLES = [
-  'coupon_uses', 'reviews', 'notify_me', 'order_items', 'orders', 'coupons',
-  'size_options', 'product_images', 'variants', 'products', 'store_config',
-  'stripe_events', 'push_subscriptions', 'analytics_daily', 'carts',
+  'coupon_uses',
+  'reviews',
+  'notify_me',
+  'order_items',
+  'orders',
+  'coupons',
+  'size_options',
+  'product_images',
+  'variants',
+  'products',
+  'store_config',
+  'stripe_events',
+  'push_subscriptions',
+  'analytics_daily',
+  'carts',
 ]
 beforeEach(async () => {
   for (const t of TABLES) await env.DB.prepare(`DELETE FROM ${t}`).run()
@@ -35,8 +47,12 @@ beforeEach(async () => {
 
 async function seedProduct() {
   await db().insert(schema.products).values({ id: 'p1', name: 'Demo Tee', active: true })
-  await db().insert(schema.variants).values({ id: 'v1', productId: 'p1', label: 'Black', sortOrder: 0 })
-  await db().insert(schema.sizeOptions).values({ id: 's1', variantId: 'v1', size: 'M', priceCents: 1000, stock: 5, active: true })
+  await db()
+    .insert(schema.variants)
+    .values({ id: 'v1', productId: 'p1', label: 'Black', sortOrder: 0 })
+  await db()
+    .insert(schema.sizeOptions)
+    .values({ id: 's1', variantId: 'v1', size: 'M', priceCents: 1000, stock: 5, active: true })
   return { productId: 'p1', variantId: 'v1', sizeId: 's1' }
 }
 
@@ -67,16 +83,24 @@ async function seedDeliveredOrder(opts: {
     updatedAt: now,
   })
 
-  await db().insert(schema.orderItems).values({
-    id: `item-${Date.now()}`,
-    orderId,
-    productId,
-    variantId: 'v1',
-    sizeOptionId: 's1',
-    quantity: 1,
-    priceCents: 1000,
-    snapshot: JSON.stringify({ productName: 'Demo Tee', variantLabel: 'Black', size: 'M', sku: '', imageUrl: '' }),
-  })
+  await db()
+    .insert(schema.orderItems)
+    .values({
+      id: `item-${Date.now()}`,
+      orderId,
+      productId,
+      variantId: 'v1',
+      sizeOptionId: 's1',
+      quantity: 1,
+      priceCents: 1000,
+      snapshot: JSON.stringify({
+        productName: 'Demo Tee',
+        variantLabel: 'Black',
+        size: 'M',
+        sku: '',
+        imageUrl: '',
+      }),
+    })
 
   return { orderId, orderNumber }
 }
@@ -129,7 +153,11 @@ describe('POST /api/reviews', () => {
 
   it('rejects review when contact does not match order (403)', async () => {
     await seedProduct()
-    await seedDeliveredOrder({ email: 'real@example.com', productId: 'p1', orderNumber: 'ORD-CONTACT01' })
+    await seedDeliveredOrder({
+      email: 'real@example.com',
+      productId: 'p1',
+      orderNumber: 'ORD-CONTACT01',
+    })
 
     const res = await post('/api/reviews', {
       orderNumber: 'ORD-CONTACT01',
@@ -143,7 +171,11 @@ describe('POST /api/reviews', () => {
 
   it('rejects review when product was not in the order (403)', async () => {
     await seedProduct()
-    await seedDeliveredOrder({ email: 'jane@example.com', productId: 'p1', orderNumber: 'ORD-WRONGPROD' })
+    await seedDeliveredOrder({
+      email: 'jane@example.com',
+      productId: 'p1',
+      orderNumber: 'ORD-WRONGPROD',
+    })
 
     const res = await post('/api/reviews', {
       orderNumber: 'ORD-WRONGPROD',
@@ -157,7 +189,11 @@ describe('POST /api/reviews', () => {
 
   it('accepts a valid review for a delivered order (201, pending moderation)', async () => {
     await seedProduct()
-    await seedDeliveredOrder({ email: 'jane@example.com', productId: 'p1', orderNumber: 'ORD-VALID001' })
+    await seedDeliveredOrder({
+      email: 'jane@example.com',
+      productId: 'p1',
+      orderNumber: 'ORD-VALID001',
+    })
 
     const res = await post('/api/reviews', {
       orderNumber: 'ORD-VALID001',
@@ -185,7 +221,11 @@ describe('POST /api/reviews', () => {
 
   it('accepts contact match by phone number', async () => {
     await seedProduct()
-    await seedDeliveredOrder({ email: 'jane@example.com', productId: 'p1', orderNumber: 'ORD-PHONE001' })
+    await seedDeliveredOrder({
+      email: 'jane@example.com',
+      productId: 'p1',
+      orderNumber: 'ORD-PHONE001',
+    })
 
     const res = await post('/api/reviews', {
       orderNumber: 'ORD-PHONE001',
@@ -199,7 +239,11 @@ describe('POST /api/reviews', () => {
 
   it('rejects duplicate review for same order+product (409)', async () => {
     await seedProduct()
-    await seedDeliveredOrder({ email: 'jane@example.com', productId: 'p1', orderNumber: 'ORD-DUP001' })
+    await seedDeliveredOrder({
+      email: 'jane@example.com',
+      productId: 'p1',
+      orderNumber: 'ORD-DUP001',
+    })
 
     await post('/api/reviews', {
       orderNumber: 'ORD-DUP001',
@@ -259,14 +303,20 @@ describe('GET /api/reviews/product/:id', () => {
     })
 
     // Insert one approved and one unapproved review directly
-    await db().insert(schema.reviews).values([
-      { id: 'r1', orderId, productId: 'p1', customerName: 'Alice', rating: 5, approved: true },
-      { id: 'r2', orderId, productId: 'p1', customerName: 'Bob',   rating: 2, approved: false },
-    ])
+    await db()
+      .insert(schema.reviews)
+      .values([
+        { id: 'r1', orderId, productId: 'p1', customerName: 'Alice', rating: 5, approved: true },
+        { id: 'r2', orderId, productId: 'p1', customerName: 'Bob', rating: 2, approved: false },
+      ])
 
     const res = await get('/api/reviews/product/p1')
     expect(res.status).toBe(200)
-    const body = (await res.json()) as { reviews: Array<{ id: string }>; average: number; count: number }
+    const body = (await res.json()) as {
+      reviews: Array<{ id: string }>
+      average: number
+      count: number
+    }
     expect(body.count).toBe(1)
     expect(body.reviews[0].id).toBe('r1')
     expect(body.average).toBe(5)
@@ -294,11 +344,27 @@ describe('GET /api/reviews/product/:id', () => {
       updatedAt: now,
     })
 
-    await db().insert(schema.reviews).values([
-      { id: 'r-avg1', orderId, productId: 'p1', customerName: 'Alice', rating: 4, approved: true },
-      { id: 'r-avg2', orderId, productId: 'p1', customerName: 'Bob',   rating: 3, approved: true },
-      { id: 'r-avg3', orderId, productId: 'p1', customerName: 'Carol', rating: 5, approved: true },
-    ])
+    await db()
+      .insert(schema.reviews)
+      .values([
+        {
+          id: 'r-avg1',
+          orderId,
+          productId: 'p1',
+          customerName: 'Alice',
+          rating: 4,
+          approved: true,
+        },
+        { id: 'r-avg2', orderId, productId: 'p1', customerName: 'Bob', rating: 3, approved: true },
+        {
+          id: 'r-avg3',
+          orderId,
+          productId: 'p1',
+          customerName: 'Carol',
+          rating: 5,
+          approved: true,
+        },
+      ])
 
     const res = await get('/api/reviews/product/p1')
     const body = (await res.json()) as { reviews: unknown[]; average: number; count: number }
@@ -332,15 +398,28 @@ async function seedProductWithReviews(productReviewsEnabled: boolean) {
     active: true,
     reviewsEnabled: productReviewsEnabled,
   })
-  await db().insert(schema.variants).values({ id: 'v-flag', productId: 'p-flag', label: 'Black', sortOrder: 0 })
-  await db().insert(schema.sizeOptions).values({ id: 's-flag', variantId: 'v-flag', size: 'M', priceCents: 1000, stock: 5, active: true })
+  await db()
+    .insert(schema.variants)
+    .values({ id: 'v-flag', productId: 'p-flag', label: 'Black', sortOrder: 0 })
+  await db().insert(schema.sizeOptions).values({
+    id: 's-flag',
+    variantId: 'v-flag',
+    size: 'M',
+    priceCents: 1000,
+    stock: 5,
+    active: true,
+  })
 }
 
 describe('Reviews flag matrix', () => {
   it('ON+ON: POST accepted, GET returns reviews', async () => {
     await seedProductWithReviews(true)
     await setSiteWideReviewsFlag(true)
-    await seedDeliveredOrder({ email: 'a@example.com', productId: 'p-flag', orderNumber: 'ORD-FLAG01' })
+    await seedDeliveredOrder({
+      email: 'a@example.com',
+      productId: 'p-flag',
+      orderNumber: 'ORD-FLAG01',
+    })
 
     const postRes = await post('/api/reviews', {
       orderNumber: 'ORD-FLAG01',
@@ -352,7 +431,10 @@ describe('Reviews flag matrix', () => {
     expect(postRes.status).toBe(201)
 
     // Approve the review directly
-    await db().update(schema.reviews).set({ approved: true }).where(eq(schema.reviews.productId, 'p-flag'))
+    await db()
+      .update(schema.reviews)
+      .set({ approved: true })
+      .where(eq(schema.reviews.productId, 'p-flag'))
 
     const getRes = await get('/api/reviews/product/p-flag')
     const body = (await getRes.json()) as { count: number }
@@ -363,7 +445,11 @@ describe('Reviews flag matrix', () => {
   it('ON+OFF (per-product off): POST → 403, GET → empty', async () => {
     await seedProductWithReviews(false)
     await setSiteWideReviewsFlag(true)
-    await seedDeliveredOrder({ email: 'b@example.com', productId: 'p-flag', orderNumber: 'ORD-FLAG02' })
+    await seedDeliveredOrder({
+      email: 'b@example.com',
+      productId: 'p-flag',
+      orderNumber: 'ORD-FLAG02',
+    })
 
     const postRes = await post('/api/reviews', {
       orderNumber: 'ORD-FLAG02',
@@ -385,7 +471,11 @@ describe('Reviews flag matrix', () => {
   it('OFF+ON (site-wide off): POST → 403, GET → empty for all', async () => {
     await seedProductWithReviews(true)
     await setSiteWideReviewsFlag(false)
-    await seedDeliveredOrder({ email: 'c@example.com', productId: 'p-flag', orderNumber: 'ORD-FLAG03' })
+    await seedDeliveredOrder({
+      email: 'c@example.com',
+      productId: 'p-flag',
+      orderNumber: 'ORD-FLAG03',
+    })
 
     const postRes = await post('/api/reviews', {
       orderNumber: 'ORD-FLAG03',
@@ -406,7 +496,11 @@ describe('Reviews flag matrix', () => {
   it('OFF+OFF: POST → 403, GET → empty', async () => {
     await seedProductWithReviews(false)
     await setSiteWideReviewsFlag(false)
-    await seedDeliveredOrder({ email: 'd@example.com', productId: 'p-flag', orderNumber: 'ORD-FLAG04' })
+    await seedDeliveredOrder({
+      email: 'd@example.com',
+      productId: 'p-flag',
+      orderNumber: 'ORD-FLAG04',
+    })
 
     const postRes = await post('/api/reviews', {
       orderNumber: 'ORD-FLAG04',
@@ -426,7 +520,11 @@ describe('Reviews flag matrix', () => {
   it('preservation: review survives flag toggle off then on', async () => {
     await seedProductWithReviews(true)
     await setSiteWideReviewsFlag(true)
-    await seedDeliveredOrder({ email: 'e@example.com', productId: 'p-flag', orderNumber: 'ORD-FLAG05' })
+    await seedDeliveredOrder({
+      email: 'e@example.com',
+      productId: 'p-flag',
+      orderNumber: 'ORD-FLAG05',
+    })
 
     // Submit and approve review while both flags are ON
     const postRes = await post('/api/reviews', {
@@ -437,7 +535,10 @@ describe('Reviews flag matrix', () => {
       rating: 5,
     })
     expect(postRes.status).toBe(201)
-    await db().update(schema.reviews).set({ approved: true }).where(eq(schema.reviews.productId, 'p-flag'))
+    await db()
+      .update(schema.reviews)
+      .set({ approved: true })
+      .where(eq(schema.reviews.productId, 'p-flag'))
 
     // Flip site-wide OFF → GET returns empty
     await setSiteWideReviewsFlag(false)

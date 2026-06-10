@@ -10,8 +10,15 @@ import { en } from '@/lib/i18n/en'
 vi.mock('next/link', async () => {
   const { createElement } = await import('react')
   return {
-    default: ({ href, children, onClick }: { href: string; children: React.ReactNode; onClick?: () => void }) =>
-      createElement('a', { href, onClick }, children),
+    default: ({
+      href,
+      children,
+      onClick,
+    }: {
+      href: string
+      children: React.ReactNode
+      onClick?: () => void
+    }) => createElement('a', { href, onClick }, children),
   }
 })
 
@@ -26,7 +33,10 @@ const apiPost = vi.fn()
 vi.mock('@/lib/api', async () => {
   // Mirror the real ApiError signature: (status, message).
   class ApiError extends Error {
-    constructor(public readonly status: number, message: string) {
+    constructor(
+      public readonly status: number,
+      message: string,
+    ) {
       super(message)
       this.name = 'ApiError'
     }
@@ -242,7 +252,10 @@ describe('CartSheet — handleApplyCoupon', () => {
     render(<CartSheet />)
     fireEvent.click(screen.getByTestId('apply'))
     await waitFor(() => expect(applyCoupon).toHaveBeenCalledWith('SAVE10', 600))
-    expect(apiPost).toHaveBeenCalledWith('/api/coupons/validate', { code: 'SAVE10', subtotalCents: 5000 })
+    expect(apiPost).toHaveBeenCalledWith('/api/coupons/validate', {
+      code: 'SAVE10',
+      subtotalCents: 5000,
+    })
     expect(toastError).not.toHaveBeenCalled()
   })
 

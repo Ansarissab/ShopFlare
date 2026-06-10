@@ -35,15 +35,26 @@ const adminPut = (path: string, body: unknown) =>
     body: JSON.stringify(body),
   })
 
-const adminDelete = (path: string) =>
-  SELF.fetch(`${BASE}${path}`, { method: 'DELETE' })
+const adminDelete = (path: string) => SELF.fetch(`${BASE}${path}`, { method: 'DELETE' })
 
 // ─── Cleanup ──────────────────────────────────────────────────────────────────
 
 const TABLES = [
-  'coupon_uses', 'reviews', 'notify_me', 'order_items', 'orders', 'coupons',
-  'size_options', 'product_images', 'variants', 'products', 'store_config',
-  'stripe_events', 'push_subscriptions', 'analytics_daily', 'carts',
+  'coupon_uses',
+  'reviews',
+  'notify_me',
+  'order_items',
+  'orders',
+  'coupons',
+  'size_options',
+  'product_images',
+  'variants',
+  'products',
+  'store_config',
+  'stripe_events',
+  'push_subscriptions',
+  'analytics_daily',
+  'carts',
 ]
 beforeEach(async () => {
   for (const t of TABLES) await env.DB.prepare(`DELETE FROM ${t}`).run()
@@ -63,7 +74,10 @@ async function addVariant(productId: string, label = 'Black') {
   return { status: res.status, variant }
 }
 
-async function addSize(variantId: string, opts: { size?: string; priceCents?: number; stock?: number } = {}) {
+async function addSize(
+  variantId: string,
+  opts: { size?: string; priceCents?: number; stock?: number } = {},
+) {
   const { size = 'M', priceCents = 1500, stock = 10 } = opts
   const res = await adminPost('/api/admin/products/sizes', {
     variantId,
@@ -72,7 +86,12 @@ async function addSize(variantId: string, opts: { size?: string; priceCents?: nu
     stock,
     active: true,
   })
-  const sizeOption = (await res.json()) as { id: string; size: string; priceCents: number; stock: number }
+  const sizeOption = (await res.json()) as {
+    id: string
+    size: string
+    priceCents: number
+    stock: number
+  }
   return { status: res.status, sizeOption }
 }
 
@@ -80,7 +99,10 @@ async function addSize(variantId: string, opts: { size?: string; priceCents?: nu
 
 describe('POST /api/admin/products', () => {
   it('creates a product and returns it (201)', async () => {
-    const { status, product } = await createProduct({ name: 'Admin Tee', description: 'A test product' })
+    const { status, product } = await createProduct({
+      name: 'Admin Tee',
+      description: 'A test product',
+    })
     expect(status).toBe(201)
     expect(product.id).toBeTruthy()
     expect(product.name).toBe('Admin Tee')
@@ -238,7 +260,11 @@ describe('POST /api/admin/products/sizes', () => {
   it('adds a size option to a variant (201)', async () => {
     const { product } = await createProduct({ name: 'Tee' })
     const { variant } = await addVariant(product.id)
-    const { status, sizeOption } = await addSize(variant.id, { size: 'L', priceCents: 2000, stock: 8 })
+    const { status, sizeOption } = await addSize(variant.id, {
+      size: 'L',
+      priceCents: 2000,
+      stock: 8,
+    })
     expect(status).toBe(201)
     expect(sizeOption.size).toBe('L')
     expect(sizeOption.priceCents).toBe(2000)

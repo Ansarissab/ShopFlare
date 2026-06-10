@@ -8,7 +8,13 @@ import type { ProductImage } from '@/lib/types/product'
 vi.mock('next/image', async () => {
   const { createElement } = await import('react')
   return {
-    default: (props: React.ImgHTMLAttributes<HTMLImageElement> & { fill?: boolean; priority?: boolean; unoptimized?: boolean }) => {
+    default: (
+      props: React.ImgHTMLAttributes<HTMLImageElement> & {
+        fill?: boolean
+        priority?: boolean
+        unoptimized?: boolean
+      },
+    ) => {
       const { fill, priority, unoptimized, ...rest } = props
       return createElement('img', rest)
     },
@@ -25,7 +31,9 @@ vi.mock('sonner', () => ({
 }))
 
 vi.mock('@/lib/image', () => ({
-  compressImage: vi.fn((file: File) => Promise.resolve({ file, originalBytes: file.size, compressedBytes: file.size })),
+  compressImage: vi.fn((file: File) =>
+    Promise.resolve({ file, originalBytes: file.size, compressedBytes: file.size }),
+  ),
   COMPRESS_CONFIRM_THRESHOLD_BYTES: 3 * 1024 * 1024,
 }))
 
@@ -86,7 +94,10 @@ describe('ImageUpload', () => {
 
     await waitFor(() => expect(onUploaded).toHaveBeenCalledWith({ id: 'img-new', url: '/new.jpg' }))
     expect(compressImage).toHaveBeenCalled()
-    expect(apiUpload).toHaveBeenCalledWith('/api/admin/products/images/upload', expect.any(FormData))
+    expect(apiUpload).toHaveBeenCalledWith(
+      '/api/admin/products/images/upload',
+      expect.any(FormData),
+    )
     expect(toast.success).toHaveBeenCalledWith(en.admin.imageUploaded)
     expect(input.value).toBe('')
   })
@@ -103,7 +114,9 @@ describe('ImageUpload', () => {
     ;(apiUpload as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('too big'))
     const { container } = renderUpload()
     const input = container.querySelector('input[type="file"]') as HTMLInputElement
-    fireEvent.change(input, { target: { files: [new File(['x'], 'p.png', { type: 'image/png' })] } })
+    fireEvent.change(input, {
+      target: { files: [new File(['x'], 'p.png', { type: 'image/png' })] },
+    })
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('too big'))
   })
 
@@ -111,7 +124,9 @@ describe('ImageUpload', () => {
     ;(compressImage as unknown as ReturnType<typeof vi.fn>).mockRejectedValueOnce('weird')
     const { container } = renderUpload()
     const input = container.querySelector('input[type="file"]') as HTMLInputElement
-    fireEvent.change(input, { target: { files: [new File(['x'], 'p.png', { type: 'image/png' })] } })
+    fireEvent.change(input, {
+      target: { files: [new File(['x'], 'p.png', { type: 'image/png' })] },
+    })
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith(en.errors.networkError))
   })
 

@@ -41,7 +41,9 @@ vi.mock('@/lib/api', () => ({ apiPost: vi.fn(() => Promise.resolve({ url: '/stri
 vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { success: vi.fn(), error: vi.fn() }) }))
 
 const buildWhatsAppOrderUrl = vi.fn((..._a: unknown[]) => 'https://wa.me/x')
-vi.mock('@/lib/whatsapp', () => ({ buildWhatsAppOrderUrl: (...a: unknown[]) => buildWhatsAppOrderUrl(...a) }))
+vi.mock('@/lib/whatsapp', () => ({
+  buildWhatsAppOrderUrl: (...a: unknown[]) => buildWhatsAppOrderUrl(...a),
+}))
 
 import { apiPost } from '@/lib/api'
 import { toast } from 'sonner'

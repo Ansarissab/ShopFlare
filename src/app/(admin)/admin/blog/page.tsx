@@ -31,10 +31,18 @@ export default function AdminBlogListPage() {
   useEffect(() => {
     let cancelled = false
     apiGet<{ posts: BlogPost[] }>('/api/admin/blog')
-      .then((res) => { if (!cancelled) setPosts(res.posts) })
-      .catch(() => { if (!cancelled) toast.error(en.errors.networkError) })
-      .finally(() => { if (!cancelled) setLoading(false) })
-    return () => { cancelled = true }
+      .then((res) => {
+        if (!cancelled) setPosts(res.posts)
+      })
+      .catch(() => {
+        if (!cancelled) toast.error(en.errors.networkError)
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   async function handleTogglePublish(post: BlogPost) {
@@ -53,7 +61,9 @@ export default function AdminBlogListPage() {
                 ...p,
                 status: isPublished ? 'draft' : 'published',
                 // Server preserves publishedAt on unpublish; on first publish, stamp client-side.
-                publishedAt: isPublished ? post.publishedAt : (post.publishedAt ?? new Date().toISOString()),
+                publishedAt: isPublished
+                  ? post.publishedAt
+                  : (post.publishedAt ?? new Date().toISOString()),
               }
             : p,
         ),
@@ -161,28 +171,20 @@ export default function AdminBlogListPage() {
 
       <Dialog
         open={deleteTarget !== null}
-        onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null)
+        }}
       >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>{en.admin.blog}</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-muted-foreground">
-            {en.admin.blogEditorDeleteConfirm}
-          </p>
+          <p className="text-sm text-muted-foreground">{en.admin.blogEditorDeleteConfirm}</p>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteTarget(null)}
-              disabled={deleting}
-            >
+            <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleting}>
               {en.admin.cancel}
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={deleting}
-            >
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
               {deleting ? en.admin.blogEditorDeleting : en.admin.deleteReview}
             </Button>
           </DialogFooter>

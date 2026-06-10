@@ -1,12 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { act } from 'react'
-import {
-  useCart,
-  useCartItemCount,
-  useCartSubtotalCents,
-  type CartItem,
-} from './useCart'
+import { useCart, useCartItemCount, useCartSubtotalCents, type CartItem } from './useCart'
 import { renderHook } from '@testing-library/react'
 
 function makeItem(overrides: Partial<CartItem> = {}): CartItem {

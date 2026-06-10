@@ -50,13 +50,9 @@ describe('BankTransferInstructions', () => {
     expect(screen.getByText(en.bankTransfer.heading)).toBeTruthy()
 
     const amount = formatPrice(5000, 'PKR')
+    expect(screen.getByText(en.bankTransfer.intro.replace('{amount}', amount))).toBeTruthy()
     expect(
-      screen.getByText(en.bankTransfer.intro.replace('{amount}', amount)),
-    ).toBeTruthy()
-    expect(
-      screen.getByText(
-        en.bankTransfer.reference.replace('{orderNumber}', 'SF-200'),
-      ),
+      screen.getByText(en.bankTransfer.reference.replace('{orderNumber}', 'SF-200')),
     ).toBeTruthy()
   })
 

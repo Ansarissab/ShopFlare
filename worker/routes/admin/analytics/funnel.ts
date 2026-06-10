@@ -32,12 +32,12 @@ app.get('/', async (c) => {
   // Abandoned: pending orders older than N hours, not yet progressed
   const abandonedRows = await db
     .select({
-      orderNumber:  schema.orders.orderNumber,
+      orderNumber: schema.orders.orderNumber,
       customerName: schema.orders.customerName,
       customerEmail: schema.orders.customerEmail,
       customerPhone: schema.orders.customerPhone,
-      totalCents:   schema.orders.totalCents,
-      createdAt:    schema.orders.createdAt,
+      totalCents: schema.orders.totalCents,
+      createdAt: schema.orders.createdAt,
     })
     .from(schema.orders)
     .where(sql`
@@ -49,7 +49,7 @@ app.get('/', async (c) => {
     .limit(20)
 
   const now = Date.now()
-  const abandonedCheckouts = abandonedRows.map(r => {
+  const abandonedCheckouts = abandonedRows.map((r) => {
     const hoursAgo = Math.floor((now - new Date(r.createdAt).getTime()) / 3_600_000)
     const contactHint = r.customerEmail
       ? maskContact(r.customerEmail, 'email')
@@ -57,25 +57,24 @@ app.get('/', async (c) => {
         ? maskContact(r.customerPhone, 'phone')
         : '—'
     return {
-      orderNumber:  r.orderNumber,
+      orderNumber: r.orderNumber,
       customerName: r.customerName,
       contactHint,
-      totalCents:   r.totalCents,
-      createdAt:    r.createdAt,
+      totalCents: r.totalCents,
+      createdAt: r.createdAt,
       hoursAgo,
     }
   })
 
-  const created   = stageCounts?.checkoutsCreated ?? 0
+  const created = stageCounts?.checkoutsCreated ?? 0
   const confirmed = stageCounts?.confirmed ?? 0
-  const checkoutAbandonmentRatePct = created > 0
-    ? Math.round(((created - confirmed) / created) * 100)
-    : 0
+  const checkoutAbandonmentRatePct =
+    created > 0 ? Math.round(((created - confirmed) / created) * 100) : 0
 
   const funnelStages = [
     { stage: 'checkouts_created', label: 'Checkouts Created', count: created },
-    { stage: 'confirmed',         label: 'Confirmed',          count: confirmed },
-    { stage: 'delivered',         label: 'Delivered',          count: stageCounts?.delivered ?? 0 },
+    { stage: 'confirmed', label: 'Confirmed', count: confirmed },
+    { stage: 'delivered', label: 'Delivered', count: stageCounts?.delivered ?? 0 },
   ]
 
   // ─── Layer 2: daily rollup counters (if rows exist in analytics_daily) ────
@@ -83,16 +82,16 @@ app.get('/', async (c) => {
   const dailyRows = await db
     .select({
       metric: schema.analyticsDaily.metric,
-      count:  sql<number>`SUM(${schema.analyticsDaily.count})`,
+      count: sql<number>`SUM(${schema.analyticsDaily.count})`,
     })
     .from(schema.analyticsDaily)
     .where(since ? sql`${schema.analyticsDaily.date} >= DATE(${since})` : sql`1=1`)
     .groupBy(schema.analyticsDaily.metric)
 
   const layer2Enabled = dailyRows.length > 0
-  const layer2Map = Object.fromEntries(dailyRows.map(r => [r.metric, r.count]))
+  const layer2Map = Object.fromEntries(dailyRows.map((r) => [r.metric, r.count]))
 
-  const layer2Stages = FUNNEL_METRICS.map(metric => ({
+  const layer2Stages = FUNNEL_METRICS.map((metric) => ({
     stage: metric,
     label: metric,
     count: layer2Map[metric] ?? 0,

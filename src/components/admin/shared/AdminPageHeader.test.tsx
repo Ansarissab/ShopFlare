@@ -40,10 +40,7 @@ describe('AdminPageHeader', () => {
 
   it('renders the actions slot when actions are provided', () => {
     render(
-      <AdminPageHeader
-        title="Coupons"
-        actions={<button data-testid="action-btn">New</button>}
-      />,
+      <AdminPageHeader title="Coupons" actions={<button data-testid="action-btn">New</button>} />,
     )
     expect(screen.getByTestId('action-btn')).toBeTruthy()
   })

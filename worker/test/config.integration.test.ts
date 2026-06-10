@@ -23,9 +23,21 @@ const adminPut = (path: string, body: unknown) =>
 // ─── Cleanup ──────────────────────────────────────────────────────────────────
 
 const TABLES = [
-  'coupon_uses', 'reviews', 'notify_me', 'order_items', 'orders', 'coupons',
-  'size_options', 'product_images', 'variants', 'products', 'store_config',
-  'stripe_events', 'push_subscriptions', 'analytics_daily', 'carts',
+  'coupon_uses',
+  'reviews',
+  'notify_me',
+  'order_items',
+  'orders',
+  'coupons',
+  'size_options',
+  'product_images',
+  'variants',
+  'products',
+  'store_config',
+  'stripe_events',
+  'push_subscriptions',
+  'analytics_daily',
+  'carts',
 ]
 beforeEach(async () => {
   for (const t of TABLES) await env.DB.prepare(`DELETE FROM ${t}`).run()
@@ -68,11 +80,13 @@ describe('GET /api/config/store', () => {
 
   it('reflects stored config values', async () => {
     const now = new Date().toISOString()
-    await db().insert(schema.storeConfig).values([
-      { key: 'storeName', value: 'My Shop', updatedAt: now },
-      { key: 'tagline', value: 'The best shop', updatedAt: now },
-      { key: 'currency', value: 'USD', updatedAt: now },
-    ])
+    await db()
+      .insert(schema.storeConfig)
+      .values([
+        { key: 'storeName', value: 'My Shop', updatedAt: now },
+        { key: 'tagline', value: 'The best shop', updatedAt: now },
+        { key: 'currency', value: 'USD', updatedAt: now },
+      ])
 
     const res = await get('/api/config/store')
     expect(res.status).toBe(200)

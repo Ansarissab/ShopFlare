@@ -10,7 +10,11 @@ export function AdminPageHeader({ title, actions, backHref }: AdminPageHeaderPro
     <div className="sticky top-0 z-20 -mx-4 -mt-4 mb-6 flex flex-wrap items-center justify-between gap-2 border-b bg-background/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:-mt-6 sm:px-6">
       <div className="flex items-center gap-2 sm:gap-3">
         {backHref && (
-          <Link href={backHref} aria-label={en.admin.back} className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}>
+          <Link
+            href={backHref}
+            aria-label={en.admin.back}
+            className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}
+          >
             <ArrowLeft className="size-4" aria-hidden />
           </Link>
         )}

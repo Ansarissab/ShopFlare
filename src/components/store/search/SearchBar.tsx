@@ -9,7 +9,9 @@ import type { SearchBarProps } from '@/lib/types/search'
 export function SearchBar({ value, onChange }: SearchBarProps) {
   const [inputValue, setInputValue] = useState(value)
   const onChangeRef = useRef(onChange)
-  useEffect(() => { onChangeRef.current = onChange }, [onChange])
+  useEffect(() => {
+    onChangeRef.current = onChange
+  }, [onChange])
 
   // Sync when parent resets value (URL navigation, external clear). Done during
   // render rather than in an effect so the input reflects the new value on the

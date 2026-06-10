@@ -10,7 +10,13 @@ import type { ProductWithVariants } from '@/lib/types/product'
 vi.mock('next/image', async () => {
   const { createElement } = await import('react')
   return {
-    default: (props: React.ImgHTMLAttributes<HTMLImageElement> & { fill?: boolean; priority?: boolean; sizes?: string }) => {
+    default: (
+      props: React.ImgHTMLAttributes<HTMLImageElement> & {
+        fill?: boolean
+        priority?: boolean
+        sizes?: string
+      },
+    ) => {
       const { fill, priority, sizes, ...rest } = props
       return createElement('img', rest)
     },
@@ -21,7 +27,9 @@ vi.mock('sonner', () => ({
   toast: Object.assign(vi.fn(), { success: vi.fn(), error: vi.fn() }),
 }))
 
-const apiPost = vi.fn((..._args: unknown[]) => Promise.resolve({ orderId: 'o1', orderNumber: '1001' }))
+const apiPost = vi.fn((..._args: unknown[]) =>
+  Promise.resolve({ orderId: 'o1', orderNumber: '1001' }),
+)
 vi.mock('@/lib/api', () => ({
   apiGet: vi.fn(() => Promise.resolve({})),
   apiPost: (...args: unknown[]) => apiPost(...args),
@@ -42,7 +50,9 @@ vi.mock('@/hooks/useApiResource', () => ({
 }))
 
 // useStoreConfig: controllable per-test
-let storeConfigState: { config: unknown } = { config: { whatsappNumber: '+10000000000', whatsappEnabled: true, currency: 'PKR' } }
+let storeConfigState: { config: unknown } = {
+  config: { whatsappNumber: '+10000000000', whatsappEnabled: true, currency: 'PKR' },
+}
 vi.mock('@/hooks/useStoreConfig', () => ({
   useStoreConfig: () => storeConfigState,
 }))
@@ -97,9 +107,11 @@ vi.mock('@/components/ui/select', async () => {
       ],
     )
   }
-  const SelectItem = (props: AnyProps) => createElement('span', null, props.children as React.ReactNode)
+  const SelectItem = (props: AnyProps) =>
+    createElement('span', null, props.children as React.ReactNode)
   ;(SelectItem as unknown as { __isSelectItem: boolean }).__isSelectItem = true
-  const passthrough = (props: AnyProps) => createElement('span', null, props.children as React.ReactNode)
+  const passthrough = (props: AnyProps) =>
+    createElement('span', null, props.children as React.ReactNode)
   return {
     Select,
     SelectItem,
@@ -135,8 +147,26 @@ function makeProducts(): ProductWithVariants[] {
           sortOrder: 0,
           images: [{ id: 'img1', variantId: 'v1', url: '/blue.jpg', r2Key: 'k', sortOrder: 0 }],
           sizes: [
-            { id: 's1', variantId: 'v1', size: 'M', sku: 'SKU-M', priceCents: 2500, stock: 5, stripePriceId: null, active: true },
-            { id: 's2', variantId: 'v1', size: 'L', sku: null, priceCents: 3000, stock: 0, stripePriceId: null, active: true },
+            {
+              id: 's1',
+              variantId: 'v1',
+              size: 'M',
+              sku: 'SKU-M',
+              priceCents: 2500,
+              stock: 5,
+              stripePriceId: null,
+              active: true,
+            },
+            {
+              id: 's2',
+              variantId: 'v1',
+              size: 'L',
+              sku: null,
+              priceCents: 3000,
+              stock: 0,
+              stripePriceId: null,
+              active: true,
+            },
           ],
         },
         {
@@ -148,7 +178,16 @@ function makeProducts(): ProductWithVariants[] {
           sortOrder: 1,
           images: [],
           sizes: [
-            { id: 's3', variantId: 'v2', size: 'S', sku: null, priceCents: 1000, stock: 2, stripePriceId: null, active: true },
+            {
+              id: 's3',
+              variantId: 'v2',
+              size: 'S',
+              sku: null,
+              priceCents: 1000,
+              stock: 2,
+              stripePriceId: null,
+              active: true,
+            },
           ],
         },
       ],
@@ -167,7 +206,9 @@ afterEach(() => {
 
 beforeEach(() => {
   apiResourceState = { data: undefined, loading: true }
-  storeConfigState = { config: { whatsappNumber: '+10000000000', whatsappEnabled: true, currency: 'PKR' } }
+  storeConfigState = {
+    config: { whatsappNumber: '+10000000000', whatsappEnabled: true, currency: 'PKR' },
+  }
   apiPost.mockResolvedValue({ orderId: 'o1', orderNumber: '1001' })
   // window.open used by whatsapp handler
   vi.stubGlobal('open', vi.fn())
@@ -182,7 +223,11 @@ function phoneInput() {
   return document.getElementById('pos-phone') as HTMLInputElement
 }
 
-function addItem({ productId = 'p1', variantId = 'v1', sizeId = 's1' }: { productId?: string; variantId?: string; sizeId?: string } = {}) {
+function addItem({
+  productId = 'p1',
+  variantId = 'v1',
+  sizeId = 's1',
+}: { productId?: string; variantId?: string; sizeId?: string } = {}) {
   fireEvent.change(selects()[0], { target: { value: productId } })
   fireEvent.change(selects()[1], { target: { value: variantId } })
   fireEvent.change(selects()[2], { target: { value: sizeId } })
@@ -316,8 +361,12 @@ describe('POSScreen', () => {
   it('Clear/Complete disabled when no items', () => {
     setLoaded()
     render(<POSScreen />)
-    expect((screen.getByRole('button', { name: en.pos.clearSale }) as HTMLButtonElement).disabled).toBe(true)
-    expect((screen.getByRole('button', { name: en.pos.completeSale }) as HTMLButtonElement).disabled).toBe(true)
+    expect(
+      (screen.getByRole('button', { name: en.pos.clearSale }) as HTMLButtonElement).disabled,
+    ).toBe(true)
+    expect(
+      (screen.getByRole('button', { name: en.pos.completeSale }) as HTMLButtonElement).disabled,
+    ).toBe(true)
   })
 
   it('customer phone input updates value', () => {
@@ -342,7 +391,9 @@ describe('POSScreen', () => {
       customerPhone: '+92300',
     })
     await waitFor(() => expect(screen.getByText(en.pos.saleCompleted)).toBeTruthy())
-    expect((toast as unknown as { success: ReturnType<typeof vi.fn> }).success).toHaveBeenCalledWith(en.pos.saleCompleted)
+    expect(
+      (toast as unknown as { success: ReturnType<typeof vi.fn> }).success,
+    ).toHaveBeenCalledWith(en.pos.saleCompleted)
     expect(screen.getByText(en.pos.orderNumber.replace('{number}', '1001'))).toBeTruthy()
   })
 
@@ -351,10 +402,12 @@ describe('POSScreen', () => {
     render(<POSScreen />)
     addItem()
     fireEvent.click(screen.getByRole('button', { name: en.pos.completeSale }))
-    await waitFor(() => expect(apiPost).toHaveBeenCalledWith('/api/admin/orders/pos', {
-      items: [{ sizeOptionId: 's1', quantity: 1 }],
-      customerPhone: undefined,
-    }))
+    await waitFor(() =>
+      expect(apiPost).toHaveBeenCalledWith('/api/admin/orders/pos', {
+        items: [{ sizeOptionId: 's1', quantity: 1 }],
+        customerPhone: undefined,
+      }),
+    )
   })
 
   it('completeSale shows error toast on failure and stays on sale screen', async () => {
@@ -365,7 +418,9 @@ describe('POSScreen', () => {
     addItem()
     fireEvent.click(screen.getByRole('button', { name: en.pos.completeSale }))
     await waitFor(() =>
-      expect((toast as unknown as { error: ReturnType<typeof vi.fn> }).error).toHaveBeenCalledWith(en.errors.orderFailed),
+      expect((toast as unknown as { error: ReturnType<typeof vi.fn> }).error).toHaveBeenCalledWith(
+        en.errors.orderFailed,
+      ),
     )
     // no success screen
     expect(screen.queryByText(en.pos.newSale)).toBeNull()
@@ -397,7 +452,12 @@ describe('POSScreen', () => {
   it('shows the loading label and disables Complete Sale while submitting', async () => {
     // Hold apiPost open so `submitting` stays true -> button renders the '…' label.
     let resolvePost: (v: { orderId: string; orderNumber: string }) => void = () => {}
-    apiPost.mockImplementationOnce(() => new Promise((res) => { resolvePost = res }))
+    apiPost.mockImplementationOnce(
+      () =>
+        new Promise((res) => {
+          resolvePost = res
+        }),
+    )
     setLoaded()
     render(<POSScreen />)
     addItem()
@@ -422,7 +482,9 @@ describe('POSScreen', () => {
 
   it('success screen hides WhatsApp button when flag OFF even with number set', async () => {
     setLoaded()
-    storeConfigState = { config: { whatsappNumber: '+10000000000', whatsappEnabled: false, currency: 'PKR' } }
+    storeConfigState = {
+      config: { whatsappNumber: '+10000000000', whatsappEnabled: false, currency: 'PKR' },
+    }
     render(<POSScreen />)
     addItem()
     fireEvent.click(screen.getByRole('button', { name: en.pos.completeSale }))

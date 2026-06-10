@@ -67,16 +67,21 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   return (
     <div className={layout.page}>
       <JsonLd data={breadcrumbListJsonLd(breadcrumbItems)} />
-      <JsonLd data={collectionPageJsonLd({
-        name: category.name,
-        url: categoryUrl,
-        description: category.description,
-        imageUrl: category.imageUrl,
-      })} />
+      <JsonLd
+        data={collectionPageJsonLd({
+          name: category.name,
+          url: categoryUrl,
+          description: category.description,
+          imageUrl: category.imageUrl,
+        })}
+      />
 
       {/* Breadcrumb */}
       <nav className="mb-6 flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
-        <Link href={catalogHref(config?.landingEnabled)} className="hover:text-foreground transition-colors">
+        <Link
+          href={catalogHref(config?.landingEnabled)}
+          className="hover:text-foreground transition-colors"
+        >
           {config?.storeName ?? 'Home'}
         </Link>
         {breadcrumb.map((b) => (

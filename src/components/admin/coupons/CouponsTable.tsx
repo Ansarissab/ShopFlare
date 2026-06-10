@@ -24,14 +24,15 @@ function CouponRow({ coupon, onEdit, onDeleted }: CouponRowProps) {
     }
   }
 
-  const valueLabel =
-    coupon.type === 'percentage' ? `${coupon.value}%` : `${coupon.value}¢`
+  const valueLabel = coupon.type === 'percentage' ? `${coupon.value}%` : `${coupon.value}¢`
 
   return (
     <tr className="border-b last:border-0 hover:bg-muted/30 transition-colors">
       <td className="px-4 py-3 font-mono text-xs font-semibold">{coupon.code}</td>
       <td className="hidden sm:table-cell px-4 py-3 text-sm">
-        <span className="capitalize">{coupon.type === 'percentage' ? en.admin.couponTypePercentage : en.admin.couponTypeFixed}</span>
+        <span className="capitalize">
+          {coupon.type === 'percentage' ? en.admin.couponTypePercentage : en.admin.couponTypeFixed}
+        </span>
       </td>
       <td className="px-4 py-3 text-sm font-medium">{valueLabel}</td>
       <td className="hidden sm:table-cell px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
@@ -39,9 +40,7 @@ function CouponRow({ coupon, onEdit, onDeleted }: CouponRowProps) {
         {coupon.usageLimit !== null ? ` / ${coupon.usageLimit}` : ''}
       </td>
       <td className="hidden sm:table-cell px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
-        {coupon.expiresAt
-          ? formatDate(coupon.expiresAt)
-          : '—'}
+        {coupon.expiresAt ? formatDate(coupon.expiresAt) : '—'}
       </td>
       <td className="px-4 py-3">
         <Badge variant={coupon.active ? 'default' : 'secondary'}>
@@ -50,7 +49,9 @@ function CouponRow({ coupon, onEdit, onDeleted }: CouponRowProps) {
       </td>
       <td className="hidden sm:table-cell px-4 py-3">
         {coupon.stripeCouponId ? (
-          <Badge variant="outline" className="text-xs">{en.admin.syncStripeCoupon}</Badge>
+          <Badge variant="outline" className="text-xs">
+            {en.admin.syncStripeCoupon}
+          </Badge>
         ) : (
           <span className="text-xs text-muted-foreground">—</span>
         )}
@@ -87,9 +88,7 @@ function CouponRow({ coupon, onEdit, onDeleted }: CouponRowProps) {
 
 export function CouponsTable({ coupons, onEdit, onDeleted }: CouponsTableProps) {
   if (coupons.length === 0) {
-    return (
-      <p className="py-12 text-center text-sm text-muted-foreground">{en.admin.noCoupons}</p>
-    )
+    return <p className="py-12 text-center text-sm text-muted-foreground">{en.admin.noCoupons}</p>
   }
 
   return (
@@ -97,28 +96,39 @@ export function CouponsTable({ coupons, onEdit, onDeleted }: CouponsTableProps) 
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b bg-muted/50">
-            <th className="px-4 py-3 text-left font-medium text-muted-foreground">{en.admin.couponCode}</th>
-            <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">{en.admin.couponType}</th>
-            <th className="px-4 py-3 text-left font-medium text-muted-foreground">{en.admin.couponValue}</th>
-            <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5">{en.admin.usedCount}<HelpTip text={en.tooltips.coupon.used} /></span>
+            <th className="px-4 py-3 text-left font-medium text-muted-foreground">
+              {en.admin.couponCode}
             </th>
-            <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">{en.admin.expiresAt}</th>
-            <th className="px-4 py-3 text-left font-medium text-muted-foreground">{en.admin.active}</th>
             <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5">{en.admin.stripeColumn}<HelpTip text={en.tooltips.coupon.stripe} /></span>
+              {en.admin.couponType}
+            </th>
+            <th className="px-4 py-3 text-left font-medium text-muted-foreground">
+              {en.admin.couponValue}
+            </th>
+            <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5">
+                {en.admin.usedCount}
+                <HelpTip text={en.tooltips.coupon.used} />
+              </span>
+            </th>
+            <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">
+              {en.admin.expiresAt}
+            </th>
+            <th className="px-4 py-3 text-left font-medium text-muted-foreground">
+              {en.admin.active}
+            </th>
+            <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5">
+                {en.admin.stripeColumn}
+                <HelpTip text={en.tooltips.coupon.stripe} />
+              </span>
             </th>
             <th className="px-4 py-3" />
           </tr>
         </thead>
         <tbody>
           {coupons.map((coupon) => (
-            <CouponRow
-              key={coupon.id}
-              coupon={coupon}
-              onEdit={onEdit}
-              onDeleted={onDeleted}
-            />
+            <CouponRow key={coupon.id} coupon={coupon} onEdit={onEdit} onDeleted={onDeleted} />
           ))}
         </tbody>
       </table>

@@ -102,9 +102,7 @@ describe('OrderSummary', () => {
       taxBasis: 'subtotal',
     }
     render(<OrderSummary />)
-    const label = en.cart.taxRateLabel
-      .replace('{name}', 'GST')
-      .replace('{rate}', '10')
+    const label = en.cart.taxRateLabel.replace('{name}', 'GST').replace('{rate}', '10')
     expect(screen.getByText(label)).toBeTruthy()
   })
 
@@ -121,9 +119,7 @@ describe('OrderSummary', () => {
       taxBasis: 'subtotal',
     }
     render(<OrderSummary />)
-    expect(
-      screen.getByText(en.cart.taxIncluded.replace('{name}', 'VAT')),
-    ).toBeTruthy()
+    expect(screen.getByText(en.cart.taxIncluded.replace('{name}', 'VAT'))).toBeTruthy()
   })
 
   it('does not render tax row when tax disabled', () => {

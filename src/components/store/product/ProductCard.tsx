@@ -23,9 +23,7 @@ export function ProductCard({
   const activeSizes = sizes.filter((s) => s.active && s.stock !== 0)
 
   // First image (lowest sortOrder across all variants)
-  const firstImage = images
-    .slice()
-    .sort((a, b) => a.sortOrder - b.sortOrder)[0]
+  const firstImage = images.slice().sort((a, b) => a.sortOrder - b.sortOrder)[0]
 
   // Variant color dots (up to 5)
   const colorVariants = variants.filter((v) => v.colorHex).slice(0, 5)
@@ -60,11 +58,7 @@ export function ProductCard({
             </div>
           )}
 
-          {isNew && (
-            <Badge className="absolute left-2 top-2">
-              {en.product.new}
-            </Badge>
-          )}
+          {isNew && <Badge className="absolute left-2 top-2">{en.product.new}</Badge>}
         </div>
 
         <CardContent className="flex flex-col gap-1.5 p-3 flex-1">

@@ -17,7 +17,12 @@ import { en } from '@/lib/i18n/en'
 import { apiPost, apiPut, apiDelete, apiGet, ApiError } from '@/lib/api'
 import { updateSizeOptionSchema } from '@/lib/schemas'
 import { formatPrice } from '@/lib/utils/index'
-import type { ProductWithVariants, VariantWithDetails, SizeOption, ProductImage } from '@/lib/types/product'
+import type {
+  ProductWithVariants,
+  VariantWithDetails,
+  SizeOption,
+  ProductImage,
+} from '@/lib/types/product'
 import type { AnalyticsProductDetail } from '@/lib/types/analytics'
 
 // ─── Per-product stats panel (edit mode only) ─────────────────────────────────
@@ -159,12 +164,26 @@ export function ProductForm({ initial }: ProductFormProps) {
       const productId = initial?.product.id
 
       if (productId) {
-        await apiPut(`/api/admin/products/${productId}`, { name, description, active, reviewsEnabled })
-        await apiPut(`/api/admin/products/${productId}/categories`, { categoryIds: selectedCategoryIds })
+        await apiPut(`/api/admin/products/${productId}`, {
+          name,
+          description,
+          active,
+          reviewsEnabled,
+        })
+        await apiPut(`/api/admin/products/${productId}/categories`, {
+          categoryIds: selectedCategoryIds,
+        })
         toast.success(en.admin.productUpdated)
       } else {
-        const created = await apiPost<{ id: string }>('/api/admin/products', { name, description, active, reviewsEnabled })
-        await apiPut(`/api/admin/products/${created.id}/categories`, { categoryIds: selectedCategoryIds })
+        const created = await apiPost<{ id: string }>('/api/admin/products', {
+          name,
+          description,
+          active,
+          reviewsEnabled,
+        })
+        await apiPut(`/api/admin/products/${created.id}/categories`, {
+          categoryIds: selectedCategoryIds,
+        })
         toast.success(en.admin.productCreated)
         router.push(`/admin/products/${created.id}`)
         return
@@ -198,9 +217,7 @@ export function ProductForm({ initial }: ProductFormProps) {
   }
 
   async function updateVariantLabel(variantId: string, label: string) {
-    setVariants((prev) =>
-      prev.map((v) => (v.id === variantId ? { ...v, label } : v)),
-    )
+    setVariants((prev) => prev.map((v) => (v.id === variantId ? { ...v, label } : v)))
   }
 
   async function saveVariant(variantId: string) {
@@ -250,7 +267,12 @@ export function ProductForm({ initial }: ProductFormProps) {
     }
   }
 
-  function updateSizeField(variantId: string, sizeId: string, field: string, value: string | number | boolean) {
+  function updateSizeField(
+    variantId: string,
+    sizeId: string,
+    field: string,
+    value: string | number | boolean,
+  ) {
     clearSizeError(sizeId, field)
     setVariants((prev) =>
       prev.map((v) =>
@@ -294,7 +316,10 @@ export function ProductForm({ initial }: ProductFormProps) {
 
     try {
       await apiPut(`/api/admin/products/sizes/${sizeId}`, payload)
-      setSizeErrors((prev) => { const { [sizeId]: _, ...rest } = prev; return rest })
+      setSizeErrors((prev) => {
+        const { [sizeId]: _, ...rest } = prev
+        return rest
+      })
       toast.success(en.admin.saved)
     } catch (err) {
       if (err instanceof ApiError && err.status === 400) {
@@ -333,9 +358,7 @@ export function ProductForm({ initial }: ProductFormProps) {
 
   function handleImageUploaded(variantId: string, image: ProductImage) {
     setVariants((prev) =>
-      prev.map((v) =>
-        v.id === variantId ? { ...v, images: [...v.images, image] } : v,
-      ),
+      prev.map((v) => (v.id === variantId ? { ...v, images: [...v.images, image] } : v)),
     )
   }
 
@@ -356,11 +379,7 @@ export function ProductForm({ initial }: ProductFormProps) {
         <h2 className="text-sm font-semibold">Basic Info</h2>
 
         <FormField label={en.admin.productName} htmlFor="product-name">
-          <Input
-            id="product-name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
+          <Input id="product-name" value={name} onChange={(e) => setName(e.target.value)} />
         </FormField>
 
         <FormField label={en.admin.productDescription} htmlFor="product-desc">
@@ -411,9 +430,7 @@ export function ProductForm({ initial }: ProductFormProps) {
       </div>
 
       {/* Per-product analytics stats — edit mode only */}
-      {initial?.product.id && (
-        <ProductStatsPanel productId={initial.product.id} />
-      )}
+      {initial?.product.id && <ProductStatsPanel productId={initial.product.id} />}
 
       {/* Variants — only shown once product is saved (has an ID) */}
       {initial?.product.id && (
@@ -454,7 +471,13 @@ export function ProductForm({ initial }: ProductFormProps) {
                         )}
                         <span className="text-sm font-medium">{variant.label}</span>
                         <span className="text-xs text-muted-foreground">
-                          ({(variant.sizes as LocalSize[]).length} sizes · {variant.images.length} images · {(variant.sizes as LocalSize[]).reduce((s, sz) => s + (sz.stock === -1 ? 0 : sz.stock), 0)} units)
+                          ({(variant.sizes as LocalSize[]).length} sizes · {variant.images.length}{' '}
+                          images ·{' '}
+                          {(variant.sizes as LocalSize[]).reduce(
+                            (s, sz) => s + (sz.stock === -1 ? 0 : sz.stock),
+                            0,
+                          )}{' '}
+                          units)
                         </span>
                       </div>
                       <Button
@@ -462,7 +485,10 @@ export function ProductForm({ initial }: ProductFormProps) {
                         variant="ghost"
                         size="icon"
                         className="size-7 text-destructive hover:text-destructive"
-                        onClick={(e: MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); deleteVariant(variant.id) }}
+                        onClick={(e: MouseEvent<HTMLButtonElement>) => {
+                          e.stopPropagation()
+                          deleteVariant(variant.id)
+                        }}
                         aria-label={en.admin.deleteVariant}
                       >
                         <Trash2 className="size-3.5" aria-hidden />
@@ -473,14 +499,22 @@ export function ProductForm({ initial }: ProductFormProps) {
                       <div className="border-t p-4 flex flex-col gap-4">
                         {/* Variant fields */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <FormField label={en.admin.variantLabel} htmlFor={`variant-label-${variant.id}`} help={en.tooltips.product.variantLabel}>
+                          <FormField
+                            label={en.admin.variantLabel}
+                            htmlFor={`variant-label-${variant.id}`}
+                            help={en.tooltips.product.variantLabel}
+                          >
                             <Input
                               id={`variant-label-${variant.id}`}
                               value={variant.label}
                               onChange={(e) => updateVariantLabel(variant.id, e.target.value)}
                             />
                           </FormField>
-                          <FormField label={en.admin.colorHex} htmlFor={`variant-color-${variant.id}`} help={en.tooltips.product.colorHex}>
+                          <FormField
+                            label={en.admin.colorHex}
+                            htmlFor={`variant-color-${variant.id}`}
+                            help={en.tooltips.product.colorHex}
+                          >
                             <div className="flex gap-2">
                               <Input
                                 id={`variant-color-${variant.id}`}
@@ -488,7 +522,9 @@ export function ProductForm({ initial }: ProductFormProps) {
                                 onChange={(e) =>
                                   setVariants((prev) =>
                                     prev.map((v) =>
-                                      v.id === variant.id ? { ...v, colorHex: e.target.value || null } : v,
+                                      v.id === variant.id
+                                        ? { ...v, colorHex: e.target.value || null }
+                                        : v,
                                     ),
                                   )
                                 }
@@ -512,7 +548,9 @@ export function ProductForm({ initial }: ProductFormProps) {
 
                         {/* Images */}
                         <div>
-                          <p className="text-xs font-medium text-muted-foreground mb-2">{en.admin.variantImages}</p>
+                          <p className="text-xs font-medium text-muted-foreground mb-2">
+                            {en.admin.variantImages}
+                          </p>
                           <ImageUpload
                             variantId={variant.id}
                             images={variant.images}
@@ -540,65 +578,116 @@ export function ProductForm({ initial }: ProductFormProps) {
                               {(variant.sizes as LocalSize[]).map((size) => {
                                 const errs = sizeErrors[size.id] ?? {}
                                 return (
-                                <div key={size.id} className="grid grid-cols-2 gap-2 items-end sm:grid-cols-4 lg:grid-cols-[1fr_1fr_1fr_1fr_auto]">
-                                  <FormField label={en.admin.sizeName} htmlFor={`size-name-${size.id}`} error={errs.size} help={en.tooltips.product.sizeName}>
-                                    <Input
-                                      id={`size-name-${size.id}`}
-                                      value={size.size}
-                                      aria-invalid={!!errs.size}
-                                      onChange={(e) => updateSizeField(variant.id, size.id, 'size', e.target.value)}
-                                    />
-                                  </FormField>
-                                  <FormField label={en.admin.priceCents} htmlFor={`size-price-${size.id}`} error={errs.priceCents} help={en.tooltips.product.priceCents}>
-                                    <Input
-                                      id={`size-price-${size.id}`}
-                                      type="number"
-                                      min={0}
-                                      value={size.priceCents}
-                                      aria-invalid={!!errs.priceCents}
-                                      onChange={(e) => updateSizeField(variant.id, size.id, 'priceCents', Number(e.target.value))}
-                                    />
-                                  </FormField>
-                                  <FormField label={en.admin.stock} htmlFor={`size-stock-${size.id}`} error={errs.stock} help={en.tooltips.product.stock}>
-                                    <Input
-                                      id={`size-stock-${size.id}`}
-                                      type="number"
-                                      min={-1}
-                                      value={size.stock}
-                                      aria-invalid={!!errs.stock}
-                                      onChange={(e) => updateSizeField(variant.id, size.id, 'stock', Number(e.target.value))}
-                                    />
-                                  </FormField>
-                                  <FormField label={en.admin.sku} htmlFor={`size-sku-${size.id}`} error={errs.sku} help={en.tooltips.product.sku}>
-                                    <Input
-                                      id={`size-sku-${size.id}`}
-                                      value={size.sku ?? ''}
-                                      aria-invalid={!!errs.sku}
-                                      onChange={(e) => updateSizeField(variant.id, size.id, 'sku', e.target.value)}
-                                    />
-                                  </FormField>
-                                  <div className="flex gap-1 pb-0.5 col-span-2 sm:col-span-1 lg:col-span-1">
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => saveSize(size.id, variant.id)}
+                                  <div
+                                    key={size.id}
+                                    className="grid grid-cols-2 gap-2 items-end sm:grid-cols-4 lg:grid-cols-[1fr_1fr_1fr_1fr_auto]"
+                                  >
+                                    <FormField
+                                      label={en.admin.sizeName}
+                                      htmlFor={`size-name-${size.id}`}
+                                      error={errs.size}
+                                      help={en.tooltips.product.sizeName}
                                     >
-                                      {en.admin.saveSize}
-                                    </Button>
-                                    <Button
-                                      type="button"
-                                      size="icon"
-                                      variant="ghost"
-                                      className="text-destructive hover:text-destructive size-9"
-                                      onClick={() => deleteSize(variant.id, size.id)}
-                                      aria-label={en.admin.deleteSize}
+                                      <Input
+                                        id={`size-name-${size.id}`}
+                                        value={size.size}
+                                        aria-invalid={!!errs.size}
+                                        onChange={(e) =>
+                                          updateSizeField(
+                                            variant.id,
+                                            size.id,
+                                            'size',
+                                            e.target.value,
+                                          )
+                                        }
+                                      />
+                                    </FormField>
+                                    <FormField
+                                      label={en.admin.priceCents}
+                                      htmlFor={`size-price-${size.id}`}
+                                      error={errs.priceCents}
+                                      help={en.tooltips.product.priceCents}
                                     >
-                                      <Trash2 className="size-3.5" aria-hidden />
-                                    </Button>
+                                      <Input
+                                        id={`size-price-${size.id}`}
+                                        type="number"
+                                        min={0}
+                                        value={size.priceCents}
+                                        aria-invalid={!!errs.priceCents}
+                                        onChange={(e) =>
+                                          updateSizeField(
+                                            variant.id,
+                                            size.id,
+                                            'priceCents',
+                                            Number(e.target.value),
+                                          )
+                                        }
+                                      />
+                                    </FormField>
+                                    <FormField
+                                      label={en.admin.stock}
+                                      htmlFor={`size-stock-${size.id}`}
+                                      error={errs.stock}
+                                      help={en.tooltips.product.stock}
+                                    >
+                                      <Input
+                                        id={`size-stock-${size.id}`}
+                                        type="number"
+                                        min={-1}
+                                        value={size.stock}
+                                        aria-invalid={!!errs.stock}
+                                        onChange={(e) =>
+                                          updateSizeField(
+                                            variant.id,
+                                            size.id,
+                                            'stock',
+                                            Number(e.target.value),
+                                          )
+                                        }
+                                      />
+                                    </FormField>
+                                    <FormField
+                                      label={en.admin.sku}
+                                      htmlFor={`size-sku-${size.id}`}
+                                      error={errs.sku}
+                                      help={en.tooltips.product.sku}
+                                    >
+                                      <Input
+                                        id={`size-sku-${size.id}`}
+                                        value={size.sku ?? ''}
+                                        aria-invalid={!!errs.sku}
+                                        onChange={(e) =>
+                                          updateSizeField(
+                                            variant.id,
+                                            size.id,
+                                            'sku',
+                                            e.target.value,
+                                          )
+                                        }
+                                      />
+                                    </FormField>
+                                    <div className="flex gap-1 pb-0.5 col-span-2 sm:col-span-1 lg:col-span-1">
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => saveSize(size.id, variant.id)}
+                                      >
+                                        {en.admin.saveSize}
+                                      </Button>
+                                      <Button
+                                        type="button"
+                                        size="icon"
+                                        variant="ghost"
+                                        className="text-destructive hover:text-destructive size-9"
+                                        onClick={() => deleteSize(variant.id, size.id)}
+                                        aria-label={en.admin.deleteSize}
+                                      >
+                                        <Trash2 className="size-3.5" aria-hidden />
+                                      </Button>
+                                    </div>
                                   </div>
-                                </div>
-                              )
+                                )
                               })}
                             </div>
                           )}

@@ -4,8 +4,17 @@ import { layout, safeArea } from '@/lib/styles'
 describe('layout', () => {
   it('exposes every documented layout key as a non-empty string', () => {
     const keys = [
-      'page', 'bar', 'formPage', 'detailPage', 'centeredState', 'inlineError',
-      'appHeader', 'tabBar', 'mobileStack', 'formGrid2', 'formGrid3',
+      'page',
+      'bar',
+      'formPage',
+      'detailPage',
+      'centeredState',
+      'inlineError',
+      'appHeader',
+      'tabBar',
+      'mobileStack',
+      'formGrid2',
+      'formGrid3',
     ] as const
     for (const k of keys) {
       expect(typeof layout[k]).toBe('string')

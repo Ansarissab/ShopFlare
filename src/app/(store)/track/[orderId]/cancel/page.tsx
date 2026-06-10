@@ -18,7 +18,14 @@ import type { CancelOrder } from '@/lib/types/order'
 import { apiPost } from '@/lib/api'
 import { useApiResource } from '@/hooks/useApiResource'
 
-type PageState = 'loading' | 'verify_contact' | 'ready' | 'not_found' | 'cannot_cancel' | 'success' | 'error'
+type PageState =
+  | 'loading'
+  | 'verify_contact'
+  | 'ready'
+  | 'not_found'
+  | 'cannot_cancel'
+  | 'success'
+  | 'error'
 
 // User-driven phase. The data-derived phases (loading/ready/not_found/
 // cannot_cancel) are computed during render from the fetch hook; this enum only
@@ -37,11 +44,17 @@ function CancelOrderContent() {
   // an order without PII, then a second fetch after the user enters contact.
   const [fetchContact, setFetchContact] = useState(searchParams.get('c') ?? '')
 
-  const apiPath = params?.orderId && fetchContact
-    ? `/api/orders/track/${params.orderId}?contact=${encodeURIComponent(fetchContact)}`
-    : null
+  const apiPath =
+    params?.orderId && fetchContact
+      ? `/api/orders/track/${params.orderId}?contact=${encodeURIComponent(fetchContact)}`
+      : null
 
-  const { data: raw, loading: fetching, notFound: fetchNotFound, error: fetchError } = useApiResource<{ order: CancelOrder }>(apiPath)
+  const {
+    data: raw,
+    loading: fetching,
+    notFound: fetchNotFound,
+    error: fetchError,
+  } = useApiResource<{ order: CancelOrder }>(apiPath)
 
   const [phase, setPhase] = useState<Phase>(!contact ? 'verify' : 'data')
   const [reason, setReason] = useState('')
@@ -149,7 +162,9 @@ function CancelOrderContent() {
         <h1 className="text-xl font-semibold">{en.checkout.cannotCancel}</h1>
         {order && (
           <p className="text-sm text-muted-foreground capitalize">
-            {en.tracking.status}: {en.orderStatusLabels[order.status as keyof typeof en.orderStatusLabels] ?? order.status}
+            {en.tracking.status}:{' '}
+            {en.orderStatusLabels[order.status as keyof typeof en.orderStatusLabels] ??
+              order.status}
           </p>
         )}
         <Link
@@ -173,7 +188,12 @@ function CancelOrderContent() {
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <polyline points="20 6 9 17 4 12" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            <polyline
+              points="20 6 9 17 4 12"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </div>
         <h1 className="text-xl font-semibold">{en.checkout.orderCancelled}</h1>

@@ -31,7 +31,11 @@ describe('etagFor', () => {
   })
 
   it('version is optional — absent and undefined produce same ETag', () => {
-    const withUndefined = etagFor({ count: 3, maxUpdatedAt: '2024-01-01T00:00:00Z', version: undefined })
+    const withUndefined = etagFor({
+      count: 3,
+      maxUpdatedAt: '2024-01-01T00:00:00Z',
+      version: undefined,
+    })
     const withoutVersion = etagFor({ count: 3, maxUpdatedAt: '2024-01-01T00:00:00Z' })
     expect(withUndefined).toBe(withoutVersion)
   })

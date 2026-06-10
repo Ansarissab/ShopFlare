@@ -21,8 +21,8 @@ export interface TrackingOrder {
   subtotalCents: number
   shippingCents: number
   discountCents: number
-  taxCents:      number
-  totalCents:    number
+  taxCents: number
+  totalCents: number
   trackingNumber?: string
   carrier?: string
   createdAt: string
@@ -34,7 +34,10 @@ export interface TrackingData {
   items: TrackingItem[]
 }
 
-export type CancelOrder = Omit<Pick<Order, 'orderNumber' | 'status' | 'customerName' | 'totalCents'>, 'customerName'> & { customerName?: string }
+export type CancelOrder = Omit<
+  Pick<Order, 'orderNumber' | 'status' | 'customerName' | 'totalCents'>,
+  'customerName'
+> & { customerName?: string }
 
 export interface OrderTimelineProps {
   status: OrderStatus

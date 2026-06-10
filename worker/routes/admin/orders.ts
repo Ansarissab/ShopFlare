@@ -61,7 +61,7 @@ app.get('/', async (c) => {
 
   const baseQuery = db.select().from(schema.orders)
   const countQuery = db.select({ total: count() }).from(schema.orders)
-  const status = statusFilter as typeof schema.orders.$inferSelect['status']
+  const status = statusFilter as (typeof schema.orders.$inferSelect)['status']
 
   const [orders, [{ total }]] = await Promise.all([
     (statusFilter ? baseQuery.where(eq(schema.orders.status, status)) : baseQuery)
@@ -92,11 +92,23 @@ app.get('/:id', async (c) => {
 
   const parsedItems = items.map((item) => ({
     ...item,
-    snapshot: (() => { try { return JSON.parse(item.snapshot) } catch { return {} } })(),
+    snapshot: (() => {
+      try {
+        return JSON.parse(item.snapshot)
+      } catch {
+        return {}
+      }
+    })(),
   }))
 
   const shippingAddress = order.shippingAddress
-    ? (() => { try { return JSON.parse(order.shippingAddress!) } catch { return null } })()
+    ? (() => {
+        try {
+          return JSON.parse(order.shippingAddress!)
+        } catch {
+          return null
+        }
+      })()
     : null
 
   return c.json({ order, items: parsedItems, shippingAddress })
@@ -134,9 +146,7 @@ app.patch('/:id/status', async (c) => {
     .where(eq(schema.orders.id, order.id))
 
   // Notify customer via push when status reaches shipped/delivered
-  c.executionCtx?.waitUntil(
-    notifyOrderStatusChange(db, c.env, order.orderNumber, status),
-  )
+  c.executionCtx?.waitUntil(notifyOrderStatusChange(db, c.env, order.orderNumber, status))
 
   return c.json({ ok: true, status })
 })

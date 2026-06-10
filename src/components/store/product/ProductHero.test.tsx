@@ -3,7 +3,13 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent, cleanup } from '@testing-library/react'
 import { ProductHero } from './ProductHero'
 import { en } from '@/lib/i18n/en'
-import type { ProductHeroProps, SizeOption, Variant, ProductImage, Product } from '@/lib/types/product'
+import type {
+  ProductHeroProps,
+  SizeOption,
+  Variant,
+  ProductImage,
+  Product,
+} from '@/lib/types/product'
 
 // ── Child mocks: capture the props each child receives so we can drive behavior ──
 vi.mock('@/components/store/product/ImageCarousel', async () => {
@@ -17,12 +23,24 @@ vi.mock('@/components/store/product/ImageCarousel', async () => {
 vi.mock('@/components/store/product/VariantSelector', async () => {
   const { createElement } = await import('react')
   return {
-    VariantSelector: ({ variants, selectedVariantId, onSelect }: { variants: Variant[]; selectedVariantId: string; onSelect: (id: string) => void }) =>
+    VariantSelector: ({
+      variants,
+      selectedVariantId,
+      onSelect,
+    }: {
+      variants: Variant[]
+      selectedVariantId: string
+      onSelect: (id: string) => void
+    }) =>
       createElement(
         'div',
         { 'data-testid': 'variant-selector', 'data-selected': selectedVariantId },
         variants.map((v) =>
-          createElement('button', { key: v.id, 'data-testid': `pick-${v.id}`, onClick: () => onSelect(v.id) }, v.label),
+          createElement(
+            'button',
+            { key: v.id, 'data-testid': `pick-${v.id}`, onClick: () => onSelect(v.id) },
+            v.label,
+          ),
         ),
       ),
   }
@@ -31,12 +49,28 @@ vi.mock('@/components/store/product/VariantSelector', async () => {
 vi.mock('@/components/store/product/SizePicker', async () => {
   const { createElement } = await import('react')
   return {
-    SizePicker: ({ sizes, selectedSizeId, onSelect }: { sizes: SizeOption[]; selectedSizeId: string | null; onSelect: (id: string) => void }) =>
+    SizePicker: ({
+      sizes,
+      selectedSizeId,
+      onSelect,
+    }: {
+      sizes: SizeOption[]
+      selectedSizeId: string | null
+      onSelect: (id: string) => void
+    }) =>
       createElement(
         'div',
-        { 'data-testid': 'size-picker', 'data-selected': selectedSizeId ?? '', 'data-count': sizes.length },
+        {
+          'data-testid': 'size-picker',
+          'data-selected': selectedSizeId ?? '',
+          'data-count': sizes.length,
+        },
         sizes.map((s) =>
-          createElement('button', { key: s.id, 'data-testid': `size-${s.id}`, onClick: () => onSelect(s.id) }, s.size),
+          createElement(
+            'button',
+            { key: s.id, 'data-testid': `size-${s.id}`, onClick: () => onSelect(s.id) },
+            s.size,
+          ),
         ),
       ),
   }
@@ -57,7 +91,12 @@ vi.mock('@/components/store/product/ProductActions', async () => {
     }) =>
       createElement(
         'div',
-        { 'data-testid': 'actions', 'data-oos': String(p.allSizesOOS), 'data-adding': String(p.isAddingToCart), 'data-size': p.selectedSize?.id ?? '' },
+        {
+          'data-testid': 'actions',
+          'data-oos': String(p.allSizesOOS),
+          'data-adding': String(p.isAddingToCart),
+          'data-size': p.selectedSize?.id ?? '',
+        },
         createElement('button', { 'data-testid': 'add', onClick: p.onAddToCart }, 'add'),
         createElement('button', { 'data-testid': 'buy', onClick: p.onBuyNow }, 'buy'),
         createElement('button', { 'data-testid': 'wa', onClick: p.onWhatsApp }, 'wa'),
@@ -70,8 +109,19 @@ vi.mock('@/components/store/product/ProductActions', async () => {
 vi.mock('@/components/store/product/NotifyMeDialog', async () => {
   const { createElement } = await import('react')
   return {
-    NotifyMeDialog: (p: { open: boolean; sizeOptionId: string; size: string; variantLabel: string }) =>
-      createElement('div', { 'data-testid': 'notify-dialog', 'data-open': String(p.open), 'data-size-id': p.sizeOptionId, 'data-size': p.size, 'data-variant': p.variantLabel }),
+    NotifyMeDialog: (p: {
+      open: boolean
+      sizeOptionId: string
+      size: string
+      variantLabel: string
+    }) =>
+      createElement('div', {
+        'data-testid': 'notify-dialog',
+        'data-open': String(p.open),
+        'data-size-id': p.sizeOptionId,
+        'data-size': p.size,
+        'data-variant': p.variantLabel,
+      }),
   }
 })
 
@@ -91,8 +141,23 @@ const product: Product = {
   updatedAt: '2024-01-01 00:00:00',
 }
 
-function size(id: string, sz: string, priceCents: number, stock: number, active = true): SizeOption {
-  return { id, variantId: 'v1', size: sz, sku: null, priceCents, stock, stripePriceId: null, active }
+function size(
+  id: string,
+  sz: string,
+  priceCents: number,
+  stock: number,
+  active = true,
+): SizeOption {
+  return {
+    id,
+    variantId: 'v1',
+    size: sz,
+    sku: null,
+    priceCents,
+    stock,
+    stripePriceId: null,
+    active,
+  }
 }
 
 function img(id: string, variantId: string): ProductImage {
@@ -154,11 +219,7 @@ describe('ProductHero', () => {
   })
 
   it('renders no price label when no eligible sizes exist', () => {
-    render(
-      <ProductHero
-        {...makeProps({ sizesByVariant: { v1: [], v2: [] } })}
-      />,
-    )
+    render(<ProductHero {...makeProps({ sizesByVariant: { v1: [], v2: [] } })} />)
     expect(screen.queryByText(/₨/)).toBeNull()
   })
 
@@ -191,7 +252,11 @@ describe('ProductHero', () => {
   it('hides the variant selector with a single variant', () => {
     render(
       <ProductHero
-        {...makeProps({ variants: [variants[0]], sizesByVariant: { v1: [size('s-m', 'M', 1000, 5)] }, imagesByVariant: { v1: [img('i1', 'v1')] } })}
+        {...makeProps({
+          variants: [variants[0]],
+          sizesByVariant: { v1: [size('s-m', 'M', 1000, 5)] },
+          imagesByVariant: { v1: [img('i1', 'v1')] },
+        })}
       />,
     )
     expect(screen.queryByTestId('variant-selector')).toBeNull()
@@ -202,7 +267,11 @@ describe('ProductHero', () => {
       <ProductHero
         {...makeProps({
           sizesByVariant: {
-            v1: [size('s-l', 'L', 1500, 3), size('s-m', 'M', 1000, 5), size('s-x', 'X', 900, 5, false)],
+            v1: [
+              size('s-l', 'L', 1500, 3),
+              size('s-m', 'M', 1000, 5),
+              size('s-x', 'X', 900, 5, false),
+            ],
             v2: [],
           },
         })}
@@ -297,9 +366,7 @@ describe('ProductHero', () => {
 
   it('handles empty variants array without crashing', () => {
     render(
-      <ProductHero
-        {...makeProps({ variants: [], sizesByVariant: {}, imagesByVariant: {} })}
-      />,
+      <ProductHero {...makeProps({ variants: [], sizesByVariant: {}, imagesByVariant: {} })} />,
     )
     expect(screen.getByText('Cool Hoodie')).toBeTruthy()
     expect(screen.queryByTestId('notify-dialog')).toBeNull()

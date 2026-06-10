@@ -169,15 +169,7 @@ describe('CartSummary', () => {
   })
 
   it('renders an inclusive tax row that does NOT change the grand total', () => {
-    render(
-      <CartSummary
-        {...defaultProps}
-        taxCents={750}
-        taxName="VAT"
-        taxRate={15}
-        taxInclusive
-      />,
-    )
+    render(<CartSummary {...defaultProps} taxCents={750} taxName="VAT" taxRate={15} taxInclusive />)
     expect(screen.getByText(en.cart.taxIncluded.replace('{name}', 'VAT'))).toBeTruthy()
     // inclusive tax excluded from total: 5000 + 300 = 5300
     expect(screen.getByText('₨5,300')).toBeTruthy()

@@ -11,7 +11,11 @@ vi.mock('@/lib/api', () => ({
 const mockConfig = { storeName: 'Test Store', currency: { code: 'PKR' } } as never
 
 // Minimal BroadcastChannel mock that lets tests fire onmessage and assert close.
-let lastChannel: { name: string; onmessage: ((e: unknown) => void) | null; close: ReturnType<typeof vi.fn> } | null = null
+let lastChannel: {
+  name: string
+  onmessage: ((e: unknown) => void) | null
+  close: ReturnType<typeof vi.fn>
+} | null = null
 class MockBroadcastChannel {
   name: string
   onmessage: ((e: unknown) => void) | null = null

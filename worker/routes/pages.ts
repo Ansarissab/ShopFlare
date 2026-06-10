@@ -20,11 +20,7 @@ app.get('/:slug', async (c) => {
 
   const db = createDb(c.env.DB)
 
-  const [page] = await db
-    .select()
-    .from(schema.pages)
-    .where(eq(schema.pages.slug, slug))
-    .limit(1)
+  const [page] = await db.select().from(schema.pages).where(eq(schema.pages.slug, slug)).limit(1)
 
   if (!page) return c.notFound()
 

@@ -59,7 +59,11 @@ test.describe('admin categories page', () => {
     await page.waitForLoadState('networkidle')
 
     // Category name input from CategoryForm
-    await expect(page.locator('input[id^="cat-name"], input[placeholder*="name" i], input[id="category-name"]').first()).toBeVisible()
+    await expect(
+      page
+        .locator('input[id^="cat-name"], input[placeholder*="name" i], input[id="category-name"]')
+        .first(),
+    ).toBeVisible()
   })
 })
 
@@ -85,7 +89,11 @@ test.describe('admin coupons page', () => {
     await page.getByRole('button', { name: /add coupon/i }).click()
 
     // CouponForm should appear (it has a code input field)
-    await expect(page.locator('input[id^="coupon-code"], input[placeholder*="code" i], input[id="coupon-code"]').first()).toBeVisible({ timeout: 3000 })
+    await expect(
+      page
+        .locator('input[id^="coupon-code"], input[placeholder*="code" i], input[id="coupon-code"]')
+        .first(),
+    ).toBeVisible({ timeout: 3000 })
   })
 })
 

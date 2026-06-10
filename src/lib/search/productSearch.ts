@@ -20,10 +20,7 @@ export function buildProductFuse(items: ProductWithVariants[]): Fuse<ProductWith
 
 // All category ids in the subtree rooted at `targetId` (itself + descendants).
 // A parent category therefore matches products tagged on any of its children.
-export function collectDescendantIds(
-  categories: CategoryNode[],
-  targetId: string,
-): Set<string> {
+export function collectDescendantIds(categories: CategoryNode[], targetId: string): Set<string> {
   const ids = new Set<string>()
 
   function addAll(node: CategoryNode) {

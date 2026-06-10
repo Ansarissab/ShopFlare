@@ -25,8 +25,10 @@ export default function EditCategoryPage() {
     }
   }, [categoryId])
 
-  const { data: detail, loading: detailLoading } = useApiResource<CategoryDetailResponse>(detailPath)
-  const { data: tree, loading: treeLoading } = useApiResource<CategoryTreeResponse>('/api/admin/categories')
+  const { data: detail, loading: detailLoading } =
+    useApiResource<CategoryDetailResponse>(detailPath)
+  const { data: tree, loading: treeLoading } =
+    useApiResource<CategoryTreeResponse>('/api/admin/categories')
 
   const loading = detailLoading || treeLoading
 
@@ -42,10 +44,7 @@ export default function EditCategoryPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <AdminPageHeader
-        title={en.admin.editCategory}
-        backHref="/admin/categories"
-      />
+      <AdminPageHeader title={en.admin.editCategory} backHref="/admin/categories" />
 
       {loading ? (
         <div className="flex flex-col gap-3 max-w-2xl">

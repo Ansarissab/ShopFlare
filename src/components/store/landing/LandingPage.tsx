@@ -12,35 +12,17 @@ export function LandingPage({ landing }: LandingPageProps) {
 
   return (
     <main>
-      {LANDING_SECTION_KEYS.map(key => {
+      {LANDING_SECTION_KEYS.map((key) => {
         const section = sections[key]
         if (!section?.enabled) return null
 
         switch (key) {
           case 'hero':
-            return (
-              <HeroSection
-                key={key}
-                section={section}
-                imageUrl={r2Url(section.imageR2Key)}
-              />
-            )
+            return <HeroSection key={key} section={section} imageUrl={r2Url(section.imageR2Key)} />
           case 'story':
-            return (
-              <StorySection
-                key={key}
-                section={section}
-                imageUrl={r2Url(section.imageR2Key)}
-              />
-            )
+            return <StorySection key={key} section={section} imageUrl={r2Url(section.imageR2Key)} />
           case 'featured':
-            return (
-              <FeaturedProductsStrip
-                key={key}
-                section={section}
-                products={featuredProducts}
-              />
-            )
+            return <FeaturedProductsStrip key={key} section={section} products={featuredProducts} />
           case 'reviews':
             return <ReviewsStrip key={key} section={section} />
           case 'cta':

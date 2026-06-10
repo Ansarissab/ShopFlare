@@ -35,9 +35,7 @@ export function CategoryProductSection({
   useEffect(() => {
     const currentQ = searchParams?.get('q') ?? ''
     if (currentQ === query) return
-    const url = query
-      ? `/category/${slug}?q=${encodeURIComponent(query)}`
-      : `/category/${slug}`
+    const url = query ? `/category/${slug}?q=${encodeURIComponent(query)}` : `/category/${slug}`
     router.replace(url, { scroll: false })
   }, [query, router, searchParams, slug])
 
@@ -76,10 +74,7 @@ export function CategoryProductSection({
       <div className="mb-6">
         <SearchBar value={query} onChange={setQuery} />
       </div>
-      <ProductGrid
-        items={visibleItems}
-        storeConfig={{ flatRateCents, thresholdCents }}
-      />
+      <ProductGrid items={visibleItems} storeConfig={{ flatRateCents, thresholdCents }} />
       <InfiniteScrollSentinel
         onVisible={loadMore}
         isLoading={isLoadingMore}

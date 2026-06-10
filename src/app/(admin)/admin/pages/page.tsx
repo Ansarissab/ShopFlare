@@ -16,9 +16,9 @@ import type { AdminPagesResponse, StorePage } from '@/lib/types/admin'
 
 const POLICY_LABELS: Record<string, string> = {
   shipping: en.policies.shipping,
-  returns:  en.policies.returns,
-  privacy:  en.policies.privacy,
-  terms:    en.policies.terms,
+  returns: en.policies.returns,
+  privacy: en.policies.privacy,
+  terms: en.policies.terms,
 }
 
 interface EditState {
@@ -43,9 +43,9 @@ export default function AdminPagesPage() {
   function startEdit(slug: string) {
     const existing = pages.find((p) => p.slug === slug)
     setEditState({
-      title:   existing?.title   ?? POLICY_LABELS[slug] ?? slug,
+      title: existing?.title ?? POLICY_LABELS[slug] ?? slug,
       content: existing?.content ?? '',
-      saving:  false,
+      saving: false,
     })
     setEditing(slug)
   }
@@ -58,15 +58,15 @@ export default function AdminPagesPage() {
     setEditState((s) => ({ ...s, saving: true }))
     try {
       await apiPut(`/api/admin/pages/${slug}`, {
-        title:   editState.title.trim() || POLICY_LABELS[slug],
+        title: editState.title.trim() || POLICY_LABELS[slug],
         content: editState.content,
       })
       setPages((prev) => {
         const idx = prev.findIndex((p) => p.slug === slug)
         const updated: StorePage = {
           slug,
-          title:     editState.title.trim() || (POLICY_LABELS[slug] ?? slug),
-          content:   editState.content,
+          title: editState.title.trim() || (POLICY_LABELS[slug] ?? slug),
+          content: editState.content,
           updatedAt: new Date().toISOString(),
         }
         if (idx >= 0) {
@@ -112,7 +112,11 @@ export default function AdminPagesPage() {
                   <span className="text-xs text-muted-foreground">
                     {en.policies.lastUpdated.replace(
                       '{date}',
-                      formatDate(saved.updatedAt, { year: 'numeric', month: 'short', day: 'numeric' }, undefined),
+                      formatDate(
+                        saved.updatedAt,
+                        { year: 'numeric', month: 'short', day: 'numeric' },
+                        undefined,
+                      ),
                     )}
                   </span>
                 )}
@@ -147,14 +151,15 @@ export default function AdminPagesPage() {
                 <p className="text-xs text-muted-foreground -mt-2">{en.admin.pageContentHint}</p>
 
                 <div className="flex gap-2">
-                  <Button
-                    onClick={() => handleSave(slug)}
-                    disabled={editState.saving}
-                    size="sm"
-                  >
+                  <Button onClick={() => handleSave(slug)} disabled={editState.saving} size="sm">
                     {editState.saving ? en.admin.saving : en.admin.save}
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={cancelEdit} disabled={editState.saving}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={cancelEdit}
+                    disabled={editState.saving}
+                  >
                     {en.admin.cancel}
                   </Button>
                 </div>
@@ -163,10 +168,11 @@ export default function AdminPagesPage() {
 
             {!isEditing && (
               <p className="text-sm text-muted-foreground line-clamp-2">
-                {saved?.content
-                  ? saved.content.slice(0, 120) + (saved.content.length > 120 ? '…' : '')
-                  : <em>{en.policies.empty}</em>
-                }
+                {saved?.content ? (
+                  saved.content.slice(0, 120) + (saved.content.length > 120 ? '…' : '')
+                ) : (
+                  <em>{en.policies.empty}</em>
+                )}
               </p>
             )}
           </div>

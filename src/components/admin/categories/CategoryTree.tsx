@@ -31,7 +31,9 @@ function CategoryRow({
         style={{ marginLeft: depth * 20 }}
       >
         <div className="flex items-center gap-2.5 min-w-0">
-          <span className={cn('text-sm font-medium truncate', !node.active && 'text-muted-foreground')}>
+          <span
+            className={cn('text-sm font-medium truncate', !node.active && 'text-muted-foreground')}
+          >
             {node.name}
           </span>
           <Badge variant={node.active ? 'default' : 'secondary'} className="shrink-0">
@@ -103,9 +105,7 @@ function CategoryRow({
 export function CategoryTree({ categories, onReorder, onEdit, onDelete }: CategoryTreeProps) {
   if (categories.length === 0) {
     return (
-      <div className="py-16 text-center text-sm text-muted-foreground">
-        {en.admin.noCategories}
-      </div>
+      <div className="py-16 text-center text-sm text-muted-foreground">{en.admin.noCategories}</div>
     )
   }
 

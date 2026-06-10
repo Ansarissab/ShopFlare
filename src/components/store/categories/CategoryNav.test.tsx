@@ -38,7 +38,9 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-function cat(over: Partial<CategoryNode> & Pick<CategoryNode, 'id' | 'name' | 'slug'>): CategoryNode {
+function cat(
+  over: Partial<CategoryNode> & Pick<CategoryNode, 'id' | 'name' | 'slug'>,
+): CategoryNode {
   return {
     description: '',
     parentId: null,
@@ -94,7 +96,9 @@ describe('CategoryNav', () => {
     // The parent renders as a sub-trigger link pointing at the parent category.
     const parentTriggerLinks = await screen.findAllByText('Apparel')
     expect(parentTriggerLinks.length).toBeGreaterThanOrEqual(1)
-    const parentLink = parentTriggerLinks.find((el) => el.getAttribute('href') === '/category/apparel')
+    const parentLink = parentTriggerLinks.find(
+      (el) => el.getAttribute('href') === '/category/apparel',
+    )
     expect(parentLink).toBeTruthy()
   }, 15000)
 

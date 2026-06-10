@@ -74,9 +74,7 @@ app.post('/unsubscribe', async (c) => {
   const { endpoint } = parsed.data
   const db = createDb(c.env.DB)
 
-  await db
-    .delete(schema.pushSubscriptions)
-    .where(eq(schema.pushSubscriptions.endpoint, endpoint))
+  await db.delete(schema.pushSubscriptions).where(eq(schema.pushSubscriptions.endpoint, endpoint))
 
   return c.json({ ok: true })
 })

@@ -34,9 +34,9 @@ test.describe('admin orders page', () => {
     await expect(page.getByRole('option', { name: /^all$/i })).toBeVisible()
 
     // At least one status option — pending or confirmed (both may exist; take first)
-    await expect(
-      page.getByRole('option', { name: /pending|confirmed/i }).first(),
-    ).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByRole('option', { name: /pending|confirmed/i }).first()).toBeVisible({
+      timeout: 10_000,
+    })
   })
 
   test('order row links are navigable', async ({ page }) => {
@@ -71,7 +71,10 @@ test.describe('admin POS page', () => {
     // POSScreen renders product + variant + size selects or a skeleton while loading.
     // After networkidle, at minimum a Select trigger or skeleton should be in DOM.
     await expect(
-      page.getByRole('combobox').first().or(page.locator('[class*="skeleton"], [class*="animate-pulse"]').first()),
+      page
+        .getByRole('combobox')
+        .first()
+        .or(page.locator('[class*="skeleton"], [class*="animate-pulse"]').first()),
     ).toBeVisible({ timeout: 15_000 })
   })
 
@@ -81,7 +84,9 @@ test.describe('admin POS page', () => {
 
     // Cart section: customer phone input or the completed order message
     // The phone FormField has id starting with customer or contains "phone"
-    const phoneInput = page.locator('input[type="tel"], input[placeholder*="phone" i], input[placeholder*="+92" i]').first()
+    const phoneInput = page
+      .locator('input[type="tel"], input[placeholder*="phone" i], input[placeholder*="+92" i]')
+      .first()
     await expect(phoneInput).toBeVisible({ timeout: 5000 })
   })
 })

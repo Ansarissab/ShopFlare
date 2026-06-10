@@ -5,7 +5,11 @@ import { Hono } from 'hono'
 import { eq, sql } from 'drizzle-orm'
 import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
-import { assembleCategoryTree, getCategoryBySlug, resolveCategoryProductIds } from 'worker/lib/categories'
+import {
+  assembleCategoryTree,
+  getCategoryBySlug,
+  resolveCategoryProductIds,
+} from 'worker/lib/categories'
 import { assembleProductList } from 'worker/lib/products'
 import { etagFor } from 'worker/lib/fingerprint'
 import { getDataVersion } from 'worker/lib/version'
@@ -66,10 +70,10 @@ app.get('/:slug', async (c) => {
     cacheControl: CACHE_CONTROL,
     build: async () => {
       // Resolve all products in this category + its descendants
-      const productIds = await resolveCategoryProductIds(db, category.id, { includeDescendants: true })
-      const products = productIds.length > 0
-        ? await assembleProductList(db, { productIds })
-        : []
+      const productIds = await resolveCategoryProductIds(db, category.id, {
+        includeDescendants: true,
+      })
+      const products = productIds.length > 0 ? await assembleProductList(db, { productIds }) : []
       return { category, products, breadcrumb }
     },
   })

@@ -1,4 +1,4 @@
-import { defaultCache } from "@serwist/next/worker"
+import { defaultCache } from '@serwist/next/worker'
 import {
   Serwist,
   CacheFirst,
@@ -6,8 +6,8 @@ import {
   NetworkFirst,
   ExpirationPlugin,
   CacheableResponsePlugin,
-} from "serwist"
-import type { PrecacheEntry, SerwistGlobalConfig } from "serwist"
+} from 'serwist'
+import type { PrecacheEntry, SerwistGlobalConfig } from 'serwist'
 
 declare global {
   interface ServiceWorkerGlobalScope extends SerwistGlobalConfig {
@@ -57,8 +57,7 @@ const runtimeCaching = [
   {
     matcher: ({ request, url }: { request: Request; url: URL }) =>
       request.method === 'GET' &&
-      (/\/api\/config(\/.*)?$/.test(url.pathname) ||
-        /\/api\/products(\/.*)?$/.test(url.pathname)),
+      (/\/api\/config(\/.*)?$/.test(url.pathname) || /\/api\/products(\/.*)?$/.test(url.pathname)),
     handler: new StaleWhileRevalidate({
       cacheName: 'shopflare-api-v1',
       plugins: [
@@ -81,8 +80,7 @@ const runtimeCaching = [
   },
   // Navigation / HTML pages — NetworkFirst with offline fallback
   {
-    matcher: ({ request }: { request: Request }) =>
-      request.mode === 'navigate',
+    matcher: ({ request }: { request: Request }) => request.mode === 'navigate',
     handler: new NetworkFirst({
       cacheName: 'shopflare-pages-v1',
       plugins: [
@@ -160,9 +158,11 @@ self.addEventListener('push', (event: PushEvent) => {
       if ('setAppBadge' in (self as unknown as { setAppBadge?: unknown })) {
         try {
           await (self as unknown as { setAppBadge(): Promise<void> }).setAppBadge()
-        } catch { /* not supported on this device */ }
+        } catch {
+          /* not supported on this device */
+        }
       }
-    })()
+    })(),
   )
 })
 
@@ -184,7 +184,7 @@ self.addEventListener('notificationclick', (event: NotificationEvent) => {
           }
         }
         return (self.clients as Clients).openWindow(targetUrl)
-      })
+      }),
   )
 })
 
@@ -249,7 +249,7 @@ self.addEventListener('sync', (event: SyncEvent) => {
             // network error: leave in queue
           }
         }
-      })()
+      })(),
     )
   }
 })

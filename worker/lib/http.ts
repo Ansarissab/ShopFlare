@@ -4,9 +4,9 @@
  * Typed loosely so any Hono route context satisfies the shape without needing
  * to import Hono's generic types here.
  */
-export async function parseBody(
-  c: { req: { json(): Promise<unknown> } },
-): Promise<[unknown, null] | [null, Response]> {
+export async function parseBody(c: {
+  req: { json(): Promise<unknown> }
+}): Promise<[unknown, null] | [null, Response]> {
   try {
     return [await c.req.json(), null]
   } catch {

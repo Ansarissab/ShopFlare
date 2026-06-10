@@ -23,7 +23,9 @@ vi.mock('@/lib/api', () => ({
 }))
 
 vi.mock('@/lib/image', () => ({
-  compressImage: vi.fn((file: File) => Promise.resolve({ file, originalBytes: file.size, compressedBytes: file.size })),
+  compressImage: vi.fn((file: File) =>
+    Promise.resolve({ file, originalBytes: file.size, compressedBytes: file.size }),
+  ),
   COMPRESS_CONFIRM_THRESHOLD_BYTES: 3 * 1024 * 1024,
 }))
 
@@ -87,7 +89,10 @@ describe('CategoryImageUpload', () => {
 
     await waitFor(() => expect(onUploadComplete).toHaveBeenCalledWith('/uploaded.jpg'))
     expect(compressImage).toHaveBeenCalled()
-    expect(apiUpload).toHaveBeenCalledWith('/api/admin/categories/cat-1/image', expect.any(FormData))
+    expect(apiUpload).toHaveBeenCalledWith(
+      '/api/admin/categories/cat-1/image',
+      expect.any(FormData),
+    )
     expect(toast.success).toHaveBeenCalledWith(en.admin.imageUploaded)
   })
 
@@ -116,7 +121,9 @@ describe('CategoryImageUpload', () => {
 
   it('removes image: calls apiDelete with category endpoint, fires onRemove + success toast', async () => {
     const onRemove = vi.fn()
-    render(<CategoryImageUpload {...baseProps} currentImageUrl="/existing.jpg" onRemove={onRemove} />)
+    render(
+      <CategoryImageUpload {...baseProps} currentImageUrl="/existing.jpg" onRemove={onRemove} />,
+    )
     fireEvent.click(screen.getByLabelText(en.admin.deleteImage))
     await waitFor(() => expect(onRemove).toHaveBeenCalled())
     expect(apiDelete).toHaveBeenCalledWith('/api/admin/categories/cat-1/image')

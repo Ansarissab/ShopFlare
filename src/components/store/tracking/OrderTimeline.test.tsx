@@ -46,7 +46,9 @@ describe('OrderTimeline — active timeline', () => {
     expect(screen.getByText(en.orderStatusLabels.processing).className).toContain('text-(--accent)')
     // shipped + delivered after → upcoming (muted)
     expect(screen.getByText(en.orderStatusLabels.shipped).className).toContain('text-(--muted-fg)')
-    expect(screen.getByText(en.orderStatusLabels.delivered).className).toContain('text-(--muted-fg)')
+    expect(screen.getByText(en.orderStatusLabels.delivered).className).toContain(
+      'text-(--muted-fg)',
+    )
   })
 
   it('first step current when status=pending (no completed steps)', () => {

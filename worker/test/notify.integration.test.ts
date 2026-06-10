@@ -23,9 +23,21 @@ const post = (path: string, body: unknown) =>
 // ─── Cleanup ──────────────────────────────────────────────────────────────────
 
 const TABLES = [
-  'coupon_uses', 'reviews', 'notify_me', 'order_items', 'orders', 'coupons',
-  'size_options', 'product_images', 'variants', 'products', 'store_config',
-  'stripe_events', 'push_subscriptions', 'analytics_daily', 'carts',
+  'coupon_uses',
+  'reviews',
+  'notify_me',
+  'order_items',
+  'orders',
+  'coupons',
+  'size_options',
+  'product_images',
+  'variants',
+  'products',
+  'store_config',
+  'stripe_events',
+  'push_subscriptions',
+  'analytics_daily',
+  'carts',
 ]
 beforeEach(async () => {
   for (const t of TABLES) await env.DB.prepare(`DELETE FROM ${t}`).run()
@@ -36,9 +48,16 @@ beforeEach(async () => {
 /** Seeds an OOS size option (stock=0) */
 async function seedOOSProduct() {
   await db().insert(schema.products).values({ id: 'p1', name: 'Hot Item', active: true })
-  await db().insert(schema.variants).values({ id: 'v1', productId: 'p1', label: 'Black', sortOrder: 0 })
+  await db()
+    .insert(schema.variants)
+    .values({ id: 'v1', productId: 'p1', label: 'Black', sortOrder: 0 })
   await db().insert(schema.sizeOptions).values({
-    id: 's1', variantId: 'v1', size: 'M', priceCents: 1500, stock: 0, active: true,
+    id: 's1',
+    variantId: 'v1',
+    size: 'M',
+    priceCents: 1500,
+    stock: 0,
+    active: true,
   })
   return { productId: 'p1', variantId: 'v1', sizeId: 's1' }
 }
@@ -46,9 +65,16 @@ async function seedOOSProduct() {
 /** Seeds an in-stock size option (stock > 0) */
 async function seedInStockProduct() {
   await db().insert(schema.products).values({ id: 'p2', name: 'Available Item', active: true })
-  await db().insert(schema.variants).values({ id: 'v2', productId: 'p2', label: 'White', sortOrder: 0 })
+  await db()
+    .insert(schema.variants)
+    .values({ id: 'v2', productId: 'p2', label: 'White', sortOrder: 0 })
   await db().insert(schema.sizeOptions).values({
-    id: 's2', variantId: 'v2', size: 'L', priceCents: 1500, stock: 5, active: true,
+    id: 's2',
+    variantId: 'v2',
+    size: 'L',
+    priceCents: 1500,
+    stock: 5,
+    active: true,
   })
   return { productId: 'p2', variantId: 'v2', sizeId: 's2' }
 }
@@ -180,18 +206,24 @@ describe('GET /api/admin/notify', () => {
 
   it('orders by waiting count descending', async () => {
     // Two OOS products
-    await db().insert(schema.products).values([
-      { id: 'pa', name: 'Product A', active: true },
-      { id: 'pb', name: 'Product B', active: true },
-    ])
-    await db().insert(schema.variants).values([
-      { id: 'va', productId: 'pa', label: 'Red', sortOrder: 0 },
-      { id: 'vb', productId: 'pb', label: 'Blue', sortOrder: 0 },
-    ])
-    await db().insert(schema.sizeOptions).values([
-      { id: 'sa', variantId: 'va', size: 'S', priceCents: 1000, stock: 0, active: true },
-      { id: 'sb', variantId: 'vb', size: 'XL', priceCents: 1000, stock: 0, active: true },
-    ])
+    await db()
+      .insert(schema.products)
+      .values([
+        { id: 'pa', name: 'Product A', active: true },
+        { id: 'pb', name: 'Product B', active: true },
+      ])
+    await db()
+      .insert(schema.variants)
+      .values([
+        { id: 'va', productId: 'pa', label: 'Red', sortOrder: 0 },
+        { id: 'vb', productId: 'pb', label: 'Blue', sortOrder: 0 },
+      ])
+    await db()
+      .insert(schema.sizeOptions)
+      .values([
+        { id: 'sa', variantId: 'va', size: 'S', priceCents: 1000, stock: 0, active: true },
+        { id: 'sb', variantId: 'vb', size: 'XL', priceCents: 1000, stock: 0, active: true },
+      ])
 
     // 1 subscriber for sa, 3 for sb
     await post('/api/notify', { sizeOptionId: 'sa', email: 'one@example.com' })

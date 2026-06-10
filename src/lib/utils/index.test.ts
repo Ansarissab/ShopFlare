@@ -109,9 +109,9 @@ describe('calculateTax', () => {
 
   it('exclusive base floors at 0 when discount exceeds subtotal', () => {
     // subtotal-discount floored to 0, plus shipping 1000 → 100
-    expect(
-      calculateTax({ ...base, taxBasis: 'subtotal_and_shipping', discountCents: 99999 }),
-    ).toBe(100)
+    expect(calculateTax({ ...base, taxBasis: 'subtotal_and_shipping', discountCents: 99999 })).toBe(
+      100,
+    )
   })
 })
 
@@ -175,7 +175,7 @@ describe('getPriceRange', () => {
       mkSize({ priceCents: 1000 }),
       mkSize({ priceCents: 3000 }),
       mkSize({ priceCents: 500, active: false }), // excluded
-      mkSize({ priceCents: 200, stock: 0 }),      // excluded
+      mkSize({ priceCents: 200, stock: 0 }), // excluded
     ]
     expect(getPriceRange(sizes)).toEqual({ minPrice: 1000, maxPrice: 3000 })
   })

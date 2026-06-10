@@ -10,7 +10,10 @@ import type { BankTransferInstructionsProps } from '@/lib/types/checkout'
  * page and the order tracking page. Reads the merchant's configured bank details
  * from store config; renders nothing until an account number is configured.
  */
-export function BankTransferInstructions({ orderNumber, totalCents }: BankTransferInstructionsProps) {
+export function BankTransferInstructions({
+  orderNumber,
+  totalCents,
+}: BankTransferInstructionsProps) {
   const { config } = useStoreConfig()
   if (!config?.bankAccountNumber) return null
 
@@ -27,9 +30,7 @@ export function BankTransferInstructions({ orderNumber, totalCents }: BankTransf
   return (
     <div className="w-full rounded-lg border bg-muted/40 p-5 text-left">
       <h2 className="text-base font-semibold">{t.heading}</h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        {t.intro.replace('{amount}', amount)}
-      </p>
+      <p className="mt-1 text-sm text-muted-foreground">{t.intro.replace('{amount}', amount)}</p>
       <p className="text-sm text-muted-foreground">
         {t.reference.replace('{orderNumber}', orderNumber)}
       </p>

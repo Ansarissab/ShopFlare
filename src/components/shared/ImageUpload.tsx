@@ -85,7 +85,12 @@ export function ImageUpload<T = unknown>({
       if (result.originalBytes > COMPRESS_CONFIRM_THRESHOLD_BYTES) {
         // Large original: show confirm dialog (Upload disabled if compressed still over cap).
         const previewUrl = URL.createObjectURL(result.file)
-        setConfirmState({ result, previewUrl, form, overCap: result.compressedBytes > MAX_IMAGE_BYTES })
+        setConfirmState({
+          result,
+          previewUrl,
+          form,
+          overCap: result.compressedBytes > MAX_IMAGE_BYTES,
+        })
         return
       }
 
@@ -136,7 +141,9 @@ export function ImageUpload<T = unknown>({
   }
 
   const savedPct = confirmState
-    ? Math.round((1 - confirmState.result.compressedBytes / confirmState.result.originalBytes) * 100)
+    ? Math.round(
+        (1 - confirmState.result.compressedBytes / confirmState.result.originalBytes) * 100,
+      )
     : 0
 
   return (
@@ -144,7 +151,10 @@ export function ImageUpload<T = unknown>({
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap gap-1.5 sm:gap-2">
           {currentImages.map((img) => (
-            <div key={img.id} className="group relative size-16 sm:size-20 rounded-md overflow-hidden border">
+            <div
+              key={img.id}
+              className="group relative size-16 sm:size-20 rounded-md overflow-hidden border"
+            >
               <Image src={img.url} alt="" fill className="object-cover" sizes="80px" />
               {deleteEndpoint && (
                 <button
@@ -183,7 +193,12 @@ export function ImageUpload<T = unknown>({
         />
       </div>
 
-      <Dialog open={confirmState !== null} onOpenChange={(open) => { if (!open) closeDialog() }}>
+      <Dialog
+        open={confirmState !== null}
+        onOpenChange={(open) => {
+          if (!open) closeDialog()
+        }}
+      >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>{en.admin.compressTitle}</DialogTitle>
@@ -216,7 +231,10 @@ export function ImageUpload<T = unknown>({
                 )}
                 {confirmState.overCap && (
                   <p className="text-destructive text-xs mt-1">
-                    {en.admin.compressTooLarge.replace('{mb}', String(Math.round(MAX_IMAGE_BYTES / 1024 / 1024)))}
+                    {en.admin.compressTooLarge.replace(
+                      '{mb}',
+                      String(Math.round(MAX_IMAGE_BYTES / 1024 / 1024)),
+                    )}
                   </p>
                 )}
               </div>

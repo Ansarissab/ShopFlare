@@ -13,14 +13,14 @@ import { formatCents } from './money'
 // ─── Shipping config helper ────────────────────────────────────────────────────
 
 interface OrderConfig {
-  flatRateCents:  number
+  flatRateCents: number
   thresholdCents: number
-  currency:       CurrencyCode
-  taxEnabled:     boolean
-  taxRate:        number
-  taxInclusive:   boolean
-  taxBasis:       string
-  taxName:        string
+  currency: CurrencyCode
+  taxEnabled: boolean
+  taxRate: number
+  taxInclusive: boolean
+  taxBasis: string
+  taxName: string
 }
 
 /**
@@ -55,20 +55,20 @@ async function getOrderConfig(db: Database): Promise<OrderConfig> {
   const currency = (kv['currency'] as CurrencyCode | undefined) ?? DEFAULT_CURRENCY
 
   return {
-    flatRateCents:   Math.max(0, Number(kv['flatShippingRateCents']      ?? '0') || 0),
-    thresholdCents:  Math.max(0, Number(kv['freeShippingThresholdCents'] ?? '0') || 0),
+    flatRateCents: Math.max(0, Number(kv['flatShippingRateCents'] ?? '0') || 0),
+    thresholdCents: Math.max(0, Number(kv['freeShippingThresholdCents'] ?? '0') || 0),
     currency,
-    taxEnabled:   kv['taxEnabled']  === 'true',
-    taxRate:      Math.max(0, Number(kv['taxRate']  ?? '0') || 0),
+    taxEnabled: kv['taxEnabled'] === 'true',
+    taxRate: Math.max(0, Number(kv['taxRate'] ?? '0') || 0),
     taxInclusive: kv['taxInclusive'] === 'true',
-    taxBasis:     kv['taxBasis']    ?? 'subtotal',
-    taxName:      kv['taxName']     || 'Tax',
+    taxBasis: kv['taxBasis'] ?? 'subtotal',
+    taxName: kv['taxName'] || 'Tax',
   }
 }
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type PaymentMethod = typeof schema.orders.$inferInsert['paymentMethod']
+export type PaymentMethod = (typeof schema.orders.$inferInsert)['paymentMethod']
 
 export interface CreateOrderItem {
   /** sizeOption PK — used to look up price + snapshot data */
@@ -91,17 +91,17 @@ export interface CreateOrderInput {
 }
 
 export interface CreateOrderResult {
-  orderId:      string
-  orderNumber:  string
+  orderId: string
+  orderNumber: string
   subtotalCents: number
   discountCents: number
   shippingCents: number
-  taxCents:      number
-  taxName:       string
-  taxRate:       number
-  taxInclusive:  boolean
-  totalCents:    number
-  currency:      CurrencyCode
+  taxCents: number
+  taxName: string
+  taxRate: number
+  taxInclusive: boolean
+  totalCents: number
+  currency: CurrencyCode
 }
 
 /**
@@ -138,17 +138,10 @@ export class StockError extends Error {
  * routes so both fail fast with a typed StockError before createOrder runs.
  * Batched — one query for the whole cart.
  */
-export async function assertItemsAvailable(
-  db: Database,
-  items: CreateOrderItem[],
-): Promise<void> {
+export async function assertItemsAvailable(db: Database, items: CreateOrderItem[]): Promise<void> {
   const ids = items.map((i) => i.sizeOptionId)
   const rows = ids.length
-    ? await db
-        .select()
-        .from(schema.sizeOptions)
-        .where(inArray(schema.sizeOptions.id, ids))
-        .all()
+    ? await db.select().from(schema.sizeOptions).where(inArray(schema.sizeOptions.id, ids)).all()
     : []
 
   const byId = new Map(rows.map((s) => [s.id, s]))
@@ -219,9 +212,7 @@ export function evaluateCoupon(
   }
 
   let discountCents =
-    coupon.type === 'percentage'
-      ? Math.floor((subtotalCents * coupon.value) / 100)
-      : coupon.value
+    coupon.type === 'percentage' ? Math.floor((subtotalCents * coupon.value) / 100) : coupon.value
 
   if (coupon.maxDiscountCents !== null) {
     discountCents = Math.min(discountCents, coupon.maxDiscountCents)
@@ -282,11 +273,7 @@ export async function createOrder(
 
   // Batch: all variants for those variantIds
   const variantRows = variantIds.length
-    ? await db
-        .select()
-        .from(schema.variants)
-        .where(inArray(schema.variants.id, variantIds))
-        .all()
+    ? await db.select().from(schema.variants).where(inArray(schema.variants.id, variantIds)).all()
     : []
 
   const variantMap = new Map(variantRows.map((v) => [v.id, v]))
@@ -296,11 +283,7 @@ export async function createOrder(
 
   // Batch: all products for those productIds
   const productRows = productIds.length
-    ? await db
-        .select()
-        .from(schema.products)
-        .where(inArray(schema.products.id, productIds))
-        .all()
+    ? await db.select().from(schema.products).where(inArray(schema.products.id, productIds)).all()
     : []
 
   const productMap = new Map(productRows.map((p) => [p.id, p]))
@@ -316,7 +299,7 @@ export async function createOrder(
     : []
 
   // Build Map<variantId, firstImage> — smallest sortOrder wins
-  const firstImageMap = new Map<string, typeof imageRows[number]>()
+  const firstImageMap = new Map<string, (typeof imageRows)[number]>()
   for (const img of imageRows) {
     const existing = firstImageMap.get(img.variantId)
     if (!existing || img.sortOrder < existing.sortOrder) {
@@ -357,18 +340,25 @@ export async function createOrder(
   }
 
   // ── 2. Store config (currency + shipping) — one query, reused below ───────
-  const { flatRateCents, thresholdCents, currency, taxEnabled, taxRate, taxInclusive, taxBasis, taxName } = await getOrderConfig(db)
+  const {
+    flatRateCents,
+    thresholdCents,
+    currency,
+    taxEnabled,
+    taxRate,
+    taxInclusive,
+    taxBasis,
+    taxName,
+  } = await getOrderConfig(db)
 
   // ── 2a. Coupon validation + discount ──────────────────────────────────────
   let discountCents = 0
   let couponRow: typeof schema.coupons.$inferSelect | null = null
 
   if (couponCode) {
-    couponRow = await db
-      .select()
-      .from(schema.coupons)
-      .where(eq(schema.coupons.code, couponCode))
-      .get() ?? null
+    couponRow =
+      (await db.select().from(schema.coupons).where(eq(schema.coupons.code, couponCode)).get()) ??
+      null
 
     const result = evaluateCoupon(couponRow, subtotalCents, new Date().toISOString(), currency)
 
@@ -403,14 +393,19 @@ export async function createOrder(
 
   // ── 2b. Shipping — mirrors client's calculateShipping logic ───────────────
   // Free if threshold is set AND subtotal (before discount) meets/exceeds it.
-  const shippingCents =
-    thresholdCents > 0 && subtotalCents >= thresholdCents ? 0 : flatRateCents
+  const shippingCents = thresholdCents > 0 && subtotalCents >= thresholdCents ? 0 : flatRateCents
 
   const taxCents = taxEnabled
     ? calculateTax({ subtotalCents, shippingCents, discountCents, taxRate, taxInclusive, taxBasis })
     : 0
 
-  const totalCents = calculateGrandTotal(subtotalCents, shippingCents, discountCents, taxCents, taxInclusive)
+  const totalCents = calculateGrandTotal(
+    subtotalCents,
+    shippingCents,
+    discountCents,
+    taxCents,
+    taxInclusive,
+  )
   const orderId = nanoid()
   const orderNumber = generateOrderNumber()
 
@@ -423,9 +418,7 @@ export async function createOrder(
     customerName,
     customerEmail: customerEmail ?? null,
     customerPhone: customerPhone ?? null,
-    shippingAddress: shippingAddress
-      ? JSON.stringify(shippingAddress)
-      : null,
+    shippingAddress: shippingAddress ? JSON.stringify(shippingAddress) : null,
     subtotalCents,
     shippingCents,
     discountCents,
@@ -494,7 +487,19 @@ export async function createOrder(
       .where(eq(schema.coupons.id, couponRow.id))
   }
 
-  return { orderId, orderNumber, subtotalCents, discountCents, shippingCents, taxCents, taxName, taxRate, taxInclusive, totalCents, currency }
+  return {
+    orderId,
+    orderNumber,
+    subtotalCents,
+    discountCents,
+    shippingCents,
+    taxCents,
+    taxName,
+    taxRate,
+    taxInclusive,
+    totalCents,
+    currency,
+  }
 }
 
 // ─── releaseOrderInventory ─────────────────────────────────────────────────────
@@ -511,10 +516,7 @@ export async function createOrder(
  * The Stripe webhook gates on the cancel UPDATE's `meta.changes`; the public
  * cancel route gates on the pre-read order status.
  */
-export async function releaseOrderInventory(
-  db: Database,
-  orderId: string,
-): Promise<void> {
+export async function releaseOrderInventory(db: Database, orderId: string): Promise<void> {
   // 1. Restore stock for each line item (skip unlimited -1, mirroring createOrder).
   const itemRows = await db
     .select({
@@ -530,10 +532,7 @@ export async function releaseOrderInventory(
       .update(schema.sizeOptions)
       .set({ stock: sql`${schema.sizeOptions.stock} + ${item.quantity}` })
       .where(
-        and(
-          eq(schema.sizeOptions.id, item.sizeOptionId),
-          sql`${schema.sizeOptions.stock} != -1`,
-        ),
+        and(eq(schema.sizeOptions.id, item.sizeOptionId), sql`${schema.sizeOptions.stock} != -1`),
       )
   }
 
@@ -553,8 +552,6 @@ export async function releaseOrderInventory(
   }
 
   if (useRows.length > 0) {
-    await db
-      .delete(schema.couponUses)
-      .where(eq(schema.couponUses.orderId, orderId))
+    await db.delete(schema.couponUses).where(eq(schema.couponUses.orderId, orderId))
   }
 }

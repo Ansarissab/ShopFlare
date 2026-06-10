@@ -20,10 +20,7 @@ function shortDate(iso: string): string {
 
 // ─── RFM segment config ───────────────────────────────────────────────────────
 
-const RFM_CONFIG: Record<
-  RfmSegment,
-  { label: string; classes: string }
-> = {
+const RFM_CONFIG: Record<RfmSegment, { label: string; classes: string }> = {
   champions: {
     label: en.admin.analyticsSegmentChampions,
     classes: 'text-green-700 bg-green-50 border-green-200',
@@ -80,9 +77,15 @@ export function CustomersTab({ period }: { period: string }) {
   useEffect(() => {
     let active = true
     apiGet<AnalyticsCustomersResponse>(`/api/admin/analytics/customers?period=${period}`)
-      .then(d => { if (active) setLoaded({ period, data: d }) })
-      .catch(() => { if (active) setLoaded({ period, data: null }) })
-    return () => { active = false }
+      .then((d) => {
+        if (active) setLoaded({ period, data: d })
+      })
+      .catch(() => {
+        if (active) setLoaded({ period, data: null })
+      })
+    return () => {
+      active = false
+    }
   }, [period])
 
   const loading = loaded?.period !== period
@@ -90,17 +93,16 @@ export function CustomersTab({ period }: { period: string }) {
 
   if (loading) return <CustomersSkeleton />
   if (!data) {
-    return (
-      <p className="text-sm text-muted-foreground">{en.admin.analyticsNoData}</p>
-    )
+    return <p className="text-sm text-muted-foreground">{en.admin.analyticsNoData}</p>
   }
 
   const { summary, topCustomers, rfmSegments } = data
 
   // Build a lookup so we can render in the fixed order defined above
-  const rfmMap = Object.fromEntries(
-    rfmSegments.map(s => [s.segment, s.count]),
-  ) as Record<RfmSegment, number>
+  const rfmMap = Object.fromEntries(rfmSegments.map((s) => [s.segment, s.count])) as Record<
+    RfmSegment,
+    number
+  >
 
   const returningPct =
     summary.totalCustomers > 0
@@ -138,7 +140,7 @@ export function CustomersTab({ period }: { period: string }) {
       <div className="flex flex-col gap-3 rounded-xl border p-5">
         <p className="text-sm font-semibold">{en.admin.analyticsRfmSegments}</p>
         <div className="flex flex-wrap gap-3">
-          {RFM_ORDER.map(seg => {
+          {RFM_ORDER.map((seg) => {
             const { label, classes } = RFM_CONFIG[seg]
             const count = rfmMap[seg] ?? 0
             return (
@@ -160,19 +162,23 @@ export function CustomersTab({ period }: { period: string }) {
           <p className="text-sm font-semibold">{en.admin.analyticsTopCustomers}</p>
         </div>
         {topCustomers.length === 0 ? (
-          <p className="px-5 py-6 text-sm text-muted-foreground">
-            {en.admin.analyticsNoData}
-          </p>
+          <p className="px-5 py-6 text-sm text-muted-foreground">{en.admin.analyticsNoData}</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b text-xs text-muted-foreground">
                   <th className="px-5 py-2 text-left font-medium">Customer</th>
-                  <th className="hidden sm:table-cell px-5 py-2 text-right font-medium">{en.admin.analyticsOrders}</th>
+                  <th className="hidden sm:table-cell px-5 py-2 text-right font-medium">
+                    {en.admin.analyticsOrders}
+                  </th>
                   <th className="px-5 py-2 text-right font-medium">{en.admin.analyticsSpent}</th>
-                  <th className="hidden md:table-cell px-5 py-2 text-right font-medium">{en.admin.analyticsFirstOrder}</th>
-                  <th className="hidden md:table-cell px-5 py-2 text-right font-medium">{en.admin.analyticsLastOrder}</th>
+                  <th className="hidden md:table-cell px-5 py-2 text-right font-medium">
+                    {en.admin.analyticsFirstOrder}
+                  </th>
+                  <th className="hidden md:table-cell px-5 py-2 text-right font-medium">
+                    {en.admin.analyticsLastOrder}
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -182,7 +188,9 @@ export function CustomersTab({ period }: { period: string }) {
                       <span className="w-5 shrink-0 text-xs text-muted-foreground">{i + 1}</span>
                       <span className="font-mono text-xs">{c.customerKey}</span>
                     </td>
-                    <td className="hidden sm:table-cell px-5 py-3 text-right tabular-nums">{c.orders}</td>
+                    <td className="hidden sm:table-cell px-5 py-3 text-right tabular-nums">
+                      {c.orders}
+                    </td>
                     <td className="px-5 py-3 text-right font-semibold tabular-nums whitespace-nowrap">
                       {formatPrice(c.totalSpentCents)}
                     </td>

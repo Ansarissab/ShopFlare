@@ -102,7 +102,9 @@ app.post('/', async (c) => {
         promotion: { type: 'coupon', coupon: stripeCoupon.id },
         code: data.code,
         ...(data.usageLimit != null ? { max_redemptions: data.usageLimit } : {}),
-        ...(data.expiresAt ? { expires_at: Math.floor(new Date(data.expiresAt).getTime() / 1000) } : {}),
+        ...(data.expiresAt
+          ? { expires_at: Math.floor(new Date(data.expiresAt).getTime() / 1000) }
+          : {}),
         ...(data.minOrderCents != null
           ? {
               restrictions: {
@@ -166,17 +168,18 @@ app.put('/:id', async (c) => {
 
   const db = createDb(c.env.DB)
 
-  const coupon = await db
-    .select()
-    .from(schema.coupons)
-    .where(eq(schema.coupons.id, id))
-    .get()
+  const coupon = await db.select().from(schema.coupons).where(eq(schema.coupons.id, id)).get()
   if (!coupon) return c.json({ error: 'Coupon not found' }, 404)
 
   const data = parsed.data
 
   // Stripe promo-code active sync
-  if (data.active !== undefined && data.active !== coupon.active && coupon.stripePromotionCodeId && c.env.STRIPE_SECRET_KEY) {
+  if (
+    data.active !== undefined &&
+    data.active !== coupon.active &&
+    coupon.stripePromotionCodeId &&
+    c.env.STRIPE_SECRET_KEY
+  ) {
     try {
       const stripe = createStripe(c.env.STRIPE_SECRET_KEY)
       await stripe.promotionCodes.update(coupon.stripePromotionCodeId, { active: data.active })
@@ -214,11 +217,7 @@ app.delete('/:id', async (c) => {
   const { id } = c.req.param()
   const db = createDb(c.env.DB)
 
-  const coupon = await db
-    .select()
-    .from(schema.coupons)
-    .where(eq(schema.coupons.id, id))
-    .get()
+  const coupon = await db.select().from(schema.coupons).where(eq(schema.coupons.id, id)).get()
   if (!coupon) return c.json({ error: 'Coupon not found' }, 404)
 
   // Deactivate Stripe promotion code if present
@@ -231,10 +230,7 @@ app.delete('/:id', async (c) => {
     }
   }
 
-  await db
-    .update(schema.coupons)
-    .set({ active: false })
-    .where(eq(schema.coupons.id, id))
+  await db.update(schema.coupons).set({ active: false }).where(eq(schema.coupons.id, id))
 
   await bumpDataVersion(db)
 

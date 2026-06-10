@@ -195,14 +195,20 @@ describe('CouponForm — edit mode', () => {
 
   it('treats an invalid stored expiry as empty', () => {
     render(
-      <CouponForm coupon={makeCoupon({ expiresAt: 'not-a-date' })} onSaved={vi.fn()} onCancel={vi.fn()} />,
+      <CouponForm
+        coupon={makeCoupon({ expiresAt: 'not-a-date' })}
+        onSaved={vi.fn()}
+        onCancel={vi.fn()}
+      />,
     )
     expect(byId('coupon-expires').value).toBe('')
   })
 
   it('puts to the coupon id, toasts updated, and calls onSaved', async () => {
     const onSaved = vi.fn()
-    render(<CouponForm coupon={makeCoupon({ id: 'cpn-42' })} onSaved={onSaved} onCancel={vi.fn()} />)
+    render(
+      <CouponForm coupon={makeCoupon({ id: 'cpn-42' })} onSaved={onSaved} onCancel={vi.fn()} />,
+    )
     fireEvent.click(screen.getByRole('button', { name: en.admin.save }))
     await waitFor(() => expect(apiPut).toHaveBeenCalled())
     expect(vi.mocked(apiPut).mock.calls[0][0]).toBe('/api/admin/coupons/cpn-42')

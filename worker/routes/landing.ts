@@ -19,10 +19,9 @@ app.get('/', async (c) => {
   const db = createDb(c.env.DB)
 
   const configRows = await db.select().from(schema.storeConfig).all()
-  const kv = Object.fromEntries(configRows.map(r => [r.key, r.value]))
-  const landingEnabled = kv['landingEnabled'] !== undefined
-    ? kv['landingEnabled'] === 'true'
-    : false
+  const kv = Object.fromEntries(configRows.map((r) => [r.key, r.value]))
+  const landingEnabled =
+    kv['landingEnabled'] !== undefined ? kv['landingEnabled'] === 'true' : false
 
   if (!isFeatureEnabled({ landingEnabled }, 'landingEnabled')) {
     return c.json({ error: 'Landing page is not enabled' }, 404)
@@ -34,25 +33,28 @@ app.get('/', async (c) => {
   ])
 
   const sections = Object.fromEntries(
-    LANDING_SECTION_KEYS.map(key => {
-      const row = sectionRows.find(r => r.sectionKey === key)
-      return [key, {
-        sectionKey: key as LandingSectionKey,
-        enabled:    row?.enabled ?? true,
-        heading:    row?.heading ?? null,
-        subtext:    row?.subtext ?? null,
-        bodyHtml:   row?.bodyHtml ?? null,
-        ctaText:    row?.ctaText ?? null,
-        ctaHref:    row?.ctaHref ?? null,
-        imageR2Key: row?.imageR2Key ?? null,
-        updatedAt:  row?.updatedAt ?? '',
-      }]
+    LANDING_SECTION_KEYS.map((key) => {
+      const row = sectionRows.find((r) => r.sectionKey === key)
+      return [
+        key,
+        {
+          sectionKey: key as LandingSectionKey,
+          enabled: row?.enabled ?? true,
+          heading: row?.heading ?? null,
+          subtext: row?.subtext ?? null,
+          bodyHtml: row?.bodyHtml ?? null,
+          ctaText: row?.ctaText ?? null,
+          ctaHref: row?.ctaHref ?? null,
+          imageR2Key: row?.imageR2Key ?? null,
+          updatedAt: row?.updatedAt ?? '',
+        },
+      ]
     }),
   )
 
   return c.json({
     sections,
-    featuredProductIds: featuredRows.map(r => r.productId),
+    featuredProductIds: featuredRows.map((r) => r.productId),
   })
 })
 

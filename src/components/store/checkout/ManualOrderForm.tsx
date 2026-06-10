@@ -71,29 +71,77 @@ export function ManualOrderForm({ endpoint, successMethod, submitLabel }: Manual
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
       {/* Full Name */}
-      <FormField label={en.checkout.name} htmlFor="ship-name" error={errors.name ? requiredMsg(en.checkout.name) : undefined}>
-        <Input id="ship-name" autoComplete="name" aria-invalid={!!errors.name} {...register('name')} />
+      <FormField
+        label={en.checkout.name}
+        htmlFor="ship-name"
+        error={errors.name ? requiredMsg(en.checkout.name) : undefined}
+      >
+        <Input
+          id="ship-name"
+          autoComplete="name"
+          aria-invalid={!!errors.name}
+          {...register('name')}
+        />
       </FormField>
 
       {/* Phone */}
-      <FormField label={en.checkout.phone} htmlFor="ship-phone" error={errors.phone ? en.errors.invalidPhone : undefined}>
-        <Input id="ship-phone" type="tel" autoComplete="tel" aria-invalid={!!errors.phone} {...register('phone')} />
+      <FormField
+        label={en.checkout.phone}
+        htmlFor="ship-phone"
+        error={errors.phone ? en.errors.invalidPhone : undefined}
+      >
+        <Input
+          id="ship-phone"
+          type="tel"
+          autoComplete="tel"
+          aria-invalid={!!errors.phone}
+          {...register('phone')}
+        />
       </FormField>
 
       {/* Email (optional) */}
-      <FormField label={en.checkout.email} htmlFor="ship-email" optional error={errors.email ? en.errors.invalidEmail : undefined}>
-        <Input id="ship-email" type="email" autoComplete="email" aria-invalid={!!errors.email} {...register('email')} />
+      <FormField
+        label={en.checkout.email}
+        htmlFor="ship-email"
+        optional
+        error={errors.email ? en.errors.invalidEmail : undefined}
+      >
+        <Input
+          id="ship-email"
+          type="email"
+          autoComplete="email"
+          aria-invalid={!!errors.email}
+          {...register('email')}
+        />
       </FormField>
 
       {/* Street Address */}
-      <FormField label={en.checkout.address} htmlFor="ship-address" error={errors.address ? requiredMsg(en.checkout.address) : undefined}>
-        <Input id="ship-address" autoComplete="street-address" aria-invalid={!!errors.address} {...register('address')} />
+      <FormField
+        label={en.checkout.address}
+        htmlFor="ship-address"
+        error={errors.address ? requiredMsg(en.checkout.address) : undefined}
+      >
+        <Input
+          id="ship-address"
+          autoComplete="street-address"
+          aria-invalid={!!errors.address}
+          {...register('address')}
+        />
       </FormField>
 
       {/* City + State row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <FormField label={en.checkout.city} htmlFor="ship-city" error={errors.city ? requiredMsg(en.checkout.city) : undefined}>
-          <Input id="ship-city" autoComplete="address-level2" aria-invalid={!!errors.city} {...register('city')} />
+        <FormField
+          label={en.checkout.city}
+          htmlFor="ship-city"
+          error={errors.city ? requiredMsg(en.checkout.city) : undefined}
+        >
+          <Input
+            id="ship-city"
+            autoComplete="address-level2"
+            aria-invalid={!!errors.city}
+            {...register('city')}
+          />
         </FormField>
 
         <FormField label={en.checkout.state} htmlFor="ship-state" optional>
@@ -107,8 +155,18 @@ export function ManualOrderForm({ endpoint, successMethod, submitLabel }: Manual
           <Input id="ship-postal" autoComplete="postal-code" {...register('postalCode')} />
         </FormField>
 
-        <FormField label={en.checkout.country} htmlFor="ship-country" error={errors.country ? requiredMsg(en.checkout.country) : undefined}>
-          <Input id="ship-country" autoComplete="country" maxLength={2} aria-invalid={!!errors.country} {...register('country')} />
+        <FormField
+          label={en.checkout.country}
+          htmlFor="ship-country"
+          error={errors.country ? requiredMsg(en.checkout.country) : undefined}
+        >
+          <Input
+            id="ship-country"
+            autoComplete="country"
+            maxLength={2}
+            aria-invalid={!!errors.country}
+            {...register('country')}
+          />
         </FormField>
       </div>
 

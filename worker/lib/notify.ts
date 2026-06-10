@@ -112,7 +112,13 @@ export async function dispatchRestockAlerts(
       // rows were filtered by isNotNull(email) above; guard satisfies TS
       if (!row.email) continue
       try {
-        const sent = await sendRestockEmail(env, row.email, product.name, sizeOption.size, productUrl)
+        const sent = await sendRestockEmail(
+          env,
+          row.email,
+          product.name,
+          sizeOption.size,
+          productUrl,
+        )
         if (sent) {
           notifiedIds.push(row.id)
         }
@@ -163,9 +169,10 @@ export async function notifyOrderStatusChange(
     const trackUrl = `${frontendUrl}/track/${orderNumber}`
 
     const title = en.pwa.orderPushTitle
-    const body = newStatus === 'shipped'
-      ? en.pwa.orderStatusShipped.replace('{orderNumber}', orderNumber)
-      : en.pwa.orderStatusDelivered.replace('{orderNumber}', orderNumber)
+    const body =
+      newStatus === 'shipped'
+        ? en.pwa.orderStatusShipped.replace('{orderNumber}', orderNumber)
+        : en.pwa.orderStatusDelivered.replace('{orderNumber}', orderNumber)
 
     await sendPushToCustomers(db, env, orderNumber, { title, body, url: trackUrl })
   } catch (err) {

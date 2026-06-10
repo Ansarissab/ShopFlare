@@ -28,10 +28,9 @@ export async function GET() {
   lines.push('')
 
   // Products
-  const productsData = await fetchFromWorker<{ products: ProductWithVariants[] }>(
-    '/api/products',
-    { revalidate: 3600 },
-  ).catch(() => null)
+  const productsData = await fetchFromWorker<{ products: ProductWithVariants[] }>('/api/products', {
+    revalidate: 3600,
+  }).catch(() => null)
   if (productsData?.products?.length) {
     lines.push('## Products')
     for (const item of productsData.products.slice(0, 50)) {
@@ -44,10 +43,9 @@ export async function GET() {
   }
 
   // Categories
-  const catData = await fetchFromWorker<{ categories: CategoryNode[] }>(
-    '/api/categories',
-    { revalidate: 3600 },
-  ).catch(() => null)
+  const catData = await fetchFromWorker<{ categories: CategoryNode[] }>('/api/categories', {
+    revalidate: 3600,
+  }).catch(() => null)
   if (catData?.categories?.length) {
     lines.push('## Categories')
     for (const cat of catData.categories) {

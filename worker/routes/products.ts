@@ -53,11 +53,7 @@ app.get('/:id', async (c) => {
   const { id } = c.req.param()
   const db = createDb(c.env.DB)
 
-  const product = await db
-    .select()
-    .from(schema.products)
-    .where(eq(schema.products.id, id))
-    .get()
+  const product = await db.select().from(schema.products).where(eq(schema.products.id, id)).get()
 
   if (!product || !product.active) {
     return c.json({ error: 'Product not found' }, 404)

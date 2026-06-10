@@ -34,7 +34,12 @@ describe('landingSectionBaseSchema', () => {
 describe('heroSectionSchema', () => {
   it('accepts all hero fields', () => {
     const r = heroSectionSchema.safeParse({
-      enabled: true, heading: 'Hero', subtext: 'Sub', ctaText: 'Buy', ctaHref: '/shop', imageR2Key: 'img/hero.avif',
+      enabled: true,
+      heading: 'Hero',
+      subtext: 'Sub',
+      ctaText: 'Buy',
+      ctaHref: '/shop',
+      imageR2Key: 'img/hero.avif',
     })
     expect(r.success).toBe(true)
   })
@@ -48,7 +53,11 @@ describe('heroSectionSchema', () => {
 
 describe('storySectionSchema', () => {
   it('accepts heading + bodyHtml + imageR2Key', () => {
-    const r = storySectionSchema.safeParse({ heading: 'Our Story', bodyHtml: '<p>story</p>', imageR2Key: 'k' })
+    const r = storySectionSchema.safeParse({
+      heading: 'Our Story',
+      bodyHtml: '<p>story</p>',
+      imageR2Key: 'k',
+    })
     expect(r.success).toBe(true)
   })
 
@@ -61,7 +70,11 @@ describe('storySectionSchema', () => {
 
 describe('featuredSectionSchema', () => {
   it('only allows enabled + heading', () => {
-    const r = featuredSectionSchema.safeParse({ enabled: true, heading: 'Featured', ctaHref: '/nope' })
+    const r = featuredSectionSchema.safeParse({
+      enabled: true,
+      heading: 'Featured',
+      ctaHref: '/nope',
+    })
     expect(r.success).toBe(true)
     expect((r.data as Record<string, unknown>)?.ctaHref).toBeUndefined()
   })
@@ -89,7 +102,9 @@ describe('featuredProductsSchema', () => {
   })
 
   it('rejects more than 20 product IDs', () => {
-    const r = featuredProductsSchema.safeParse({ productIds: Array.from({ length: 21 }, (_, i) => `p${i}`) })
+    const r = featuredProductsSchema.safeParse({
+      productIds: Array.from({ length: 21 }, (_, i) => `p${i}`),
+    })
     expect(r.success).toBe(false)
   })
 

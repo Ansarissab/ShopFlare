@@ -23,7 +23,7 @@ async function getConfig(): Promise<StoreConfig> {
       next: { revalidate: 300 },
     })
     if (!res.ok) return {}
-    return await res.json() as StoreConfig
+    return (await res.json()) as StoreConfig
   } catch {
     return {}
   }

@@ -14,9 +14,7 @@ export function VariantSelector({
 
   return (
     <div className={cn('flex flex-col gap-2', className)}>
-      <p className="text-sm font-medium text-foreground">
-        {en.store.selectVariant}
-      </p>
+      <p className="text-sm font-medium text-foreground">{en.store.selectVariant}</p>
       <div className="flex flex-wrap gap-2">
         {variants.map((variant) => {
           const isSelected = variant.id === selectedVariantId

@@ -14,20 +14,53 @@ vi.mock('@/lib/api', () => ({
 const fullData: AnalyticsProductsResponse = {
   period: '30d',
   leaderboard: [
-    { productId: 'p1', productName: 'Alpha Tee', orders: 5, unitsSold: 12, revenueCents: 30000, aovCents: 6000 },
-    { productId: 'p2', productName: 'Beta Cap', orders: 9, unitsSold: 7, revenueCents: 50000, aovCents: 5555 },
-    { productId: 'p3', productName: 'Gamma Bag', orders: 2, unitsSold: 30, revenueCents: 10000, aovCents: 5000 },
+    {
+      productId: 'p1',
+      productName: 'Alpha Tee',
+      orders: 5,
+      unitsSold: 12,
+      revenueCents: 30000,
+      aovCents: 6000,
+    },
+    {
+      productId: 'p2',
+      productName: 'Beta Cap',
+      orders: 9,
+      unitsSold: 7,
+      revenueCents: 50000,
+      aovCents: 5555,
+    },
+    {
+      productId: 'p3',
+      productName: 'Gamma Bag',
+      orders: 2,
+      unitsSold: 30,
+      revenueCents: 10000,
+      aovCents: 5000,
+    },
   ],
   variants: [
     { variantId: 'v1', variantLabel: 'Red', colorHex: '#ff0000', unitsSold: 4, revenueCents: 8000 },
     { variantId: 'v2', variantLabel: 'NoColor', colorHex: null, unitsSold: 1, revenueCents: 2000 },
   ],
-  sizes: [
-    { sizeOptionId: 's1', size: 'M', unitsSold: 3, revenueCents: 6000 },
-  ],
+  sizes: [{ sizeOptionId: 's1', size: 'M', unitsSold: 3, revenueCents: 6000 }],
   slowMovers: [
-    { productId: 'sm1', productName: 'Dusty Sock', unitsSold: 0, stockOnHand: 40, unlimited: false, turnoverRatio: 0 },
-    { productId: 'sm2', productName: 'Endless Item', unitsSold: 2, stockOnHand: 0, unlimited: true, turnoverRatio: 1.234 },
+    {
+      productId: 'sm1',
+      productName: 'Dusty Sock',
+      unitsSold: 0,
+      stockOnHand: 40,
+      unlimited: false,
+      turnoverRatio: 0,
+    },
+    {
+      productId: 'sm2',
+      productName: 'Endless Item',
+      unitsSold: 2,
+      stockOnHand: 0,
+      unlimited: true,
+      turnoverRatio: 1.234,
+    },
   ],
 }
 
@@ -51,7 +84,11 @@ afterEach(() => {
 describe('ProductsTab', () => {
   it('shows skeleton while loading then renders data (uses period in request)', async () => {
     let resolve!: (v: AnalyticsProductsResponse) => void
-    vi.mocked(apiGet).mockReturnValueOnce(new Promise(r => { resolve = r }))
+    vi.mocked(apiGet).mockReturnValueOnce(
+      new Promise((r) => {
+        resolve = r
+      }),
+    )
     const { container } = render(<ProductsTab period="30d" />)
     // skeleton present (animate-pulse from Skeleton)
     expect(container.querySelector('.animate-pulse')).toBeTruthy()

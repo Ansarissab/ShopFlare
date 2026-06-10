@@ -37,7 +37,12 @@ app.post('/validate', async (c) => {
   // discount, so without a throttle it enables coupon-code enumeration.
   // (Turnstile is intentionally NOT required here: coupon-apply happens in the
   // cart, before the Turnstile-gated checkout form mounts.)
-  if (!(await rateLimit(c.env, 'coupon-validate', c.req.header('CF-Connecting-IP'), { limit: 20, windowSeconds: 60 }))) {
+  if (
+    !(await rateLimit(c.env, 'coupon-validate', c.req.header('CF-Connecting-IP'), {
+      limit: 20,
+      windowSeconds: 60,
+    }))
+  ) {
     return c.json({ error: 'Too many requests' }, 429)
   }
 
@@ -60,11 +65,8 @@ app.post('/validate', async (c) => {
     .get()
   const currency = (currencyRow?.value as CurrencyCode | undefined) ?? DEFAULT_CURRENCY
 
-  const coupon = await db
-    .select()
-    .from(schema.coupons)
-    .where(eq(schema.coupons.code, code))
-    .get() ?? null
+  const coupon =
+    (await db.select().from(schema.coupons).where(eq(schema.coupons.code, code)).get()) ?? null
 
   const result = evaluateCoupon(coupon, subtotalCents, new Date().toISOString(), currency)
 

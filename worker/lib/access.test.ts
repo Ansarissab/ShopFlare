@@ -18,7 +18,11 @@ const now = () => Math.floor(Date.now() / 1000)
 
 describe('requireAdmin', () => {
   it('allows the dev/test bypass (ENVIRONMENT=development + ADMIN_DEV_BYPASS=1)', async () => {
-    const res = await makeApp().request('/protected', {}, { ENVIRONMENT: 'development', ADMIN_DEV_BYPASS: '1' })
+    const res = await makeApp().request(
+      '/protected',
+      {},
+      { ENVIRONMENT: 'development', ADMIN_DEV_BYPASS: '1' },
+    )
     expect(res.status).toBe(200)
   })
 

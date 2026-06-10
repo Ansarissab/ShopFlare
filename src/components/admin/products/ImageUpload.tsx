@@ -1,6 +1,9 @@
 'use client'
 
-import { ImageUpload as SharedImageUpload, type SharedImageItem } from '@/components/shared/ImageUpload'
+import {
+  ImageUpload as SharedImageUpload,
+  type SharedImageItem,
+} from '@/components/shared/ImageUpload'
 import { MAX_IMAGES_PER_VARIANT } from '@/lib/constants'
 import type { ProductImage } from '@/lib/types/product'
 

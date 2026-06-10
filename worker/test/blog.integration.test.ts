@@ -53,9 +53,22 @@ const adminDelete = (path: string) =>
 // ─── Cleanup ──────────────────────────────────────────────────────────────────
 
 const TABLES = [
-  'coupon_uses', 'reviews', 'notify_me', 'order_items', 'orders', 'coupons',
-  'size_options', 'product_images', 'variants', 'products', 'store_config',
-  'stripe_events', 'push_subscriptions', 'analytics_daily', 'carts', 'blog_posts',
+  'coupon_uses',
+  'reviews',
+  'notify_me',
+  'order_items',
+  'orders',
+  'coupons',
+  'size_options',
+  'product_images',
+  'variants',
+  'products',
+  'store_config',
+  'stripe_events',
+  'push_subscriptions',
+  'analytics_daily',
+  'carts',
+  'blog_posts',
 ]
 beforeEach(async () => {
   for (const t of TABLES) await env.DB.prepare(`DELETE FROM ${t}`).run()
@@ -65,11 +78,13 @@ beforeEach(async () => {
 
 const setBlogEnabled = async (value: boolean) => {
   const now = new Date().toISOString()
-  await db().insert(schema.storeConfig).values({
-    key: 'blogEnabled',
-    value: String(value),
-    updatedAt: now,
-  })
+  await db()
+    .insert(schema.storeConfig)
+    .values({
+      key: 'blogEnabled',
+      value: String(value),
+      updatedAt: now,
+    })
 }
 
 // ─── Tests ────────────────────────────────────────────────────────────────────

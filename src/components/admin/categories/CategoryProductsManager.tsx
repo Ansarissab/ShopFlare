@@ -80,8 +80,8 @@ export function CategoryProductsManager({
   async function handleReorder(index: number, direction: 'up' | 'down') {
     const newAssigned = [...assigned]
     const swapIndex = direction === 'up' ? index - 1 : index + 1
-    if (swapIndex < 0 || swapIndex >= newAssigned.length) return;
-    [newAssigned[index], newAssigned[swapIndex]] = [newAssigned[swapIndex], newAssigned[index]]
+    if (swapIndex < 0 || swapIndex >= newAssigned.length) return
+    ;[newAssigned[index], newAssigned[swapIndex]] = [newAssigned[swapIndex], newAssigned[index]]
 
     setSaving(true)
     try {
@@ -99,8 +99,7 @@ export function CategoryProductsManager({
   const assignedIds = new Set(assigned.map((a) => a.product.id))
   const filteredPicker = allProducts.filter(
     ({ product }) =>
-      !assignedIds.has(product.id) &&
-      product.name.toLowerCase().includes(search.toLowerCase()),
+      !assignedIds.has(product.id) && product.name.toLowerCase().includes(search.toLowerCase()),
   )
 
   return (

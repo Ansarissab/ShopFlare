@@ -61,10 +61,17 @@ describe('admin-session token', () => {
     // Build a token with a real signature but a payload lacking `exp`.
     const enc = new TextEncoder()
     const b64url = (b: Uint8Array) =>
-      btoa(String.fromCharCode(...b)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+      btoa(String.fromCharCode(...b))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '')
     const payloadB64 = b64url(enc.encode(JSON.stringify({ foo: 'bar' })))
     const key = await crypto.subtle.importKey(
-      'raw', enc.encode(SECRET), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'],
+      'raw',
+      enc.encode(SECRET),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign'],
     )
     const sig = new Uint8Array(await crypto.subtle.sign('HMAC', key, enc.encode(payloadB64)))
     const token = `${payloadB64}.${b64url(sig)}`

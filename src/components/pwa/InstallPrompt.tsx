@@ -3,7 +3,13 @@
 import { useState, useEffect, useSyncExternalStore } from 'react'
 import { X, Share } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from '@/components/ui/sheet'
 import { en } from '@/lib/i18n/en'
 import { INSTALL_DISMISSED_KEY } from '@/lib/constants'
 import { useIsStandalone } from '@/hooks/useDisplayMode'
@@ -19,11 +25,17 @@ function isIos(): boolean {
 }
 
 function isDismissed(): boolean {
-  try { return localStorage.getItem(INSTALL_DISMISSED_KEY) === '1' } catch { return false }
+  try {
+    return localStorage.getItem(INSTALL_DISMISSED_KEY) === '1'
+  } catch {
+    return false
+  }
 }
 
 function markDismissed(): void {
-  try { localStorage.setItem(INSTALL_DISMISSED_KEY, '1') } catch {}
+  try {
+    localStorage.setItem(INSTALL_DISMISSED_KEY, '1')
+  } catch {}
 }
 
 // Client-only "hydrated" flag via useSyncExternalStore: returns false on the
@@ -99,8 +111,15 @@ export function InstallPrompt() {
               <p className="text-xs text-muted-foreground truncate">{en.pwa.installBody}</p>
             </div>
             <div className="flex gap-2">
-              <Button size="sm" onClick={handleInstall} className="w-full sm:w-auto">{en.pwa.installAction}</Button>
-              <Button size="sm" variant="ghost" onClick={handleDismiss} className="w-full sm:w-auto">
+              <Button size="sm" onClick={handleInstall} className="w-full sm:w-auto">
+                {en.pwa.installAction}
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={handleDismiss}
+                className="w-full sm:w-auto"
+              >
                 <X className="h-4 w-4" />
               </Button>
             </div>
@@ -109,7 +128,12 @@ export function InstallPrompt() {
       )}
 
       {/* iOS A2HS instruction sheet */}
-      <Sheet open={showIosSheet} onOpenChange={(open) => { if (!open) handleDismiss() }}>
+      <Sheet
+        open={showIosSheet}
+        onOpenChange={(open) => {
+          if (!open) handleDismiss()
+        }}
+      >
         <SheetContent side="bottom" className="pb-[calc(1.5rem+var(--safe-bottom,0px))]">
           <SheetHeader className="text-left">
             <SheetTitle>{en.pwa.installIosTitle}</SheetTitle>
@@ -117,17 +141,23 @@ export function InstallPrompt() {
           </SheetHeader>
           <div className="mt-4 space-y-3">
             <div className="flex items-center gap-3">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">1</span>
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
+                1
+              </span>
               <span className="text-sm flex items-center gap-1">
                 {en.pwa.installIosStep1} <Share className="inline h-4 w-4" />
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">2</span>
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
+                2
+              </span>
               <span className="text-sm">{en.pwa.installIosStep2}</span>
             </div>
             <div className="flex items-center gap-3">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">3</span>
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
+                3
+              </span>
               <span className="text-sm">{en.pwa.installIosStep3}</span>
             </div>
           </div>

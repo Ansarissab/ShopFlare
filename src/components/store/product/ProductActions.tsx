@@ -23,12 +23,7 @@ export function ProductActions({
   if (allSizesOOS) {
     return (
       <div className={cn('flex flex-col gap-3', className)}>
-        <Button
-          variant="outline"
-          size="lg"
-          className="w-full gap-2"
-          onClick={onNotifyMe}
-        >
+        <Button variant="outline" size="lg" className="w-full gap-2" onClick={onNotifyMe}>
           <Bell className="size-4" />
           {en.store.notifyMe}
         </Button>
@@ -67,24 +62,16 @@ export function ProductActions({
 
       {/* Contextual: WhatsApp + COD — only when size is selected */}
       {hasSelection && (
-        <div className={cn('grid gap-2', showWhatsApp ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1')}>
+        <div
+          className={cn('grid gap-2', showWhatsApp ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1')}
+        >
           {showWhatsApp && (
-            <Button
-              variant="outline"
-              size="lg"
-              className="gap-2"
-              onClick={onWhatsApp}
-            >
+            <Button variant="outline" size="lg" className="gap-2" onClick={onWhatsApp}>
               <MessageCircle className="size-4" />
               <span className="truncate">{en.store.orderOnWhatsApp}</span>
             </Button>
           )}
-          <Button
-            variant="outline"
-            size="lg"
-            className="gap-2"
-            onClick={onCOD}
-          >
+          <Button variant="outline" size="lg" className="gap-2" onClick={onCOD}>
             <Banknote className="size-4" />
             <span className="truncate">{en.store.cashOnDelivery}</span>
           </Button>

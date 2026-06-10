@@ -19,16 +19,16 @@ app.get('/', async (c) => {
   const db = createDb(c.env.DB)
   const since = sinceDate(period)
 
-  const inPeriod  = periodFilter(since)
-  const active    = activeOrdersFilter(since)
+  const inPeriod = periodFilter(since)
+  const active = activeOrdersFilter(since)
 
   // ─── Summary ────────────────────────────────────────────────────────────────
   const [summary] = await db
     .select({
-      totalOrders:        sql<number>`COUNT(*)`,
-      totalRevenueCents:  sql<number>`SUM(CASE WHEN ${schema.orders.status} != 'cancelled' THEN ${schema.orders.totalCents} ELSE 0 END)`,
-      cancelledOrders:    sql<number>`SUM(CASE WHEN ${schema.orders.status} = 'cancelled' THEN 1 ELSE 0 END)`,
-      deliveredOrders:    sql<number>`SUM(CASE WHEN ${schema.orders.status} = 'delivered' THEN 1 ELSE 0 END)`,
+      totalOrders: sql<number>`COUNT(*)`,
+      totalRevenueCents: sql<number>`SUM(CASE WHEN ${schema.orders.status} != 'cancelled' THEN ${schema.orders.totalCents} ELSE 0 END)`,
+      cancelledOrders: sql<number>`SUM(CASE WHEN ${schema.orders.status} = 'cancelled' THEN 1 ELSE 0 END)`,
+      deliveredOrders: sql<number>`SUM(CASE WHEN ${schema.orders.status} = 'delivered' THEN 1 ELSE 0 END)`,
       totalDiscountCents: sql<number>`SUM(CASE WHEN ${schema.orders.status} != 'cancelled' THEN ${schema.orders.discountCents} ELSE 0 END)`,
     })
     .from(schema.orders)
@@ -37,9 +37,9 @@ app.get('/', async (c) => {
   // ─── Revenue by day ──────────────────────────────────────────────────────────
   const revenueByDay = await db
     .select({
-      day:          sql<string>`DATE(${schema.orders.createdAt})`,
+      day: sql<string>`DATE(${schema.orders.createdAt})`,
       revenueCents: sql<number>`SUM(${schema.orders.totalCents})`,
-      orderCount:   sql<number>`COUNT(*)`,
+      orderCount: sql<number>`COUNT(*)`,
     })
     .from(schema.orders)
     .where(active)
@@ -49,8 +49,8 @@ app.get('/', async (c) => {
   // ─── Payment method breakdown ────────────────────────────────────────────────
   const paymentMethods = await db
     .select({
-      method:       schema.orders.paymentMethod,
-      count:        sql<number>`COUNT(*)`,
+      method: schema.orders.paymentMethod,
+      count: sql<number>`COUNT(*)`,
       revenueCents: sql<number>`SUM(${schema.orders.totalCents})`,
     })
     .from(schema.orders)
@@ -61,9 +61,9 @@ app.get('/', async (c) => {
   // ─── Top products ────────────────────────────────────────────────────────────
   const topProducts = await db
     .select({
-      productId:    schema.orderItems.productId,
-      productName:  sql<string>`MIN(${schema.products.name})`,
-      unitsSold:    sql<number>`SUM(${schema.orderItems.quantity})`,
+      productId: schema.orderItems.productId,
+      productName: sql<string>`MIN(${schema.products.name})`,
+      unitsSold: sql<number>`SUM(${schema.orderItems.quantity})`,
       revenueCents: sql<number>`SUM(${schema.orderItems.quantity} * ${schema.orderItems.priceCents})`,
     })
     .from(schema.orderItems)
@@ -77,8 +77,8 @@ app.get('/', async (c) => {
   // ─── Coupon stats ────────────────────────────────────────────────────────────
   const couponStats = await db
     .select({
-      couponCode:         schema.orders.couponCode,
-      uses:               sql<number>`COUNT(*)`,
+      couponCode: schema.orders.couponCode,
+      uses: sql<number>`COUNT(*)`,
       totalDiscountCents: sql<number>`SUM(${schema.orders.discountCents})`,
     })
     .from(schema.orders)

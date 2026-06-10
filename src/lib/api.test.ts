@@ -102,7 +102,10 @@ describe('apiGet', () => {
     fetchMock.mockResolvedValueOnce(jsonResponse({ hello: 'world' }))
     const out = await apiGet<{ hello: string }>('/api/products')
     expect(out).toEqual({ hello: 'world' })
-    expect(fetchMock).toHaveBeenCalledWith(`${WORKER_URL}/api/products`, expect.objectContaining({}))
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${WORKER_URL}/api/products`,
+      expect.objectContaining({}),
+    )
   })
 
   it('returns undefined on an empty body (e.g. 204)', async () => {
@@ -129,20 +132,26 @@ describe('apiGet', () => {
   it('omits Authorization on admin paths when no token is stored', async () => {
     clearAdminToken()
     await apiGet('/api/admin/orders')
-    expect((fetchMock.mock.calls[0][1].headers as Record<string, string>).Authorization).toBeUndefined()
+    expect(
+      (fetchMock.mock.calls[0][1].headers as Record<string, string>).Authorization,
+    ).toBeUndefined()
   })
 
   it('never attaches the token on public paths', async () => {
     setAdminToken('tok123')
     await apiGet('/api/products')
-    expect((fetchMock.mock.calls[0][1].headers as Record<string, string>).Authorization).toBeUndefined()
+    expect(
+      (fetchMock.mock.calls[0][1].headers as Record<string, string>).Authorization,
+    ).toBeUndefined()
     clearAdminToken()
   })
 
   it('does not attach the token to the public admin login endpoint', async () => {
     setAdminToken('tok123')
     await apiPost('/api/admin/login', { password: 'x' })
-    expect((fetchMock.mock.calls[0][1].headers as Record<string, string>).Authorization).toBeUndefined()
+    expect(
+      (fetchMock.mock.calls[0][1].headers as Record<string, string>).Authorization,
+    ).toBeUndefined()
     clearAdminToken()
   })
 })
@@ -154,7 +163,9 @@ describe('admin token storage + 401 handling', () => {
       configurable: true,
       value: { pathname, href: pathname },
     })
-    return () => { if (orig) Object.defineProperty(window, 'location', orig) }
+    return () => {
+      if (orig) Object.defineProperty(window, 'location', orig)
+    }
   }
 
   it('clears the token and redirects to /admin/login on a 401 from a protected admin path', async () => {
@@ -180,7 +191,9 @@ describe('admin token storage + 401 handling', () => {
   it('does not clear the token on a 401 from the public login endpoint', async () => {
     setAdminToken('tok')
     fetchMock.mockResolvedValueOnce(jsonResponse({ error: 'Invalid password' }, 401))
-    await expect(apiPost('/api/admin/login', { password: 'x' })).rejects.toMatchObject({ status: 401 })
+    await expect(apiPost('/api/admin/login', { password: 'x' })).rejects.toMatchObject({
+      status: 401,
+    })
     expect(getAdminToken()).toBe('tok')
     clearAdminToken()
   })
@@ -190,9 +203,15 @@ describe('admin token storage + 401 handling', () => {
     Object.defineProperty(window, 'localStorage', {
       configurable: true,
       value: {
-        getItem() { throw new Error('blocked') },
-        setItem() { throw new Error('blocked') },
-        removeItem() { throw new Error('blocked') },
+        getItem() {
+          throw new Error('blocked')
+        },
+        setItem() {
+          throw new Error('blocked')
+        },
+        removeItem() {
+          throw new Error('blocked')
+        },
       },
     })
     expect(getAdminToken()).toBeNull()
@@ -239,14 +258,18 @@ describe('error handling in request()', () => {
 
   it('falls back to HTTP <status> when body is non-JSON', async () => {
     fetchMock.mockResolvedValueOnce({
-      ok: false, status: 500, text: () => Promise.resolve('not json'),
+      ok: false,
+      status: 500,
+      text: () => Promise.resolve('not json'),
     } as unknown as Response)
     await expect(apiGet('/api/x')).rejects.toMatchObject({ status: 500, message: 'HTTP 500' })
   })
 
   it('falls back to HTTP <status> when body is empty', async () => {
     fetchMock.mockResolvedValueOnce({
-      ok: false, status: 503, text: () => Promise.resolve(''),
+      ok: false,
+      status: 503,
+      text: () => Promise.resolve(''),
     } as unknown as Response)
     await expect(apiGet('/api/x')).rejects.toMatchObject({ status: 503, message: 'HTTP 503' })
   })
@@ -313,12 +336,20 @@ describe('apiUpload', () => {
 describe('prefetch', () => {
   it('fires a force-cache GET and dedups in-flight paths', async () => {
     let resolveFetch: (v: Response) => void = () => {}
-    fetchMock.mockImplementation(() => new Promise<Response>(r => { resolveFetch = r }))
+    fetchMock.mockImplementation(
+      () =>
+        new Promise<Response>((r) => {
+          resolveFetch = r
+        }),
+    )
 
     prefetch('/api/p1')
     prefetch('/api/p1') // duplicate while in flight — should be ignored
     expect(fetchMock).toHaveBeenCalledTimes(1)
-    expect(fetchMock).toHaveBeenCalledWith(WORKER_URL + '/api/p1', { method: 'GET', cache: 'force-cache' })
+    expect(fetchMock).toHaveBeenCalledWith(WORKER_URL + '/api/p1', {
+      method: 'GET',
+      cache: 'force-cache',
+    })
 
     resolveFetch(jsonResponse({}))
     // allow .finally() to run and clear the set
@@ -341,15 +372,21 @@ describe('prefetch', () => {
 type FakeEntry = { id: string; url: string; body: string; headers?: Record<string, string> }
 
 function makeFakeIDB(initial: FakeEntry[] = []) {
-  const store = new Map<string, FakeEntry>(initial.map(e => [e.id, e]))
+  const store = new Map<string, FakeEntry>(initial.map((e) => [e.id, e]))
   const fakeDB = {
     transaction() {
       const tx: Record<string, unknown> = {}
       const objectStore = {
-        add(entry: FakeEntry) { store.set(entry.id, entry); queueMicrotask(() => (tx.oncomplete as () => void)?.()); return {} },
+        add(entry: FakeEntry) {
+          store.set(entry.id, entry)
+          queueMicrotask(() => (tx.oncomplete as () => void)?.())
+          return {}
+        },
         getAll() {
           const req: Record<string, unknown> = {}
-          queueMicrotask(() => { (req.onsuccess as () => void)?.() ; })
+          queueMicrotask(() => {
+            ;(req.onsuccess as () => void)?.()
+          })
           Object.defineProperty(req, 'result', { get: () => [...store.values()] })
           return req
         },
@@ -450,7 +487,11 @@ describe('apiPostQueued', () => {
     const { fakeDB, store } = makeFakeIDB()
     stubIndexedDB(fakeDB)
     fetchMock.mockImplementation(() => {
-      Object.defineProperty(navigator, 'onLine', { value: false, configurable: true, writable: true })
+      Object.defineProperty(navigator, 'onLine', {
+        value: false,
+        configurable: true,
+        writable: true,
+      })
       return Promise.reject(new TypeError('Failed to fetch'))
     })
 

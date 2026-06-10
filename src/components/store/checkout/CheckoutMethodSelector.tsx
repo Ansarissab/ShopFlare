@@ -32,10 +32,34 @@ export function CheckoutMethodSelector() {
   const bankEnabled = !!config?.bankAccountNumber
 
   const methods: Method[] = [
-    { value: 'card',     label: en.checkout.payWithCard,      description: en.checkout.cardDescription,      icon: CreditCard },
-    { value: 'cod',      label: en.store.cashOnDelivery,      description: en.checkout.codDescription,       icon: Banknote },
-    ...(bankEnabled ? [{ value: 'bank' as const, label: en.checkout.bankTransfer, description: en.checkout.bankDescription, icon: Building2 }] : []),
-    { value: 'whatsapp', label: en.store.orderOnWhatsApp,     description: en.checkout.whatsappDescription,  icon: MessageCircle },
+    {
+      value: 'card',
+      label: en.checkout.payWithCard,
+      description: en.checkout.cardDescription,
+      icon: CreditCard,
+    },
+    {
+      value: 'cod',
+      label: en.store.cashOnDelivery,
+      description: en.checkout.codDescription,
+      icon: Banknote,
+    },
+    ...(bankEnabled
+      ? [
+          {
+            value: 'bank' as const,
+            label: en.checkout.bankTransfer,
+            description: en.checkout.bankDescription,
+            icon: Building2,
+          },
+        ]
+      : []),
+    {
+      value: 'whatsapp',
+      label: en.store.orderOnWhatsApp,
+      description: en.checkout.whatsappDescription,
+      icon: MessageCircle,
+    },
   ]
 
   async function handleStripeCheckout() {
@@ -110,8 +134,14 @@ export function CheckoutMethodSelector() {
           <div className="flex flex-col gap-3">
             <p className="text-sm text-muted-foreground">{en.checkout.stripeRedirectNote}</p>
             <TurnstileWidget
-              onVerify={(token) => { setTurnstileToken(token); setTurnstileError(false) }}
-              onError={() => { setTurnstileToken(null); setTurnstileError(true) }}
+              onVerify={(token) => {
+                setTurnstileToken(token)
+                setTurnstileError(false)
+              }}
+              onError={() => {
+                setTurnstileToken(null)
+                setTurnstileError(true)
+              }}
             />
             {turnstileError && (
               <p className="text-xs text-destructive">{en.checkout.securityCheckFailed}</p>
@@ -148,8 +178,8 @@ export function CheckoutMethodSelector() {
 
         {active === 'whatsapp' && (
           <p className="text-sm text-muted-foreground">
-            WhatsApp ordering is available directly on each product page. Visit the product you
-            want and tap &ldquo;{en.store.orderOnWhatsApp}&rdquo; to send your order.
+            WhatsApp ordering is available directly on each product page. Visit the product you want
+            and tap &ldquo;{en.store.orderOnWhatsApp}&rdquo; to send your order.
           </p>
         )}
       </div>

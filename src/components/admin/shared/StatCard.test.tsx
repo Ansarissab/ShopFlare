@@ -15,8 +15,7 @@ vi.mock('next/link', async () => {
 vi.mock('@/components/common/HelpTip', async () => {
   const { createElement } = await import('react')
   return {
-    HelpTip: ({ text }: { text: string }) =>
-      createElement('span', { 'data-helptip': text }, text),
+    HelpTip: ({ text }: { text: string }) => createElement('span', { 'data-helptip': text }, text),
   }
 })
 

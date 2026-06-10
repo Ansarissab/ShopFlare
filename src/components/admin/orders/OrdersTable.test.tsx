@@ -69,9 +69,7 @@ describe('OrdersTable', () => {
   })
 
   it('falls back to em dash when both email and phone are null', () => {
-    render(
-      <OrdersTable orders={[makeOrder({ customerEmail: null, customerPhone: null })]} />,
-    )
+    render(<OrdersTable orders={[makeOrder({ customerEmail: null, customerPhone: null })]} />)
     expect(screen.getByText('—')).toBeTruthy()
   })
 
@@ -106,7 +104,10 @@ describe('OrdersTable', () => {
   it('renders one row per order', () => {
     render(
       <OrdersTable
-        orders={[makeOrder({ id: 'a', orderNumber: 'SF-1' }), makeOrder({ id: 'b', orderNumber: 'SF-2' })]}
+        orders={[
+          makeOrder({ id: 'a', orderNumber: 'SF-1' }),
+          makeOrder({ id: 'b', orderNumber: 'SF-2' }),
+        ]}
       />,
     )
     expect(screen.getByRole('link', { name: 'SF-1' })).toBeTruthy()

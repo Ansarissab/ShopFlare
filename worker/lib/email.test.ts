@@ -192,9 +192,24 @@ describe('sendOrderEmails', () => {
   it('sends a confirmation, with subject, BCC and tracking URL', async () => {
     const f = okFetch(200)
     const db = makeOrderDb({
-      order: baseOrder({ subtotalCents: 6000, shippingCents: 500, discountCents: 1000, totalCents: 5500 }),
-      items: [{ quantity: 2, priceCents: 3000, snapshot: JSON.stringify({ productName: 'Tee', variantLabel: 'Red', size: 'M' }) }],
-      config: { currency: 'USD', contactEmail: 'merchant@b.c', senderEmail: 'noreply@verified.test' },
+      order: baseOrder({
+        subtotalCents: 6000,
+        shippingCents: 500,
+        discountCents: 1000,
+        totalCents: 5500,
+      }),
+      items: [
+        {
+          quantity: 2,
+          priceCents: 3000,
+          snapshot: JSON.stringify({ productName: 'Tee', variantLabel: 'Red', size: 'M' }),
+        },
+      ],
+      config: {
+        currency: 'USD',
+        contactEmail: 'merchant@b.c',
+        senderEmail: 'noreply@verified.test',
+      },
     })
     await sendOrderEmails(db, makeEnv(), 'ord_1')
 
@@ -217,7 +232,12 @@ describe('sendOrderEmails', () => {
     const db = makeOrderDb({
       order: baseOrder({ paymentMethod: 'bank_transfer' }),
       items: [{ quantity: 1, priceCents: 5000, snapshot: 'not-json' }],
-      config: { currency: 'PKR', bankAccountNumber: '0001234567', bankName: 'Test Bank', bankInstructions: 'Pay fast' },
+      config: {
+        currency: 'PKR',
+        bankAccountNumber: '0001234567',
+        bankName: 'Test Bank',
+        bankInstructions: 'Pay fast',
+      },
     })
     await sendOrderEmails(db, makeEnv(), 'ord_1')
     const payload = JSON.parse((f.mock.calls[0][1] as RequestInit).body as string)
@@ -268,7 +288,11 @@ describe('sendOrderEmails', () => {
   })
 
   it('never throws when the db access fails', async () => {
-    const db = { select: vi.fn(() => { throw new Error('db down') }) } as unknown as Database
+    const db = {
+      select: vi.fn(() => {
+        throw new Error('db down')
+      }),
+    } as unknown as Database
     await expect(sendOrderEmails(db, makeEnv(), 'ord_1')).resolves.toBeUndefined()
   })
 })
@@ -282,7 +306,13 @@ describe('sendRestockEmail', () => {
 
   it('returns false when RESEND_API_KEY is unset', async () => {
     const f = okFetch()
-    const ok = await sendRestockEmail(makeEnv({ RESEND_API_KEY: undefined } as Partial<Bindings>), 'a@b.c', 'Tee', 'M', 'https://shop.test/p/1')
+    const ok = await sendRestockEmail(
+      makeEnv({ RESEND_API_KEY: undefined } as Partial<Bindings>),
+      'a@b.c',
+      'Tee',
+      'M',
+      'https://shop.test/p/1',
+    )
     expect(ok).toBe(false)
     expect(f).not.toHaveBeenCalled()
   })
@@ -295,7 +325,13 @@ describe('sendRestockEmail', () => {
 
   it('sends a restock email with escaped product details and CTA', async () => {
     const f = okFetch(200)
-    const ok = await sendRestockEmail(makeEnv(), 'a@b.c', 'Tee & <Co>', 'M', 'https://shop.test/p/1')
+    const ok = await sendRestockEmail(
+      makeEnv(),
+      'a@b.c',
+      'Tee & <Co>',
+      'M',
+      'https://shop.test/p/1',
+    )
     expect(ok).toBe(true)
     const payload = JSON.parse((f.mock.calls[0][1] as RequestInit).body as string)
     expect(payload.subject).toBe(en.email.restockSubject.replace('{productName}', 'Tee & <Co>'))

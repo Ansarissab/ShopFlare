@@ -25,33 +25,33 @@ app.get('/', async (c) => {
   const rows = await db
     .select({
       sizeOptionId: schema.notifyMe.sizeOptionId,
-      waiting:        count(schema.notifyMe.id).as('waiting'),
+      waiting: count(schema.notifyMe.id).as('waiting'),
       lastRequestedAt: max(schema.notifyMe.createdAt).as('last_requested_at'),
       // size option fields
-      size:    schema.sizeOptions.size,
-      stock:   schema.sizeOptions.stock,
+      size: schema.sizeOptions.size,
+      stock: schema.sizeOptions.stock,
       // variant + product
       variantLabel: schema.variants.label,
-      productName:  schema.products.name,
+      productName: schema.products.name,
     })
     .from(schema.notifyMe)
     .innerJoin(schema.sizeOptions, eq(schema.notifyMe.sizeOptionId, schema.sizeOptions.id))
-    .innerJoin(schema.variants,    eq(schema.sizeOptions.variantId, schema.variants.id))
-    .innerJoin(schema.products,    eq(schema.variants.productId,    schema.products.id))
+    .innerJoin(schema.variants, eq(schema.sizeOptions.variantId, schema.variants.id))
+    .innerJoin(schema.products, eq(schema.variants.productId, schema.products.id))
     .where(eq(schema.notifyMe.notified, false))
     .groupBy(schema.notifyMe.sizeOptionId)
     .orderBy(desc(sql`waiting`))
     .all()
 
   const requests = rows.map((r) => ({
-    sizeOptionId:   r.sizeOptionId,
-    size:           r.size,
-    productName:    r.productName,
-    variantLabel:   r.variantLabel,
-    waiting:        r.waiting,
+    sizeOptionId: r.sizeOptionId,
+    size: r.size,
+    productName: r.productName,
+    variantLabel: r.variantLabel,
+    waiting: r.waiting,
     lastRequestedAt: r.lastRequestedAt ?? '',
     // stock > 0 or -1 (unlimited) means in-stock
-    inStock:        r.stock === -1 || r.stock > 0,
+    inStock: r.stock === -1 || r.stock > 0,
   }))
 
   return c.json({ requests })

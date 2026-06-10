@@ -242,7 +242,9 @@ describe('edgeCached', () => {
     vi.stubGlobal('caches', { default: { match: matchMock, put: putMock } })
 
     const ctx = makeCtx({})
-    ctx.executionCtx.waitUntil = vi.fn(() => { throw new Error('no exec ctx') })
+    ctx.executionCtx.waitUntil = vi.fn(() => {
+      throw new Error('no exec ctx')
+    })
     const build = vi.fn(async () => ({ ok: true }))
 
     const res = await edgeCached(ctx as never, {

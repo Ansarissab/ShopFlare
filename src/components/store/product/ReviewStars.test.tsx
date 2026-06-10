@@ -40,9 +40,7 @@ describe('ReviewStars — interactive', () => {
     const onChange = vi.fn()
     render(<ReviewStars rating={0} onChange={onChange} />)
     // Click the 4-star button
-    const fourStarBtn = screen.getByLabelText(
-      en.reviews.starLabelPlural.replace('{count}', '4'),
-    )
+    const fourStarBtn = screen.getByLabelText(en.reviews.starLabelPlural.replace('{count}', '4'))
     fireEvent.click(fourStarBtn)
     expect(onChange).toHaveBeenCalledWith(4)
   })
@@ -50,9 +48,7 @@ describe('ReviewStars — interactive', () => {
   it('calls onChange with 1 when clicking first star', () => {
     const onChange = vi.fn()
     render(<ReviewStars rating={0} onChange={onChange} />)
-    const oneStarBtn = screen.getByLabelText(
-      en.reviews.starLabel.replace('{count}', '1'),
-    )
+    const oneStarBtn = screen.getByLabelText(en.reviews.starLabel.replace('{count}', '1'))
     fireEvent.click(oneStarBtn)
     expect(onChange).toHaveBeenCalledWith(1)
   })

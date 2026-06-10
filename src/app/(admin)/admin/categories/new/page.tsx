@@ -13,14 +13,13 @@ export default function NewCategoryPage() {
   const { data, loading } = useApiResource<CategoryTreeResponse>('/api/admin/categories')
 
   // Flatten tree to a flat list of top-level categories for parent picker
-  const parentOptions = (data?.categories ?? []).map(({ children: _c, productCount: _p, ...rest }) => rest)
+  const parentOptions = (data?.categories ?? []).map(
+    ({ children: _c, productCount: _p, ...rest }) => rest,
+  )
 
   return (
     <div className="flex flex-col gap-5">
-      <AdminPageHeader
-        title={en.admin.addCategory}
-        backHref="/admin/categories"
-      />
+      <AdminPageHeader title={en.admin.addCategory} backHref="/admin/categories" />
 
       {loading ? (
         <div className="flex flex-col gap-3 max-w-2xl">

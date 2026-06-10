@@ -13,7 +13,9 @@ export function InfiniteScrollSentinel({
 }: InfiniteScrollSentinelProps) {
   const ref = useRef<HTMLDivElement>(null)
   const onVisibleRef = useRef(onVisible)
-  useEffect(() => { onVisibleRef.current = onVisible }, [onVisible])
+  useEffect(() => {
+    onVisibleRef.current = onVisible
+  }, [onVisible])
 
   useEffect(() => {
     const el = ref.current

@@ -19,12 +19,12 @@ export type PaymentMethod = (typeof PAYMENT_METHODS)[number]
 
 export const CURRENCIES = {
   PKR: { symbol: '₨', code: 'PKR', name: 'Pakistani Rupee', decimals: 0 },
-  USD: { symbol: '$',  code: 'USD', name: 'US Dollar',        decimals: 2 },
-  GBP: { symbol: '£',  code: 'GBP', name: 'British Pound',    decimals: 2 },
-  EUR: { symbol: '€',  code: 'EUR', name: 'Euro',             decimals: 2 },
-  AED: { symbol: 'د.إ', code: 'AED', name: 'UAE Dirham',      decimals: 2 },
-  BDT: { symbol: '৳',  code: 'BDT', name: 'Bangladeshi Taka', decimals: 0 },
-  SAR: { symbol: '﷼',  code: 'SAR', name: 'Saudi Riyal',      decimals: 2 },
+  USD: { symbol: '$', code: 'USD', name: 'US Dollar', decimals: 2 },
+  GBP: { symbol: '£', code: 'GBP', name: 'British Pound', decimals: 2 },
+  EUR: { symbol: '€', code: 'EUR', name: 'Euro', decimals: 2 },
+  AED: { symbol: 'د.إ', code: 'AED', name: 'UAE Dirham', decimals: 2 },
+  BDT: { symbol: '৳', code: 'BDT', name: 'Bangladeshi Taka', decimals: 0 },
+  SAR: { symbol: '﷼', code: 'SAR', name: 'Saudi Riyal', decimals: 2 },
 } as const
 export type CurrencyCode = keyof typeof CURRENCIES
 
@@ -36,7 +36,7 @@ export const MAX_IMAGE_BYTES = 5 * 1024 * 1024 // 5 MB — server-side upload ca
 export const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'] as const
 export const MAX_COUPON_CODE_LENGTH = 20
 export const MIN_COUPON_CODE_LENGTH = 6
-export const FREE_SHIPPING_DEFAULT_THRESHOLD = 0  // 0 = disabled
+export const FREE_SHIPPING_DEFAULT_THRESHOLD = 0 // 0 = disabled
 export const LOW_STOCK_THRESHOLD = 5
 export const MAX_CART_ITEMS = 50
 
@@ -58,9 +58,9 @@ export const TOP_CUSTOMERS_LIMIT = 20
 export const EVENT_SAMPLE_RATE = 0.2
 
 export const RFM_RECENCY_DAYS_HIGH = 30
-export const RFM_RECENCY_DAYS_MED  = 90
-export const RFM_FREQUENCY_HIGH    = 3
-export const RFM_FREQUENCY_MED     = 2
+export const RFM_RECENCY_DAYS_MED = 90
+export const RFM_FREQUENCY_HIGH = 3
+export const RFM_FREQUENCY_MED = 2
 
 export const FUNNEL_METRICS = ['product_view', 'add_to_cart', 'checkout_start', 'purchase'] as const
 export type FunnelMetric = (typeof FUNNEL_METRICS)[number]
@@ -69,18 +69,18 @@ export type FunnelMetric = (typeof FUNNEL_METRICS)[number]
 
 export const RADIUS_PRESETS = {
   none: '0rem',
-  sm:   '0.25rem',
-  md:   '0.5rem',
-  lg:   '0.75rem',
+  sm: '0.25rem',
+  md: '0.5rem',
+  lg: '0.75rem',
   full: '1.5rem',
 } as const
 export type RadiusPreset = keyof typeof RADIUS_PRESETS
 
 // key maps to the CSS variable emitted by next/font in the root layout
 export const FONT_PRESETS = {
-  sans:    'var(--font-geist-sans)',
-  serif:   'var(--font-merriweather)',
-  mono:    'var(--font-geist-mono)',
+  sans: 'var(--font-geist-sans)',
+  serif: 'var(--font-merriweather)',
+  mono: 'var(--font-geist-mono)',
   rounded: 'var(--font-nunito)',
 } as const
 export type FontPreset = keyof typeof FONT_PRESETS
@@ -89,9 +89,9 @@ export const COLOR_MODES = ['light', 'dark', 'system'] as const
 export type ColorMode = (typeof COLOR_MODES)[number]
 
 export const DENSITY_PRESETS = {
-  compact:      '0.75',
-  comfortable:  '1',
-  spacious:     '1.25',
+  compact: '0.75',
+  comfortable: '1',
+  spacious: '1.25',
 } as const
 export type DensityPreset = keyof typeof DENSITY_PRESETS
 
@@ -103,52 +103,72 @@ export type HeroStyle = (typeof HERO_STYLES)[number]
 export const STYLE_PRESETS = [
   {
     name: 'Midnight',
-    primaryColor: '#18181b', accentColor: '#6366f1',
-    fontFamily: 'sans' as const, radius: 'md' as const,
-    density: 'comfortable' as const, heroStyle: 'image-left' as const,
+    primaryColor: '#18181b',
+    accentColor: '#6366f1',
+    fontFamily: 'sans' as const,
+    radius: 'md' as const,
+    density: 'comfortable' as const,
+    heroStyle: 'image-left' as const,
   },
   {
     name: 'Emerald',
-    primaryColor: '#065f46', accentColor: '#10b981',
-    fontFamily: 'sans' as const, radius: 'lg' as const,
-    density: 'comfortable' as const, heroStyle: 'full-bleed' as const,
+    primaryColor: '#065f46',
+    accentColor: '#10b981',
+    fontFamily: 'sans' as const,
+    radius: 'lg' as const,
+    density: 'comfortable' as const,
+    heroStyle: 'full-bleed' as const,
   },
   {
     name: 'Sunset',
-    primaryColor: '#9a3412', accentColor: '#f97316',
-    fontFamily: 'serif' as const, radius: 'none' as const,
-    density: 'compact' as const, heroStyle: 'split' as const,
+    primaryColor: '#9a3412',
+    accentColor: '#f97316',
+    fontFamily: 'serif' as const,
+    radius: 'none' as const,
+    density: 'compact' as const,
+    heroStyle: 'split' as const,
   },
   {
     name: 'Ocean',
-    primaryColor: '#0c4a6e', accentColor: '#0ea5e9',
-    fontFamily: 'sans' as const, radius: 'full' as const,
-    density: 'spacious' as const, heroStyle: 'centered' as const,
+    primaryColor: '#0c4a6e',
+    accentColor: '#0ea5e9',
+    fontFamily: 'sans' as const,
+    radius: 'full' as const,
+    density: 'spacious' as const,
+    heroStyle: 'centered' as const,
   },
   {
     name: 'Elegant',
-    primaryColor: '#1a1a2e', accentColor: '#e8d5b7',
-    fontFamily: 'serif' as const, radius: 'sm' as const,
-    density: 'spacious' as const, heroStyle: 'centered' as const,
+    primaryColor: '#1a1a2e',
+    accentColor: '#e8d5b7',
+    fontFamily: 'serif' as const,
+    radius: 'sm' as const,
+    density: 'spacious' as const,
+    heroStyle: 'centered' as const,
   },
   {
     name: 'Playful',
-    primaryColor: '#7c3aed', accentColor: '#f59e0b',
-    fontFamily: 'rounded' as const, radius: 'full' as const,
-    density: 'comfortable' as const, heroStyle: 'image-left' as const,
+    primaryColor: '#7c3aed',
+    accentColor: '#f59e0b',
+    fontFamily: 'rounded' as const,
+    radius: 'full' as const,
+    density: 'comfortable' as const,
+    heroStyle: 'image-left' as const,
   },
 ] as const
 export type StylePreset = (typeof STYLE_PRESETS)[number]
 
 export const THEME_PRESETS = STYLE_PRESETS.map(({ name, primaryColor, accentColor }) => ({
-  name, primaryColor, accentColor,
+  name,
+  primaryColor,
+  accentColor,
 }))
 
 // ─── Tax ─────────────────────────────────────────────────────────────────────
 
 export const TAX_BASIS = {
-  subtotal:             'subtotal',
-  subtotalAndShipping:  'subtotal_and_shipping',
+  subtotal: 'subtotal',
+  subtotalAndShipping: 'subtotal_and_shipping',
 } as const
 export type TaxBasis = keyof typeof TAX_BASIS
 
@@ -167,13 +187,13 @@ export const INSTALL_DISMISSED_KEY = 'pwa-install-dismissed'
 
 // Tab routes for the native bottom nav (standalone mode)
 export const TAB_ROUTES = [
-  { key: 'home',  href: '/',      labelKey: 'tabHome'  },
-  { key: 'shop',  href: '/shop',  labelKey: 'tabShop'  },  // /shop when landingEnabled, / when off — AppTabBar resolves via catalogHref
-  { key: 'cart',  href: null,     labelKey: 'tabCart'  },  // null = triggers CartSheet
+  { key: 'home', href: '/', labelKey: 'tabHome' },
+  { key: 'shop', href: '/shop', labelKey: 'tabShop' }, // /shop when landingEnabled, / when off — AppTabBar resolves via catalogHref
+  { key: 'cart', href: null, labelKey: 'tabCart' }, // null = triggers CartSheet
   { key: 'track', href: '/track', labelKey: 'tabTrack' },
-  { key: 'menu',  href: null,     labelKey: 'tabMenu'  },  // null = triggers menu sheet
+  { key: 'menu', href: null, labelKey: 'tabMenu' }, // null = triggers menu sheet
 ] as const
-export type TabKey = typeof TAB_ROUTES[number]['key']
+export type TabKey = (typeof TAB_ROUTES)[number]['key']
 
 // Default manifest values (used when merchant hasn't configured custom icons)
 export const PWA_MANIFEST_DEFAULTS = {
@@ -196,12 +216,12 @@ export const SEARCH_DEBOUNCE_MS = 250
 // ─── Feature Flags ────────────────────────────────────────────────────────────
 
 export const FEATURE_FLAGS = {
-  whatsappEnabled:     false, // phase 19
-  reviewsEnabled:      true,  // phase 20 (on by default — already live)
-  faqEnabled:          false, // phase 21 (sitewide FAQ — off by default until merchant adds content)
-  llmDiscoveryEnabled: true,  // phase 21
-  landingEnabled:      false, // phase 22
-  blogEnabled:         false, // phase 23
+  whatsappEnabled: false, // phase 19
+  reviewsEnabled: true, // phase 20 (on by default — already live)
+  faqEnabled: false, // phase 21 (sitewide FAQ — off by default until merchant adds content)
+  llmDiscoveryEnabled: true, // phase 21
+  landingEnabled: false, // phase 22
+  blogEnabled: false, // phase 23
 } as const
 export type FeatureFlagKey = keyof typeof FEATURE_FLAGS
 
@@ -227,12 +247,7 @@ export const AI_TRAINING_BOTS = [
 ] as const
 
 // SEO scraper bots — always blocked (crawl-budget abuse).
-export const BLOCKED_SCRAPER_BOTS = [
-  'AhrefsBot',
-  'SemrushBot',
-  'MJ12bot',
-  'DotBot',
-] as const
+export const BLOCKED_SCRAPER_BOTS = ['AhrefsBot', 'SemrushBot', 'MJ12bot', 'DotBot'] as const
 
 // ─── Landing Page ────────────────────────────────────────────────────────────
 

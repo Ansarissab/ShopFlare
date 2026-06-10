@@ -5,7 +5,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 const mockResHeaders: Record<string, string> = {}
 const mockNextFn = vi.fn(() => ({
   headers: {
-    set: (k: string, v: string) => { mockResHeaders[k] = v },
+    set: (k: string, v: string) => {
+      mockResHeaders[k] = v
+    },
     get: (k: string) => mockResHeaders[k] ?? null,
   },
 }))
@@ -25,8 +27,7 @@ function makeReq(pathname: string, accept?: string): Parameters<typeof middlewar
     nextUrl: { pathname, origin: 'https://store.example.com' },
     url: `https://store.example.com${pathname}`,
     headers: {
-      get: (k: string) =>
-        k.toLowerCase() === 'accept' && accept ? accept : null,
+      get: (k: string) => (k.toLowerCase() === 'accept' && accept ? accept : null),
     },
   } as unknown as Parameters<typeof middleware>[0]
 }

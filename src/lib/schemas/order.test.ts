@@ -24,17 +24,34 @@ describe('codOrderSchema', () => {
   })
 
   it('rejects non-positive / non-integer quantity', () => {
-    expect(codOrderSchema.safeParse({ items: [{ sizeOptionId: 'sz1', quantity: 0 }], shippingAddress: validAddress }).success).toBe(false)
-    expect(codOrderSchema.safeParse({ items: [{ sizeOptionId: 'sz1', quantity: 1.5 }], shippingAddress: validAddress }).success).toBe(false)
+    expect(
+      codOrderSchema.safeParse({
+        items: [{ sizeOptionId: 'sz1', quantity: 0 }],
+        shippingAddress: validAddress,
+      }).success,
+    ).toBe(false)
+    expect(
+      codOrderSchema.safeParse({
+        items: [{ sizeOptionId: 'sz1', quantity: 1.5 }],
+        shippingAddress: validAddress,
+      }).success,
+    ).toBe(false)
   })
 
   it('rejects bad country code length', () => {
-    const r = codOrderSchema.safeParse({ items: [{ sizeOptionId: 'sz1', quantity: 1 }], shippingAddress: { ...validAddress, country: 'PAK' } })
+    const r = codOrderSchema.safeParse({
+      items: [{ sizeOptionId: 'sz1', quantity: 1 }],
+      shippingAddress: { ...validAddress, country: 'PAK' },
+    })
     expect(r.success).toBe(false)
   })
 
   it('rejects malformed coupon code', () => {
-    const r = codOrderSchema.safeParse({ items: [{ sizeOptionId: 'sz1', quantity: 1 }], shippingAddress: validAddress, couponCode: 'bad code!' })
+    const r = codOrderSchema.safeParse({
+      items: [{ sizeOptionId: 'sz1', quantity: 1 }],
+      shippingAddress: validAddress,
+      couponCode: 'bad code!',
+    })
     expect(r.success).toBe(false)
   })
 })

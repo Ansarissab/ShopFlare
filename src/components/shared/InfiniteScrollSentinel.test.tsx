@@ -21,7 +21,10 @@ class MockIntersectionObserver {
     return []
   }
   trigger(isIntersecting: boolean) {
-    this.cb([{ isIntersecting } as IntersectionObserverEntry], this as unknown as IntersectionObserver)
+    this.cb(
+      [{ isIntersecting } as IntersectionObserverEntry],
+      this as unknown as IntersectionObserver,
+    )
   }
 }
 

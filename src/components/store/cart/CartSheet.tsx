@@ -4,12 +4,7 @@ import Link from 'next/link'
 import { toast } from 'sonner'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { en } from '@/lib/i18n/en'
 import { calculateShipping, calculateTax } from '@/lib/utils/index'
 import { useCart, useCartSubtotalCents } from '@/hooks/useCart'
@@ -26,11 +21,11 @@ export function CartSheet({ flatRateCents = 0, thresholdCents = 0 }: CartSheetPr
   const shippingCents = calculateShipping(subtotalCents, flatRateCents, thresholdCents)
 
   const { config } = useStoreConfig()
-  const taxEnabled   = config?.taxEnabled   ?? false
-  const taxRate      = config?.taxRate      ?? 0
-  const taxName      = config?.taxName      ?? 'Tax'
+  const taxEnabled = config?.taxEnabled ?? false
+  const taxRate = config?.taxRate ?? 0
+  const taxName = config?.taxName ?? 'Tax'
   const taxInclusive = config?.taxInclusive ?? false
-  const taxBasis     = config?.taxBasis     ?? 'subtotal'
+  const taxBasis = config?.taxBasis ?? 'subtotal'
 
   const discountCents = useCart((s) => s.discountCents)
   const couponApplied = useCart((s) => s.couponCode !== null)
@@ -60,7 +55,12 @@ export function CartSheet({ flatRateCents = 0, thresholdCents = 0 }: CartSheetPr
   }
 
   return (
-    <Sheet open={isOpen} onOpenChange={(open: boolean) => { if (!open) closeCart() }}>
+    <Sheet
+      open={isOpen}
+      onOpenChange={(open: boolean) => {
+        if (!open) closeCart()
+      }}
+    >
       <SheetContent side="right" className="flex flex-col p-0 sm:max-w-md w-full">
         <SheetHeader className="px-4 pt-4 pb-2">
           <SheetTitle>{en.cart.title}</SheetTitle>

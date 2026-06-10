@@ -53,7 +53,7 @@ function OrderTrackingContent() {
   // Clear app badge when user views their order
   useEffect(() => {
     if ('clearAppBadge' in navigator) {
-      (navigator as Navigator & { clearAppBadge(): Promise<void> }).clearAppBadge().catch(() => {})
+      ;(navigator as Navigator & { clearAppBadge(): Promise<void> }).clearAppBadge().catch(() => {})
     }
   }, [])
   const contact = searchParams.get('c') ?? ''
@@ -83,9 +83,7 @@ function OrderTrackingContent() {
     return (
       <div className={cn(layout.centeredState, 'max-w-2xl')}>
         <h1 className="text-2xl font-semibold tracking-tight">{en.tracking.notFound}</h1>
-        <p className="text-sm text-muted-foreground">
-          {en.tracking.notFoundBody}
-        </p>
+        <p className="text-sm text-muted-foreground">{en.tracking.notFoundBody}</p>
         <Link href="/track" className="text-sm text-primary underline-offset-4 hover:underline">
           Back to tracking
         </Link>
@@ -105,7 +103,8 @@ function OrderTrackingContent() {
             {en.checkout.orderNumber.replace('{number}', order.orderNumber)}
           </h1>
           <Badge variant="secondary" className="capitalize">
-            {en.paymentMethodLabels[order.paymentMethod as keyof typeof en.paymentMethodLabels] ?? order.paymentMethod}
+            {en.paymentMethodLabels[order.paymentMethod as keyof typeof en.paymentMethodLabels] ??
+              order.paymentMethod}
           </Badge>
         </div>
         <p className="text-sm text-muted-foreground">
@@ -188,7 +187,10 @@ function OrderTrackingContent() {
       {canCancel && (
         <Link
           href={`/track/${params.orderId}/cancel${contact ? `?c=${encodeURIComponent(contact)}` : ''}`}
-          className={buttonVariants({ variant: 'outline' }) + ' w-full border-destructive text-destructive hover:bg-destructive/10 justify-center'}
+          className={
+            buttonVariants({ variant: 'outline' }) +
+            ' w-full border-destructive text-destructive hover:bg-destructive/10 justify-center'
+          }
         >
           {en.checkout.cancelOrder}
         </Link>

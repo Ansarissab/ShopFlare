@@ -29,7 +29,10 @@ const NOW = '2026-06-02T00:00:00.000Z'
 
 describe('evaluateCoupon', () => {
   it('rejects missing coupon', () => {
-    expect(evaluateCoupon(null, 1000, NOW)).toEqual({ ok: false, message: 'Coupon not found or inactive' })
+    expect(evaluateCoupon(null, 1000, NOW)).toEqual({
+      ok: false,
+      message: 'Coupon not found or inactive',
+    })
   })
 
   it('rejects inactive coupon', () => {
@@ -37,15 +40,25 @@ describe('evaluateCoupon', () => {
   })
 
   it('computes percentage discount (floored)', () => {
-    expect(evaluateCoupon(coupon({ type: 'percentage', value: 10 }), 999, NOW)).toEqual({ ok: true, discountCents: 99 })
+    expect(evaluateCoupon(coupon({ type: 'percentage', value: 10 }), 999, NOW)).toEqual({
+      ok: true,
+      discountCents: 99,
+    })
   })
 
   it('computes fixed discount', () => {
-    expect(evaluateCoupon(coupon({ type: 'fixed', value: 500 }), 3000, NOW)).toEqual({ ok: true, discountCents: 500 })
+    expect(evaluateCoupon(coupon({ type: 'fixed', value: 500 }), 3000, NOW)).toEqual({
+      ok: true,
+      discountCents: 500,
+    })
   })
 
   it('caps discount at maxDiscountCents', () => {
-    const r = evaluateCoupon(coupon({ type: 'percentage', value: 50, maxDiscountCents: 200 }), 1000, NOW)
+    const r = evaluateCoupon(
+      coupon({ type: 'percentage', value: 50, maxDiscountCents: 200 }),
+      1000,
+      NOW,
+    )
     expect(r).toEqual({ ok: true, discountCents: 200 })
   })
 
@@ -58,10 +71,14 @@ describe('evaluateCoupon', () => {
   })
 
   it('rejects expired coupon', () => {
-    expect(evaluateCoupon(coupon({ expiresAt: '2026-01-01T00:00:00.000Z' }), 1000, NOW).ok).toBe(false)
+    expect(evaluateCoupon(coupon({ expiresAt: '2026-01-01T00:00:00.000Z' }), 1000, NOW).ok).toBe(
+      false,
+    )
   })
 
   it('accepts coupon expiring in the future', () => {
-    expect(evaluateCoupon(coupon({ expiresAt: '2027-01-01T00:00:00.000Z' }), 1000, NOW).ok).toBe(true)
+    expect(evaluateCoupon(coupon({ expiresAt: '2027-01-01T00:00:00.000Z' }), 1000, NOW).ok).toBe(
+      true,
+    )
   })
 })

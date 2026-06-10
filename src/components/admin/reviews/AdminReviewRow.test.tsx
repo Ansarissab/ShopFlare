@@ -37,7 +37,11 @@ function makeReview(overrides: Partial<AdminReview> = {}): AdminReview {
 function renderRow(review: AdminReview, onChanged = vi.fn()) {
   // tr must be inside a table for valid DOM
   const result = render(
-    <table><tbody><AdminReviewRow review={review} onChanged={onChanged} /></tbody></table>,
+    <table>
+      <tbody>
+        <AdminReviewRow review={review} onChanged={onChanged} />
+      </tbody>
+    </table>,
   )
   return { ...result, onChanged }
 }

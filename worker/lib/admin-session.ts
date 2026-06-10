@@ -101,7 +101,9 @@ export async function verifySessionToken(
   if (!timingSafeEqual(expectedSig, providedSig)) return false
 
   try {
-    const payload = JSON.parse(new TextDecoder().decode(b64UrlToBytes(payloadB64))) as { exp?: number }
+    const payload = JSON.parse(new TextDecoder().decode(b64UrlToBytes(payloadB64))) as {
+      exp?: number
+    }
     return typeof payload.exp === 'number' && payload.exp > nowSeconds
   } catch {
     return false

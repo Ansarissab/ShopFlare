@@ -2,7 +2,13 @@
 
 import { useState } from 'react'
 import { OrdersTable } from '@/components/admin/orders/OrdersTable'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { en } from '@/lib/i18n/en'
 import { ORDER_STATUSES } from '@/lib/constants'
@@ -20,7 +26,10 @@ export default function AdminOrdersPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">{en.admin.orders}</h1>
 
-        <Select value={statusFilter} onValueChange={(v: string | null) => setStatusFilter(v ?? 'all')}>
+        <Select
+          value={statusFilter}
+          onValueChange={(v: string | null) => setStatusFilter(v ?? 'all')}
+        >
           <SelectTrigger className="w-40" aria-label={en.admin.filterByStatus}>
             <SelectValue placeholder={en.admin.allStatuses} />
           </SelectTrigger>

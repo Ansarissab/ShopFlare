@@ -26,8 +26,8 @@ function xmlEscape(str: string): string {
 
 export async function GET(): Promise<Response> {
   const workerUrl = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
-    ?? (workerUrl ? workerUrl.replace(/\/api$/, '') : '')
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ?? (workerUrl ? workerUrl.replace(/\/api$/, '') : '')
 
   if (!workerUrl) {
     return new Response(null, { status: 404 })

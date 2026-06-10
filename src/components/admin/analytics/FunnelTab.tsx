@@ -16,11 +16,16 @@ interface FunnelTabProps {
 // Maps API stage keys to i18n labels for layer-2 stages
 function layer2Label(stage: string): string {
   switch (stage) {
-    case 'product_view':   return en.admin.analyticsFunnelViews
-    case 'add_to_cart':    return en.admin.analyticsFunnelAddToCart
-    case 'checkout_start': return en.admin.analyticsFunnelCheckoutStart
-    case 'purchase':       return en.admin.analyticsFunnelPurchased
-    default:               return stage
+    case 'product_view':
+      return en.admin.analyticsFunnelViews
+    case 'add_to_cart':
+      return en.admin.analyticsFunnelAddToCart
+    case 'checkout_start':
+      return en.admin.analyticsFunnelCheckoutStart
+    case 'purchase':
+      return en.admin.analyticsFunnelPurchased
+    default:
+      return stage
   }
 }
 
@@ -38,9 +43,15 @@ export function FunnelTab({ period }: FunnelTabProps) {
   useEffect(() => {
     let active = true
     apiGet<AnalyticsFunnelResponse>(`/api/admin/analytics/funnel?period=${period}`)
-      .then(d => { if (active) setLoaded({ period, data: d }) })
-      .catch(() => { if (active) setLoaded({ period, data: null }) })
-    return () => { active = false }
+      .then((d) => {
+        if (active) setLoaded({ period, data: d })
+      })
+      .catch(() => {
+        if (active) setLoaded({ period, data: null })
+      })
+    return () => {
+      active = false
+    }
   }, [period])
 
   const loading = loaded?.period !== period
@@ -66,7 +77,14 @@ export function FunnelTab({ period }: FunnelTabProps) {
     return <p className="text-sm text-muted-foreground">{en.admin.analyticsNoData}</p>
   }
 
-  const { funnelStages, checkoutAbandonmentRatePct, abandonedCheckouts, layer2Enabled, layer2Stages, sampleRate } = data
+  const {
+    funnelStages,
+    checkoutAbandonmentRatePct,
+    abandonedCheckouts,
+    layer2Enabled,
+    layer2Stages,
+    sampleRate,
+  } = data
 
   // max count drives bar widths for layer-1 funnel
   const maxCount = Math.max(...funnelStages.map((s) => s.count), 1)
@@ -78,7 +96,6 @@ export function FunnelTab({ period }: FunnelTabProps) {
 
   return (
     <div className="flex flex-col gap-8">
-
       {/* ── Layer 1: Checkout funnel ─────────────────────────────────────────── */}
       <section className="flex flex-col gap-3">
         <h3 className="flex items-center gap-1.5 text-sm font-semibold">
@@ -138,19 +155,31 @@ export function FunnelTab({ period }: FunnelTabProps) {
               <thead>
                 <tr className="border-b bg-muted/50">
                   <th className="px-3 py-2 text-left font-medium text-muted-foreground">#</th>
-                  <th className="px-3 py-2 text-left font-medium text-muted-foreground">{en.admin.analyticsCustomerName}</th>
-                  <th className="hidden sm:table-cell px-3 py-2 text-left font-medium text-muted-foreground">{en.admin.analyticsContact}</th>
-                  <th className="px-3 py-2 text-right font-medium text-muted-foreground">{en.admin.totalRevenue}</th>
+                  <th className="px-3 py-2 text-left font-medium text-muted-foreground">
+                    {en.admin.analyticsCustomerName}
+                  </th>
+                  <th className="hidden sm:table-cell px-3 py-2 text-left font-medium text-muted-foreground">
+                    {en.admin.analyticsContact}
+                  </th>
+                  <th className="px-3 py-2 text-right font-medium text-muted-foreground">
+                    {en.admin.totalRevenue}
+                  </th>
                   <th className="hidden sm:table-cell px-3 py-2 text-right font-medium text-muted-foreground" />
                 </tr>
               </thead>
               <tbody>
                 {abandonedCheckouts.map((row) => (
                   <tr key={row.orderNumber} className="border-b last:border-0 hover:bg-muted/30">
-                    <td className="px-3 py-2 font-mono text-xs text-muted-foreground">{row.orderNumber}</td>
+                    <td className="px-3 py-2 font-mono text-xs text-muted-foreground">
+                      {row.orderNumber}
+                    </td>
                     <td className="px-3 py-2">{row.customerName}</td>
-                    <td className="hidden sm:table-cell px-3 py-2 text-muted-foreground">{row.contactHint}</td>
-                    <td className="px-3 py-2 text-right whitespace-nowrap">{formatPrice(row.totalCents)}</td>
+                    <td className="hidden sm:table-cell px-3 py-2 text-muted-foreground">
+                      {row.contactHint}
+                    </td>
+                    <td className="px-3 py-2 text-right whitespace-nowrap">
+                      {formatPrice(row.totalCents)}
+                    </td>
                     <td className="hidden sm:table-cell px-3 py-2 text-right text-xs text-muted-foreground whitespace-nowrap">
                       {en.admin.analyticsHoursAgo.replace('{n}', String(row.hoursAgo))}
                     </td>
@@ -166,7 +195,9 @@ export function FunnelTab({ period }: FunnelTabProps) {
       <section className="flex flex-col gap-3">
         {!layer2Enabled ? (
           <div className="rounded-lg border border-dashed p-4 flex flex-col gap-1">
-            <p className="text-sm font-medium text-muted-foreground">{en.admin.analyticsFunnelLayer2Off}</p>
+            <p className="text-sm font-medium text-muted-foreground">
+              {en.admin.analyticsFunnelLayer2Off}
+            </p>
             <p className="text-xs text-muted-foreground">{en.admin.analyticsFunnelLayer2Hint}</p>
           </div>
         ) : (
@@ -177,7 +208,8 @@ export function FunnelTab({ period }: FunnelTabProps) {
               <div className="flex flex-col gap-2">
                 {layer2Stages.map((stage) => {
                   const widthPct = (stage.count / maxL2Count) * 100
-                  const ofFirst = firstL2Count > 0 ? Math.round((stage.count / firstL2Count) * 100) : 0
+                  const ofFirst =
+                    firstL2Count > 0 ? Math.round((stage.count / firstL2Count) * 100) : 0
                   return (
                     <div key={stage.stage} className="flex flex-col gap-1">
                       <div className="flex items-center justify-between text-xs">
@@ -199,12 +231,14 @@ export function FunnelTab({ period }: FunnelTabProps) {
             )}
 
             <p className="text-xs text-muted-foreground">
-              {en.admin.analyticsSampleRateNote.replace('{rate}', String(Math.round(sampleRate * 100)))}
+              {en.admin.analyticsSampleRateNote.replace(
+                '{rate}',
+                String(Math.round(sampleRate * 100)),
+              )}
             </p>
           </>
         )}
       </section>
-
     </div>
   )
 }

@@ -51,7 +51,10 @@ function concatBytes(...arrays: Uint8Array[]): Uint8Array {
   const total = arrays.reduce((n, a) => n + a.length, 0)
   const out = new Uint8Array(total)
   let offset = 0
-  for (const a of arrays) { out.set(a, offset); offset += a.length }
+  for (const a of arrays) {
+    out.set(a, offset)
+    offset += a.length
+  }
   return out
 }
 
@@ -72,15 +75,24 @@ async function encryptWebPush(
 
   // 1. Generate ephemeral sender ECDH P-256 key pair
   // Cast to CryptoKeyPair — CF Workers types return CryptoKey|CryptoKeyPair from generateKey.
-  const senderKeyPair = await crypto.subtle.generateKey(
-    { name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits'],
-  ) as CryptoKeyPair
-  const senderPublicKeyRaw = await crypto.subtle.exportKey('raw', senderKeyPair.publicKey) as ArrayBuffer
+  const senderKeyPair = (await crypto.subtle.generateKey(
+    { name: 'ECDH', namedCurve: 'P-256' },
+    true,
+    ['deriveBits'],
+  )) as CryptoKeyPair
+  const senderPublicKeyRaw = (await crypto.subtle.exportKey(
+    'raw',
+    senderKeyPair.publicKey,
+  )) as ArrayBuffer
   const senderPublicKey = new Uint8Array(senderPublicKeyRaw)
 
   // 2. Import subscriber's public key for ECDH
   const receiverPublicKey = await crypto.subtle.importKey(
-    'raw', receiverPublicKeyBytes, { name: 'ECDH', namedCurve: 'P-256' }, false, [],
+    'raw',
+    receiverPublicKeyBytes,
+    { name: 'ECDH', namedCurve: 'P-256' },
+    false,
+    [],
   )
 
   // 3. ECDH shared secret (32 bytes)
@@ -103,9 +115,13 @@ async function encryptWebPush(
     receiverPublicKeyBytes,
     senderPublicKey,
   )
-  const ecdhKey = await crypto.subtle.importKey('raw', ecdhSecret, { name: 'HKDF' }, false, ['deriveBits'])
+  const ecdhKey = await crypto.subtle.importKey('raw', ecdhSecret, { name: 'HKDF' }, false, [
+    'deriveBits',
+  ])
   const ikmBytes = await crypto.subtle.deriveBits(
-    { name: 'HKDF', hash: 'SHA-256', salt: authSecret, info: infoWebPush }, ecdhKey, 32 * 8,
+    { name: 'HKDF', hash: 'SHA-256', salt: authSecret, info: infoWebPush },
+    ecdhKey,
+    32 * 8,
   )
   const ikm = new Uint8Array(ikmBytes)
 
@@ -113,27 +129,41 @@ async function encryptWebPush(
   const cekKey = await crypto.subtle.importKey('raw', ikm, { name: 'HKDF' }, false, ['deriveBits'])
   const cekBytes = await crypto.subtle.deriveBits(
     {
-      name: 'HKDF', hash: 'SHA-256', salt,
+      name: 'HKDF',
+      hash: 'SHA-256',
+      salt,
       info: new TextEncoder().encode('Content-Encoding: aes128gcm\x00'),
     },
-    cekKey, 16 * 8,
+    cekKey,
+    16 * 8,
   )
   const cek = new Uint8Array(cekBytes)
 
   // 7. Nonce (12 bytes): HKDF(salt=salt, IKM=ikm, info="Content-Encoding: nonce\0")
-  const nonceKey = await crypto.subtle.importKey('raw', ikm, { name: 'HKDF' }, false, ['deriveBits'])
+  const nonceKey = await crypto.subtle.importKey('raw', ikm, { name: 'HKDF' }, false, [
+    'deriveBits',
+  ])
   const nonceBytes = await crypto.subtle.deriveBits(
     {
-      name: 'HKDF', hash: 'SHA-256', salt,
+      name: 'HKDF',
+      hash: 'SHA-256',
+      salt,
       info: new TextEncoder().encode('Content-Encoding: nonce\x00'),
     },
-    nonceKey, 12 * 8,
+    nonceKey,
+    12 * 8,
   )
   const nonce = new Uint8Array(nonceBytes)
 
   // 8. AES-128-GCM encrypt: plaintext || 0x02 (last-record delimiter per RFC 8188)
   const record = concatBytes(new TextEncoder().encode(plaintext), new Uint8Array([0x02]))
-  const aesKey = await crypto.subtle.importKey('raw', cek, { name: 'AES-GCM', length: 128 }, false, ['encrypt'])
+  const aesKey = await crypto.subtle.importKey(
+    'raw',
+    cek,
+    { name: 'AES-GCM', length: 128 },
+    false,
+    ['encrypt'],
+  )
   const ciphertextBits = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: nonce }, aesKey, record)
   const ciphertext = new Uint8Array(ciphertextBits)
 
@@ -141,7 +171,13 @@ async function encryptWebPush(
   //    salt (16) | rs uint32be (4) | idlen uint8 (1) | sender_public_key (65) | ciphertext
   const rs = 4096
   const rsBytes = new Uint8Array([rs >> 24, (rs >> 16) & 0xff, (rs >> 8) & 0xff, rs & 0xff])
-  return concatBytes(salt, rsBytes, new Uint8Array([senderPublicKey.length]), senderPublicKey, ciphertext)
+  return concatBytes(
+    salt,
+    rsBytes,
+    new Uint8Array([senderPublicKey.length]),
+    senderPublicKey,
+    ciphertext,
+  )
 }
 
 // ─── VAPID JWT builder (ES256, P-256) ────────────────────────────────────────
@@ -166,9 +202,7 @@ async function buildVapidJwt(
     new TextEncoder().encode(JSON.stringify({ typ: 'JWT', alg: 'ES256' })),
   )
   const payload = bytesToBase64Url(
-    new TextEncoder().encode(
-      JSON.stringify({ aud: audience, exp: now + 43200, sub: subject }),
-    ),
+    new TextEncoder().encode(JSON.stringify({ aud: audience, exp: now + 43200, sub: subject })),
   )
 
   const signingInput = `${header}.${payload}`
@@ -191,15 +225,41 @@ async function buildVapidJwt(
   //         04 20        — OCTET STRING (private key bytes)
   //           <32 bytes>
   const pkcs8 = new Uint8Array([
-    0x30, 0x41,
-    0x02, 0x01, 0x00,
-    0x30, 0x13,
-    0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01,
-    0x06, 0x08, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07,
-    0x04, 0x27,
-    0x30, 0x25,
-    0x02, 0x01, 0x01,
-    0x04, 0x20,
+    0x30,
+    0x41,
+    0x02,
+    0x01,
+    0x00,
+    0x30,
+    0x13,
+    0x06,
+    0x07,
+    0x2a,
+    0x86,
+    0x48,
+    0xce,
+    0x3d,
+    0x02,
+    0x01,
+    0x06,
+    0x08,
+    0x2a,
+    0x86,
+    0x48,
+    0xce,
+    0x3d,
+    0x03,
+    0x01,
+    0x07,
+    0x04,
+    0x27,
+    0x30,
+    0x25,
+    0x02,
+    0x01,
+    0x01,
+    0x04,
+    0x20,
     ...rawPrivateKeyBytes,
   ])
 

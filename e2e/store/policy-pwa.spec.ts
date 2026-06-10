@@ -11,7 +11,9 @@ test.describe('policy pages', () => {
       // Either the page content renders or the "Page Not Found" state is shown —
       // both paths render a "Back to store" link. Auto-wait (cold dev compile +
       // the policy API fetch can exceed a short timeout under parallel load).
-      await expect(page.getByRole('link', { name: 'Back to store' })).toBeVisible({ timeout: 20_000 })
+      await expect(page.getByRole('link', { name: 'Back to store' })).toBeVisible({
+        timeout: 20_000,
+      })
     })
   }
 })

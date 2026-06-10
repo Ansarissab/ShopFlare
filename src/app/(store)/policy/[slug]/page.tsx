@@ -18,7 +18,11 @@ interface PageProps {
 }
 
 const plainText = (html: string) =>
-  html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 155)
+  html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 155)
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params

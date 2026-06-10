@@ -4,28 +4,41 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import {
-  LayoutDashboard, Package, ShoppingCart, Tag, BarChart2, Settings,
-  Monitor, Star, BellRing, FileText, PanelLeftClose, PanelLeftOpen, Menu,
-  FolderTree, Layers, Newspaper,
+  LayoutDashboard,
+  Package,
+  ShoppingCart,
+  Tag,
+  BarChart2,
+  Settings,
+  Monitor,
+  Star,
+  BellRing,
+  FileText,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Menu,
+  FolderTree,
+  Layers,
+  Newspaper,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { en } from '@/lib/i18n/en'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 
 const navItems = [
-  { href: '/admin',           label: en.admin.dashboard,      icon: LayoutDashboard },
-  { href: '/admin/products',    label: en.admin.products,       icon: Package },
-  { href: '/admin/categories', label: en.admin.categories,    icon: FolderTree },
-  { href: '/admin/orders',    label: en.admin.orders,         icon: ShoppingCart },
-  { href: '/admin/pos',       label: en.admin.pos,            icon: Monitor },
-  { href: '/admin/coupons',   label: en.admin.coupons,        icon: Tag },
-  { href: '/admin/reviews',   label: en.admin.reviews,        icon: Star },
-  { href: '/admin/notify',    label: en.admin.notifyRequests, icon: BellRing },
-  { href: '/admin/landing',   label: en.admin.landingPage,    icon: Layers },
-  { href: '/admin/blog',      label: en.admin.blog,           icon: Newspaper },
-  { href: '/admin/pages',     label: en.admin.pages,          icon: FileText },
-  { href: '/admin/settings',  label: en.admin.settings,       icon: Settings },
-  { href: '/admin/analytics', label: en.admin.analytics,      icon: BarChart2 },
+  { href: '/admin', label: en.admin.dashboard, icon: LayoutDashboard },
+  { href: '/admin/products', label: en.admin.products, icon: Package },
+  { href: '/admin/categories', label: en.admin.categories, icon: FolderTree },
+  { href: '/admin/orders', label: en.admin.orders, icon: ShoppingCart },
+  { href: '/admin/pos', label: en.admin.pos, icon: Monitor },
+  { href: '/admin/coupons', label: en.admin.coupons, icon: Tag },
+  { href: '/admin/reviews', label: en.admin.reviews, icon: Star },
+  { href: '/admin/notify', label: en.admin.notifyRequests, icon: BellRing },
+  { href: '/admin/landing', label: en.admin.landingPage, icon: Layers },
+  { href: '/admin/blog', label: en.admin.blog, icon: Newspaper },
+  { href: '/admin/pages', label: en.admin.pages, icon: FileText },
+  { href: '/admin/settings', label: en.admin.settings, icon: Settings },
+  { href: '/admin/analytics', label: en.admin.analytics, icon: BarChart2 },
 ] as const
 
 // Shared nav list — used in both the desktop aside and the mobile Sheet drawer
@@ -41,10 +54,7 @@ function SidebarNav({
   return (
     <nav className="flex flex-col gap-0.5 p-2">
       {navItems.map(({ href, label, icon: Icon }) => {
-        const active =
-          href === '/admin'
-            ? pathname === '/admin'
-            : pathname.startsWith(href)
+        const active = href === '/admin' ? pathname === '/admin' : pathname.startsWith(href)
 
         return (
           <Link
@@ -96,27 +106,28 @@ export function AdminSidebar() {
   const [collapsed, setCollapsed] = useState(false)
 
   return (
-    <aside className={cn(
-      'hidden md:flex h-full flex-col border-r bg-background transition-all duration-200',
-      collapsed ? 'w-14' : 'w-56',
-    )}>
+    <aside
+      className={cn(
+        'hidden md:flex h-full flex-col border-r bg-background transition-all duration-200',
+        collapsed ? 'w-14' : 'w-56',
+      )}
+    >
       <div className="flex h-14 items-center border-b px-3">
-        {!collapsed && (
-          <span className="flex-1 text-sm font-semibold tracking-tight">Admin</span>
-        )}
+        {!collapsed && <span className="flex-1 text-sm font-semibold tracking-tight">Admin</span>}
         <button
           type="button"
-          onClick={() => setCollapsed(c => !c)}
+          onClick={() => setCollapsed((c) => !c)}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           className={cn(
             'flex items-center justify-center rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground',
             collapsed && 'mx-auto',
           )}
         >
-          {collapsed
-            ? <PanelLeftOpen className="size-4" aria-hidden />
-            : <PanelLeftClose className="size-4" aria-hidden />
-          }
+          {collapsed ? (
+            <PanelLeftOpen className="size-4" aria-hidden />
+          ) : (
+            <PanelLeftClose className="size-4" aria-hidden />
+          )}
         </button>
       </div>
 

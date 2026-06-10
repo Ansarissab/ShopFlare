@@ -62,10 +62,7 @@ app.post('/', async (c) => {
         .where(
           and(
             eq(schema.notifyMe.sizeOptionId, sizeOptionId),
-            or(
-              eq(schema.notifyMe.email, email),
-              eq(schema.notifyMe.phone, phone),
-            ),
+            or(eq(schema.notifyMe.email, email), eq(schema.notifyMe.phone, phone)),
           ),
         )
         .get()
@@ -75,10 +72,7 @@ app.post('/', async (c) => {
         .select({ id: schema.notifyMe.id })
         .from(schema.notifyMe)
         .where(
-          and(
-            eq(schema.notifyMe.sizeOptionId, sizeOptionId),
-            eq(schema.notifyMe.email, email),
-          ),
+          and(eq(schema.notifyMe.sizeOptionId, sizeOptionId), eq(schema.notifyMe.email, email)),
         )
         .get()
       if (existing) return c.json({ ok: true, duplicate: true })
@@ -87,10 +81,7 @@ app.post('/', async (c) => {
         .select({ id: schema.notifyMe.id })
         .from(schema.notifyMe)
         .where(
-          and(
-            eq(schema.notifyMe.sizeOptionId, sizeOptionId),
-            eq(schema.notifyMe.phone, phone),
-          ),
+          and(eq(schema.notifyMe.sizeOptionId, sizeOptionId), eq(schema.notifyMe.phone, phone)),
         )
         .get()
       if (existing) return c.json({ ok: true, duplicate: true })

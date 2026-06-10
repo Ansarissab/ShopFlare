@@ -50,7 +50,12 @@ vi.mock('@/components/store/checkout/TurnstileWidget', async () => {
       createElement('div', {}, [
         createElement(
           'button',
-          { key: 'v', type: 'button', onClick: () => onVerify('tok-1'), 'data-testid': 'ts-verify' },
+          {
+            key: 'v',
+            type: 'button',
+            onClick: () => onVerify('tok-1'),
+            'data-testid': 'ts-verify',
+          },
           'verify',
         ),
         createElement(
@@ -234,9 +239,7 @@ describe('ManualOrderForm', () => {
     const form = container.querySelector('form') as HTMLFormElement
     fireEvent.submit(form)
 
-    await waitFor(() =>
-      expect(toast.error).toHaveBeenCalledWith(requiredMsg('Security check')),
-    )
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith(requiredMsg('Security check')))
     expect(mockApiPost).not.toHaveBeenCalled()
     expect(push).not.toHaveBeenCalled()
   })
@@ -259,7 +262,10 @@ describe('ManualOrderForm', () => {
     // Hold apiPost open so isSubmitting stays true and the button shows the '...' label.
     let resolvePost: (v: { orderId: string; orderNumber: string }) => void = () => {}
     mockApiPost.mockImplementationOnce(
-      () => new Promise((res) => { resolvePost = res }),
+      () =>
+        new Promise((res) => {
+          resolvePost = res
+        }),
     )
     render(<ManualOrderForm {...baseProps} />)
     fillValidAddress()

@@ -3,18 +3,18 @@ import type { ProductWithVariants } from './product'
 
 export interface LandingSection {
   sectionKey: LandingSectionKey
-  enabled:    boolean
-  heading:    string | null
-  subtext:    string | null
-  bodyHtml:   string | null
-  ctaText:    string | null
-  ctaHref:    string | null
+  enabled: boolean
+  heading: string | null
+  subtext: string | null
+  bodyHtml: string | null
+  ctaText: string | null
+  ctaHref: string | null
   imageR2Key: string | null
-  updatedAt:  string
+  updatedAt: string
 }
 
 export interface LandingData {
-  sections:         Record<LandingSectionKey, LandingSection>
+  sections: Record<LandingSectionKey, LandingSection>
   featuredProducts: ProductWithVariants[]
 }
 

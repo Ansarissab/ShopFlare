@@ -40,11 +40,7 @@ app.get('/:id', async (c) => {
   const { id } = c.req.param()
   const db = createDb(c.env.DB)
 
-  const product = await db
-    .select()
-    .from(schema.products)
-    .where(eq(schema.products.id, id))
-    .get()
+  const product = await db.select().from(schema.products).where(eq(schema.products.id, id)).get()
 
   if (!product) return c.json({ error: 'Product not found' }, 404)
 
@@ -331,13 +327,11 @@ app.put('/sizes/:sizeId', async (c) => {
   // Trigger only when old stock was 0 (OOS) and the new stock is available
   // (>0 or -1 unlimited). Use waitUntil so dispatch never blocks the response.
   const newStock = updated?.stock ?? oldStock
-  const wasOOS      = oldStock === 0
+  const wasOOS = oldStock === 0
   const nowAvailable = newStock > 0 || newStock === -1
   if (wasOOS && nowAvailable) {
     try {
-      c.executionCtx.waitUntil(
-        dispatchRestockAlerts(db, c.env, sizeId),
-      )
+      c.executionCtx.waitUntil(dispatchRestockAlerts(db, c.env, sizeId))
     } catch (err) {
       // Defensive: executionCtx.waitUntil should never throw synchronously,
       // but guard so the PUT response is never affected.
@@ -387,7 +381,10 @@ app.post('/images/upload', async (c) => {
     return c.json({ error: `Unsupported image type: ${file.type || 'unknown'}` }, 415)
   }
   if (file.size > MAX_IMAGE_BYTES) {
-    return c.json({ error: `Image exceeds ${Math.round(MAX_IMAGE_BYTES / 1024 / 1024)}MB limit` }, 413)
+    return c.json(
+      { error: `Image exceeds ${Math.round(MAX_IMAGE_BYTES / 1024 / 1024)}MB limit` },
+      413,
+    )
   }
 
   const db = createDb(c.env.DB)
@@ -408,7 +405,7 @@ app.post('/images/upload', async (c) => {
   }
 
   // Extension derived from the validated MIME type (not the client filename).
-  const ext = file.type === 'image/jpeg' ? 'jpg' : file.type.split('/')[1] ?? 'jpg'
+  const ext = file.type === 'image/jpeg' ? 'jpg' : (file.type.split('/')[1] ?? 'jpg')
   const imageId = nanoid()
   const r2Key = `products/${variant.productId}/${variantId}/${imageId}.${ext}`
 
@@ -482,7 +479,7 @@ app.put('/:id/categories', async (c) => {
         productId: id,
         categoryId,
         sortOrder: i,
-      }))
+      })),
     )
   }
 
@@ -521,9 +518,9 @@ app.put('/categories/:categoryId/reorder', async (c) => {
           and(
             eq(schema.productCategories.productId, productId),
             eq(schema.productCategories.categoryId, categoryId),
-          )
-        )
-    )
+          ),
+        ),
+    ),
   )
 
   await bumpDataVersion(db)

@@ -6,9 +6,18 @@ export type StoreConfig = Omit<StoreConfigData, 'currency'> & {
   currency: CurrencyCode
 }
 
-export type ThemeSnapshot = Pick<StoreConfig,
-  'primaryColor' | 'primaryColorFg' | 'accentColor' | 'accentColorFg' |
-  'radius' | 'fontFamily' | 'colorMode' | 'density' | 'heroStyle'> & {
+export type ThemeSnapshot = Pick<
+  StoreConfig,
+  | 'primaryColor'
+  | 'primaryColorFg'
+  | 'accentColor'
+  | 'accentColorFg'
+  | 'radius'
+  | 'fontFamily'
+  | 'colorMode'
+  | 'density'
+  | 'heroStyle'
+> & {
   logoUrl?: string
 }
 

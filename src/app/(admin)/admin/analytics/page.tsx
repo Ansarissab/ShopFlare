@@ -2,8 +2,17 @@
 
 import { useEffect, useState } from 'react'
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, PieChart, Pie, Cell, Legend,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
 } from 'recharts'
 import { StatCard } from '@/components/admin/shared/StatCard'
 import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
@@ -22,18 +31,18 @@ import type { AnalyticsPeriod } from '@/lib/constants'
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const PERIODS: { value: AnalyticsPeriod; label: string }[] = [
-  { value: '7d',  label: en.admin.analyticsPeriod7d },
+  { value: '7d', label: en.admin.analyticsPeriod7d },
   { value: '30d', label: en.admin.analyticsPeriod30d },
   { value: '90d', label: en.admin.analyticsPeriod90d },
   { value: 'all', label: en.admin.analyticsPeriodAll },
 ]
 
 const PAYMENT_LABELS: Record<string, string> = {
-  cod:             'Cash on Delivery',
+  cod: 'Cash on Delivery',
   stripe_checkout: 'Card (Stripe)',
-  bank_transfer:   'Bank Transfer',
-  whatsapp:        'WhatsApp',
-  in_person_cash:  'In-Person Cash',
+  bank_transfer: 'Bank Transfer',
+  whatsapp: 'WhatsApp',
+  in_person_cash: 'In-Person Cash',
 }
 
 const METHOD_COLORS = ['#18181b', '#6366f1', '#f59e0b', '#22c55e', '#ef4444']
@@ -63,7 +72,9 @@ function OverviewSkeleton() {
   return (
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-xl" />)}
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-28 rounded-xl" />
+        ))}
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Skeleton className="h-72 rounded-xl lg:col-span-2" />
@@ -140,16 +151,16 @@ function OverviewTab({ period }: { period: AnalyticsPeriod }) {
           ) : (
             <ResponsiveContainer width="100%" height={240}>
               <AreaChart
-                data={data.revenueByDay.map(d => ({
-                  label:   shortDay(d.day),
+                data={data.revenueByDay.map((d) => ({
+                  label: shortDay(d.day),
                   revenue: d.revenueCents,
-                  orders:  d.orderCount,
+                  orders: d.orderCount,
                 }))}
                 margin={{ top: 4, right: 4, left: -16, bottom: 0 }}
               >
                 <defs>
                   <linearGradient id="analyticsRevGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%"  stopColor="#18181b" stopOpacity={0.12} />
+                    <stop offset="5%" stopColor="#18181b" stopOpacity={0.12} />
                     <stop offset="95%" stopColor="#18181b" stopOpacity={0} />
                   </linearGradient>
                 </defs>
@@ -165,7 +176,7 @@ function OverviewTab({ period }: { period: AnalyticsPeriod }) {
                   tick={{ fontSize: 11, fill: '#71717a' }}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={v => (v === 0 ? '0' : formatPrice(v))}
+                  tickFormatter={(v) => (v === 0 ? '0' : formatPrice(v))}
                 />
                 <Tooltip
                   formatter={(val, name) =>
@@ -200,8 +211,8 @@ function OverviewTab({ period }: { period: AnalyticsPeriod }) {
             <ResponsiveContainer width="100%" height={240}>
               <PieChart>
                 <Pie
-                  data={data.paymentMethods.map(m => ({
-                    name:  PAYMENT_LABELS[m.method] ?? m.method,
+                  data={data.paymentMethods.map((m) => ({
+                    name: PAYMENT_LABELS[m.method] ?? m.method,
                     value: m.count,
                   }))}
                   cx="50%"
@@ -243,8 +254,12 @@ function OverviewTab({ period }: { period: AnalyticsPeriod }) {
               <thead>
                 <tr className="border-b text-xs text-muted-foreground">
                   <th className="px-2 sm:px-5 py-2 text-left font-medium">Product</th>
-                  <th className="hidden sm:table-cell px-2 sm:px-5 py-2 text-right font-medium">{en.admin.analyticsUnitsSold}</th>
-                  <th className="px-2 sm:px-5 py-2 text-right font-medium">{en.admin.totalRevenue}</th>
+                  <th className="hidden sm:table-cell px-2 sm:px-5 py-2 text-right font-medium">
+                    {en.admin.analyticsUnitsSold}
+                  </th>
+                  <th className="px-2 sm:px-5 py-2 text-right font-medium">
+                    {en.admin.totalRevenue}
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -254,7 +269,9 @@ function OverviewTab({ period }: { period: AnalyticsPeriod }) {
                       <span className="w-5 shrink-0 text-xs text-muted-foreground">{i + 1}</span>
                       <span className="font-medium truncate min-w-0">{p.productName}</span>
                     </td>
-                    <td className="hidden sm:table-cell px-2 sm:px-5 py-3 text-right tabular-nums">{p.unitsSold}</td>
+                    <td className="hidden sm:table-cell px-2 sm:px-5 py-3 text-right tabular-nums">
+                      {p.unitsSold}
+                    </td>
                     <td className="px-2 sm:px-5 py-3 text-right font-semibold tabular-nums whitespace-nowrap">
                       {formatPrice(p.revenueCents)}
                     </td>
@@ -277,15 +294,19 @@ function OverviewTab({ period }: { period: AnalyticsPeriod }) {
               <thead>
                 <tr className="border-b text-xs text-muted-foreground">
                   <th className="px-2 sm:px-5 py-2 text-left font-medium">Coupon Code</th>
-                  <th className="hidden sm:table-cell px-2 sm:px-5 py-2 text-right font-medium">{en.admin.analyticsUses}</th>
+                  <th className="hidden sm:table-cell px-2 sm:px-5 py-2 text-right font-medium">
+                    {en.admin.analyticsUses}
+                  </th>
                   <th className="px-2 sm:px-5 py-2 text-right font-medium">Total Discount</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {data.couponStats.map(c => (
+                {data.couponStats.map((c) => (
                   <tr key={c.couponCode} className="hover:bg-muted/40">
                     <td className="px-2 sm:px-5 py-3 font-mono font-medium">{c.couponCode}</td>
-                    <td className="hidden sm:table-cell px-2 sm:px-5 py-3 text-right tabular-nums">{c.uses}</td>
+                    <td className="hidden sm:table-cell px-2 sm:px-5 py-3 text-right tabular-nums">
+                      {c.uses}
+                    </td>
                     <td className="px-2 sm:px-5 py-3 text-right font-semibold tabular-nums whitespace-nowrap text-success">
                       -{formatPrice(c.totalDiscountCents)}
                     </td>
@@ -307,7 +328,7 @@ export default function AdminAnalyticsPage() {
 
   const periodSelector = (
     <div className="flex gap-1">
-      {PERIODS.map(p => (
+      {PERIODS.map((p) => (
         <Button
           key={p.value}
           size="sm"

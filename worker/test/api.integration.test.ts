@@ -36,19 +36,41 @@ const ADDRESS = {
 async function seedProduct(opts: { stock?: number; priceCents?: number; active?: boolean } = {}) {
   const { stock = 5, priceCents = 1000, active = true } = opts
   await db().insert(schema.products).values({ id: 'p1', name: 'Demo Tee', active })
-  await db().insert(schema.variants).values({ id: 'v1', productId: 'p1', label: 'Black', sortOrder: 0 })
-  await db().insert(schema.sizeOptions).values({ id: 's1', variantId: 'v1', size: 'M', priceCents, stock, active: true })
+  await db()
+    .insert(schema.variants)
+    .values({ id: 'v1', productId: 'p1', label: 'Black', sortOrder: 0 })
+  await db()
+    .insert(schema.sizeOptions)
+    .values({ id: 's1', variantId: 'v1', size: 'M', priceCents, stock, active: true })
   return { productId: 'p1', variantId: 'v1', sizeId: 's1' }
 }
 
 const stockOf = async (id: string) =>
-  (await db().select({ stock: schema.sizeOptions.stock }).from(schema.sizeOptions).where(eq(schema.sizeOptions.id, id)).get())?.stock
+  (
+    await db()
+      .select({ stock: schema.sizeOptions.stock })
+      .from(schema.sizeOptions)
+      .where(eq(schema.sizeOptions.id, id))
+      .get()
+  )?.stock
 
 // Tables cleared between tests (defensive — storage is also isolated per test).
 const TABLES = [
-  'coupon_uses', 'reviews', 'notify_me', 'order_items', 'orders', 'coupons',
-  'size_options', 'product_images', 'variants', 'products', 'store_config',
-  'stripe_events', 'push_subscriptions', 'analytics_daily', 'carts',
+  'coupon_uses',
+  'reviews',
+  'notify_me',
+  'order_items',
+  'orders',
+  'coupons',
+  'size_options',
+  'product_images',
+  'variants',
+  'products',
+  'store_config',
+  'stripe_events',
+  'push_subscriptions',
+  'analytics_daily',
+  'carts',
 ]
 beforeEach(async () => {
   for (const t of TABLES) await env.DB.prepare(`DELETE FROM ${t}`).run()
@@ -87,7 +109,9 @@ describe('health + public config', () => {
     //   (b) KV and R2 checks are NOT short-circuited (still ok: true)
     //   (c) healthProbe never throws — returns a HealthReport, not an exception
     const failingDb = {
-      prepare: () => { throw new Error('simulated D1 failure') },
+      prepare: () => {
+        throw new Error('simulated D1 failure')
+      },
     } as unknown as D1Database
     const report = await healthProbe({ ...env, DB: failingDb })
     expect(report.overall).toBe('degraded')
@@ -131,7 +155,9 @@ describe('COD checkout', () => {
 
     const track = await get(`/api/orders/track/${orderNumber}`)
     expect(track.status).toBe(200)
-    const { order } = (await track.json()) as { order: { totalCents: number; status: string; paymentMethod: string } }
+    const { order } = (await track.json()) as {
+      order: { totalCents: number; status: string; paymentMethod: string }
+    }
     expect(order).toMatchObject({ totalCents: 2000, status: 'pending', paymentMethod: 'cod' })
   })
 
@@ -152,16 +178,18 @@ describe('COD checkout', () => {
     const [a, b] = await Promise.all([post('/api/orders/cod', body), post('/api/orders/cod', body)])
     const statuses = [a.status, b.status].sort()
     expect(statuses).toEqual([201, 422]) // exactly one wins
-    expect(await stockOf('s1')).toBe(0)  // never negative, never double-sold
+    expect(await stockOf('s1')).toBe(0) // never negative, never double-sold
   })
 })
 
 describe('bank transfer', () => {
   it('exposes configured bank details publicly', async () => {
-    await db().insert(schema.storeConfig).values([
-      { key: 'bankName', value: 'Demo Bank' },
-      { key: 'bankAccountNumber', value: '0000-1234567-8' },
-    ])
+    await db()
+      .insert(schema.storeConfig)
+      .values([
+        { key: 'bankName', value: 'Demo Bank' },
+        { key: 'bankAccountNumber', value: '0000-1234567-8' },
+      ])
     const res = await get('/api/config/store')
     const cfg = (await res.json()) as Record<string, string>
     expect(cfg.bankName).toBe('Demo Bank')
@@ -180,7 +208,11 @@ describe('bank transfer', () => {
     const { order } = (await (await get(`/api/orders/track/${orderNumber}`)).json()) as {
       order: { status: string; paymentMethod: string; totalCents: number }
     }
-    expect(order).toMatchObject({ status: 'pending', paymentMethod: 'bank_transfer', totalCents: 1500 })
+    expect(order).toMatchObject({
+      status: 'pending',
+      paymentMethod: 'bank_transfer',
+      totalCents: 1500,
+    })
   })
 
   it('merchant confirms bank_transfer order via admin PATCH: pending→confirmed, stock unchanged', async () => {
@@ -215,8 +247,13 @@ describe('bank transfer', () => {
 describe('coupons', () => {
   it('validates an active coupon and computes the discount', async () => {
     await db().insert(schema.coupons).values({
-      id: 'c1', code: 'WELCOME10', type: 'percentage', value: 10,
-      perCustomerLimit: 1, usedCount: 0, active: true,
+      id: 'c1',
+      code: 'WELCOME10',
+      type: 'percentage',
+      value: 10,
+      perCustomerLimit: 1,
+      usedCount: 0,
+      active: true,
     })
     const ok = await post('/api/coupons/validate', { code: 'WELCOME10', subtotalCents: 1000 })
     expect(await ok.json()).toMatchObject({ valid: true, discountCents: 100 })
@@ -230,15 +267,23 @@ describe('cancellation', () => {
   it('cancels a pending order and restores stock', async () => {
     await seedProduct({ stock: 5, priceCents: 1000 })
     const { orderNumber } = (await (
-      await post('/api/orders/cod', { items: [{ sizeOptionId: 's1', quantity: 2 }], shippingAddress: ADDRESS })
+      await post('/api/orders/cod', {
+        items: [{ sizeOptionId: 's1', quantity: 2 }],
+        shippingAddress: ADDRESS,
+      })
     ).json()) as { orderNumber: string }
     expect(await stockOf('s1')).toBe(3)
 
-    const cancel = await post(`/api/orders/${orderNumber}/cancel`, { contact: ADDRESS.email, reason: 'changed mind' })
+    const cancel = await post(`/api/orders/${orderNumber}/cancel`, {
+      contact: ADDRESS.email,
+      reason: 'changed mind',
+    })
     expect(cancel.status).toBe(200)
     expect(await stockOf('s1')).toBe(5) // restored
 
-    const { order } = (await (await get(`/api/orders/track/${orderNumber}`)).json()) as { order: { status: string } }
+    const { order } = (await (await get(`/api/orders/track/${orderNumber}`)).json()) as {
+      order: { status: string }
+    }
     expect(order.status).toBe('cancelled')
   })
 })
@@ -246,8 +291,11 @@ describe('cancellation', () => {
 describe('reviews gate', () => {
   it('rejects a review for an order that is not delivered', async () => {
     const res = await post('/api/reviews', {
-      orderNumber: 'ORD-NOPE0001', contact: 'jane@example.com',
-      productId: 'p1', customerName: 'Jane', rating: 5,
+      orderNumber: 'ORD-NOPE0001',
+      contact: 'jane@example.com',
+      productId: 'p1',
+      customerName: 'Jane',
+      rating: 5,
     })
     expect(res.status).toBe(403)
   })
@@ -273,7 +321,9 @@ async function signedWebhook(eventPayload: object) {
     ['sign'],
   )
   const sigBytes = await crypto.subtle.sign('HMAC', key, enc.encode(`${timestamp}.${payload}`))
-  const hex = Array.from(new Uint8Array(sigBytes)).map(b => b.toString(16).padStart(2, '0')).join('')
+  const hex = Array.from(new Uint8Array(sigBytes))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
   return SELF.fetch(`${BASE}/api/stripe/webhook`, {
     method: 'POST',
     headers: { 'stripe-signature': `t=${timestamp},v1=${hex}` },
@@ -331,7 +381,11 @@ describe('stripe webhook', () => {
     expect(order?.customerEmail).toBe('jane@example.com')
     expect(order?.stripePaymentIntentId).toBe('pi_test_x')
 
-    const evtRow = await db().select().from(schema.stripeEvents).where(eq(schema.stripeEvents.eventId, 'evt_completed_1')).get()
+    const evtRow = await db()
+      .select()
+      .from(schema.stripeEvents)
+      .where(eq(schema.stripeEvents.eventId, 'evt_completed_1'))
+      .get()
     expect(evtRow).toBeTruthy()
     expect(evtRow?.type).toBe('checkout.session.completed')
 
@@ -358,22 +412,39 @@ describe('stripe webhook', () => {
     const res2 = await signedWebhook(event)
     expect(res2.status).toBe(200)
 
-    const rows = await db().select().from(schema.stripeEvents).where(eq(schema.stripeEvents.eventId, 'evt_idem_complete')).all()
+    const rows = await db()
+      .select()
+      .from(schema.stripeEvents)
+      .where(eq(schema.stripeEvents.eventId, 'evt_idem_complete'))
+      .all()
     expect(rows).toHaveLength(1)
 
-    const order = await db().select({ status: schema.orders.status }).from(schema.orders).where(eq(schema.orders.id, orderId)).get()
+    const order = await db()
+      .select({ status: schema.orders.status })
+      .from(schema.orders)
+      .where(eq(schema.orders.id, orderId))
+      .get()
     expect(order?.status).toBe('confirmed')
   })
 
   it('checkout.session.expired cancels pending order + releases inventory + reverts coupon', async () => {
     await db().insert(schema.coupons).values({
-      id: 'c_exp', code: 'EXPIRE10', type: 'percentage', value: 10,
-      perCustomerLimit: 1, usedCount: 0, active: true,
+      id: 'c_exp',
+      code: 'EXPIRE10',
+      type: 'percentage',
+      value: 10,
+      perCustomerLimit: 1,
+      usedCount: 0,
+      active: true,
     })
     const orderId = await seedStripeOrder({ stock: 5, couponCode: 'EXPIRE10' })
 
     expect(await stockOf('s1')).toBe(3) // 5 - 2 reserved
-    const usesBefore = await db().select().from(schema.couponUses).where(eq(schema.couponUses.couponId, 'c_exp')).all()
+    const usesBefore = await db()
+      .select()
+      .from(schema.couponUses)
+      .where(eq(schema.couponUses.couponId, 'c_exp'))
+      .all()
     expect(usesBefore).toHaveLength(1)
 
     const res = await signedWebhook({
@@ -383,22 +454,37 @@ describe('stripe webhook', () => {
     })
     expect(res.status).toBe(200)
 
-    const order = await db().select({ status: schema.orders.status }).from(schema.orders).where(eq(schema.orders.id, orderId)).get()
+    const order = await db()
+      .select({ status: schema.orders.status })
+      .from(schema.orders)
+      .where(eq(schema.orders.id, orderId))
+      .get()
     expect(order?.status).toBe('cancelled')
 
     expect(await stockOf('s1')).toBe(5) // restored
 
-    const usesAfter = await db().select().from(schema.couponUses).where(eq(schema.couponUses.couponId, 'c_exp')).all()
+    const usesAfter = await db()
+      .select()
+      .from(schema.couponUses)
+      .where(eq(schema.couponUses.couponId, 'c_exp'))
+      .all()
     expect(usesAfter).toHaveLength(0) // coupon_uses row deleted
 
-    const evtRow = await db().select().from(schema.stripeEvents).where(eq(schema.stripeEvents.eventId, 'evt_expired_1')).get()
+    const evtRow = await db()
+      .select()
+      .from(schema.stripeEvents)
+      .where(eq(schema.stripeEvents.eventId, 'evt_expired_1'))
+      .get()
     expect(evtRow).toBeTruthy()
   })
 
   it('checkout.session.expired does not cancel an already-confirmed order', async () => {
     const orderId = await seedStripeOrder({ stock: 5 })
     // Manually confirm (simulates completed webhook already fired)
-    await db().update(schema.orders).set({ status: 'confirmed' }).where(eq(schema.orders.id, orderId))
+    await db()
+      .update(schema.orders)
+      .set({ status: 'confirmed' })
+      .where(eq(schema.orders.id, orderId))
     const stockAtConfirm = await stockOf('s1') // 3 (reserved, not released)
 
     await signedWebhook({
@@ -407,7 +493,11 @@ describe('stripe webhook', () => {
       data: { object: { id: 'cs_test_guard', metadata: { orderId } } },
     })
 
-    const order = await db().select({ status: schema.orders.status }).from(schema.orders).where(eq(schema.orders.id, orderId)).get()
+    const order = await db()
+      .select({ status: schema.orders.status })
+      .from(schema.orders)
+      .where(eq(schema.orders.id, orderId))
+      .get()
     expect(order?.status).toBe('confirmed') // guard: status unchanged
 
     expect(await stockOf('s1')).toBe(stockAtConfirm) // stock unchanged (release not triggered)
@@ -427,7 +517,11 @@ describe('stripe webhook', () => {
 
     expect(await stockOf('s1')).toBe(5) // restored once, not double-credited
 
-    const rows = await db().select().from(schema.stripeEvents).where(eq(schema.stripeEvents.eventId, 'evt_idem_exp')).all()
+    const rows = await db()
+      .select()
+      .from(schema.stripeEvents)
+      .where(eq(schema.stripeEvents.eventId, 'evt_idem_exp'))
+      .all()
     expect(rows).toHaveLength(1) // idempotency row written once
   })
 })

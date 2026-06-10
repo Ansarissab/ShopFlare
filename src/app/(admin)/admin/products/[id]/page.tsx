@@ -46,7 +46,9 @@ export default function EditProductPage() {
       ) : notFound ? (
         <div className="py-20 text-center text-sm text-muted-foreground">
           Product not found.{' '}
-          <Link href="/admin/products" className="text-primary underline">Back</Link>
+          <Link href="/admin/products" className="text-primary underline">
+            Back
+          </Link>
         </div>
       ) : (
         <ProductForm initial={data ?? undefined} />

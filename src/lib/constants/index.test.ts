@@ -43,7 +43,12 @@ import {
 describe('order + payment enums', () => {
   it('ORDER_STATUSES covers the lifecycle in order', () => {
     expect(ORDER_STATUSES).toEqual([
-      'pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled',
+      'pending',
+      'confirmed',
+      'processing',
+      'shipped',
+      'delivered',
+      'cancelled',
     ])
   })
 
@@ -165,8 +170,8 @@ describe('tax + pwa', () => {
 
 describe('TAB_ROUTES', () => {
   it('cart + menu use null href (sheet triggers); others have a route', () => {
-    const cart = TAB_ROUTES.find(t => t.key === 'cart')
-    const home = TAB_ROUTES.find(t => t.key === 'home')
+    const cart = TAB_ROUTES.find((t) => t.key === 'cart')
+    const home = TAB_ROUTES.find((t) => t.key === 'home')
     expect(cart?.href).toBeNull()
     expect(home?.href).toBe('/')
   })

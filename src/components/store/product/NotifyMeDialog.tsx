@@ -63,8 +63,10 @@ export function NotifyMeDialog({
           <DialogTitle>{en.store.notifyMe}</DialogTitle>
           <DialogDescription>
             {"We'll let you know when "}
-            <strong>{variantLabel} / {size}</strong>
-            {" is back in stock."}
+            <strong>
+              {variantLabel} / {size}
+            </strong>
+            {' is back in stock.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -81,9 +83,7 @@ export function NotifyMeDialog({
               aria-invalid={!!errors.email}
               {...register('email')}
             />
-            {errors.email && (
-              <p className="text-sm text-destructive">{en.errors.invalidEmail}</p>
-            )}
+            {errors.email && <p className="text-sm text-destructive">{en.errors.invalidEmail}</p>}
           </div>
 
           <div className="flex flex-col gap-2">
@@ -96,14 +96,10 @@ export function NotifyMeDialog({
               aria-invalid={!!errors.phone}
               {...register('phone')}
             />
-            {errors.phone && (
-              <p className="text-sm text-destructive">{en.errors.invalidPhone}</p>
-            )}
+            {errors.phone && <p className="text-sm text-destructive">{en.errors.invalidPhone}</p>}
           </div>
 
-          {errors.root && (
-            <p className="text-sm text-destructive">{errors.root.message}</p>
-          )}
+          {errors.root && <p className="text-sm text-destructive">{errors.root.message}</p>}
 
           <Button type="submit" className="w-full" disabled={isSubmitting}>
             {en.store.notifyMe}

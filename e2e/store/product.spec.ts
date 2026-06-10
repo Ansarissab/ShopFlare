@@ -110,7 +110,8 @@ test.describe('product detail page', () => {
     await expect(addToCartBtn).toBeVisible({ timeout: 10_000 })
 
     // Select first available size so the button becomes active
-    const firstSizeBtn = page.getByRole('button', { name: /^(?!Add to Cart|Buy Now|Out of Stock)/ })
+    const firstSizeBtn = page
+      .getByRole('button', { name: /^(?!Add to Cart|Buy Now|Out of Stock)/ })
       .filter({ hasText: /.+/ })
       .first()
     const sizeVisible = await firstSizeBtn.isVisible({ timeout: 2_000 }).catch(() => false)

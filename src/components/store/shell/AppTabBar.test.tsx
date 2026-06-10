@@ -44,7 +44,10 @@ vi.mock('@/lib/utils/haptics', () => ({
 }))
 
 vi.mock('@/hooks/useStoreConfig', () => ({
-  useStoreConfig: () => ({ config: landingEnabled !== undefined ? { landingEnabled } : undefined, loading: false }),
+  useStoreConfig: () => ({
+    config: landingEnabled !== undefined ? { landingEnabled } : undefined,
+    loading: false,
+  }),
 }))
 
 import { AppTabBar } from './AppTabBar'

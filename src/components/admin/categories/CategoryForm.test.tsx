@@ -134,9 +134,7 @@ describe('CategoryForm', () => {
   })
 
   it('falls back to default message for 422 parentId without message', async () => {
-    vi.mocked(apiPost).mockRejectedValueOnce(
-      new ApiError(422, 'invalid', { field: 'parentId' }),
-    )
+    vi.mocked(apiPost).mockRejectedValueOnce(new ApiError(422, 'invalid', { field: 'parentId' }))
     render(<CategoryForm parentOptions={[]} onSuccess={vi.fn()} />)
     fireEvent.change(screen.getByLabelText(en.admin.categoryName), { target: { value: 'X' } })
     fireEvent.click(screen.getByRole('button', { name: en.admin.addCategory }))
@@ -172,7 +170,10 @@ describe('CategoryForm', () => {
 
   it('excludes self from parent options in edit mode', () => {
     const cat = makeCategory({ id: 'self', name: 'Self' })
-    const parentOptions = [makeCategory({ id: 'self', name: 'Self' }), makeCategory({ id: 'other', name: 'Other' })]
+    const parentOptions = [
+      makeCategory({ id: 'self', name: 'Self' }),
+      makeCategory({ id: 'other', name: 'Other' }),
+    ]
     render(<CategoryForm category={cat} parentOptions={parentOptions} onSuccess={vi.fn()} />)
     // open the select
     fireEvent.click(screen.getByLabelText(en.admin.categoryParent))
@@ -205,7 +206,9 @@ describe('CategoryForm', () => {
     render(<CategoryForm category={cat} parentOptions={[]} onSuccess={onSuccess} />)
     // edit mode shows the edit button label even though id is empty
     fireEvent.click(screen.getByRole('button', { name: en.admin.editCategory }))
-    await waitFor(() => expect(apiPost).toHaveBeenCalledWith('/api/admin/categories', expect.any(Object)))
+    await waitFor(() =>
+      expect(apiPost).toHaveBeenCalledWith('/api/admin/categories', expect.any(Object)),
+    )
     expect(apiPut).not.toHaveBeenCalled()
     expect(toast.success).toHaveBeenCalledWith(en.admin.categoryCreated)
     expect(onSuccess).toHaveBeenCalled()

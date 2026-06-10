@@ -11,9 +11,19 @@ afterEach(() => {
 
 import type { CategoryNode } from '@/lib/types/store'
 
-const cat = (o: Pick<CategoryNode, 'id' | 'name' | 'slug' | 'productCount'> & Partial<CategoryNode>): CategoryNode => ({
-  parentId: null, sortOrder: 0, imageUrl: null, r2Key: null, description: '',
-  active: true, createdAt: '2024-01-01', updatedAt: '2024-01-01', children: [], ...o,
+const cat = (
+  o: Pick<CategoryNode, 'id' | 'name' | 'slug' | 'productCount'> & Partial<CategoryNode>,
+): CategoryNode => ({
+  parentId: null,
+  sortOrder: 0,
+  imageUrl: null,
+  r2Key: null,
+  description: '',
+  active: true,
+  createdAt: '2024-01-01',
+  updatedAt: '2024-01-01',
+  children: [],
+  ...o,
 })
 
 const categories: CategoryNode[] = [

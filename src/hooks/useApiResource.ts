@@ -35,11 +35,16 @@ const _cache = new Map<string, unknown>()
 // Only cache read-only public content — never transactional/order paths.
 const shouldCache = (path: string) => !path.startsWith('/api/orders')
 
-export function useApiResource<T>(path: string | null, opts?: UseApiResourceOptions): ApiResourceState<T> {
+export function useApiResource<T>(
+  path: string | null,
+  opts?: UseApiResourceOptions,
+): ApiResourceState<T> {
   const [data, setData] = useState<T | null>(() =>
-    path && shouldCache(path) && _cache.has(path) ? (_cache.get(path) as T) : null
+    path && shouldCache(path) && _cache.has(path) ? (_cache.get(path) as T) : null,
   )
-  const [loading, setLoading] = useState(() => (path ? !(shouldCache(path) && _cache.has(path)) : true))
+  const [loading, setLoading] = useState(() =>
+    path ? !(shouldCache(path) && _cache.has(path)) : true,
+  )
   const [error, setError] = useState<string | null>(null)
   const [notFound, setNotFound] = useState(false)
   // Bump to trigger a silent background re-fetch without resetting state.
@@ -48,7 +53,7 @@ export function useApiResource<T>(path: string | null, opts?: UseApiResourceOpti
   useEffect(() => {
     if (!opts?.refetchOnFocus) return
     const onVisible = () => {
-      if (document.visibilityState === 'visible') setRefetchKey(k => k + 1)
+      if (document.visibilityState === 'visible') setRefetchKey((k) => k + 1)
     }
     document.addEventListener('visibilitychange', onVisible)
     return () => document.removeEventListener('visibilitychange', onVisible)
@@ -58,13 +63,13 @@ export function useApiResource<T>(path: string | null, opts?: UseApiResourceOpti
     if (!opts?.refetchOnChannel) return
     if (typeof BroadcastChannel === 'undefined') return
     const ch = new BroadcastChannel(DATA_UPDATED_CHANNEL)
-    ch.onmessage = () => setRefetchKey(k => k + 1)
+    ch.onmessage = () => setRefetchKey((k) => k + 1)
     return () => ch.close()
   }, [opts?.refetchOnChannel])
 
   useEffect(() => {
     if (!opts?.refetchInterval || opts.refetchInterval <= 0) return
-    const id = setInterval(() => setRefetchKey(k => k + 1), opts.refetchInterval)
+    const id = setInterval(() => setRefetchKey((k) => k + 1), opts.refetchInterval)
     return () => clearInterval(id)
   }, [opts?.refetchInterval])
 

@@ -36,7 +36,10 @@ class MockIntersectionObserver {
 
 beforeEach(() => {
   lastObserver = null
-  vi.stubGlobal('IntersectionObserver', MockIntersectionObserver as unknown as typeof IntersectionObserver)
+  vi.stubGlobal(
+    'IntersectionObserver',
+    MockIntersectionObserver as unknown as typeof IntersectionObserver,
+  )
 })
 
 afterEach(() => {

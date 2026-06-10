@@ -4,10 +4,10 @@
 export type HapticPattern = 'light' | 'medium' | 'success' | 'error'
 
 const PATTERNS: Record<HapticPattern, number | number[]> = {
-  light:   10,
-  medium:  25,
+  light: 10,
+  medium: 25,
   success: [15, 50, 15],
-  error:   [50, 100, 50],
+  error: [50, 100, 50],
 }
 
 export function vibrate(pattern: HapticPattern = 'light'): void {

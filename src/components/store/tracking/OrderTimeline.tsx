@@ -43,12 +43,21 @@ function StepIcon({ step, state }: { step: string; state: StepState }) {
     ),
     confirmed: (
       <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <polyline points="20 6 9 17 4 12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <polyline
+          points="20 6 9 17 4 12"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
     ),
     processing: (
       <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" strokeWidth="2" strokeLinecap="round" />
+        <path
+          d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
       </svg>
     ),
     shipped: (
@@ -61,7 +70,11 @@ function StepIcon({ step, state }: { step: string; state: StepState }) {
     ),
     delivered: (
       <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" strokeWidth="2" strokeLinejoin="round" />
+        <path
+          d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"
+          strokeWidth="2"
+          strokeLinejoin="round"
+        />
         <polyline points="9 22 9 12 15 12 15 22" strokeWidth="2" strokeLinejoin="round" />
       </svg>
     ),
@@ -129,7 +142,8 @@ export function OrderTimeline({ status, trackingNumber, carrier }: OrderTimeline
                     )}
                     {trackingNumber && (
                       <span>
-                        {en.tracking.trackingNumber}: <span className="font-mono">{trackingNumber}</span>
+                        {en.tracking.trackingNumber}:{' '}
+                        <span className="font-mono">{trackingNumber}</span>
                       </span>
                     )}
                   </div>

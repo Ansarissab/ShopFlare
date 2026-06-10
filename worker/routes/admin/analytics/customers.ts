@@ -41,31 +41,39 @@ app.get('/', async (c) => {
   // All customers in period: keyed by lower(email) with phone fallback
   const allCustomers = await db
     .select({
-      customerKey:    sql<string>`COALESCE(LOWER(${schema.orders.customerEmail}), ${schema.orders.customerPhone}, 'unknown')`,
-      orders:         sql<number>`COUNT(*)`,
+      customerKey: sql<string>`COALESCE(LOWER(${schema.orders.customerEmail}), ${schema.orders.customerPhone}, 'unknown')`,
+      orders: sql<number>`COUNT(*)`,
       totalSpentCents: sql<number>`SUM(${schema.orders.totalCents})`,
-      firstOrderAt:   sql<string>`MIN(${schema.orders.createdAt})`,
-      lastOrderAt:    sql<string>`MAX(${schema.orders.createdAt})`,
-      rawEmail:       sql<string | null>`MIN(${schema.orders.customerEmail})`,
-      rawPhone:       sql<string | null>`MIN(${schema.orders.customerPhone})`,
+      firstOrderAt: sql<string>`MIN(${schema.orders.createdAt})`,
+      lastOrderAt: sql<string>`MAX(${schema.orders.createdAt})`,
+      rawEmail: sql<string | null>`MIN(${schema.orders.customerEmail})`,
+      rawPhone: sql<string | null>`MIN(${schema.orders.customerPhone})`,
     })
     .from(schema.orders)
     .where(active)
-    .groupBy(sql`COALESCE(LOWER(${schema.orders.customerEmail}), ${schema.orders.customerPhone}, 'unknown')`)
+    .groupBy(
+      sql`COALESCE(LOWER(${schema.orders.customerEmail}), ${schema.orders.customerPhone}, 'unknown')`,
+    )
     .orderBy(sql`SUM(${schema.orders.totalCents}) DESC`)
 
   const totalCustomers = allCustomers.length
-  const returningCustomers = allCustomers.filter(c => c.orders > 1).length
-  const repeatRatePct = totalCustomers > 0
-    ? Math.round((returningCustomers / totalCustomers) * 100)
-    : 0
-  const avgClvCents = totalCustomers > 0
-    ? Math.round(allCustomers.reduce((s, c) => s + c.totalSpentCents, 0) / totalCustomers)
-    : 0
+  const returningCustomers = allCustomers.filter((c) => c.orders > 1).length
+  const repeatRatePct =
+    totalCustomers > 0 ? Math.round((returningCustomers / totalCustomers) * 100) : 0
+  const avgClvCents =
+    totalCustomers > 0
+      ? Math.round(allCustomers.reduce((s, c) => s + c.totalSpentCents, 0) / totalCustomers)
+      : 0
 
   // RFM: classify all customers. recency = days since lastOrderAt vs now.
   const now = Date.now()
-  const rfmCounts: Record<RfmSegment, number> = { champions: 0, loyal: 0, at_risk: 0, new: 0, other: 0 }
+  const rfmCounts: Record<RfmSegment, number> = {
+    champions: 0,
+    loyal: 0,
+    at_risk: 0,
+    new: 0,
+    other: 0,
+  }
 
   for (const cust of allCustomers) {
     const daysSinceLast = Math.floor((now - new Date(cust.lastOrderAt).getTime()) / 86_400_000)
@@ -84,20 +92,21 @@ app.get('/', async (c) => {
     }
   }
 
-  const rfmSegments = (Object.entries(rfmCounts) as [RfmSegment, number][])
-    .map(([segment, count]) => ({ segment, count }))
+  const rfmSegments = (Object.entries(rfmCounts) as [RfmSegment, number][]).map(
+    ([segment, count]) => ({ segment, count }),
+  )
 
   // Top customers (masked)
-  const topCustomers = allCustomers.slice(0, TOP_CUSTOMERS_LIMIT).map(cust => ({
+  const topCustomers = allCustomers.slice(0, TOP_CUSTOMERS_LIMIT).map((cust) => ({
     customerKey: cust.rawEmail
       ? maskEmail(cust.rawEmail)
       : cust.rawPhone
         ? maskPhone(cust.rawPhone)
         : 'Unknown',
-    orders:          cust.orders,
+    orders: cust.orders,
     totalSpentCents: cust.totalSpentCents,
-    firstOrderAt:    cust.firstOrderAt,
-    lastOrderAt:     cust.lastOrderAt,
+    firstOrderAt: cust.firstOrderAt,
+    lastOrderAt: cust.lastOrderAt,
   }))
 
   return c.json({
