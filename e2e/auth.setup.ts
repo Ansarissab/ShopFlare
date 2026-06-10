@@ -29,6 +29,15 @@ setup('authenticate admin', async ({ request, baseURL }) => {
 
   expect(token, 'no token returned from /api/admin/login').toBeTruthy()
 
+  // Provision feature flags the storefront e2e needs. Blog is flag-gated (off in the
+  // seed → /blog 404s); enable it so the store-blog spec has a page to load. Landing
+  // is intentionally left OFF — turning it on moves the catalog to /shop and would
+  // break the home specs that expect the grid at /.
+  await request.put(`${WORKER_URL}/api/admin/config/store`, {
+    headers: { Authorization: `Bearer ${token}` },
+    data: { blogEnabled: true },
+  })
+
   // storageState is keyed by origin → use the app's baseURL (dynamic e2e port).
   const origin = baseURL ?? 'http://localhost:3000'
   const state = {
