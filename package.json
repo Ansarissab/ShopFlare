@@ -35,7 +35,7 @@
     "verify": "node scripts/ci.mjs",
     "ci": "node scripts/ci.mjs",
     "setup": "node scripts/setup/index.mts",
-    "worker:dev": "wrangler dev worker/index.ts",
+    "worker:dev": "wrangler dev worker/index.ts --var ENVIRONMENT:development",
     "worker:deploy": "wrangler deploy --var ENVIRONMENT:production",
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply shopflare-db0 --local",

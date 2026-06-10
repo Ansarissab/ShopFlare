@@ -32,6 +32,14 @@ function freePort(start) {
 const port = process.env.PW_PORT || String(await freePort(3000))
 const child = spawn('./node_modules/.bin/playwright', ['test', ...process.argv.slice(2)], {
   stdio: 'inherit',
-  env: { ...process.env, PW_PORT: String(port) },
+  env: {
+    ...process.env,
+    PW_PORT: String(port),
+    // e2e exercises the LOCAL stack (wrangler dev on :8787). Force the worker URL to
+    // localhost so BOTH the client fetch (lib/api.ts) AND the CSP connect-src
+    // (next.config.ts) agree. Otherwise .env.local's production NEXT_PUBLIC_WORKER_URL
+    // leaks into the CSP and the browser blocks every localhost API call.
+    NEXT_PUBLIC_WORKER_URL: 'http://localhost:8787',
+  },
 })
 child.on('exit', (code) => process.exit(code ?? 1))
