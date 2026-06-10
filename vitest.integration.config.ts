@@ -20,6 +20,10 @@ export default defineWorkersConfig(async () => {
     },
     test: {
       name: 'integration',
+      // Cap to 3 workers — each spins a miniflare/workerd runtime + ephemeral D1,
+      // which is heavy; the 8-core default oversubscribes RAM. Matches the ≤3 rule.
+      maxWorkers: 3,
+      minWorkers: 1,
       include: ['worker/test/**/*.test.ts'],
       setupFiles: ['./worker/test/apply-migrations.ts'],
       // No coverage block here on purpose. This project runs in the Cloudflare

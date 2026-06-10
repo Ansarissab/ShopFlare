@@ -13,6 +13,11 @@ export default defineConfig({
   },
   test: {
     name: 'unit',
+    // Cap parallelism to 3 workers (machine has 8 cores; 7 default workers thrash
+    // RAM/CPU and slow the run rather than speed it up). 3 is the sweet spot here
+    // and matches the project-wide "≤3 concurrent" rule.
+    maxWorkers: 3,
+    minWorkers: 1,
     // Default to node (fast, no DOM). Component tests opt into jsdom per-file via
     // a `@vitest-environment jsdom` docblock — only the `.tsx` files pay for it.
     environment: 'node',
