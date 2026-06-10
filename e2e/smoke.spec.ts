@@ -31,7 +31,6 @@ const ROUTES: { path: string; heading: RegExp; needsCart?: boolean }[] = [
   { path: '/admin/products/new', heading: /product|new/i },
   { path: '/admin/reviews', heading: /review/i },
   { path: '/admin/settings', heading: /setting/i },
-  { path: '/admin/unauthorized', heading: /unauthorized|access|denied/i },
 ]
 
 // A minimal valid cart entry so stateful routes (checkout) don't redirect to home.

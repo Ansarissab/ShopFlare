@@ -10,14 +10,17 @@
  *   3. unit + cov  — vitest unit project with the 95% coverage gate
  *   4. integration — vitest workers-pool suite (real worker + D1/KV/R2 via miniflare)
  *   5. build       — next build
+ *   6. e2e         — Playwright functional suite (chromium-desktop), visual excluded
  *
- * E2E/visual/a11y (Playwright) are intentionally NOT here — they need a running dev
- * server + Chromium and are slow. Run them with `pnpm test:e2e` (or `pnpm test:all`).
+ * e2e runs for LOCAL `pnpm verify` only — GitHub CI uses pnpm lint/typecheck/test/
+ * build directly (not `verify`), so e2e never runs in the cloud. It boots its own
+ * dev server (free port) in development env. Visual specs are excluded (they need the
+ * deterministic docker baselines — `pnpm test:visual:docker`). Skipped by `--quick`.
  *
  * Usage:
- *   pnpm verify              # run the full gate
+ *   pnpm verify              # full gate incl. e2e
  *   pnpm verify --no-build   # skip the (slow) production build
- *   pnpm verify --quick      # typecheck + lint + unit only (fast pre-commit-ish loop)
+ *   pnpm verify --quick      # typecheck + lint + unit only (fast loop, no e2e)
  */
 import { spawn } from 'node:child_process'
 
@@ -56,6 +59,8 @@ const steps = [
   { name: 'unit + 95% coverage', cmd: 'pnpm', argv: ['test:coverage'] },
   { name: 'integration', cmd: 'pnpm', argv: ['test:integration'], skip: quick },
   { name: 'build', cmd: 'pnpm', argv: ['build'], skip: quick || skipBuild },
+  // Local-only: GitHub CI doesn't invoke `pnpm verify`. Boots its own dev server.
+  { name: 'e2e', cmd: 'pnpm', argv: ['test:e2e'], skip: quick },
 ]
 
 const fmt = (ms) => (ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${Math.round(ms)}ms`)

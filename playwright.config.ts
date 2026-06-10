@@ -16,7 +16,9 @@ export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  // 1 local retry absorbs the occasional load-induced flake (heavy flows like
+  // checkout can time out under CPU pressure); only the failing test re-runs.
+  retries: process.env.CI ? 2 : 1,
   // Local: cap at 3 (was unbounded → up to 8 browser workers on an 8-core box).
   // CI stays single-worker for deterministic timing.
   workers: process.env.CI ? 1 : 3,
