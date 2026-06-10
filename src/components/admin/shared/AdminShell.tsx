@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useSyncExternalStore, type ReactNode } from 'react'
+import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react'
 import { AdminSidebar, MobileAdminNav } from '@/components/admin/shared/AdminSidebar'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { getAdminToken } from '@/lib/api'
@@ -27,9 +27,18 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const token = useAdminToken()
   const isLogin = pathname === '/admin/login'
 
+  // Gate the redirect on client mount. During hydration useSyncExternalStore still
+  // returns the server snapshot (null), so without this an already-logged-in user
+  // who hard-refreshes or opens an /admin/* URL directly would be bounced to login
+  // before the client snapshot reads their token from localStorage.
+  const [mounted, setMounted] = useState(false)
   useEffect(() => {
-    if (!isLogin && !token) router.replace('/admin/login')
-  }, [isLogin, token, router])
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (mounted && !isLogin && !token) router.replace('/admin/login')
+  }, [mounted, isLogin, token, router])
 
   // Login page renders bare — no sidebar chrome, no token required.
   if (isLogin) return <>{children}</>
