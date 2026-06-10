@@ -268,7 +268,7 @@ you've edited in admin. Delete the `demo_*` rows to remove the sample data.
 | `pnpm web:preview` | Build via OpenNext + preview the frontend worker locally (workerd) |
 | `pnpm web:deploy` | Build via OpenNext + deploy the frontend worker (`shopflare-web`) |
 | `pnpm setup` | Interactive CF + Stripe setup wizard |
-| `pnpm lint` | ESLint |
+| `pnpm lint` | oxlint |
 | `pnpm typecheck` | `tsc` for the app **and** the Worker |
 | `pnpm test` / `pnpm test:watch` | Vitest unit tests |
 | `pnpm db:generate` | Generate a Drizzle migration from `db/schema.ts` |
