@@ -1,9 +1,8 @@
 #!/usr/bin/env sh
 set -e
 
-# Full test gate before sharing code: unit (95% coverage surface) + integration.
-# Build is intentionally NOT gated here — CI (.github/workflows/ci.yml) runs
-# `pnpm build` on every push, so duplicating the slowest step (~144s) locally only
-# pads each push. Run the whole gate locally anytime with `pnpm verify`.
 echo "[pre-push] test (unit + integration)..."
 pnpm test
+
+echo "[pre-push] build..."
+pnpm build
