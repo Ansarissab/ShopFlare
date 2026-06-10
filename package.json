@@ -25,6 +25,7 @@
     "test:coverage": "vitest run --project unit --coverage",
     "test:integration": "vitest run --project integration",
     "test:e2e": "playwright test",
+    "test:e2e:fast": "playwright test --project=chromium-desktop",
     "test:smoke": "playwright test --grep @smoke",
     "test:visual": "playwright test e2e/visual.spec.ts --workers=1",
     "test:visual:update": "playwright test e2e/visual.spec.ts --workers=1 --update-snapshots",
