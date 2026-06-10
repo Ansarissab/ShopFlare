@@ -1,0 +1,39 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "react", "nextjs", "import"],
+  "ignorePatterns": [
+    ".next/**",
+    "out/**",
+    "build/**",
+    "next-env.d.ts",
+    ".open-next/**",
+    "public/sw.js",
+    "public/sw.js.map",
+    ".wrangler/**",
+    "coverage/**",
+    "playwright-report/**",
+    "test-results/**",
+    ".visual-baselines/**",
+    "e2e/**/*-snapshots/**"
+  ],
+  "rules": {
+    "no-unused-vars": [
+      "warn",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_",
+        "ignoreRestSiblings": true
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["e2e/**/*.ts"],
+      "rules": {
+        "react-hooks/rules-of-hooks": "off",
+        "no-empty-pattern": "off"
+      }
+    }
+  ]
+}

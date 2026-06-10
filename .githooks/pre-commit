@@ -1,7 +1,14 @@
 #!/usr/bin/env sh
-# Fast gate only — typecheck (frontend + worker) in parallel.
+# Fast gate only — lint/format staged files, then typecheck (frontend + worker).
 # Tests moved to pre-push: commits are frequent and the suite is slow/growing.
 # Run the full suite manually anytime with `pnpm test`.
+
+# Lint ONLY the staged files (oxlint --fix, re-staged on fix). Encodes the lint
+# rules as tooling so they can't be forgotten — fails the commit on oxlint errors
+# (warnings pass). Config: .nano-staged.json / .oxlintrc.json. Formatting is opt-in
+# (`pnpm format` / oxfmt), kept out of the gate to avoid reformatting churn.
+echo "[pre-commit] lint staged files (nano-staged → oxlint --fix)..."
+./node_modules/.bin/nano-staged || exit 1
 
 echo "[pre-commit] typecheck (frontend + worker) — parallel..."
 

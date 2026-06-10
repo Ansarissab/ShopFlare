@@ -6,7 +6,7 @@
  * Runs every gate the way it would run in cloud CI, fail-fast, with a clean summary.
  * Steps (in order):
  *   1. typecheck   — tsc x3 (app + worker + service worker)
- *   2. lint        — eslint (0 errors)
+ *   2. lint        — oxlint (0 errors; `pnpm lint:eslint` runs the legacy eslint pass)
  *   3. unit + cov  — vitest unit project with the 95% coverage gate
  *   4. integration — vitest workers-pool suite (real worker + D1/KV/R2 via miniflare)
  *   5. build       — next build
