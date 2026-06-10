@@ -5,35 +5,44 @@ import { fileURLToPath } from 'node:url'
 const r = (p: string) => fileURLToPath(new URL(p, import.meta.url))
 
 export default defineConfig({
-  resolve: {
-    alias: {
-      '@': r('./src'),
-      worker: r('./worker'),
-    },
-  },
   test: {
-    name: 'unit',
-    // Cap parallelism to 3 workers (machine has 8 cores; 7 default workers thrash
-    // RAM/CPU and slow the run rather than speed it up). 3 is the sweet spot here
-    // and matches the project-wide "≤3 concurrent" rule.
+    // Cap parallelism to 3 workers (8-core box; 7 default workers thrash RAM/CPU
+    // and OOM the run). Matches the project-wide "≤3 concurrent" rule.
     maxWorkers: 3,
     minWorkers: 1,
-    // Default to node (fast, no DOM). Component tests opt into jsdom per-file via
-    // a `@vitest-environment jsdom` docblock — only the `.tsx` files pay for it.
-    environment: 'node',
-    include: ['{src,worker}/**/*.{test,spec}.{ts,tsx}'],
-    // Integration tests run in the workers pool (vitest.integration.config.ts),
-    // not the node pool — keep them out of the unit project.
-    exclude: ['worker/test/**', '**/node_modules/**'],
+    // Replaces the deprecated `vitest.workspace.ts`. Two projects:
+    //   unit        (node pool)    — pure-logic + jsdom component tests, fast
+    //   integration (workers pool) — real worker + D1/KV/R2 via miniflare
+    // `pnpm test` runs both; `pnpm test:unit` / `--project unit` runs just one.
+    projects: [
+      {
+        // Unit project (was the body of this file before the workspace migration).
+        resolve: {
+          alias: {
+            '@': r('./src'),
+            worker: r('./worker'),
+          },
+        },
+        test: {
+          name: 'unit',
+          // Default to node (fast, no DOM). Component tests opt into jsdom per-file
+          // via a `@vitest-environment jsdom` docblock — only the `.tsx` files pay.
+          environment: 'node',
+          include: ['{src,worker}/**/*.{test,spec}.{ts,tsx}'],
+          // Integration tests run in the workers pool (vitest.integration.config.ts),
+          // not the node pool — keep them out of the unit project.
+          exclude: ['worker/test/**', '**/node_modules/**'],
+        },
+      },
+      './vitest.integration.config.ts',
+    ],
+    // Coverage lives at the ROOT so the 95% gate is enforced when running
+    // `vitest run --project unit --coverage` (v8 instruments the node pool cleanly;
+    // the workers-pool integration project is covered behaviorally, not by line %).
     coverage: {
       provider: 'v8' as const,
       reporter: ['text-summary', 'json-summary'],
       reportsDirectory: './coverage',
-      // The 95% gate is enforced on the UNIT project only (node pool), where v8
-      // instruments cleanly. The integration project runs in the workers pool
-      // (miniflare/workerd) — v8 can't instrument out-of-process code, so worker
-      // routes would falsely read 0%. Those routes ARE covered, by the integration
-      // suite (every route exercised via SELF.fetch); that's a separate boolean gate.
       // `all: true` + explicit include = the gate measures the real unit surface,
       // not just files that happen to be imported by a test.
       all: true,
@@ -56,9 +65,8 @@ export default defineConfig({
         // PWA service worker — runs in SW scope, tested via E2E
         'src/sw.ts',
         'public/**',
-        // CF-runtime worker/lib — these wrap D1/KV/R2/Stripe/Resend and external
-        // IO; they're exercised end-to-end by the integration suite (workers pool),
-        // not unit-testable in the node pool without mocking away their entire body.
+        // CF-runtime worker/lib — wrap D1/KV/R2/Stripe/Resend + external IO;
+        // exercised end-to-end by the integration suite, not unit-testable in node.
         'worker/lib/stripe.ts',
         'worker/lib/push.ts',
         'worker/lib/analytics.ts',
@@ -66,16 +74,8 @@ export default defineConfig({
         'worker/lib/categories.ts',
         'worker/lib/notify.ts',
         'worker/lib/products.ts',
-        // createOrder — the COD/Stripe order-assembly pipeline (stock checks,
-        // coupon application, D1 inserts). Exercised thoroughly by the integration
-        // suite (order creation, stock decrement, coupons) — mocking the entire
-        // Drizzle db to unit-test it would be brittle and low-value.
         'worker/lib/orders.ts',
-        // healthProbe — wraps D1/KV/R2 binding calls; exercised end-to-end by the
-        // integration suite (happy path + forced binding failure → 503).
         'worker/lib/health.ts',
-        // reviews + sanitize — wrap D1 and use CF helper types;
-        // covered behaviorally by the integration suite.
         'worker/lib/reviews.ts',
         'worker/lib/sanitize.ts',
       ],
