@@ -13,7 +13,6 @@ import { env, SELF } from 'cloudflare:test'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
-import { nanoid } from 'nanoid'
 
 const db = () => createDb(env.DB)
 const BASE = 'https://shop.test'

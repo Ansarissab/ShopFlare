@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { blogPostBase, blogPostCreate, blogPostUpdate, blogPostPublic } from './blog'
+import { blogPostBase, blogPostUpdate, blogPostPublic } from './blog'
 
 describe('blogPostBase', () => {
   it('validates a valid post object (all fields)', () => {

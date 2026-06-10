@@ -6,7 +6,6 @@
 //   DELETE /image/:r2key   delete a section image from R2
 
 import { Hono } from 'hono'
-import { eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'

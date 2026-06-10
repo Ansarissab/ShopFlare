@@ -4,8 +4,6 @@ import {
   heroSectionSchema,
   storySectionSchema,
   featuredSectionSchema,
-  reviewsSectionSchema,
-  ctaSectionSchema,
   SECTION_SCHEMAS,
   featuredProductsSchema,
   sectionKeySchema,

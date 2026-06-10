@@ -50,14 +50,6 @@ function fileInput(): HTMLInputElement {
   return document.querySelector('input[type="file"]') as HTMLInputElement
 }
 
-// Helper: simulate picking a file with given size
-function pickFile(size: number, name = 'photo.jpg') {
-  const content = 'x'.repeat(size)
-  const file = new File([content], name, { type: 'image/jpeg' })
-  Object.defineProperty(file, 'size', { value: size })
-  return file
-}
-
 describe('shared ImageUpload', () => {
   it('renders upload button', () => {
     render(<ImageUpload endpoint="/api/upload" onUploaded={vi.fn()} />)

@@ -7,7 +7,7 @@ import { CTABand } from './CTABand'
 import type { LandingPageProps } from '@/lib/types'
 import { LANDING_SECTION_KEYS } from '@/lib/constants'
 
-export function LandingPage({ landing, storeConfig }: LandingPageProps) {
+export function LandingPage({ landing }: LandingPageProps) {
   const { sections, featuredProducts } = landing
 
   return (

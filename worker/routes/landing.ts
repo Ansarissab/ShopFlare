@@ -3,7 +3,7 @@
 // Gated by landingEnabled flag: returns 404 when the feature is off.
 
 import { Hono } from 'hono'
-import { eq, asc } from 'drizzle-orm'
+import { asc } from 'drizzle-orm'
 import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import { isFeatureEnabled } from 'worker/lib/features'
