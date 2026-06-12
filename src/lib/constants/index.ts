@@ -103,8 +103,8 @@ export type HeroStyle = (typeof HERO_STYLES)[number]
 export const STYLE_PRESETS = [
   {
     name: 'Midnight',
-    primaryColor: '#18181b',
-    accentColor: '#6366f1',
+    primaryColor: '#1A1A18',
+    accentColor: '#4A7C6F',
     fontFamily: 'sans' as const,
     radius: 'md' as const,
     density: 'comfortable' as const,
@@ -203,8 +203,8 @@ export const PWA_MANIFEST_DEFAULTS = {
   iconMaskable: '/icon-maskable-512.png',
   iconMonochrome: '/icon-monochrome-192.png',
   appleTouchIcon: '/apple-touch-icon.png',
-  backgroundColor: '#09090b',
-  themeColor: '#18181b',
+  backgroundColor: '#141412',
+  themeColor: '#1A1A18',
 } as const
 
 // ─── Search + pagination ──────────────────────────────────────────────────────

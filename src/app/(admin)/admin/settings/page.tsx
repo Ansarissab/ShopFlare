@@ -52,8 +52,8 @@ export default function AdminSettingsPage() {
   const [productPageSize, setProductPageSize] = useState(String(DEFAULT_PRODUCT_PAGE_SIZE))
   const [saving, setSaving] = useState(false)
 
-  const [primaryColor, setPrimaryColor] = useState('#18181b')
-  const [accentColor, setAccentColor] = useState('#6366f1')
+  const [primaryColor, setPrimaryColor] = useState('#1A1A18')
+  const [accentColor, setAccentColor] = useState('#4A7C6F')
   const [radius, setRadius] = useState('md')
   const [fontFamily, setFontFamily] = useState('sans')
   const [colorMode, setColorMode] = useState('light')
@@ -112,8 +112,8 @@ export default function AdminSettingsPage() {
     setBankAccountNumber(config.bankAccountNumber ?? '')
     setBankIban(config.bankIban ?? '')
     setBankInstructions(config.bankInstructions ?? '')
-    setPrimaryColor(config.primaryColor ?? '#18181b')
-    setAccentColor(config.accentColor ?? '#6366f1')
+    setPrimaryColor(config.primaryColor ?? '#1A1A18')
+    setAccentColor(config.accentColor ?? '#4A7C6F')
     setRadius(config.radius ?? 'md')
     setFontFamily(config.fontFamily ?? 'sans')
     setColorMode(config.colorMode ?? 'light')
@@ -329,7 +329,7 @@ export default function AdminSettingsPage() {
                 onChange={(e) => setPrimaryColor(e.target.value)}
                 className="font-mono text-xs"
                 maxLength={7}
-                placeholder="#18181b"
+                placeholder="#1A1A18"
               />
             </div>
           </FormField>
@@ -351,7 +351,7 @@ export default function AdminSettingsPage() {
                 onChange={(e) => setAccentColor(e.target.value)}
                 className="font-mono text-xs"
                 maxLength={7}
-                placeholder="#6366f1"
+                placeholder="#4A7C6F"
               />
             </div>
           </FormField>

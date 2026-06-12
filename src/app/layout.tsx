@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono, Merriweather, Nunito } from 'next/font/google'
+import { Geist, Geist_Mono, Instrument_Serif, Merriweather, Nunito } from 'next/font/google'
 import '@/app/globals.css'
 import { ServiceWorkerProvider } from '@/components/pwa/ServiceWorkerProvider'
 import { JsonLd } from '@/components/shared/JsonLd'
@@ -9,6 +9,15 @@ import type { StoreConfig } from '@/lib/types/common'
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'], display: 'swap' })
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'], display: 'swap' })
+// Design-system display font — used for h1–h4 via --font-display CSS variable.
+// next/font self-hosts automatically; no external request at runtime.
+const instrumentSerif = Instrument_Serif({
+  variable: '--font-display',
+  subsets: ['latin'],
+  weight: '400',
+  style: ['normal', 'italic'],
+  display: 'swap',
+})
 // Curated extra fonts — preload:false so they're only downloaded when selected by the merchant
 const merriweather = Merriweather({
   variable: '--font-merriweather',
@@ -104,7 +113,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     ...(siteUrl ? { '@id': `${siteUrl}#org` } : {}),
   }
 
-  const fontVars = `${geistSans.variable} ${geistMono.variable} ${merriweather.variable} ${nunito.variable}`
+  const fontVars = `${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} ${merriweather.variable} ${nunito.variable}`
   return (
     <html lang="en" className={`${fontVars} h-full antialiased`} suppressHydrationWarning>
       <head>
@@ -121,8 +130,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
-        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#18181b" />
+        <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FAFAF7" />
+        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#141412" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
       {/* suppressHydrationWarning: browser extensions inject attrs before React hydrates */}

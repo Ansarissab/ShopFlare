@@ -71,8 +71,8 @@ describe('GET /api/config/store', () => {
     const body = (await res.json()) as Record<string, unknown>
     expect(body.storeName).toBe('ShopFlare')
     expect(body.currency).toBe('PKR')
-    expect(body.primaryColor).toBe('#18181b')
-    expect(body.accentColor).toBe('#6366f1')
+    expect(body.primaryColor).toBe('#1A1A18')
+    expect(body.accentColor).toBe('#4A7C6F')
     expect(body.radius).toBe('md')
     expect(body.fontFamily).toBe('sans')
     expect(body.colorMode).toBe('light')

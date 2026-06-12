@@ -4,8 +4,8 @@ export const revalidate = 300
 
 const WORKER_URL = process.env.NEXT_PUBLIC_WORKER_URL?.replace(/\/$/, '') ?? ''
 const FALLBACK_NAME = 'ShopFlare Admin'
-const FALLBACK_THEME = '#18181b'
-const FALLBACK_BG = '#09090b'
+const FALLBACK_THEME = '#1A1A18'
+const FALLBACK_BG = '#141412'
 
 type StoreConfig = { storeName?: string; primaryColor?: string; backgroundColor?: string }
 
