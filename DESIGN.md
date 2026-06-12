@@ -41,27 +41,29 @@ Components must use only CSS variables — never hardcode hex.
 | `--card`             | `#F4F4EF`     | Surface / card background                 |
 | `--fg`               | `#1A1A18`     | Body text / ink                           |
 | `--muted`            | `#EBEBE4`     | Subtle fills, dividers, skeleton loaders  |
-| `--muted-fg`         | `#76766E`     | Placeholder text, secondary labels        |
+| `--muted-fg`         | `#6B6B62`     | Placeholder text, secondary labels        |
 | `--border`           | `#E2E2DA`     | Input borders, card outlines              |
 | `--primary`          | `var(--store-primary, #1A1A18)` | CTA buttons, key actions    |
 | `--primary-fg`       | `var(--store-primary-fg, #FAFAF7)` | Text on primary surfaces |
 | `--accent`           | `var(--store-accent, #4A7C6F)` | Oxidized copper — links, badges, focus rings |
 | `--accent-fg`        | `var(--store-accent-fg, #FAFAF7)` | Text on accent surfaces  |
-| `--destructive`      | `#ef4444`     | Errors, delete actions                    |
-| `--success`          | `#22c55e`     | Confirmations, stock indicators           |
+| `--destructive`      | `#dc2626`     | Errors, delete actions                    |
+| `--success`          | `#15803d`     | Confirmations, stock indicators           |
 | `--warning`          | `#f59e0b`     | Low stock, pending states                 |
 
 ### Dark mode (`[data-theme="dark"]`)
 
-| Token          | Default     | Change from light          |
-|----------------|-------------|----------------------------|
-| `--bg`         | `#141412`   | Deep warm black            |
-| `--card`       | `#1E1E1B`   | Slightly lifted surface    |
-| `--fg`         | `#F0F0EB`   | Warm white                 |
-| `--muted`      | `#2A2A26`   | Dark fill                  |
-| `--muted-fg`   | `#8A8A82`   | Dimmed label text          |
-| `--border`     | `#333330`   | Subtle warm dark border    |
-| `--accent`     | `var(--store-accent, #6AAE9E)` | Lighter copper for contrast |
+| Token            | Default     | Change from light                                    |
+|------------------|-------------|------------------------------------------------------|
+| `--bg`           | `#141412`   | Deep warm black                                      |
+| `--card`         | `#1E1E1B`   | Slightly lifted surface                              |
+| `--fg`           | `#F0F0EB`   | Warm white                                           |
+| `--muted`        | `#2A2A26`   | Dark fill                                            |
+| `--muted-fg`     | `#8A8A82`   | Dimmed label text (5.30:1 on bg — passes AA)         |
+| `--border`       | `#333330`   | Subtle warm dark border                              |
+| `--accent`       | `var(--store-accent, #6AAE9E)` | Lighter copper for contrast           |
+| `--destructive`  | `#ef4444`   | Restored — dark bg is bright enough (4.90:1)         |
+| `--success`      | `#22c55e`   | Restored — dark bg is bright enough (8.10:1)         |
 
 Primary/primary-fg carry over from `:root` unless the merchant overrides them.
 

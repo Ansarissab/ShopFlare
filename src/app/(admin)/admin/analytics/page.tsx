@@ -45,7 +45,7 @@ const PAYMENT_LABELS: Record<string, string> = {
   in_person_cash: 'In-Person Cash',
 }
 
-const METHOD_COLORS = ['#18181b', '#6366f1', '#f59e0b', '#22c55e', '#ef4444']
+const METHOD_COLORS = ['#1A1A18', '#4A7C6F', '#f59e0b', '#22c55e', '#ef4444']
 
 const TOOLTIP_STYLE = {
   fontSize: 12,
@@ -160,20 +160,20 @@ function OverviewTab({ period }: { period: AnalyticsPeriod }) {
               >
                 <defs>
                   <linearGradient id="analyticsRevGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#18181b" stopOpacity={0.12} />
-                    <stop offset="95%" stopColor="#18181b" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#1A1A18" stopOpacity={0.12} />
+                    <stop offset="95%" stopColor="#1A1A18" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
                 <XAxis
                   dataKey="label"
-                  tick={{ fontSize: 11, fill: '#71717a' }}
+                  tick={{ fontSize: 11, fill: '#6B6B62' }}
                   tickLine={false}
                   axisLine={false}
                   interval="preserveStartEnd"
                 />
                 <YAxis
-                  tick={{ fontSize: 11, fill: '#71717a' }}
+                  tick={{ fontSize: 11, fill: '#6B6B62' }}
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={(v) => (v === 0 ? '0' : formatPrice(v))}
@@ -190,7 +190,7 @@ function OverviewTab({ period }: { period: AnalyticsPeriod }) {
                 <Area
                   type="monotone"
                   dataKey="revenue"
-                  stroke="#18181b"
+                  stroke="#1A1A18"
                   strokeWidth={2}
                   fill="url(#analyticsRevGrad)"
                   dot={false}

@@ -45,10 +45,10 @@
     --card:         #F4F4EF;
     --card-fg:      #1A1A18;
     --muted:        #EBEBE4;
-    --muted-fg:     #76766E;
+    --muted-fg:     #6B6B62;
     --border:       #E2E2DA;
-    --destructive:  #ef4444;
-    --success:      #22c55e;
+    --destructive:  #dc2626;
+    --success:      #15803d;
     --warning:      #f59e0b;
     --radius:       0.5rem;
 
@@ -79,14 +79,17 @@
 
   /* ─── Dark mode ─────────────────────────────────────────────────────────── */
   [data-theme="dark"] {
-    --bg:       #141412;
-    --fg:       #F0F0EB;
-    --card:     #1E1E1B;
-    --card-fg:  #F0F0EB;
-    --muted:    #2A2A26;
-    --muted-fg: #8A8A82;
-    --border:   #333330;
-    --accent:   var(--store-accent, #6AAE9E);
+    --bg:          #141412;
+    --fg:          #F0F0EB;
+    --card:        #1E1E1B;
+    --card-fg:     #F0F0EB;
+    --muted:       #2A2A26;
+    --muted-fg:    #8A8A82;
+    --border:      #333330;
+    --accent:      var(--store-accent, #6AAE9E);
+    /* Restore vivid variants — dark bg is too dark for the lightened light-mode values */
+    --destructive: #ef4444;
+    --success:     #22c55e;
   }
 
   /* ─── Base resets ────────────────────────────────────────────────────────── */
