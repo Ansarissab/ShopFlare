@@ -27,6 +27,8 @@ export interface LandingPageProps {
 export interface HeroSectionProps {
   section: LandingSection
   heroStyle?: string
+  /** Brand fallback for the hero heading when no custom heading is set (white-label). */
+  storeName?: string
 }
 
 export interface StorySectionProps {

@@ -8,8 +8,11 @@ export function HeroSection({
   section,
   heroStyle = 'image-left',
   imageUrl,
+  storeName,
 }: HeroSectionProps & { imageUrl: string | null }) {
-  const heading = section.heading || en.store.heroDefaultHeading
+  // White-label: when the merchant hasn't written a custom hero heading, fall back
+  // to their store name (the brand) before the generic "Welcome to Our Store" copy.
+  const heading = section.heading || storeName || en.store.heroDefaultHeading
   const subtext = section.subtext || en.store.heroDefaultSubtext
   const ctaText = section.ctaText || en.store.heroDefaultCta
   const ctaHref = section.ctaHref || '/shop'
