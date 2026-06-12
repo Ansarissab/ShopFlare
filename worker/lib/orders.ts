@@ -413,34 +413,17 @@ export async function createOrder(
   const orderId = nanoid()
   const orderNumber = generateOrderNumber()
 
-  // ── 3. Insert order row ────────────────────────────────────────────────────
-  await db.insert(schema.orders).values({
-    id: orderId,
-    orderNumber,
-    status: 'pending',
-    paymentMethod,
-    customerName,
-    customerEmail: customerEmail ?? null,
-    customerPhone: customerPhone ?? null,
-    shippingAddress: shippingAddress ? JSON.stringify(shippingAddress) : null,
-    subtotalCents,
-    shippingCents,
-    discountCents,
-    taxCents,
-    totalCents,
-    couponCode: couponCode ?? null,
-  })
-
-  // ── 4. Insert order items ──────────────────────────────────────────────────
-  for (const item of orderItemsToInsert) {
-    await db.insert(schema.orderItems).values({ ...item, orderId })
-  }
-
-  // ── 5. Stock decrement — ATOMIC conditional reserve (prevents oversell) ───
+  // ── 3. Stock decrement — ATOMIC conditional reserve (prevents oversell) ───
+  // Run the stock-reservation loop BEFORE writing any order rows. This means a
+  // mid-reservation failure only needs to reverse the stock — there is nothing
+  // to delete from the orders/order_items tables yet, which eliminates the
+  // window where a partial order header + some items could be left behind if the
+  // worker is evicted between the header insert and the full items loop.
+  //
   // The decrement only succeeds where `stock >= quantity`, so two orders racing
   // for the last units can't both win: the loser's UPDATE matches 0 rows
   // (meta.changes !== 1). On a loss we roll back the units already reserved in
-  // this call plus the half-written order rows, then surface a StockError.
+  // this call, then surface a StockError.
   // Unlimited (-1) items are skipped — they never need reserving.
   const reserved: Array<{ sizeOptionId: string; quantity: number }> = []
   for (const item of items) {
@@ -463,28 +446,83 @@ export async function createOrder(
       continue
     }
 
-    // Lost the race — restore what we reserved, delete the order, then throw.
+    // Lost the race — restore what we reserved (no order rows exist yet), then throw.
     for (const r of reserved) {
       await db
         .update(schema.sizeOptions)
         .set({ stock: sql`${schema.sizeOptions.stock} + ${r.quantity}` })
         .where(eq(schema.sizeOptions.id, r.sizeOptionId))
     }
-    await db.delete(schema.orderItems).where(eq(schema.orderItems.orderId, orderId))
-    await db.delete(schema.orders).where(eq(schema.orders.id, orderId))
     throw new StockError(`Insufficient stock for size: ${so.size}`)
   }
 
-  // ── 6. Record coupon usage + increment usedCount ──────────────────────────
-  if (couponCode && couponRow) {
-    await db.insert(schema.couponUses).values({
-      id: nanoid(),
-      couponId: couponRow.id,
-      orderId,
-      customerEmail: customerEmail ?? null,
-      customerPhone: customerPhone ?? null,
-    })
+  // ── 4. Atomic insert — order header + all items + coupon_uses ─────────────
+  // All stock is reserved above. Now commit the order rows atomically: D1's
+  // batch() wraps all statements in a single transaction, so the database never
+  // contains a partial order (header without items, or items without header).
+  // If the batch fails, the reserved stock stays decremented — releaseOrderInventory
+  // cannot be called because no order row exists, so we add a best-effort
+  // stock reversal here before re-throwing.
+  const orderHeaderInsert = db.insert(schema.orders).values({
+    id: orderId,
+    orderNumber,
+    status: 'pending',
+    paymentMethod,
+    customerName,
+    customerEmail: customerEmail ?? null,
+    customerPhone: customerPhone ?? null,
+    shippingAddress: shippingAddress ? JSON.stringify(shippingAddress) : null,
+    subtotalCents,
+    shippingCents,
+    discountCents,
+    taxCents,
+    totalCents,
+    couponCode: couponCode ?? null,
+  })
 
+  const orderItemInserts = orderItemsToInsert.map((item) =>
+    db.insert(schema.orderItems).values({ ...item, orderId }),
+  )
+
+  const couponUsesInsert =
+    couponCode && couponRow
+      ? db.insert(schema.couponUses).values({
+          id: nanoid(),
+          couponId: couponRow.id,
+          orderId,
+          customerEmail: customerEmail ?? null,
+          customerPhone: customerPhone ?? null,
+        })
+      : null
+
+  const batchStatements = [
+    orderHeaderInsert,
+    ...orderItemInserts,
+    ...(couponUsesInsert ? [couponUsesInsert] : []),
+  ] as Parameters<typeof db.batch>[0]
+
+  try {
+    await db.batch(batchStatements)
+  } catch (err) {
+    // Batch failed — no order row written, so we must reverse the stock
+    // reservations manually before bubbling the error.
+    for (const r of reserved) {
+      await db
+        .update(schema.sizeOptions)
+        .set({ stock: sql`${schema.sizeOptions.stock} + ${r.quantity}` })
+        .where(eq(schema.sizeOptions.id, r.sizeOptionId))
+    }
+    throw err
+  }
+
+  // ── 5. Increment coupon usedCount (non-transactional counter) ─────────────
+  // This is a denormalised counter updated after the atomic batch. A crash here
+  // leaves usedCount one behind — evaluateCoupon re-checks coupon_uses rows for
+  // the per-customer limit, so the counter being slightly stale is not a
+  // correctness risk for the per-customer check. The global usageLimit check uses
+  // usedCount directly; under extreme failure conditions it could allow one extra
+  // use, which is acceptable given that the coupon_uses row IS committed above.
+  if (couponCode && couponRow) {
     await db
       .update(schema.coupons)
       .set({ usedCount: sql`used_count + 1` })
