@@ -18,7 +18,7 @@ export function OrderSummary() {
   const subtotalCents = useCartSubtotalCents()
   const { config } = useStoreConfig()
 
-  const flatRateCents = config?.flatShippingRateCents ?? 29900
+  const flatRateCents = config?.flatShippingRateCents ?? 0
   const thresholdCents = config?.freeShippingThresholdCents ?? 0
   const shippingCents = calculateShipping(subtotalCents, flatRateCents, thresholdCents)
 

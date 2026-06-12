@@ -81,12 +81,12 @@ describe('OrderSummary', () => {
     expect(screen.getByText(formatPrice(29900))).toBeTruthy()
   })
 
-  it('falls back to default flat shipping rate when config absent', () => {
+  it('falls back to 0 shipping when config absent (matches CartSheet + DB default)', () => {
     cartState = { items: [item], discountCents: 0 }
     subtotal = 3000
-    mockConfig = null // defaults: flatRate 29900, threshold 0 → flat rate charged
+    mockConfig = null // defaults: flatRate 0, threshold 0 → free shipping shown
     render(<OrderSummary />)
-    expect(screen.getByText(formatPrice(29900))).toBeTruthy()
+    expect(screen.getByText(en.cart.shippingFree)).toBeTruthy()
   })
 
   it('renders tax row when tax enabled and tax > 0 (exclusive)', () => {
