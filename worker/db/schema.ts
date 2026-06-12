@@ -95,52 +95,66 @@ export const productCategories = sqliteTable(
 
 // ─── Orders ─────────────────────────────────────────────────────────────────
 
-export const orders = sqliteTable('orders', {
-  id: text('id').primaryKey(),
-  orderNumber: text('order_number').notNull().unique(),
-  status: text('status', {
-    enum: ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'],
-  })
-    .notNull()
-    .default('pending'),
-  paymentMethod: text('payment_method', {
-    enum: ['stripe_checkout', 'cod', 'bank_transfer', 'whatsapp', 'in_person_cash'],
-  }).notNull(),
-  customerName: text('customer_name').notNull(),
-  customerEmail: text('customer_email'),
-  customerPhone: text('customer_phone'),
-  shippingAddress: text('shipping_address'), // JSON string
-  subtotalCents: integer('subtotal_cents').notNull(),
-  shippingCents: integer('shipping_cents').notNull().default(0),
-  discountCents: integer('discount_cents').notNull().default(0),
-  taxCents: integer('tax_cents').notNull().default(0),
-  totalCents: integer('total_cents').notNull(),
-  couponCode: text('coupon_code'),
-  stripeSessionId: text('stripe_session_id'),
-  stripePaymentIntentId: text('stripe_payment_intent_id'),
-  trackingNumber: text('tracking_number'),
-  carrier: text('carrier'),
-  notes: text('notes'),
-  createdAt: text('created_at')
-    .notNull()
-    .default(sql`(datetime('now'))`),
-  updatedAt: text('updated_at')
-    .notNull()
-    .default(sql`(datetime('now'))`),
-})
+export const orders = sqliteTable(
+  'orders',
+  {
+    id: text('id').primaryKey(),
+    orderNumber: text('order_number').notNull().unique(),
+    status: text('status', {
+      enum: ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'],
+    })
+      .notNull()
+      .default('pending'),
+    paymentMethod: text('payment_method', {
+      enum: ['stripe_checkout', 'cod', 'bank_transfer', 'whatsapp', 'in_person_cash'],
+    }).notNull(),
+    customerName: text('customer_name').notNull(),
+    customerEmail: text('customer_email'),
+    customerPhone: text('customer_phone'),
+    shippingAddress: text('shipping_address'), // JSON string
+    subtotalCents: integer('subtotal_cents').notNull(),
+    shippingCents: integer('shipping_cents').notNull().default(0),
+    discountCents: integer('discount_cents').notNull().default(0),
+    taxCents: integer('tax_cents').notNull().default(0),
+    totalCents: integer('total_cents').notNull(),
+    couponCode: text('coupon_code'),
+    stripeSessionId: text('stripe_session_id'),
+    stripePaymentIntentId: text('stripe_payment_intent_id'),
+    trackingNumber: text('tracking_number'),
+    carrier: text('carrier'),
+    notes: text('notes'),
+    createdAt: text('created_at')
+      .notNull()
+      .default(sql`(datetime('now'))`),
+    updatedAt: text('updated_at')
+      .notNull()
+      .default(sql`(datetime('now'))`),
+  },
+  (t) => ({
+    createdAtIdx: index('orders_created_at_idx').on(t.createdAt),
+    statusIdx: index('orders_status_idx').on(t.status),
+    stripeSessionIdIdx: index('orders_stripe_session_id_idx').on(t.stripeSessionId),
+  }),
+)
 
-export const orderItems = sqliteTable('order_items', {
-  id: text('id').primaryKey(),
-  orderId: text('order_id')
-    .notNull()
-    .references(() => orders.id, { onDelete: 'cascade' }),
-  sizeOptionId: text('size_option_id').notNull(),
-  productId: text('product_id').notNull(),
-  variantId: text('variant_id').notNull(),
-  quantity: integer('quantity').notNull().default(1),
-  priceCents: integer('price_cents').notNull(),
-  snapshot: text('snapshot').notNull(), // JSON: {productName, variantLabel, size, sku, imageUrl}
-})
+export const orderItems = sqliteTable(
+  'order_items',
+  {
+    id: text('id').primaryKey(),
+    orderId: text('order_id')
+      .notNull()
+      .references(() => orders.id, { onDelete: 'cascade' }),
+    sizeOptionId: text('size_option_id').notNull(),
+    productId: text('product_id').notNull(),
+    variantId: text('variant_id').notNull(),
+    quantity: integer('quantity').notNull().default(1),
+    priceCents: integer('price_cents').notNull(),
+    snapshot: text('snapshot').notNull(), // JSON: {productName, variantLabel, size, sku, imageUrl}
+  },
+  (t) => ({
+    orderIdIdx: index('order_items_order_id_idx').on(t.orderId),
+  }),
+)
 
 // ─── Coupons ─────────────────────────────────────────────────────────────────
 
@@ -163,21 +177,28 @@ export const coupons = sqliteTable('coupons', {
     .default(sql`(datetime('now'))`),
 })
 
-export const couponUses = sqliteTable('coupon_uses', {
-  id: text('id').primaryKey(),
-  couponId: text('coupon_id')
-    .notNull()
-    .references(() => coupons.id),
-  orderId: text('order_id')
-    .notNull()
-    .references(() => orders.id),
-  customerEmail: text('customer_email'),
-  customerPhone: text('customer_phone'),
-  customerIp: text('customer_ip'),
-  usedAt: text('used_at')
-    .notNull()
-    .default(sql`(datetime('now'))`),
-})
+export const couponUses = sqliteTable(
+  'coupon_uses',
+  {
+    id: text('id').primaryKey(),
+    couponId: text('coupon_id')
+      .notNull()
+      .references(() => coupons.id),
+    orderId: text('order_id')
+      .notNull()
+      .references(() => orders.id),
+    customerEmail: text('customer_email'),
+    customerPhone: text('customer_phone'),
+    customerIp: text('customer_ip'),
+    usedAt: text('used_at')
+      .notNull()
+      .default(sql`(datetime('now'))`),
+  },
+  (t) => ({
+    couponIdIdx: index('coupon_uses_coupon_id_idx').on(t.couponId),
+    orderIdIdx: index('coupon_uses_order_id_idx').on(t.orderId),
+  }),
+)
 
 // ─── Reviews ─────────────────────────────────────────────────────────────────
 
