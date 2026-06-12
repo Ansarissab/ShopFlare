@@ -8,7 +8,14 @@ export const landingSectionBaseSchema = z.object({
   subtext: z.string().max(500).optional(),
   bodyHtml: z.string().optional(),
   ctaText: z.string().max(100).optional(),
-  ctaHref: z.string().max(500).optional(),
+  ctaHref: z
+    .string()
+    .max(500)
+    .regex(
+      /^(\/[^\s]*|https?:\/\/[^\s]+)$/i,
+      'ctaHref must be a relative path starting with / or an http(s) URL',
+    )
+    .optional(),
   imageR2Key: z.string().optional(),
 })
 

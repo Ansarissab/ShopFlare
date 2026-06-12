@@ -29,6 +29,44 @@ describe('landingSectionBaseSchema', () => {
     const r = landingSectionBaseSchema.safeParse({ ctaText: 'x'.repeat(101) })
     expect(r.success).toBe(false)
   })
+
+  it('ctaHref: accepts a root-relative path', () => {
+    expect(landingSectionBaseSchema.safeParse({ ctaHref: '/' }).success).toBe(true)
+    expect(landingSectionBaseSchema.safeParse({ ctaHref: '/shop' }).success).toBe(true)
+    expect(
+      landingSectionBaseSchema.safeParse({ ctaHref: '/collections/tees?sort=new' }).success,
+    ).toBe(true)
+  })
+
+  it('ctaHref: accepts http and https URLs', () => {
+    expect(
+      landingSectionBaseSchema.safeParse({ ctaHref: 'https://example.com/page' }).success,
+    ).toBe(true)
+    expect(
+      landingSectionBaseSchema.safeParse({ ctaHref: 'http://localhost:3000/shop' }).success,
+    ).toBe(true)
+  })
+
+  it('ctaHref: rejects javascript: URI (XSS vector)', () => {
+    expect(
+      landingSectionBaseSchema.safeParse({ ctaHref: 'javascript:alert(document.cookie)' }).success,
+    ).toBe(false)
+  })
+
+  it('ctaHref: rejects data: URI', () => {
+    expect(
+      landingSectionBaseSchema.safeParse({ ctaHref: 'data:text/html,<script>alert(1)</script>' })
+        .success,
+    ).toBe(false)
+  })
+
+  it('ctaHref: rejects bare domain without scheme', () => {
+    expect(landingSectionBaseSchema.safeParse({ ctaHref: 'example.com/shop' }).success).toBe(false)
+  })
+
+  it('ctaHref: absent (undefined) still passes — field is optional', () => {
+    expect(landingSectionBaseSchema.safeParse({}).success).toBe(true)
+  })
 })
 
 describe('heroSectionSchema', () => {
