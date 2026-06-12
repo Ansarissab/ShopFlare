@@ -39,7 +39,7 @@ export function HeroSection({
             />
           )}
           <div className="relative z-10 max-w-2xl text-white">
-            <h1 className="text-4xl font-bold sm:text-5xl">{heading}</h1>
+            <h1 className="text-4xl sm:text-5xl">{heading}</h1>
             {subtext && <p className="mt-4 text-lg opacity-90">{subtext}</p>}
             <Link
               href={ctaHref}
@@ -57,7 +57,7 @@ export function HeroSection({
               <Image src={imageUrl} alt={heading} fill className="object-cover" priority />
             </div>
           )}
-          <h1 className="text-4xl font-bold sm:text-5xl">{heading}</h1>
+          <h1 className="text-4xl sm:text-5xl">{heading}</h1>
           {subtext && <p className="mt-4 text-muted-foreground text-lg">{subtext}</p>}
           <Link
             href={ctaHref}
@@ -75,7 +75,7 @@ export function HeroSection({
             </div>
           )}
           <div className="flex-1">
-            <h1 className="text-4xl font-bold sm:text-5xl">{heading}</h1>
+            <h1 className="text-4xl sm:text-5xl">{heading}</h1>
             {subtext && <p className="mt-4 text-muted-foreground text-lg">{subtext}</p>}
             <Link
               href={ctaHref}
@@ -86,22 +86,69 @@ export function HeroSection({
           </div>
         </div>
       ) : (
-        // image-left (default)
-        <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-16 sm:flex-row sm:items-center sm:px-6 lg:px-8">
+        // image-left default → POSTER layout
+        // Left-weighted poster: dominant serif headline, single sentence, one CTA.
+        // Store name/brand sits as a small mono watermark above the headline.
+        // If a hero image exists it anchors at the right edge, offset/bleeding.
+        // Entrance animation: fade + lift, gated on prefers-reduced-motion.
+        <div className="relative mx-auto flex min-h-[90svh] max-w-7xl flex-col justify-end px-4 py-16 sm:px-6 lg:px-8 lg:min-h-[85svh]">
+          {/* Hero image — right-anchored, edge-crossing anchor (not a washed bg) */}
           {imageUrl && (
-            <div className="relative h-64 w-full overflow-hidden rounded-xl sm:h-80 sm:flex-1">
-              <Image src={imageUrl} alt={heading} fill className="object-cover" priority />
+            <div
+              className={cn(
+                'pointer-events-none absolute inset-y-0 right-0 w-full sm:w-3/5 lg:w-1/2',
+              )}
+              aria-hidden="true"
+            >
+              <Image
+                src={imageUrl}
+                alt=""
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 60vw, 50vw"
+                className="object-cover object-center"
+                priority
+              />
+              {/* gradient veil: left-to-right so text stays legible on mobile */}
+              <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent sm:via-background/60 sm:to-transparent" />
             </div>
           )}
-          <div className="flex-1">
-            <h1 className="text-4xl font-bold sm:text-5xl">{heading}</h1>
-            {subtext && <p className="mt-4 text-muted-foreground text-lg">{subtext}</p>}
-            <Link
-              href={ctaHref}
-              className="mt-8 inline-block rounded-md bg-primary px-8 py-3 text-primary-foreground font-semibold transition hover:opacity-90"
+
+          {/* Text content — left-weighted, layered above image */}
+          <div
+            className={cn(
+              'hero-poster-text relative z-10 flex flex-col gap-6',
+              imageUrl ? 'max-w-lg sm:max-w-xl' : 'max-w-2xl',
+            )}
+          >
+            {/* Store name — mono watermark, uppercase, tracked */}
+            {storeName && (
+              <span className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                {storeName}
+              </span>
+            )}
+
+            {/* Dominant serif headline — clamp for fluid sizing */}
+            <h1
+              className="text-foreground tracking-tight leading-[1.05]"
+              style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)' }}
             >
-              {ctaText}
-            </Link>
+              {heading}
+            </h1>
+
+            {/* Supporting sentence — one short line, muted Geist */}
+            {subtext && (
+              <p className="text-base text-muted-foreground sm:text-lg max-w-sm">{subtext}</p>
+            )}
+
+            {/* Single CTA */}
+            <div>
+              <Link
+                href={ctaHref}
+                className="inline-flex items-center rounded-md bg-primary px-7 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent min-h-[44px]"
+              >
+                {ctaText}
+              </Link>
+            </div>
           </div>
         </div>
       )}

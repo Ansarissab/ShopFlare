@@ -206,6 +206,22 @@ nav, [data-tab-bar] {
   }
 }
 
+/* ─── Hero poster text entrance ─────────────────────────────────────────────
+   .hero-poster-text fades + lifts in when the poster hero first renders.
+   Single transition, no JS animation library. Gated on prefers-reduced-motion.
+   ─────────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-poster-text {
+    transition: opacity 400ms ease-out, transform 400ms ease-out;
+    transition-behavior: allow-discrete;
+
+    @starting-style {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+  }
+}
+
 /* ─── Product grid staggered entrance ───────────────────────────────────────
    .pg-enter gives each card a CSS @starting-style entrance: fades + lifts in
    from translateY(12px). The inline transition-delay on each card staggers the

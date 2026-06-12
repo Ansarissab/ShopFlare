@@ -64,12 +64,14 @@ export function ProductHero({
       : null
 
   return (
-    <div className={cn('grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 md:gap-12', className)}>
-      {/* Left: Image carousel */}
+    <div
+      className={cn('grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-16 md:items-start', className)}
+    >
+      {/* Left: Image gallery — full-width, color in view */}
       <ImageCarousel images={currentImages} />
 
-      {/* Right: Details */}
-      <div className="flex flex-col gap-5">
+      {/* Right: sticky purchase panel — commerce stack, always reachable */}
+      <div className="md:sticky md:top-24 flex flex-col gap-5">
         {/* Badges */}
         {(isNew || isPopular) && (
           <div className="flex gap-2">
@@ -78,22 +80,26 @@ export function ProductHero({
           </div>
         )}
 
-        {/* Product name */}
-        <h1 className="text-2xl font-bold leading-tight text-foreground md:text-3xl">
+        {/* Product name — display serif (h1 base styles apply var(--font-display)), large */}
+        <h1 className="text-3xl leading-tight text-foreground tracking-tight md:text-4xl">
           {product.name}
         </h1>
 
-        {/* Price */}
-        {priceLabel && <p className="text-xl font-semibold text-primary">{priceLabel}</p>}
+        {/* Price — Geist Mono, prominent */}
+        {priceLabel && (
+          <p className="font-mono text-2xl font-medium text-foreground tabular-nums">
+            {priceLabel}
+          </p>
+        )}
         {allSizesOOS && (
           <p className="text-sm font-medium text-muted-foreground">{en.store.outOfStock}</p>
         )}
 
         <Separator />
 
-        {/* Description */}
+        {/* Description — editorial, generous leading, muted */}
         {product.description && (
-          <p className="text-sm leading-relaxed text-muted-foreground">{product.description}</p>
+          <p className="text-base leading-relaxed text-muted-foreground">{product.description}</p>
         )}
 
         {/* Variant selector — only show when >1 variant */}
@@ -112,7 +118,7 @@ export function ProductHero({
           onSelect={setSelectedSizeId}
         />
 
-        {/* Actions */}
+        {/* Actions — tight commerce stack */}
         <ProductActions
           product={product}
           selectedVariant={currentVariant}
