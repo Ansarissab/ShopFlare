@@ -1,14 +1,18 @@
 import type { NextConfig } from 'next'
 import withSerwistInit from '@serwist/next'
 import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare'
+import { resolveWorkerUrl } from './src/lib/worker-url'
 
 // Lets `next dev` see Cloudflare bindings/env via the OpenNext adapter.
 // Safe no-op in production builds.
 initOpenNextCloudflareForDev()
 
-// Worker/API origin the browser talks to — allowed in CSP connect-src so client
-// fetches (lib/api.ts) aren't blocked. Empty in pure-static builds.
-const workerUrl = process.env.NEXT_PUBLIC_WORKER_URL?.replace(/\/$/, '') ?? ''
+// Worker/API origin the browser talks to — allowed in CSP connect-src/img-src so
+// client fetches (lib/api.ts) aren't blocked. Resolved through the SAME helper as
+// the client so the allow-list and the actual fetch target can never diverge: in
+// dev the prod-isolation guard pins this to localhost:8787, matching lib/api.ts
+// (otherwise the CSP would silently block every dev API call). Empty in pure-static builds.
+const workerUrl = resolveWorkerUrl(process.env)
 
 // Content-Security-Policy. Pragmatic, non-breaking baseline:
 //  - 'unsafe-inline' on script/style is required by Next's inline bootstrap +
