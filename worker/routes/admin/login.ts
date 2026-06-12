@@ -13,9 +13,12 @@ import { verifyTurnstile } from 'worker/lib/turnstile'
 import { rateLimit } from 'worker/lib/ratelimit'
 import { createSessionToken, safePasswordEqual } from 'worker/lib/admin-session'
 
-// 7 days — long enough to avoid nagging a single merchant, short enough to bound
-// a leaked token. Rotate ADMIN_SESSION_SECRET to revoke all tokens immediately.
-const SESSION_TTL_SECONDS = 7 * 24 * 60 * 60
+// 24 hours — stateless HMAC token stored in localStorage (XSS-stealable; mitigated
+// by the strict CSP), so the TTL is the sole bound on a stolen token's validity window.
+// 24 h balances security vs. re-login friction for a single-merchant admin. Raise this
+// constant if a merchant wants longer sessions (e.g. 7 * 24 * 60 * 60 for 7 days).
+// Rotate ADMIN_SESSION_SECRET to revoke all outstanding tokens immediately.
+const SESSION_TTL_SECONDS = 24 * 60 * 60
 
 // Brute-force throttle: max 5 attempts per IP per 5 minutes. Turnstile blocks
 // bots but a solved token can be replayed within its window; this caps password

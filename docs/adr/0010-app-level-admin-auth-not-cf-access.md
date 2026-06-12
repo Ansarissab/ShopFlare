@@ -25,7 +25,7 @@ Single shared admin password with a stateless signed-token session:
 
 - `POST /api/admin/login`: Turnstile + per-IP rate limit (5 / 5 min) + constant-time,
   length-blind password check against `ADMIN_PASSWORD` → returns an HMAC-SHA256 token
-  (`{exp}`, 7-day TTL) signed with `ADMIN_SESSION_SECRET` (`worker/lib/admin-session.ts`).
+  (`{exp}`, 24-hour TTL) signed with `ADMIN_SESSION_SECRET` (`worker/lib/admin-session.ts`).
 - `requireAdmin` (`worker/lib/access.ts`) verifies the `Authorization: Bearer` token on
   every other `/api/admin/*` request; fails closed (503 without secret, 401 otherwise).
 - Frontend stores the token in `localStorage` and sends it as a Bearer header — a cookie
