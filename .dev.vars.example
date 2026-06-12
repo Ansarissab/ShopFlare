@@ -1,16 +1,38 @@
+# Local worker secrets for `wrangler dev` (worker/index.ts). Copy to `.dev.vars`
+# (gitignored) and fill in. In production these are set via `wrangler secret put`.
+# See docs/setup/environment-variables.md.
+
+# Stripe (use test keys locally)
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_PUBLISHABLE_KEY=pk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
+
+# Resend (transactional email)
 RESEND_API_KEY=re_...
+# Verified sender address. If unset, email falls back to Resend's
+# onboarding@resend.dev test sender (fine locally; set a verified domain address
+# in production for deliverability + branding).
+RESEND_FROM=Store <orders@yourdomain.com>
+
+# Web Push (PWA admin "new order" notifications)
 VAPID_PRIVATE_KEY=...
 VAPID_PUBLIC_KEY=...
+
+# Cloudflare Turnstile (bot protection on public forms + admin login).
+# Verification is skipped entirely when ENVIRONMENT=development, so local dev does
+# NOT need real keys.
 TURNSTILE_SITE_KEY=...
 TURNSTILE_SECRET_KEY=...
-CF_ACCESS_CLIENT_ID=...
-CF_ACCESS_CLIENT_SECRET=...
-# Admin API auth (worker verifies the CF Access assertion JWT). Leave blank in
-# local dev (ENVIRONMENT=development bypasses verification). In production set:
-#   CF_ACCESS_TEAM_DOMAIN — your Zero Trust team domain, no scheme
-#   CF_ACCESS_AUD         — the Audience (AUD) tag of the admin-API Access app
-CF_ACCESS_TEAM_DOMAIN=yourteam.cloudflareaccess.com
-CF_ACCESS_AUD=...
+
+# Admin API auth — app-level HMAC session token (NOT CF Access).
+#   ADMIN_PASSWORD        the admin login password
+#   ADMIN_SESSION_SECRET  HMAC signing secret for the Bearer session token
+#                         (use a long random string, e.g. `openssl rand -hex 32`)
+ADMIN_PASSWORD=changeme-local-password
+ADMIN_SESSION_SECRET=...
+
+# Local dev convenience. ENVIRONMENT=development skips Turnstile verification, and
+# with ADMIN_DEV_BYPASS=1 the admin dashboard skips the login gate locally.
+# NEVER set these in production.
+ENVIRONMENT=development
+ADMIN_DEV_BYPASS=1
