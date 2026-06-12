@@ -62,7 +62,7 @@ Six named looks, each bundling brand colors, font, corner radius, spacing densit
 
 | Preset | Primary | Accent | Feel |
 | --- | --- | --- | --- |
-| Midnight | Near-black | Indigo | Minimal, dark |
+| Midnight | Near-black | Oxidized copper | Minimal, dark |
 | Emerald | Deep green | Mint | Fresh, nature |
 | Sunset | Deep orange | Warm orange | Warm, editorial |
 | Ocean | Deep blue | Sky | Clean, airy |

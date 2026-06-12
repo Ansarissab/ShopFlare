@@ -11,7 +11,7 @@
 > **Deploy button deploys the API worker only.** For a full store (both workers +
 > migrations + Stripe webhook auto-setup), fork the repo and run `pnpm setup`.
 
-🧪 **1360** unit tests &nbsp;·&nbsp; 🔗 **153** integration tests &nbsp;·&nbsp; 📊 **95%** coverage
+🧪 **1368** unit tests &nbsp;·&nbsp; 🔗 **168** integration tests &nbsp;·&nbsp; 📊 **95%** coverage
 
 A free, open-source, self-hosted online store. Fork it, run the setup wizard, start selling.
 No monthly platform fees — it runs entirely on Cloudflare's free tier and Stripe's
@@ -167,7 +167,7 @@ Imports use path aliases only: `@/*` for `src`, `worker/*` for the Worker (no `.
 
 ## Quick start
 
-**Prerequisites:** Node 20+, `pnpm` 9, a Cloudflare account, and a Stripe account.
+**Prerequisites:** Node 22+, `pnpm` 9, a Cloudflare account, and a Stripe account.
 
 ```bash
 # 1. Fork + clone, then install
@@ -264,7 +264,8 @@ you've edited in admin. Delete the `demo_*` rows to remove the sample data.
 | --- | --- |
 | `pnpm dev` | Next.js dev server |
 | `pnpm worker:dev` | Wrangler dev server for the API Worker |
-| `pnpm build` | Production build of the Next.js app (`--webpack` required for Serwist SW injection; Turbopack support pending upstream) |
+| `pnpm build` | Turbopack production build of the Next.js app (fast; does **not** inject the Serwist SW) |
+| `pnpm build:webpack` | Webpack production build — injects the Serwist service worker (required before `web:deploy`) |
 | `pnpm web:preview` | Build via OpenNext + preview the frontend worker locally (workerd) |
 | `pnpm web:deploy` | Build via OpenNext + deploy the frontend worker (`shopflare-web`) |
 | `pnpm setup` | Interactive CF + Stripe setup wizard |
@@ -337,7 +338,7 @@ Two Vitest projects (a workspace), both run by `pnpm test`:
   the review verified-purchase gate, Stripe webhook signature rejection, and admin CRUD.
 
 ```bash
-pnpm test            # all projects (1360 unit + 153 integration)
+pnpm test            # all projects (1368 unit + 168 integration)
 pnpm test:coverage   # unit coverage report (gate: 95%)
 pnpm typecheck && pnpm test && pnpm build
 ```
@@ -377,6 +378,7 @@ Domain setup: [docs/setup/domain-setup.md](docs/setup/domain-setup.md).
 - Decisions: [docs/adr/](docs/adr/)
 - Features: [Stripe](docs/features/stripe-checkout.md) · [COD](docs/features/cod-orders.md) · [coupons](docs/features/coupons.md) · [inventory](docs/features/inventory.md) · [reviews/notify](docs/features/pwa-notifications.md) · [WhatsApp](docs/features/whatsapp.md)
 - Admin guide: [docs/admin-guide/](docs/admin-guide/)
+- Design system: [DESIGN.md](DESIGN.md) (Instrument Serif + Geist, warm-paper neutrals, oxidized-copper accent)
 - Runbooks: [payments verification](docs/runbooks/payments-verification.md) (Stripe test-mode + bank transfer)
 
 ---
