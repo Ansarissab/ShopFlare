@@ -37,9 +37,9 @@ export function ProductCard({
   const canQuickAdd = activeSizes.length === 1
 
   function handleQuickAdd(e: React.MouseEvent) {
+    if (!canQuickAdd) return
     e.preventDefault()
     e.stopPropagation()
-    if (!canQuickAdd) return
     const size = activeSizes[0]
     const variant = variants.find((v) => v.id === size.variantId) ?? variants[0]
     addItem({
@@ -94,8 +94,10 @@ export function ProductCard({
 
         {isNew && <Badge className="absolute left-2 top-2">{en.product.new}</Badge>}
 
-        {/* Quick-add affordance — revealed on hover, hidden when OOS or multi-size (needs PDP) */}
-        {activeSizes.length > 0 && (
+        {/* Quick-add affordance — revealed on hover, only for single-size products.
+            Multi-size products skip this overlay; the whole card is a <Link> to the PDP
+            where the shopper picks a size. */}
+        {canQuickAdd && (
           <div
             className={cn(
               'absolute inset-x-0 bottom-0',
@@ -115,13 +117,10 @@ export function ProductCard({
                 'text-xs font-medium tracking-wide',
                 'bg-background/90 backdrop-blur-[2px]',
                 'text-foreground border-t border-border/60',
-                'transition-colors hover:bg-background',
-                // When multiple sizes: clicking navigates to PDP (default link behaviour)
-                // When single size: JS handler fires. Either way the button is meaningful.
-                canQuickAdd ? 'cursor-pointer' : 'cursor-pointer',
+                'transition-colors hover:bg-background cursor-pointer',
               )}
             >
-              {canQuickAdd ? en.store.quickAdd : en.store.addToCart}
+              {en.store.quickAdd}
             </button>
           </div>
         )}
