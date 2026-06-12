@@ -3,15 +3,25 @@
 // stay on the protected /api/admin prefix (never the public /api/orders router).
 
 import { Hono } from 'hono'
-import { eq, desc, count, sql } from 'drizzle-orm'
+import { eq, and, desc, count, inArray, sql } from 'drizzle-orm'
 import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import { updateOrderStatusSchema, updateTrackingSchema } from '@/lib/schemas'
-import { createOrder, assertItemsAvailable, CouponError, StockError } from 'worker/lib/orders'
+import {
+  createOrder,
+  assertItemsAvailable,
+  releaseOrderInventory,
+  CouponError,
+  StockError,
+} from 'worker/lib/orders'
 import { parseBody } from 'worker/lib/http'
 import { posOrderSchema } from '@/lib/schemas'
 import type { AdminEnv } from 'worker/lib/access'
 import { notifyOrderStatusChange } from 'worker/lib/notify'
+import { rowsChanged } from 'worker/lib/d1'
+
+// Statuses that hold reserved stock — cancelling from one of these must release inventory.
+const STOCK_HOLDING_STATUSES = ['pending', 'confirmed', 'processing'] as const
 
 const app = new Hono<AdminEnv>()
 
@@ -130,20 +140,65 @@ app.patch('/:id/status', async (c) => {
   const db = createDb(c.env.DB)
 
   const order = await db
-    .select({ id: schema.orders.id, orderNumber: schema.orders.orderNumber })
+    .select({
+      id: schema.orders.id,
+      orderNumber: schema.orders.orderNumber,
+      status: schema.orders.status,
+    })
     .from(schema.orders)
     .where(byIdOrNumber(id))
     .get()
   if (!order) return c.json({ error: 'Order not found' }, 404)
 
-  await db
-    .update(schema.orders)
-    .set({
-      status,
-      ...(notes !== undefined ? { notes } : {}),
-      updatedAt: new Date().toISOString(),
-    })
-    .where(eq(schema.orders.id, order.id))
+  // BUG #3 fix: when transitioning to cancelled from a stock-holding status,
+  // use a conditional WHERE to win the race atomically, then release inventory
+  // exactly once (mirror the public cancel route and the Stripe expired handler).
+  if (status === 'cancelled') {
+    const stockHolding = (STOCK_HOLDING_STATUSES as readonly string[]).includes(order.status)
+
+    if (stockHolding) {
+      // Conditional UPDATE: only wins if the order is still in a stock-holding
+      // state — prevents double-release under concurrent admin actions.
+      const cancelRes = await db
+        .update(schema.orders)
+        .set({
+          status: 'cancelled',
+          ...(notes !== undefined ? { notes } : {}),
+          updatedAt: new Date().toISOString(),
+        })
+        .where(
+          and(
+            eq(schema.orders.id, order.id),
+            inArray(schema.orders.status, [...STOCK_HOLDING_STATUSES]),
+          ),
+        )
+
+      if (rowsChanged(cancelRes) === 1) {
+        await releaseOrderInventory(db, order.id)
+      }
+    } else {
+      // Order is already in a non-stock-holding state (shipped, delivered,
+      // cancelled) — unconditional update is safe; no inventory to release.
+      await db
+        .update(schema.orders)
+        .set({
+          status: 'cancelled',
+          ...(notes !== undefined ? { notes } : {}),
+          updatedAt: new Date().toISOString(),
+        })
+        .where(eq(schema.orders.id, order.id))
+    }
+  } else {
+    // Non-cancellation transitions — no inventory change needed.
+    await db
+      .update(schema.orders)
+      .set({
+        status,
+        ...(notes !== undefined ? { notes } : {}),
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(schema.orders.id, order.id))
+  }
 
   // Notify customer via push when status reaches shipped/delivered
   c.executionCtx?.waitUntil(notifyOrderStatusChange(db, c.env, order.orderNumber, status))

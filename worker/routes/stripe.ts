@@ -13,6 +13,10 @@ import { notifyNewOrder } from 'worker/lib/notify'
 import { rowsChanged } from 'worker/lib/d1'
 import type { Bindings } from 'worker/types'
 
+// Stock-reserving statuses: any order in one of these states holds reserved
+// inventory that must be released when the order is cancelled.
+const STOCK_HOLDING_STATUSES = ['pending', 'confirmed', 'processing'] as const
+
 const app = new Hono<{ Bindings: Bindings }>()
 
 // ─── Validation schema ────────────────────────────────────────────────────────
@@ -72,13 +76,19 @@ app.post('/checkout-session', async (c) => {
       .where(eq(schema.sizeOptions.stripePriceId, item.stripePriceId))
       .get()
 
-    if (sizeOpt) {
-      orderItems.push({ sizeOptionId: sizeOpt.id, quantity: item.quantity })
-    } else {
-      // stripePriceId not found in D1 — log and skip snapshot; order will
-      // still be created but without this line item in the snapshot.
-      console.warn('[stripe/checkout] stripePriceId not found in D1', item.stripePriceId)
+    // BUG #6 fix: treat missing OR inactive sizeOption as unavailable.
+    // Mirror COD's assertItemsAvailable behaviour — return 422 BEFORE
+    // calling createOrder so no order/stock is ever written for a bad item.
+    if (!sizeOpt || !sizeOpt.active) {
+      return c.json(
+        {
+          error: `Item not available: ${item.stripePriceId}`,
+        },
+        422,
+      )
     }
+
+    orderItems.push({ sizeOptionId: sizeOpt.id, quantity: item.quantity })
   }
 
   // createOrder atomically reserves stock; it throws StockError if an item sold
@@ -167,7 +177,22 @@ app.post('/checkout-session', async (c) => {
 
     return c.json({ url: session.url })
   } catch (err) {
+    // BUG #2 fix: session.create threw — release the stock reserved by
+    // createOrder above and mark the order cancelled so it can never be
+    // confirmed later (no checkout.session.completed will ever arrive for it).
+    // Gate on rowsChanged so the release runs exactly once even if this
+    // handler is somehow called twice for the same orderId.
+    const cancelRes = await db
+      .update(schema.orders)
+      .set({ status: 'cancelled', updatedAt: new Date().toISOString() })
+      .where(and(eq(schema.orders.id, orderId), eq(schema.orders.status, 'pending')))
+
+    if (rowsChanged(cancelRes) === 1) {
+      await releaseOrderInventory(db, orderId)
+    }
+
     const message = err instanceof Error ? err.message : 'Stripe error'
+    console.error('[stripe/checkout] session.create failed — order cancelled', { orderId, message })
     return c.json({ error: message }, 500)
   }
 })
@@ -231,28 +256,45 @@ app.post('/webhook', async (c) => {
       const customerName = session.customer_details?.name ?? null
       const customerEmail = session.customer_details?.email ?? null
 
-      // Confirm the order and record the idempotency row atomically (a D1 batch
-      // is one transaction). A retry after a mid-handler crash re-runs the batch;
-      // a retry after success short-circuits at the idempotency check above — so
-      // the notifications below fire exactly once.
-      await db.batch([
-        db
-          .update(schema.orders)
-          .set({
-            status: 'confirmed',
-            stripeSessionId: session.id,
-            stripePaymentIntentId,
-            ...(customerName ? { customerName } : {}),
-            ...(customerEmail ? { customerEmail } : {}),
-            updatedAt: new Date().toISOString(),
-          })
-          .where(eq(schema.orders.id, orderId)),
-        db.insert(schema.stripeEvents).values({
-          id: nanoid(),
-          eventId: event.id,
-          type: event.type,
-        }),
-      ])
+      // BUG #4 fix: only confirm an order that is still pending — add a status
+      // guard to the UPDATE so a previously-cancelled order can never be
+      // resurrected by a late/replayed completed event. We still record the
+      // idempotency row (so Stripe stops retrying) but skip notifications.
+      //
+      // Use a two-step approach instead of db.batch: first do the guarded UPDATE
+      // and check rowsChanged, THEN insert the idempotency row. This lets us
+      // branch on whether the order was actually transitioned.
+      const confirmRes = await db
+        .update(schema.orders)
+        .set({
+          status: 'confirmed',
+          stripeSessionId: session.id,
+          stripePaymentIntentId,
+          ...(customerName ? { customerName } : {}),
+          ...(customerEmail ? { customerEmail } : {}),
+          updatedAt: new Date().toISOString(),
+        })
+        .where(and(eq(schema.orders.id, orderId), eq(schema.orders.status, 'pending')))
+
+      // Always record the idempotency row so Stripe stops retrying this event
+      // regardless of whether the order was actually in a pending state.
+      await db.insert(schema.stripeEvents).values({
+        id: nanoid(),
+        eventId: event.id,
+        type: event.type,
+      })
+
+      if (rowsChanged(confirmRes) !== 1) {
+        // Order was not pending (already cancelled, confirmed, etc.) — log and ack.
+        console.warn(
+          '[stripe/webhook] completed event hit non-pending order — skipping side-effects',
+          {
+            orderId,
+            eventId: event.id,
+          },
+        )
+        break
+      }
 
       // Backfill coupon_uses.customerEmail with the real email from Stripe.
       // createOrder writes the coupon_uses row at session-creation time when
