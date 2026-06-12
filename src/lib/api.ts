@@ -15,12 +15,26 @@ import { resolveWorkerUrl as resolveWorkerUrlFromEnv } from '@/lib/worker-url'
 // client fetch target and the Next.js CSP allow-list (next.config.ts) share ONE
 // source of truth and can never diverge (a divergence silently CSP-blocks every
 // dev API call).
+//
+// IMPORTANT: we pass an object with STATIC member accesses, NOT `process.env`
+// itself. Next.js only statically inlines direct member accesses like
+// `process.env.NEXT_PUBLIC_*` into the client bundle. Passing the whole
+// `process.env` object means the helper would read `env.NEXT_PUBLIC_WORKER_URL`
+// dynamically, which resolves to `undefined` in the browser — causing the
+// storefront to fetch relative `/api/*` on the Next origin (404) instead of the
+// worker. Keep each access as a literal `process.env.KEY` reference.
 export function resolveWorkerUrl(): string {
-  return resolveWorkerUrlFromEnv(process.env, (configured) =>
-    console.warn(
-      `[api] Ignoring non-local NEXT_PUBLIC_WORKER_URL (${configured}) in development to keep ` +
-        `dev off production. Use http://localhost:8787, or set NEXT_PUBLIC_ALLOW_REMOTE_API=1 to override.`,
-    ),
+  return resolveWorkerUrlFromEnv(
+    {
+      NEXT_PUBLIC_WORKER_URL: process.env.NEXT_PUBLIC_WORKER_URL,
+      NODE_ENV: process.env.NODE_ENV,
+      NEXT_PUBLIC_ALLOW_REMOTE_API: process.env.NEXT_PUBLIC_ALLOW_REMOTE_API,
+    },
+    (configured) =>
+      console.warn(
+        `[api] Ignoring non-local NEXT_PUBLIC_WORKER_URL (${configured}) in development to keep ` +
+          `dev off production. Use http://localhost:8787, or set NEXT_PUBLIC_ALLOW_REMOTE_API=1 to override.`,
+      ),
   )
 }
 
