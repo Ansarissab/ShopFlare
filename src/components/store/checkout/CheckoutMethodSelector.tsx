@@ -93,8 +93,12 @@ export function CheckoutMethodSelector() {
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Method selector */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      {/* Method selector — behaves as a radio group */}
+      <div
+        role="radiogroup"
+        aria-label={en.checkout.paymentMethodLegend}
+        className="grid grid-cols-1 sm:grid-cols-2 gap-2"
+      >
         {methods.map((m) => {
           const Icon = m.icon
           const selected = active === m.value
@@ -102,6 +106,8 @@ export function CheckoutMethodSelector() {
             <button
               key={m.value}
               type="button"
+              role="radio"
+              aria-checked={selected}
               onClick={() => setActive(m.value)}
               className={cn(
                 'flex items-start gap-3 rounded-lg border p-4 text-left transition-colors',

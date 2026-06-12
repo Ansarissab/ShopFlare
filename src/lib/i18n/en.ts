@@ -86,6 +86,7 @@ export const en = {
     orderCancelled: 'Order Cancelled',
     cancelSuccess: 'Your order has been cancelled successfully.',
     cannotCancel: 'This order cannot be cancelled.',
+    paymentMethodLegend: 'Payment method',
     stripeRedirectNote: "You will be redirected to Stripe's secure payment page.",
     cardDescription: 'Pay securely via Stripe',
     codDescription: 'Pay when your order arrives',

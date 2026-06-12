@@ -13,6 +13,7 @@ export function CategoryFilter({ categories, activeSlug, onChange }: CategoryFil
         {/* All Products chip */}
         <button
           type="button"
+          aria-pressed={activeSlug === null}
           onClick={() => onChange(null)}
           className={cn(
             'inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium transition-colors whitespace-nowrap',
@@ -28,6 +29,7 @@ export function CategoryFilter({ categories, activeSlug, onChange }: CategoryFil
           <button
             key={cat.id}
             type="button"
+            aria-pressed={activeSlug === cat.slug}
             onClick={() => onChange(cat.slug)}
             className={cn(
               'inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium transition-colors whitespace-nowrap',
