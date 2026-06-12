@@ -68,6 +68,7 @@ export default async function StorePage() {
             storeName: config?.storeName ?? 'Store',
             tagline: config?.tagline,
             logoUrl: config?.logoUrl,
+            heroStyle: config?.heroStyle,
           }}
         />
         {faqItems.length > 0 && (

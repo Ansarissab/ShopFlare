@@ -21,7 +21,7 @@ export interface LandingData {
 // Props consumed by the server LandingPage component and its children.
 export interface LandingPageProps {
   landing: LandingData
-  storeConfig: { storeName: string; tagline?: string; logoUrl?: string }
+  storeConfig: { storeName: string; tagline?: string; logoUrl?: string; heroStyle?: string }
 }
 
 export interface HeroSectionProps {

@@ -24,6 +24,7 @@ export function LandingPage({ landing, storeConfig }: LandingPageProps) {
                 section={section}
                 imageUrl={r2Url(section.imageR2Key)}
                 storeName={storeConfig.storeName}
+                heroStyle={storeConfig.heroStyle}
               />
             )
           case 'story':
