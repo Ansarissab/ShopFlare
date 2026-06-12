@@ -4,8 +4,8 @@
 // are all exercised exactly as in production. ENVIRONMENT=development makes the
 // Turnstile + CF Access checks bypass (see vitest.integration.config.ts).
 
-import { env, SELF } from 'cloudflare:test'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { env, SELF, fetchMock } from 'cloudflare:test'
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { eq } from 'drizzle-orm'
 import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
@@ -53,6 +53,22 @@ const stockOf = async (id: string) =>
       .where(eq(schema.sizeOptions.id, id))
       .get()
   )?.stock
+
+// Stripe is an external API — never hit it in tests. Intercept outbound HTTP via
+// miniflare's fetchMock so checkout-session creation exercises the real D1 path
+// without network calls. Mirror the pattern used in coupons.integration.test.ts.
+beforeAll(() => {
+  fetchMock.activate()
+  fetchMock
+    .get('https://api.stripe.com')
+    .intercept({ method: 'POST', path: /^\/v1\/checkout\/sessions/ })
+    .reply(
+      200,
+      JSON.stringify({ id: 'cs_test_stub', url: 'https://checkout.stripe.com/pay/cs_test_stub' }),
+      { headers: { 'Content-Type': 'application/json' } },
+    )
+    .persist()
+})
 
 // Tables cleared between tests (defensive — storage is also isolated per test).
 const TABLES = [
@@ -260,6 +276,158 @@ describe('coupons', () => {
 
     const bad = await post('/api/coupons/validate', { code: 'NOPE', subtotalCents: 1000 })
     expect(await bad.json()).toMatchObject({ valid: false })
+  })
+})
+
+// ─── C1: POST /api/stripe/checkout-session ────────────────────────────────────
+//
+// Stripe's session.create is stubbed via fetchMock (see beforeAll above).
+// What IS covered:
+//   - body validation (400 on missing items)
+//   - stripePriceId → sizeOptionId resolution + order + orderItems created in D1
+//   - stock reserved (decremented) at session-creation time
+//   - stripeSessionId persisted from the stubbed Stripe response
+//   - tax line-item branch: tax inserted into Stripe payload (verified indirectly
+//     via the order row's taxCents)
+//   - coupon applied at session-creation: discountCents recorded on the order
+//   - 422 on out-of-stock before the Stripe call is attempted
+//   - 422 on invalid coupon code
+// What is NOT covered by this harness:
+//   - The actual Stripe-hosted checkout UI and payment flow
+//   - session.url validity (Stripe returns the real hosted URL in production)
+describe('stripe checkout-session POST', () => {
+  it('validates body — rejects missing items (400)', async () => {
+    const res = await post('/api/stripe/checkout-session', {})
+    expect(res.status).toBe(400)
+  })
+
+  it('creates order + reserves stock + persists stripeSessionId', async () => {
+    await seedProduct({ stock: 5, priceCents: 1000 })
+    // Add stripePriceId to the sizeOption so the route can resolve it
+    await db()
+      .update(schema.sizeOptions)
+      .set({ stripePriceId: 'price_test_s1' })
+      .where(eq(schema.sizeOptions.id, 's1'))
+
+    const res = await post('/api/stripe/checkout-session', {
+      items: [{ stripePriceId: 'price_test_s1', quantity: 2 }],
+    })
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as { url: string }
+    expect(body.url).toBe('https://checkout.stripe.com/pay/cs_test_stub')
+
+    // Order row created as pending with the stubbed session id
+    const orders = await db().select().from(schema.orders).all()
+    expect(orders).toHaveLength(1)
+    expect(orders[0].status).toBe('pending')
+    expect(orders[0].paymentMethod).toBe('stripe_checkout')
+    expect(orders[0].stripeSessionId).toBe('cs_test_stub')
+    expect(orders[0].subtotalCents).toBe(2000)
+
+    // Order items created from the resolved sizeOptionId
+    const items = await db().select().from(schema.orderItems).all()
+    expect(items).toHaveLength(1)
+    expect(items[0].sizeOptionId).toBe('s1')
+    expect(items[0].quantity).toBe(2)
+
+    // Stock reserved at session-creation time (5 - 2 = 3)
+    expect(await stockOf('s1')).toBe(3)
+  })
+
+  it('records taxCents on the order when tax is enabled', async () => {
+    await seedProduct({ stock: 5, priceCents: 2000 })
+    await db()
+      .update(schema.sizeOptions)
+      .set({ stripePriceId: 'price_tax_s1' })
+      .where(eq(schema.sizeOptions.id, 's1'))
+    // Enable a 10% non-inclusive tax
+    await db()
+      .insert(schema.storeConfig)
+      .values([
+        { key: 'taxEnabled', value: 'true' },
+        { key: 'taxRate', value: '10' },
+        { key: 'taxInclusive', value: 'false' },
+        { key: 'taxName', value: 'GST' },
+        { key: 'taxBasis', value: 'subtotal' },
+      ])
+
+    const res = await post('/api/stripe/checkout-session', {
+      items: [{ stripePriceId: 'price_tax_s1', quantity: 1 }],
+    })
+    expect(res.status).toBe(200)
+
+    const order = await db().select().from(schema.orders).get()
+    // 10% of 2000 = 200 tax cents
+    expect(order?.taxCents).toBe(200)
+    expect(order?.totalCents).toBe(2200)
+  })
+
+  it('applies coupon: discountCents on order + couponUses row written', async () => {
+    await seedProduct({ stock: 5, priceCents: 2000 })
+    await db()
+      .update(schema.sizeOptions)
+      .set({ stripePriceId: 'price_coup_s1' })
+      .where(eq(schema.sizeOptions.id, 's1'))
+    await db().insert(schema.coupons).values({
+      id: 'coup_stripe',
+      code: 'STRIPE10',
+      type: 'percentage',
+      value: 10,
+      perCustomerLimit: 1,
+      usedCount: 0,
+      active: true,
+    })
+
+    const res = await post('/api/stripe/checkout-session', {
+      items: [{ stripePriceId: 'price_coup_s1', quantity: 1 }],
+      couponCode: 'STRIPE10',
+    })
+    expect(res.status).toBe(200)
+
+    const order = await db().select().from(schema.orders).get()
+    expect(order?.discountCents).toBe(200) // 10% of 2000
+    expect(order?.couponCode).toBe('STRIPE10')
+
+    // coupon_uses row created with null email (email unknown at session-creation time)
+    const uses = await db()
+      .select()
+      .from(schema.couponUses)
+      .where(eq(schema.couponUses.couponId, 'coup_stripe'))
+      .all()
+    expect(uses).toHaveLength(1)
+    expect(uses[0].customerEmail).toBeNull()
+  })
+
+  it('returns 422 when an item is out of stock before the Stripe call', async () => {
+    await seedProduct({ stock: 1, priceCents: 1000 })
+    await db()
+      .update(schema.sizeOptions)
+      .set({ stripePriceId: 'price_oos_s1' })
+      .where(eq(schema.sizeOptions.id, 's1'))
+
+    const res = await post('/api/stripe/checkout-session', {
+      items: [{ stripePriceId: 'price_oos_s1', quantity: 5 }],
+    })
+    expect(res.status).toBe(422)
+
+    // No order created, stock unchanged
+    const orders = await db().select().from(schema.orders).all()
+    expect(orders).toHaveLength(0)
+    expect(await stockOf('s1')).toBe(1)
+  })
+
+  it('returns 422 for an invalid coupon code', async () => {
+    await seedProduct({ stock: 5, priceCents: 1000 })
+    await db()
+      .update(schema.sizeOptions)
+      .set({ stripePriceId: 'price_badc_s1' })
+      .where(eq(schema.sizeOptions.id, 's1'))
+
+    const res = await post('/api/stripe/checkout-session', {
+      items: [{ stripePriceId: 'price_badc_s1', quantity: 1 }],
+      couponCode: 'DOESNOTEXIST',
+    })
+    expect(res.status).toBe(422)
   })
 })
 
@@ -523,6 +691,55 @@ describe('stripe webhook', () => {
       .where(eq(schema.stripeEvents.eventId, 'evt_idem_exp'))
       .all()
     expect(rows).toHaveLength(1) // idempotency row written once
+  })
+
+  // H2: per-customer coupon limit attribution for Stripe orders.
+  // createOrder writes coupon_uses with customerEmail=null (contact unknown at
+  // session-creation). checkout.session.completed must backfill customerEmail so
+  // the per-customer cap counts this use for the customer's future orders.
+  it('checkout.session.completed backfills coupon_uses.customerEmail for per-customer limit', async () => {
+    await db().insert(schema.coupons).values({
+      id: 'c_attr',
+      code: 'ATTR10',
+      type: 'percentage',
+      value: 10,
+      perCustomerLimit: 1,
+      usedCount: 0,
+      active: true,
+    })
+    const orderId = await seedStripeOrder({ stock: 5, couponCode: 'ATTR10' })
+
+    // Before webhook: coupon_uses row exists with null email
+    const usesBefore = await db()
+      .select()
+      .from(schema.couponUses)
+      .where(eq(schema.couponUses.couponId, 'c_attr'))
+      .all()
+    expect(usesBefore).toHaveLength(1)
+    expect(usesBefore[0].customerEmail).toBeNull()
+
+    // Fire completed webhook with real customer email
+    await signedWebhook({
+      id: 'evt_attr_complete',
+      type: 'checkout.session.completed',
+      data: {
+        object: {
+          id: 'cs_test_attr',
+          metadata: { orderId },
+          payment_intent: 'pi_attr',
+          customer_details: { name: 'Alice', email: 'alice@example.com' },
+        },
+      },
+    })
+
+    // coupon_uses row is backfilled with the real email
+    const usesAfter = await db()
+      .select()
+      .from(schema.couponUses)
+      .where(eq(schema.couponUses.couponId, 'c_attr'))
+      .all()
+    expect(usesAfter).toHaveLength(1)
+    expect(usesAfter[0].customerEmail).toBe('alice@example.com')
   })
 })
 
