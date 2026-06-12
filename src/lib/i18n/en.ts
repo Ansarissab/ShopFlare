@@ -34,6 +34,7 @@ export const en = {
     allProductsLoaded: 'All products loaded',
     showingProducts: 'Showing {count} products',
     showingProductsOf: 'Showing {shown} of {total} products',
+    quickAdd: 'Quick add',
     whatsappWidgetLabel: 'Chat on WhatsApp',
     // Landing page store-front copy
     shopAllProducts: 'Shop All Products',

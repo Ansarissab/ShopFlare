@@ -206,6 +206,24 @@ nav, [data-tab-bar] {
   }
 }
 
+/* ─── Product grid staggered entrance ───────────────────────────────────────
+   .pg-enter gives each card a CSS @starting-style entrance: fades + lifts in
+   from translateY(12px). The inline transition-delay on each card staggers the
+   effect without any JS animation library.
+   Gated on prefers-reduced-motion: no-preference — reduced-motion skips it.
+   ─────────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  .pg-enter {
+    transition: opacity 280ms ease-out, transform 280ms ease-out;
+    transition-behavior: allow-discrete;
+
+    @starting-style {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+}
+
 /* In standalone mode: hide web chrome and add padding for app shell */
 @media (display-mode: standalone) {
   [data-web-chrome] {

@@ -1,3 +1,4 @@
+import type * as React from 'react'
 import type { Product, Variant, SizeOption, ProductImage } from 'worker/db/schema'
 import type { CurrencyCode } from '@/lib/constants'
 
@@ -66,6 +67,8 @@ export interface ProductCardProps {
   images: ProductImage[]
   isNew?: boolean
   className?: string
+  /** Inline styles forwarded to the root element (e.g. transition-delay for stagger) */
+  style?: React.CSSProperties
 }
 
 export interface ProductHeroProps {

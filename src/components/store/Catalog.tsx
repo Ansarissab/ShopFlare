@@ -26,11 +26,11 @@ interface CatalogProps {
 function ProductListingSkeleton() {
   return (
     <div className={layout.page}>
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">
         {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="flex flex-col gap-3">
-            <Skeleton className="aspect-square w-full rounded-xl" />
-            <Skeleton className="h-5 w-3/4" />
+          <div key={i} className="flex flex-col gap-2.5">
+            <Skeleton className="aspect-4/5 w-full rounded-[3px]" />
+            <Skeleton className="h-4 w-3/4" />
             <Skeleton className="h-4 w-1/3" />
           </div>
         ))}
@@ -158,7 +158,7 @@ export function Catalog({ basePath = '/' }: CatalogProps) {
         )
       ) : (
         <>
-          <p className="mb-4 text-sm text-muted-foreground">
+          <p className="mb-6 font-mono text-xs uppercase tracking-wide text-muted-foreground">
             {hasMore
               ? en.store.showingProductsOf
                   .replace('{shown}', String(visibleItems.length))
