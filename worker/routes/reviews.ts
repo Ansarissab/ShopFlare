@@ -12,6 +12,7 @@ import { parseBody } from 'worker/lib/http'
 import { verifyTurnstile } from 'worker/lib/turnstile'
 import { rateLimit } from 'worker/lib/ratelimit'
 import { reviewsAllowed } from 'worker/lib/reviews'
+import { contactMatchesOrder } from 'worker/lib/order-contact'
 import { en } from '@/lib/i18n/en'
 import type { Bindings } from 'worker/types'
 
@@ -67,19 +68,7 @@ app.post('/', async (c) => {
     return c.json({ error: VERIFY_FAILED }, 403)
   }
 
-  const digitsOnly = (s: string) => s.replace(/\D/g, '')
-  const contactLower = contact.trim().toLowerCase()
-  const contactDigits = digitsOnly(contact)
-
-  const emailMatch =
-    order.customerEmail !== null && order.customerEmail.toLowerCase() === contactLower
-
-  const phoneMatch =
-    contactDigits.length > 0 &&
-    order.customerPhone !== null &&
-    digitsOnly(order.customerPhone).endsWith(contactDigits)
-
-  if (!emailMatch && !phoneMatch) {
+  if (!contactMatchesOrder(order, contact)) {
     return c.json({ error: VERIFY_FAILED }, 403)
   }
 

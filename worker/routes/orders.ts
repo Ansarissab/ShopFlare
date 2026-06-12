@@ -19,6 +19,7 @@ import {
 import { parseBody } from 'worker/lib/http'
 import { verifyTurnstile } from 'worker/lib/turnstile'
 import { rateLimit } from 'worker/lib/ratelimit'
+import { contactMatchesOrder } from 'worker/lib/order-contact'
 import { notifyNewOrder } from 'worker/lib/notify'
 import type { Bindings } from 'worker/types'
 
@@ -53,17 +54,7 @@ app.get('/track/:orderNumber', async (c) => {
   let contactVerified = false
 
   if (contact) {
-    const contactLower = contact.trim().toLowerCase()
-    const emailMatch =
-      order.customerEmail !== null && order.customerEmail.toLowerCase() === contactLower
-    const digitsOnly = (s: string) => s.replace(/\D/g, '')
-    const contactDigits = digitsOnly(contact)
-    const phoneMatch =
-      contactDigits.length > 0 &&
-      order.customerPhone !== null &&
-      digitsOnly(order.customerPhone).endsWith(contactDigits)
-
-    if (!emailMatch && !phoneMatch) {
+    if (!contactMatchesOrder(order, contact)) {
       return c.json({ error: 'Contact does not match this order' }, 403)
     }
     contactVerified = true
@@ -239,17 +230,7 @@ app.post('/:orderNumber/cancel', async (c) => {
   if (!order) return c.json({ error: 'Order not found' }, 404)
 
   // Verify the caller owns the order before allowing cancellation.
-  const contactLower = contact.trim().toLowerCase()
-  const digitsOnly = (s: string) => s.replace(/\D/g, '')
-  const emailMatch =
-    order.customerEmail !== null && order.customerEmail.toLowerCase() === contactLower
-  const contactDigits = digitsOnly(contact)
-  const phoneMatch =
-    contactDigits.length > 0 &&
-    order.customerPhone !== null &&
-    digitsOnly(order.customerPhone).endsWith(contactDigits)
-
-  if (!emailMatch && !phoneMatch) {
+  if (!contactMatchesOrder(order, contact)) {
     return c.json({ error: 'Contact does not match this order' }, 403)
   }
 
