@@ -12,6 +12,7 @@ import * as schema from 'worker/db/schema'
 import { SECTION_SCHEMAS, featuredProductsSchema, sectionKeySchema } from '@/lib/schemas/landing'
 import type { LandingSectionInput } from '@/lib/schemas/landing'
 import { parseBody } from 'worker/lib/http'
+import { sanitizeHtml } from 'worker/lib/sanitize'
 import { bumpDataVersion } from 'worker/lib/version'
 import type { AdminEnv } from 'worker/lib/access'
 import { LANDING_SECTION_KEYS } from '@/lib/constants'
@@ -88,7 +89,7 @@ app.put('/sections/:key', async (c) => {
     enabled: data.enabled ?? true,
     heading: data.heading ?? null,
     subtext: data.subtext ?? null,
-    bodyHtml: data.bodyHtml ?? null,
+    bodyHtml: data.bodyHtml != null ? sanitizeHtml(data.bodyHtml) : null,
     ctaText: data.ctaText ?? null,
     ctaHref: data.ctaHref ?? null,
     imageR2Key: data.imageR2Key ?? null,

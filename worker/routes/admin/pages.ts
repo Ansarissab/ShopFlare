@@ -5,6 +5,7 @@ import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import { updatePageSchema } from '@/lib/schemas'
 import { parseBody } from 'worker/lib/http'
+import { sanitizeHtml } from 'worker/lib/sanitize'
 import { bumpDataVersion } from 'worker/lib/version'
 import type { AdminEnv } from 'worker/lib/access'
 import { POLICY_SLUGS } from '@/lib/constants'
@@ -41,10 +42,10 @@ app.put('/:slug', async (c) => {
 
   await db
     .insert(schema.pages)
-    .values({ slug, title: parsed.data.title, content: parsed.data.content })
+    .values({ slug, title: parsed.data.title, content: sanitizeHtml(parsed.data.content) })
     .onConflictDoUpdate({
       target: schema.pages.slug,
-      set: { title: parsed.data.title, content: parsed.data.content, updatedAt: now },
+      set: { title: parsed.data.title, content: sanitizeHtml(parsed.data.content), updatedAt: now },
     })
 
   await bumpDataVersion(db)
