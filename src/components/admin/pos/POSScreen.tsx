@@ -265,7 +265,13 @@ export function POSScreen() {
               <li key={item.sizeOptionId} className="flex items-center gap-3">
                 {item.imageUrl && (
                   <div className="relative size-10 rounded-md overflow-hidden border shrink-0">
-                    <Image src={item.imageUrl} alt="" fill className="object-cover" sizes="40px" />
+                    <Image
+                      src={item.imageUrl}
+                      alt={item.productName}
+                      fill
+                      className="object-cover"
+                      sizes="40px"
+                    />
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
