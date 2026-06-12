@@ -360,4 +360,79 @@ describe('POST /api/orders/cod with coupon', () => {
     })
     expect(res.status).toBe(422)
   })
+
+  it('concurrent orders: global usageLimit=1 — exactly one wins, usedCount never exceeds limit', async () => {
+    // Seed enough stock so the race is on the coupon slot, not on inventory.
+    await seedProduct({ priceCents: 2000, stock: 10 })
+    await db().insert(schema.coupons).values({
+      id: 'race-coup',
+      code: 'ONETIME',
+      type: 'fixed',
+      value: 100,
+      usageLimit: 1,
+      perCustomerLimit: 99,
+      usedCount: 0,
+      active: true,
+    })
+
+    const body = {
+      items: [{ sizeOptionId: 's1', quantity: 1 }],
+      shippingAddress: ADDRESS,
+      couponCode: 'ONETIME',
+    }
+    const [r1, r2] = await Promise.all([
+      post('/api/orders/cod', body),
+      post('/api/orders/cod', body),
+    ])
+
+    const statuses = [r1.status, r2.status].sort()
+    // Exactly one order succeeds, the other gets a 422 (CouponError)
+    expect(statuses).toEqual([201, 422])
+
+    // usedCount must be exactly 1 — never 2
+    const row = await db()
+      .select({ usedCount: schema.coupons.usedCount })
+      .from(schema.coupons)
+      .where(eq(schema.coupons.id, 'race-coup'))
+      .get()
+    expect(row?.usedCount).toBe(1)
+  })
+
+  it('failed order (out-of-stock) does NOT permanently consume a coupon slot', async () => {
+    // Stock=1 so the second order will hit a StockError during reservation.
+    // The coupon slot claimed atomically must be released.
+    await seedProduct({ priceCents: 2000, stock: 1 })
+    await db().insert(schema.coupons).values({
+      id: 'rollback-coup',
+      code: 'ROLLBACK5',
+      type: 'fixed',
+      value: 100,
+      usageLimit: 5,
+      perCustomerLimit: 99,
+      usedCount: 0,
+      active: true,
+    })
+
+    const body = (extraQty: number) => ({
+      items: [{ sizeOptionId: 's1', quantity: extraQty }],
+      shippingAddress: ADDRESS,
+      couponCode: 'ROLLBACK5',
+    })
+
+    // First order succeeds (takes the only stock unit)
+    const r1 = await post('/api/orders/cod', body(1))
+    expect(r1.status).toBe(201)
+
+    // Second order fails — out of stock
+    const r2 = await post('/api/orders/cod', body(1))
+    expect(r2.status).toBe(422)
+
+    // usedCount should be 1 (only the successful order), not 2
+    const row = await db()
+      .select({ usedCount: schema.coupons.usedCount })
+      .from(schema.coupons)
+      .where(eq(schema.coupons.id, 'rollback-coup'))
+      .get()
+    expect(row?.usedCount).toBe(1)
+  })
 })

@@ -393,6 +393,25 @@ export async function createOrder(
     }
 
     discountCents = result.discountCents
+
+    // ── Atomic global-limit claim (TOCTOU fix) ──────────────────────────────
+    // Increment used_count in a single conditional UPDATE so two concurrent
+    // checkouts can't both read the same stale usedCount and both pass.
+    // The WHERE clause ensures the increment only fires when the slot is still
+    // available; if it returns 0 rows the limit was claimed by another request.
+    // This replaces the non-atomic post-batch increment (step 5 below).
+    // Nothing has been reserved yet at this point, so no rollback is needed on
+    // a 0-row result.
+    if (couponRow && couponRow.usageLimit !== null) {
+      const claimRes = await db
+        .update(schema.coupons)
+        .set({ usedCount: sql`used_count + 1` })
+        .where(and(eq(schema.coupons.id, couponRow.id), sql`used_count < ${couponRow.usageLimit}`))
+
+      if (rowsChanged(claimRes) === 0) {
+        throw new CouponError('Coupon usage limit reached')
+      }
+    }
   }
 
   // ── 2b. Shipping — mirrors client's calculateShipping logic ───────────────
@@ -453,6 +472,13 @@ export async function createOrder(
         .set({ stock: sql`${schema.sizeOptions.stock} + ${r.quantity}` })
         .where(eq(schema.sizeOptions.id, r.sizeOptionId))
     }
+    // Release the coupon slot that was atomically claimed above (if any).
+    if (couponRow?.usageLimit !== null && couponRow) {
+      await db
+        .update(schema.coupons)
+        .set({ usedCount: sql`MAX(0, used_count - 1)` })
+        .where(eq(schema.coupons.id, couponRow.id))
+    }
     throw new StockError(`Insufficient stock for size: ${so.size}`)
   }
 
@@ -512,17 +538,21 @@ export async function createOrder(
         .set({ stock: sql`${schema.sizeOptions.stock} + ${r.quantity}` })
         .where(eq(schema.sizeOptions.id, r.sizeOptionId))
     }
+    // Release the coupon slot that was atomically claimed above (if any).
+    if (couponRow?.usageLimit !== null && couponRow) {
+      await db
+        .update(schema.coupons)
+        .set({ usedCount: sql`MAX(0, used_count - 1)` })
+        .where(eq(schema.coupons.id, couponRow.id))
+    }
     throw err
   }
 
-  // ── 5. Increment coupon usedCount (non-transactional counter) ─────────────
-  // This is a denormalised counter updated after the atomic batch. A crash here
-  // leaves usedCount one behind — evaluateCoupon re-checks coupon_uses rows for
-  // the per-customer limit, so the counter being slightly stale is not a
-  // correctness risk for the per-customer check. The global usageLimit check uses
-  // usedCount directly; under extreme failure conditions it could allow one extra
-  // use, which is acceptable given that the coupon_uses row IS committed above.
-  if (couponCode && couponRow) {
+  // NOTE: No separate usedCount increment here. The atomic claim in step 2a
+  // already incremented used_count for coupons with a usageLimit. For unlimited
+  // coupons (usageLimit IS NULL) the count is purely informational — we still
+  // increment it here so the admin dashboard shows real usage stats.
+  if (couponCode && couponRow && couponRow.usageLimit === null) {
     await db
       .update(schema.coupons)
       .set({ usedCount: sql`used_count + 1` })
