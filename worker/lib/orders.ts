@@ -9,6 +9,7 @@ import { DEFAULT_CURRENCY } from '@/lib/constants'
 import type { CurrencyCode } from '@/lib/constants'
 import { calculateTax, calculateGrandTotal } from '@/lib/utils/index'
 import { formatCents } from './money'
+import { rowsChanged } from 'worker/lib/d1'
 
 // ─── Shipping config helper ────────────────────────────────────────────────────
 
@@ -454,7 +455,7 @@ export async function createOrder(
         ),
       )
 
-    if ((res as unknown as D1Result).meta?.changes === 1) {
+    if (rowsChanged(res) === 1) {
       reserved.push({ sizeOptionId: item.sizeOptionId, quantity: item.quantity })
       continue
     }

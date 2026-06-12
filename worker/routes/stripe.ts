@@ -10,6 +10,7 @@ import { parseBody } from 'worker/lib/http'
 import { verifyTurnstile } from 'worker/lib/turnstile'
 import { rateLimit } from 'worker/lib/ratelimit'
 import { notifyNewOrder } from 'worker/lib/notify'
+import { rowsChanged } from 'worker/lib/d1'
 import type { Bindings } from 'worker/types'
 
 const app = new Hono<{ Bindings: Bindings }>()
@@ -306,7 +307,7 @@ app.post('/webhook', async (c) => {
         .set({ status: 'cancelled', updatedAt: new Date().toISOString() })
         .where(and(eq(schema.orders.id, orderId), eq(schema.orders.status, 'pending')))
 
-      if ((cancelRes as unknown as D1Result).meta?.changes === 1) {
+      if (rowsChanged(cancelRes) === 1) {
         // Return the stock + coupon quota reserved at checkout creation to the
         // pool — otherwise every abandoned Stripe checkout leaks inventory.
         await releaseOrderInventory(db, orderId)

@@ -20,6 +20,7 @@ import { parseBody } from 'worker/lib/http'
 import { verifyTurnstile } from 'worker/lib/turnstile'
 import { rateLimit } from 'worker/lib/ratelimit'
 import { contactMatchesOrder } from 'worker/lib/order-contact'
+import { rowsChanged } from 'worker/lib/d1'
 import { notifyNewOrder } from 'worker/lib/notify'
 import type { Bindings } from 'worker/types'
 
@@ -252,7 +253,7 @@ app.post('/:orderNumber/cancel', async (c) => {
       and(eq(schema.orders.id, order.id), inArray(schema.orders.status, ['pending', 'confirmed'])),
     )
 
-  if ((cancelRes as unknown as D1Result).meta?.changes === 1) {
+  if (rowsChanged(cancelRes) === 1) {
     // Return the reserved stock + coupon quota to the pool.
     await releaseOrderInventory(db, order.id)
   }
