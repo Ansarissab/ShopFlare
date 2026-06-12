@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
+import { TurnstileWidget } from '@/components/store/checkout/TurnstileWidget'
 import { en } from '@/lib/i18n/en'
 import { formatPrice } from '@/lib/utils/index'
 import { layout } from '@/lib/styles'
@@ -60,6 +61,8 @@ function CancelOrderContent() {
   const [reason, setReason] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [confirmed, setConfirmed] = useState(false)
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
+  const [turnstileError, setTurnstileError] = useState(false)
 
   // `order` and the data-derived page state are computed during render from the
   // fetch hook — no effect needed to mirror them into state.
@@ -96,12 +99,15 @@ function CancelOrderContent() {
     if (!params?.orderId) return
     setSubmitting(true)
     try {
-      await apiPost(`/api/orders/${params.orderId}/cancel`, {
-        contact,
-        reason: reason.trim() || undefined,
-      })
+      await apiPost(
+        `/api/orders/${params.orderId}/cancel`,
+        { contact, reason: reason.trim() || undefined },
+        { headers: { 'X-Turnstile-Token': turnstileToken ?? '' } },
+      )
       setPhase('success')
     } catch {
+      // Reset Turnstile so the user can retry with a fresh token.
+      setTurnstileToken(null)
       setPhase('error')
     } finally {
       setSubmitting(false)
@@ -264,12 +270,27 @@ function CancelOrderContent() {
         </div>
       </div>
 
+      {/* Turnstile */}
+      <TurnstileWidget
+        onVerify={(token) => {
+          setTurnstileToken(token)
+          setTurnstileError(false)
+        }}
+        onError={() => {
+          setTurnstileToken(null)
+          setTurnstileError(true)
+        }}
+      />
+      {turnstileError && (
+        <p className="text-xs text-destructive">{en.checkout.securityCheckFailed}</p>
+      )}
+
       {/* Actions */}
       <div className="flex flex-col gap-3 sm:flex-row-reverse">
         <Button
           variant="destructive"
           className="flex-1"
-          disabled={!confirmed || submitting}
+          disabled={!confirmed || submitting || !turnstileToken}
           onClick={handleCancel}
         >
           {submitting ? en.tracking.cancelling : en.checkout.cancelOrder}

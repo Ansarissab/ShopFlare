@@ -199,14 +199,22 @@ app.post('/bank-transfer', manualOrderHandler('bank_transfer', 'bank-transfer'))
 app.post('/:orderNumber/cancel', async (c) => {
   // Throttle per IP — cancellation is a state-changing action keyed only on the
   // (unguessable) order number, so a throttle blocks any mass-cancel attempt.
+  const ip = c.req.header('CF-Connecting-IP')
   if (
-    !(await rateLimit(c.env, 'cancel', c.req.header('CF-Connecting-IP'), {
+    !(await rateLimit(c.env, 'cancel', ip, {
       limit: 10,
       windowSeconds: 60,
     }))
   ) {
     return c.json({ error: 'Too many requests' }, 429)
   }
+
+  // Security: verify Turnstile token before any DB work — mirrors the COD path.
+  const token = c.req.header('X-Turnstile-Token') ?? null
+  const valid = await verifyTurnstile(token, c.env.TURNSTILE_SECRET_KEY, ip, {
+    isDevelopment: c.env.ENVIRONMENT === 'development',
+  })
+  if (!valid) return c.json({ error: 'Security check failed' }, 403)
 
   const { orderNumber } = c.req.param()
 
