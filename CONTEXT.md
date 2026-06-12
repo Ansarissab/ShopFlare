@@ -95,11 +95,19 @@ A password-protected section of the Store at /admin/* (app-level admin password 
 
 ## Store Config
 
-Merchant-controlled settings stored in D1: store name, tagline, logo URL, brand colors, contact email, WhatsApp number, social links, currency, country, shipping rates, products-per-page (pagination size), and policy content. Changes take effect without redeploy.
+Merchant-controlled settings stored in D1: store name, tagline, logo URL, brand colors, contact email, WhatsApp number, social links, currency, country, shipping rates, products-per-page (pagination size), policy content, and Locale settings (enabled Locales + default Locale). Changes take effect without redeploy.
 
 ## Product Search
 
-Client-side fuzzy search powered by Fuse.js (threshold 0.35). Searches across product name, description, and variant labels. No API call — all matching runs against the already-loaded product list in the browser. Active query is kept in the `?q=` URL param for shareability. Works in combination with category filter on the home page and stand-alone on category pages.
+Fuzzy search powered by Fuse.js (threshold 0.35) across product name, description, and variant labels. Reached from a search control in the storefront header (and the `/` keyboard shortcut), which opens a search Overlay that searches and filters the full catalog from any page; results are always Products and link directly to a Product. The Overlay also carries the category (and in-stock) filters, so searching and filtering happen in one place. It searches Products only — never app commands or navigation actions. The catalog is fetched once and cached for this purpose. Active query is kept in the `?q=` URL param for shareability. The in-grid filter on catalog/category pages continues to narrow the already-loaded list.
+
+## Locale
+
+A language the storefront chrome can render in. English is the source Locale; French and Urdu are the first additional Locales. Urdu is right-to-left and uses a bundled font. A Locale translates only UI chrome (static interface strings), not Merchant-authored content (Product text, policies, FAQ) — that is a separate later capability. Which Locales are available and which is the default are Merchant-controlled in Store Config.
+
+## Locale Switcher
+
+A storefront control (in the header) letting the Customer choose among the Locales the Merchant has enabled. Shown only when more than one Locale is enabled. The choice navigates to the Locale's URL prefix and is remembered via a cookie across pages and visits. First-time visitors start on the default Locale (no automatic language detection).
 
 ## White-Label
 
@@ -145,9 +153,29 @@ Merchant-authored formatted content created with the shared Trix editor and stor
 
 An optional collection of Merchant-authored articles published for SEO. Each Blog Post has a title, slug, Rich Text body, cover image (R2), excerpt, tags, and a draft/published state. Server-rendered with Article structured data, listed at `/blog`, and included in the sitemap and RSS feed. Gated by a Feature Flag.
 
+## FAQ
+
+A set of question/answer pairs the Merchant authors. There are two scopes: a store-wide FAQ (shown on a dedicated `/faq` page, linked from the header and included in the sitemap) and a per-Product FAQ (shown on that Product's page). Each is a structured, reorderable list of items (question + Rich Text answer), rendered as a modern accordion and emitted as FAQ structured data. The store-wide FAQ is gated by a Feature Flag; a Product FAQ shows when the Product has items.
+
 ## LLM Discovery
 
 The set of optional, Merchant-toggleable features that make the Store legible to AI crawlers and answer engines: an auto-generated `llms.txt`, Markdown (`.md`) versions of public pages, FAQ structured data, and an AI-bot policy in robots.txt (allowing search bots, optionally blocking training bots).
+
+## Marketing Tag
+
+A third-party measurement or advertising integration (Google Analytics 4, Google Ads, Meta Pixel) the Merchant enables by entering its ID in Store Config. Tags load only after the Customer grants Cookie Consent, never before — so they never run during an unconsented page load. White-label: no tag fires unless the Merchant configured its ID.
+
+## Site Verification
+
+A token a Merchant pastes into Store Config to prove Store ownership to a search engine (Google Search Console, Bing Webmaster Tools). Rendered as a verification meta tag. Merchants may also add extra `<meta>`/`<link>` tags through a sanitized custom-tags field (never raw scripts).
+
+## Cookie Consent
+
+The Customer's recorded choice to allow or refuse non-essential cookies. Gates all Marketing Tags. Required wherever EU visitors are served (e.g. the French Locale). Until consent is granted, no Marketing Tag loads.
+
+## Announcement Bar
+
+A thin notice bar at the very top of the storefront (above the header) for delivery, sales, or general notices. Merchant-controlled in Store Config and gated by a Feature Flag. The Merchant picks a type — a single message, a scheduled message (auto shows/hides between a start and end time), or several rotating messages. Each message has text, an optional link, and an optional color. The Customer can dismiss it; dismissal is remembered per message version, so a new announcement reappears. Its text is Merchant-authored content (not yet Locale-translated).
 
 ## Health Check
 
