@@ -370,8 +370,11 @@ export async function createOrder(
 
     // Per-customer usage limit. Only enforceable when we know the customer's
     // contact at creation time (COD/POS). The Stripe path creates the order with
-    // empty contact — its per-customer cap is enforced by the Stripe promotion
-    // code's own limits instead.
+    // empty contact, so this guard is skipped at session-creation time. The real
+    // customer email arrives via session.customer_details in the
+    // checkout.session.completed webhook (stripe.ts), which backfills
+    // coupon_uses.customerEmail so future orders by the same customer are
+    // correctly counted against the per-customer limit.
     if (couponRow && (customerEmail || customerPhone)) {
       const contactConds = [
         customerEmail ? eq(schema.couponUses.customerEmail, customerEmail) : undefined,

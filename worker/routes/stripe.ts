@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, sql } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { createStripe } from 'worker/lib/stripe'
 import { createDb } from 'worker/db/index'
@@ -253,6 +253,26 @@ app.post('/webhook', async (c) => {
           type: event.type,
         }),
       ])
+
+      // Backfill coupon_uses.customerEmail with the real email from Stripe.
+      // createOrder writes the coupon_uses row at session-creation time when
+      // contact is unknown (Stripe orders start with empty customerEmail). Now
+      // that the real email is available we update the row so the per-customer
+      // limit (perCustomerLimit) correctly counts this use for future orders
+      // placed by the same customer.
+      if (customerEmail) {
+        await db
+          .update(schema.couponUses)
+          .set({ customerEmail })
+          .where(
+            and(
+              eq(schema.couponUses.orderId, orderId),
+              // Only fill in if still null — prevents double-writes on replay
+              // (idempotency guard above prevents replay reaching here, but belt+suspenders).
+              sql`${schema.couponUses.customerEmail} IS NULL`,
+            ),
+          )
+      }
 
       console.info('[stripe/webhook] order confirmed', { orderId, sessionId: session.id })
 
