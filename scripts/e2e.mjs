@@ -10,7 +10,7 @@
 //   node scripts/e2e.mjs --project=chromium-desktop
 //   node scripts/e2e.mjs --grep @smoke
 import net from 'node:net'
-import { spawn } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 
 function freePort(start) {
   return new Promise((resolve) => {
@@ -28,6 +28,14 @@ function freePort(start) {
     tryPort()
   })
 }
+
+// Seed the local D1 so the storefront is never empty during e2e. Both steps are
+// idempotent: migrations are a no-op when already applied, and seed.sql uses
+// INSERT OR IGNORE / INSERT OR REPLACE so re-runs are safe.
+console.log('[e2e] Applying local D1 migrations…')
+spawnSync('pnpm', ['db:migrate:local'], { stdio: 'inherit' })
+console.log('[e2e] Seeding local D1…')
+spawnSync('pnpm', ['db:seed:local'], { stdio: 'inherit' })
 
 const port = process.env.PW_PORT || String(await freePort(3000))
 const child = spawn('./node_modules/.bin/playwright', ['test', ...process.argv.slice(2)], {
