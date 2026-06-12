@@ -38,35 +38,39 @@ describe('getDataVersion', () => {
 })
 
 describe('bumpDataVersion', () => {
-  it('increments an existing numeric version', async () => {
-    const { db, values, onConflictDoUpdate } = makeDb({ value: '7' })
+  it('inserts seed value "1" (first-ever write)', async () => {
+    const { db, values } = makeDb(undefined)
     await bumpDataVersion(db)
 
     expect(values).toHaveBeenCalledTimes(1)
     const written = values.mock.calls[0][0] as { key: string; value: string }
     expect(written.key).toBe('dataVersion')
-    expect(written.value).toBe('8')
+    expect(written.value).toBe('1')
+  })
+
+  it('uses a SQL expression (not a precomputed string) for the conflict increment', async () => {
+    const { db, onConflictDoUpdate } = makeDb({ value: '7' })
+    await bumpDataVersion(db)
+
     expect(onConflictDoUpdate).toHaveBeenCalledTimes(1)
-    const conflict = onConflictDoUpdate.mock.calls[0][0] as { set: { value: string } }
-    expect(conflict.set.value).toBe('8')
-  })
-
-  it('starts at 1 when no row exists', async () => {
-    const { db, values } = makeDb(undefined)
-    await bumpDataVersion(db)
-    expect((values.mock.calls[0][0] as { value: string }).value).toBe('1')
-  })
-
-  it('treats a non-numeric stored value as 0 (writes 1)', async () => {
-    const { db, values } = makeDb({ value: 'not-a-number' })
-    await bumpDataVersion(db)
-    expect((values.mock.calls[0][0] as { value: string }).value).toBe('1')
+    const conflict = onConflictDoUpdate.mock.calls[0][0] as { set: { value: unknown } }
+    // The increment must be a Drizzle SQL template object, not a pre-computed string.
+    // True atomicity is verified by the integration suite; here we just guard the shape.
+    expect(typeof conflict.set.value).not.toBe('string')
+    expect(conflict.set.value).toBeTruthy()
   })
 
   it('writes an ISO updatedAt timestamp', async () => {
-    const { db, values } = makeDb({ value: '0' })
+    const { db, values } = makeDb(undefined)
     await bumpDataVersion(db)
     const written = values.mock.calls[0][0] as { updatedAt: string }
     expect(written.updatedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/)
+  })
+
+  it('does NOT perform a read before the upsert (single atomic statement)', async () => {
+    const { db, select } = makeDb({ value: '5' })
+    await bumpDataVersion(db)
+    // The atomic rewrite must never call select — atomicity means no pre-read.
+    expect(select).not.toHaveBeenCalled()
   })
 })
