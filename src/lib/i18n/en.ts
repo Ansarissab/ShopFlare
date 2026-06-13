@@ -48,6 +48,7 @@ export const en = {
     ctaDefaultHeading: 'Ready to Shop?',
     ctaDefaultSubtext: 'Browse our full collection',
     ctaDefaultCta: 'Shop Now',
+    languageSwitcherLabel: 'Language',
   },
   cart: {
     title: 'Your Cart',
@@ -562,6 +563,12 @@ export const en = {
     enableBlog: 'Enable blog',
     enableBlogHint:
       'When ON, /blog and individual post pages are visible to visitors. Off = 404 for all blog URLs.',
+    // locale settings (phase 28)
+    localesHeading: 'Languages',
+    localesDescription:
+      'Choose which languages customers can switch to. English is always enabled.',
+    enabledLocalesLabel: 'Enabled languages',
+    defaultLocaleLabel: 'Default language',
   },
   // SEO / LLM discovery settings (phase 21)
   seo: {

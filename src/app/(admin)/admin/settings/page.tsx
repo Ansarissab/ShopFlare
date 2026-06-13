@@ -20,6 +20,9 @@ import { RichText } from '@/components/shared/RichText'
 import { en } from '@/lib/i18n/en'
 import {
   CURRENCIES,
+  LOCALES,
+  SHIPPED_LOCALES,
+  type LocaleCode,
   RADIUS_PRESETS,
   FONT_PRESETS,
   STYLE_PRESETS,
@@ -83,6 +86,11 @@ export default function AdminSettingsPage() {
   const [taxInclusive, setTaxInclusive] = useState(false)
   const [taxBasis, setTaxBasis] = useState('subtotal')
   const [taxRegistrationNumber, setTaxRegistrationNumber] = useState('')
+
+  // Locales
+  const [enabledLocales, setEnabledLocales] = useState<LocaleCode[]>(['en'])
+  const [defaultLocale, setDefaultLocale] = useState<LocaleCode>('en')
+
   const logoInputRef = useRef<HTMLInputElement>(null)
   const faviconInputRef = useRef<HTMLInputElement>(null)
 
@@ -127,6 +135,13 @@ export default function AdminSettingsPage() {
     setTaxBasis(config.taxBasis ?? 'subtotal')
     setTaxRegistrationNumber(config.taxRegistrationNumber ?? '')
     setProductPageSize(String(config.productPageSize ?? DEFAULT_PRODUCT_PAGE_SIZE))
+    const rawEnabled = config.enabledLocales ?? ['en']
+    const validEnabled = rawEnabled.filter((l: string) =>
+      SHIPPED_LOCALES.includes(l as LocaleCode),
+    ) as LocaleCode[]
+    setEnabledLocales(validEnabled.length > 0 ? validEnabled : ['en'])
+    const rawDefault = config.defaultLocale as LocaleCode | undefined
+    setDefaultLocale(rawDefault && SHIPPED_LOCALES.includes(rawDefault) ? rawDefault : 'en')
   }, [config])
 
   async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -222,6 +237,8 @@ export default function AdminSettingsPage() {
         taxBasis,
         taxRegistrationNumber: taxRegistrationNumber.trim() || undefined,
         productPageSize: Number(productPageSize) || DEFAULT_PRODUCT_PAGE_SIZE,
+        enabledLocales,
+        defaultLocale,
       })
       toast.success(en.admin.settingsSaved)
       if (typeof BroadcastChannel !== 'undefined') {
@@ -834,6 +851,63 @@ export default function AdminSettingsPage() {
           </div>
         </FormField>
         <p className="text-sm text-muted-foreground -mt-2">{en.admin.enableBlogHint}</p>
+      </div>
+
+      {/* Languages */}
+      <div className="flex flex-col gap-4 rounded-lg border p-5">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-sm font-semibold">{en.admin.localesHeading}</h2>
+          <p className="text-xs text-muted-foreground">{en.admin.localesDescription}</p>
+        </div>
+
+        <FormField label={en.admin.enabledLocalesLabel} htmlFor="s-locales">
+          <div className="flex flex-col gap-2">
+            {SHIPPED_LOCALES.map((loc) => {
+              const isEn = loc === 'en'
+              const checked = isEn || enabledLocales.includes(loc)
+              return (
+                <label key={loc} className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    disabled={isEn}
+                    onChange={(e) => {
+                      if (isEn) return
+                      if (e.target.checked) {
+                        setEnabledLocales((prev) => [...prev, loc])
+                      } else {
+                        const next = enabledLocales.filter((l) => l !== loc)
+                        setEnabledLocales(next)
+                        // If the disabled locale was the default, reset to 'en'
+                        if (defaultLocale === loc) setDefaultLocale('en')
+                      }
+                    }}
+                    className="h-4 w-4 cursor-pointer rounded border disabled:opacity-50"
+                  />
+                  {LOCALES[loc].label}
+                </label>
+              )
+            })}
+          </div>
+        </FormField>
+
+        <FormField label={en.admin.defaultLocaleLabel} htmlFor="s-default-locale">
+          <Select
+            value={defaultLocale}
+            onValueChange={(v: string | null) => setDefaultLocale((v as LocaleCode) ?? 'en')}
+          >
+            <SelectTrigger id="s-default-locale" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {enabledLocales.map((loc) => (
+                <SelectItem key={loc} value={loc}>
+                  {LOCALES[loc].label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FormField>
       </div>
 
       {/* Payments & Shipping */}

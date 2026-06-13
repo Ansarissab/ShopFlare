@@ -10,6 +10,7 @@ import { useStoreConfig } from '@/hooks/useStoreConfig'
 import { useApiResource } from '@/hooks/useApiResource'
 import { CartSheet } from '@/components/store/cart/CartSheet'
 import { CategoryNav } from '@/components/store/categories/CategoryNav'
+import { LocaleSwitcher } from '@/components/store/LocaleSwitcher'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
 import { useT } from '@/lib/i18n/Provider'
@@ -69,6 +70,9 @@ export function StorefrontHeader() {
           >
             {t.store.trackOrder}
           </Link>
+
+          {/* Language switcher — renders nothing when only one locale is enabled */}
+          <LocaleSwitcher />
 
           {/* Cart button */}
           <Button
