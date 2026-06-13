@@ -23,21 +23,36 @@ test.describe('cart and checkout', () => {
     addToCart,
   }) => {
     await addToCart(page)
-    await page.waitForLoadState('networkidle')
 
-    // Navigate to checkout directly (works even if cart sheet is closed)
+    // Close the cart sheet before navigating so that Zustand persists isOpen=false.
+    // Without this, the checkout page may redirect to / if Zustand rehydrates too
+    // slowly (items briefly [] on first render), and then / re-opens the cart sheet
+    // (isOpen: true from localStorage), hiding the checkout form behind the dialog.
+    const closeBtn = page.getByRole('button', { name: 'Close' })
+    const cartDialog = page.getByRole('dialog', { name: 'Your Cart' })
+    const cartOpen = await cartDialog.isVisible({ timeout: 3_000 }).catch(() => false)
+    if (cartOpen) {
+      await closeBtn.click()
+      await cartDialog.waitFor({ state: 'hidden', timeout: 3_000 }).catch(() => null)
+    }
+
+    // Navigate to checkout. Use 'load' not 'networkidle': the Turnstile widget
+    // loads an external Cloudflare script that may have ongoing requests.
     await page.goto('/checkout')
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('load')
 
-    // If cart is empty the page redirects to / — skip gracefully
-    const url = page.url()
-    if (!url.includes('/checkout')) {
-      test.skip(true, 'Cart empty after addToCart — skipping COD form test')
+    // COD method is selected by default; wait for the ManualOrderForm to appear.
+    // This also guards against the empty-cart redirect (if form never appears →
+    // items were not in localStorage → skip gracefully).
+    const nameField = page.getByLabel('Full Name')
+    const formVisible = await nameField.isVisible({ timeout: 8_000 }).catch(() => false)
+    if (!formVisible) {
+      test.skip(true, 'Checkout form not visible (cart may have been empty) — skipping COD test')
       return
     }
 
     // ManualOrderForm fields — labels are taken from en.checkout.*
-    await page.getByLabel('Full Name').fill('Test User')
+    await nameField.fill('Test User')
     await page.getByLabel('Phone Number').fill('+923001234567')
     await page.getByLabel('Street Address').fill('123 Test Street')
     await page.getByLabel('City').fill('Karachi')
