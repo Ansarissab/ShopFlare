@@ -271,3 +271,13 @@ export type BlogStatus = (typeof BLOG_STATUSES)[number]
 // Must match the keys in healthProbe() checks object.
 export const HEALTH_SERVICE_KEYS = ['db', 'kv', 'r2'] as const
 export type HealthServiceKey = (typeof HEALTH_SERVICE_KEYS)[number]
+
+// ─── i18n Locales ───────────────────────────────────────────────────────────
+export const LOCALES = {
+  en: { code: 'en', label: 'English', dir: 'ltr' },
+  fr: { code: 'fr', label: 'Français', dir: 'ltr' },
+  ur: { code: 'ur', label: 'اردو', dir: 'rtl' },
+} as const
+export type LocaleCode = keyof typeof LOCALES
+export const SHIPPED_LOCALES = Object.keys(LOCALES) as LocaleCode[]
+export const DEFAULT_LOCALE: LocaleCode = 'en'

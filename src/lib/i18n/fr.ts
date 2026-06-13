@@ -1,4 +1,8 @@
-export const en = {
+import type { Dictionary } from './en'
+
+// TODO(i18n): French translations pending. English placeholders so the
+// engine, routing and RTL ship now; real strings land in a follow-up pass.
+export const fr: Dictionary = {
   store: {
     addToCart: 'Add to Cart',
     buyNow: 'Buy Now',
@@ -36,7 +40,6 @@ export const en = {
     showingProductsOf: 'Showing {shown} of {total} products',
     quickAdd: 'Quick add',
     whatsappWidgetLabel: 'Chat on WhatsApp',
-    // Landing page store-front copy
     shopAllProducts: 'Shop All Products',
     shopNav: 'Shop',
     featuredProductsHeading: 'Featured Products',
@@ -99,8 +102,6 @@ export const en = {
     calculatedAtDelivery: 'Calculated at delivery',
     securityCheckFailed: 'Security check failed. Please refresh and try again.',
   },
-  // Reusable bank-transfer copy — shared by the checkout success page, the order
-  // tracking page, and the confirmation email (worker imports `en`). DRY.
   bankTransfer: {
     heading: 'Bank Transfer Instructions',
     intro: 'Transfer {amount} to the account below to complete your order.',
@@ -197,7 +198,6 @@ export const en = {
     revenueChart: 'Revenue — Last 14 Days',
     ordersChart: 'Order Status',
     noOrdersYet: 'No orders yet',
-    // orders
     updateStatus: 'Update Status',
     addTracking: 'Add Tracking',
     trackingNumber: 'Tracking Number',
@@ -206,7 +206,6 @@ export const en = {
     trackingAdded: 'Tracking number saved',
     orderDetail: 'Order Detail',
     shippingAddress: 'Shipping Address',
-    // products
     productName: 'Product Name',
     productDescription: 'Description',
     active: 'Active',
@@ -246,7 +245,6 @@ export const en = {
     sizeDeleted: 'Size deleted',
     imageUploaded: 'Image uploaded',
     imageDeleted: 'Image deleted',
-    // image compression confirm dialog
     compressTitle: 'Optimize this image?',
     compressBody: "This image is large. We'll shrink it to keep your store fast.",
     compressSizeLabel: '{original} → {compressed}',
@@ -257,7 +255,6 @@ export const en = {
     stripeProductId: 'Stripe Product ID',
     stripePriceId: 'Stripe Price ID',
     syncStripe: 'Sync with Stripe',
-    // config
     storeSettings: 'Store Settings',
     storeName: 'Store Name',
     tagline: 'Tagline',
@@ -267,7 +264,6 @@ export const en = {
     freeShippingThreshold: 'Free Shipping Threshold (cents)',
     flatShippingRate: 'Flat Shipping Rate (cents)',
     settingsSaved: 'Settings saved',
-    // bank transfer details (shown to customers paying by bank transfer)
     bankSectionTitle: 'Bank Transfer Details',
     bankSectionHint:
       'Shown to customers who choose Bank Transfer at checkout. Leave the account number empty to hide that option.',
@@ -278,7 +274,6 @@ export const en = {
     bankInstructions: 'Extra Instructions (optional)',
     paymentReceived: 'Mark Payment Received',
     paymentConfirmed: 'Payment confirmed',
-    // coupons (Agent N)
     addCoupon: 'Add Coupon',
     editCoupon: 'Edit Coupon',
     deleteCoupon: 'Delete Coupon',
@@ -302,7 +297,6 @@ export const en = {
     couponUpdated: 'Coupon updated',
     couponDeleted: 'Coupon deleted',
     noCoupons: 'No coupons yet.',
-    // reviews moderation (Agent P)
     reviewModeration: 'Review Moderation',
     pendingReviews: 'Pending',
     approvedReviews: 'Approved',
@@ -317,7 +311,6 @@ export const en = {
     reviewRating: 'Rating',
     reviewProduct: 'Product',
     reviewCustomer: 'Customer',
-    // notify-me / restock (Agent Q)
     notifyRequests: 'Restock Requests',
     notifyRequestsFor: '{count} waiting',
     notifyNoRequests: 'No restock requests.',
@@ -327,19 +320,16 @@ export const en = {
     notifyDispatched: 'Alerts sent: {count}',
     notifyInStock: 'In stock',
     notifyOutOfStock: 'Out of stock',
-    // policy pages
     policyPages: 'Policy Pages',
     editPage: 'Edit',
     pageTitle: 'Page Title',
     pageContent: 'Content',
     pageContentHint: 'Plain text shown to customers. Use blank lines to separate paragraphs.',
     pageSaved: 'Page saved',
-    // shared admin chrome
     cancel: 'Cancel',
     stripeColumn: 'Stripe',
     reviewStatus: 'Status',
     reviewDate: 'Date',
-    // login page
     loginTitle: 'Admin Sign In',
     loginSubtitle: 'Enter your admin password to continue.',
     loginPasswordLabel: 'Password',
@@ -349,7 +339,6 @@ export const en = {
     loginInvalid: 'Invalid password. Try again.',
     loginError: 'Could not sign in. Please try again.',
     loginVerifying: 'Completing security check…',
-    // analytics
     analyticsRevenueTrend: 'Revenue Trend',
     analyticsPaymentMethods: 'Payment Methods',
     analyticsTopProducts: 'Top Products',
@@ -363,12 +352,10 @@ export const en = {
     analyticsUses: 'Uses',
     analyticsAvgOrder: 'Avg. Order',
     analyticsDiscountsGiven: 'Discounts Given',
-    // analytics tabs
     analyticsTabOverview: 'Overview',
     analyticsTabProducts: 'Products',
     analyticsTabCustomers: 'Customers',
     analyticsTabFunnel: 'Funnel',
-    // products tab
     analyticsLeaderboard: 'Product Leaderboard',
     analyticsOrders: 'Orders',
     analyticsAov: 'AOV',
@@ -385,7 +372,6 @@ export const en = {
     analyticsTimesTogether: 'Times Together',
     analyticsConfidence: 'Confidence',
     analyticsProductStats: 'Product Stats',
-    // customers tab
     analyticsTotalCustomers: 'Total Customers',
     analyticsReturning: 'Returning',
     analyticsRepeatRate: 'Repeat Rate',
@@ -400,7 +386,6 @@ export const en = {
     analyticsSegmentAtRisk: 'At Risk',
     analyticsSegmentNew: 'New',
     analyticsSegmentOther: 'Others',
-    // funnel tab
     analyticsFunnel: 'Checkout Funnel',
     analyticsFunnelCheckoutsCreated: 'Checkouts Created',
     analyticsFunnelConfirmed: 'Confirmed',
@@ -419,7 +404,6 @@ export const en = {
     analyticsHoursAgo: '{n}h ago',
     analyticsCustomerName: 'Customer',
     analyticsContact: 'Contact',
-    // appearance / theme settings
     appearance: 'Appearance',
     appearanceHint: 'Customize your store look. Changes apply live — no redeploy needed.',
     primaryColor: 'Primary color',
@@ -439,7 +423,6 @@ export const en = {
     themePresets: 'Style Presets',
     livePreview: 'Live preview',
     appearanceSaved: 'Appearance updated',
-    // Landing page editor
     landingPage: 'Landing Page',
     landingPageHint:
       "Design your store's homepage. Toggle sections, set copy and images. Changes apply without redeployment.",
@@ -464,7 +447,6 @@ export const en = {
     landingFeaturedProducts: 'Featured products',
     landingFeaturedHint: 'Select up to 20 products to feature. Drag to reorder.',
     landingFeaturedSaved: 'Featured products saved',
-    // Style preset admin labels
     stylePresets: 'Style Presets',
     stylePresetsHint:
       'Apply a complete look in one click — colors, font, radius, spacing, and hero layout.',
@@ -496,7 +478,6 @@ export const en = {
     taxRegistrationNumber: 'Tax Registration Number',
     taxRegistrationHint: 'Optional — shown on order receipts',
     taxSaved: 'Tax settings saved',
-    // categories
     categories: 'Categories',
     addCategory: 'Add Category',
     editCategory: 'Edit Category',
@@ -521,7 +502,6 @@ export const en = {
     slugAutoHint: 'Auto-generated from name',
     productPageSize: 'Products per page',
     productPageSizeHint: 'Number of products loaded per scroll batch (6–96)',
-    // blog nav + editor (phase 23)
     blog: 'Blog',
     addPost: 'New Post',
     blogEditorTitle: 'Title',
@@ -550,20 +530,16 @@ export const en = {
     blogEditorPublishedAt: 'Published',
     blogEditorNoPosts: 'No posts yet. Create your first post.',
     blogEditorStatusBadge: 'Status',
-    // whatsapp toggle (phase 19)
     enableWhatsApp: 'Enable WhatsApp',
     enableWhatsAppHint: 'WhatsApp number must also be set for any button to appear.',
-    // reviews toggle (phase 20)
     enableReviews: 'Enable reviews',
     enableReviewsHint:
       'Show customer reviews across the store. Turning this off hides reviews everywhere and stops new submissions; existing reviews are kept.',
     enableReviewsProduct: 'Enable reviews for this product',
-    // blog toggle (phase 23)
     enableBlog: 'Enable blog',
     enableBlogHint:
       'When ON, /blog and individual post pages are visible to visitors. Off = 404 for all blog URLs.',
   },
-  // SEO / LLM discovery settings (phase 21)
   seo: {
     faqSectionTitle: 'FAQ / Q&A',
     faqEnabledLabel: 'Show FAQ section on store',
@@ -579,7 +555,6 @@ export const en = {
     llmDiscoveryHelp:
       'Shows your store in /llms.txt and allows AI answer bots to index your content.',
   },
-  // Blog storefront (phase 23)
   blog: {
     pageTitle: 'Blog',
     pageDescription: 'Latest articles and updates from our store.',
@@ -590,8 +565,6 @@ export const en = {
     rssTitle: 'Blog RSS Feed',
     tagLabel: 'Tag:',
   },
-  // Tooltip copy — short, plain, merchant-friendly. Rendered via <HelpTip>.
-  // Never inline these strings in JSX; always reference en.tooltips.*
   tooltips: {
     product: {
       variantLabel: 'A version of this product, e.g. a color. Each can have its own images.',
@@ -713,7 +686,6 @@ export const en = {
     footer: 'Please confirm availability and delivery details.',
     contactGreeting: 'Hi, I have a question about your store',
   },
-  // Store-facing reviews (Agent P)
   reviews: {
     sectionTitle: 'Customer Reviews',
     writeReview: 'Write a Review',
@@ -739,16 +711,13 @@ export const en = {
     submitFailed: 'Could not submit review. Please try again.',
     cancel: 'Cancel',
     disabled: 'Reviews are not available for this product',
-    // Accessibility labels (ReviewStars)
     selectRating: 'Select rating',
     starsAriaLabel: '{rating} out of 5 stars',
     starLabel: '{count} star',
     starLabelPlural: '{count} stars',
-    // Verify-purchase form placeholders (ReviewForm)
     orderNumberPlaceholder: 'ORD-…',
     contactPlaceholder: 'you@example.com or +1 555…',
   },
-  // Transactional email copy (Agent O) — sent from the CF Worker via Resend.
   email: {
     orderConfirmSubject: 'Order {orderNumber} confirmed',
     orderConfirmHeading: 'Thanks for your order!',
@@ -768,7 +737,6 @@ export const en = {
     restockBody: 'The {productName} ({size}) you wanted is back in stock.',
     restockCta: 'Shop now',
   },
-  // Web Push notification copy (Agent O) — shown to the merchant.
   notifications: {
     newOrderTitle: 'New order received',
     newOrderBody: 'Order {orderNumber} — {total}',
@@ -778,17 +746,12 @@ export const en = {
     pushBlocked: 'Notifications are blocked in your browser settings.',
     pushUnsupported: 'Push notifications are not supported on this device.',
   },
-  // PWA — offline page, install prompt, update toast, sync feedback, bottom nav,
-  // and customer push notification copy (Phase 10).
   pwa: {
-    // offline page
     offlineTitle: "You're offline",
     offlineBody: 'Check your connection and try again.',
     offlineRetry: 'Try again',
-    // update toast
     updateAvailable: 'App update available',
     updateReload: 'Reload',
-    // install prompt
     installTitle: 'Add to Home Screen',
     installBody: 'Install this app for a faster experience.',
     installAction: 'Install',
@@ -798,17 +761,14 @@ export const en = {
     installIosStep2: 'Select "Add to Home Screen"',
     installIosStep3: 'Tap Add',
     installIosClose: 'Close',
-    // offline sync
     syncQueued: 'Saved offline — will sync when back online',
     syncSuccess: 'Your request has been sent',
     syncFailed: 'Sync failed — please try again online',
-    // bottom tab bar
     tabHome: 'Home',
     tabShop: 'Shop',
     tabCart: 'Cart',
     tabTrack: 'Track',
     tabMenu: 'Menu',
-    // customer push notifications
     orderPushTitle: 'Order Update',
     orderPushEnableTitle: 'Get order updates',
     orderPushEnableBody: 'Enable push notifications to track your order status.',
@@ -818,11 +778,9 @@ export const en = {
     orderPushBlocked: 'Notifications blocked in browser settings.',
     orderStatusShipped: 'Your order {orderNumber} has been shipped!',
     orderStatusDelivered: 'Your order {orderNumber} has been delivered!',
-    // back-in-stock push
     restockPushTitle: '{productName} is back in stock!',
     restockPushBody: 'The {size} you wanted is now available.',
   },
-  // Status page — /status SSR page (Phase 25)
   status: {
     title: 'System Status',
     description: 'Live operational status of the store backend services.',
@@ -839,17 +797,4 @@ export const en = {
     checkFailed: 'Check failed',
     latency: '{ms}ms',
   },
-} as const
-
-export type TranslationKey = keyof typeof en
-
-/** Convenience helper — avoids repeating `.replace('{field}', x)` at call sites. */
-export function requiredMsg(field: string): string {
-  return en.errors.required.replace('{field}', field)
 }
-
-// Widen the as-const narrow literals to plain strings so fr/ur can hold
-// translated strings while still being type-checked for structural completeness.
-// No arrays exist in `en`, so this simple recursive form is correct.
-type Widen<T> = T extends string ? string : { [K in keyof T]: Widen<T[K]> }
-export type Dictionary = Widen<typeof en>
