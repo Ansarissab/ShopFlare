@@ -1,12 +1,20 @@
 #!/usr/bin/env node
-// e2e launcher. Finds ONE free port (scanning up from 3000) and exports it as
-// PW_PORT before spawning Playwright, so the config AND every Playwright worker
-// process share the same port. Doing the scan inside playwright.config.ts instead
-// is unreliable: Playwright re-loads the config in each worker, so every worker
-// would pick a *different* free port than the one the dev server actually booted on.
+// e2e launcher. Finds free ports (scanning up from a configurable base) and
+// exports them as PW_PORT / PW_WORKER_PORT before spawning Playwright, so the
+// config AND every Playwright worker process share the same ports. Doing the
+// scan inside playwright.config.ts instead is unreliable: Playwright re-loads
+// the config in each worker, so every worker would pick a *different* free port
+// than the one the dev server actually booted on.
 //
-// Net effect: a busy :3000 (e.g. another local app) never collides — we boot our
-// own ShopFlare dev server on the next free port. Any args are passed through:
+// Race-safe for concurrent invocations (e.g. smoke + e2e running in parallel):
+//   Set E2E_APP_PORT_BASE / E2E_WORKER_PORT_BASE to non-overlapping ranges so
+//   the two processes scan distinct 100-port windows and never race on the same
+//   candidate. ci.mjs sets:
+//     smoke → app 3100–3199 / worker 8887–8986
+//     e2e   → app 3200–3299 / worker 8987–9086
+//   (Default fallback is 3000 / 8787 for standalone runs.)
+//
+// Any args are passed through to Playwright:
 //   node scripts/e2e.mjs --project=chromium-desktop
 //   node scripts/e2e.mjs --grep @smoke
 import net from 'node:net'
@@ -27,7 +35,7 @@ function probePort(candidate) {
 // Unlike the old impl, on exhaustion we throw rather than returning an occupied
 // port — the caller must never receive a port that is already in use.
 async function freePort(start, exclude = new Set()) {
-  for (let p = start; p <= start + 200; p++) {
+  for (let p = start; p <= start + 100; p++) {
     if (exclude.has(p)) continue
     try {
       await probePort(p)
@@ -36,8 +44,12 @@ async function freePort(start, exclude = new Set()) {
       // EADDRINUSE or similar — try next
     }
   }
-  throw new Error(`[e2e] No free port found in range ${start}–${start + 200}`)
+  throw new Error(`[e2e] No free port found in range ${start}–${start + 100}`)
 }
+
+// Base ports: override via env to get non-overlapping ranges for concurrent runs.
+const appBase = Number(process.env.E2E_APP_PORT_BASE ?? 3000)
+const workerBase = Number(process.env.E2E_WORKER_PORT_BASE ?? 8787)
 
 // Seed the local D1 so the storefront is never empty during e2e. Both steps are
 // idempotent: migrations are a no-op when already applied, and seed.sql uses
@@ -48,7 +60,7 @@ console.log('[e2e] Seeding local D1…')
 spawnSync('pnpm', ['db:seed:local'], { stdio: 'inherit' })
 
 // Determine app port: re-validate any pre-set PW_PORT (a stale export may point
-// at an occupied port), then scan from 3000 if needed.
+// at an occupied port), then scan from appBase if needed.
 let port
 if (process.env.PW_PORT) {
   const candidate = Number(process.env.PW_PORT)
@@ -56,33 +68,35 @@ if (process.env.PW_PORT) {
     await probePort(candidate)
     port = candidate // pre-set value is genuinely free
   } catch {
-    console.warn(`[e2e] PW_PORT=${candidate} is occupied — scanning for free port…`)
-    port = await freePort(3000)
+    console.warn(`[e2e] PW_PORT=${candidate} is occupied — scanning from ${appBase}…`)
+    port = await freePort(appBase)
   }
 } else {
-  port = await freePort(3000)
+  port = await freePort(appBase)
 }
 
 // Determine worker port: re-validate any pre-set PW_WORKER_PORT, then scan from
-// 8787+ (skipping the chosen app port so they can never be equal).
+// workerBase (skipping the chosen app port so they can never be equal).
 let workerPort
 const excludeFromWorker = new Set([port])
 if (process.env.PW_WORKER_PORT) {
   const candidate = Number(process.env.PW_WORKER_PORT)
   if (excludeFromWorker.has(candidate)) {
-    console.warn(`[e2e] PW_WORKER_PORT=${candidate} collides with app port — scanning…`)
-    workerPort = await freePort(8787, excludeFromWorker)
+    console.warn(
+      `[e2e] PW_WORKER_PORT=${candidate} collides with app port — scanning from ${workerBase}…`,
+    )
+    workerPort = await freePort(workerBase, excludeFromWorker)
   } else {
     try {
       await probePort(candidate)
       workerPort = candidate
     } catch {
-      console.warn(`[e2e] PW_WORKER_PORT=${candidate} is occupied — scanning for free port…`)
-      workerPort = await freePort(8787, excludeFromWorker)
+      console.warn(`[e2e] PW_WORKER_PORT=${candidate} is occupied — scanning from ${workerBase}…`)
+      workerPort = await freePort(workerBase, excludeFromWorker)
     }
   }
 } else {
-  workerPort = await freePort(8787, excludeFromWorker)
+  workerPort = await freePort(workerBase, excludeFromWorker)
 }
 
 console.log(`[e2e] app port: ${port}  worker port: ${workerPort}`)
