@@ -7,11 +7,12 @@ import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { CategoryForm } from '@/components/admin/categories/CategoryForm'
 import { CategoryImageUpload } from '@/components/admin/categories/CategoryImageUpload'
 import { CategoryProductsManager } from '@/components/admin/categories/CategoryProductsManager'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { useApiResource } from '@/hooks/useApiResource'
 import type { CategoryDetailResponse, CategoryTreeResponse } from '@/lib/types/category'
 
 export default function EditCategoryPage() {
+  const t = useT()
   const params = useParams<{ id: string }>()
   const categoryId = params?.id ?? null
 
@@ -44,7 +45,7 @@ export default function EditCategoryPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <AdminPageHeader title={en.admin.editCategory} backHref="/admin/categories" />
+      <AdminPageHeader title={t.admin.editCategory} backHref="/admin/categories" />
 
       {loading ? (
         <div className="flex flex-col gap-3 max-w-2xl">
@@ -65,7 +66,7 @@ export default function EditCategoryPage() {
 
           {/* Category image */}
           <div className="rounded-lg border p-5 flex flex-col gap-4">
-            <h2 className="text-sm font-semibold">{en.admin.categoryImage}</h2>
+            <h2 className="text-sm font-semibold">{t.admin.categoryImage}</h2>
             <CategoryImageUpload
               categoryId={detail.category.id}
               currentImageUrl={resolvedImageUrl}
@@ -81,7 +82,7 @@ export default function EditCategoryPage() {
           />
         </>
       ) : (
-        <p className="text-sm text-muted-foreground">{en.admin.noCategories}</p>
+        <p className="text-sm text-muted-foreground">{t.admin.noCategories}</p>
       )}
     </div>
   )

@@ -11,7 +11,7 @@ import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { FormField } from '@/components/common/FormField'
 import { RichText } from '@/components/shared/RichText'
 import { ImageUpload } from '@/components/shared/ImageUpload'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { apiGet, apiPost, apiPatch, WORKER_URL } from '@/lib/api'
 import { formatDate } from '@/lib/utils/index'
 import { CATEGORY_SLUG_PATTERN } from '@/lib/constants'
@@ -30,6 +30,7 @@ function deriveSlug(title: string): string {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function BlogEditorPage({ params }: { params: Promise<{ id: string }> }) {
+  const t = useT()
   const { id } = React.use(params)
   const isNew = id === 'new'
   const router = useRouter()
@@ -73,7 +74,7 @@ export default function BlogEditorPage({ params }: { params: Promise<{ id: strin
         setSlugTouched(true) // existing slug — treat as manually set
       })
       .catch(() => {
-        if (!cancelled) toast.error(en.errors.networkError)
+        if (!cancelled) toast.error(t.errors.networkError)
       })
       .finally(() => {
         if (!cancelled) setLoading(false)
@@ -95,7 +96,7 @@ export default function BlogEditorPage({ params }: { params: Promise<{ id: strin
     setSlugTouched(true)
     setSlug(value)
     if (value && !CATEGORY_SLUG_PATTERN.test(value)) {
-      setSlugError(en.admin.blogEditorSlugHint)
+      setSlugError(t.admin.blogEditorSlugHint)
     } else {
       setSlugError(undefined)
     }
@@ -105,7 +106,7 @@ export default function BlogEditorPage({ params }: { params: Promise<{ id: strin
   async function handleSave() {
     if (!slug || !title) return
     if (slug && !CATEGORY_SLUG_PATTERN.test(slug)) {
-      setSlugError(en.admin.blogEditorSlugHint)
+      setSlugError(t.admin.blogEditorSlugHint)
       return
     }
 
@@ -127,16 +128,16 @@ export default function BlogEditorPage({ params }: { params: Promise<{ id: strin
     try {
       if (isNew) {
         const created = await apiPost<{ id: string; slug: string }>('/api/admin/blog', payload)
-        toast.success(en.admin.blogEditorCreated)
+        toast.success(t.admin.blogEditorCreated)
         router.push(`/admin/blog/${created.id}`)
       } else {
         await apiPatch(`/api/admin/blog/${id}`, payload)
-        toast.success(en.admin.blogEditorSaved)
+        toast.success(t.admin.blogEditorSaved)
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : en.errors.networkError
+      const msg = err instanceof Error ? err.message : t.errors.networkError
       if (msg.toLowerCase().includes('slug')) {
-        setSlugError(en.admin.blogEditorSlugTaken)
+        setSlugError(t.admin.blogEditorSlugTaken)
       } else {
         toast.error(msg)
       }
@@ -163,7 +164,7 @@ export default function BlogEditorPage({ params }: { params: Promise<{ id: strin
       setStatus(next)
       setPublishedAt(isPublished ? null : new Date().toISOString())
     } catch {
-      toast.error(en.errors.networkError)
+      toast.error(t.errors.networkError)
     } finally {
       setPublishing(false)
     }
@@ -173,7 +174,7 @@ export default function BlogEditorPage({ params }: { params: Promise<{ id: strin
   const coverImages = coverR2Key ? [{ id: coverR2Key, url: `${WORKER_URL}/cdn/${coverR2Key}` }] : []
 
   // ── editor title ──
-  const pageTitle = isNew ? en.admin.addPost : title || en.admin.blog
+  const pageTitle = isNew ? t.admin.addPost : title || t.admin.blog
 
   return (
     <div className="flex flex-col gap-5 max-w-3xl">
@@ -184,7 +185,7 @@ export default function BlogEditorPage({ params }: { params: Promise<{ id: strin
           <div className="flex items-center gap-2">
             {!isNew && publishedAt && (
               <span className="text-xs text-muted-foreground hidden sm:inline">
-                {en.admin.blogEditorPublishedAt}: {formatDate(publishedAt)}
+                {t.admin.blogEditorPublishedAt}: {formatDate(publishedAt)}
               </span>
             )}
             <Button
@@ -193,10 +194,10 @@ export default function BlogEditorPage({ params }: { params: Promise<{ id: strin
               disabled={publishing || saving}
               onClick={handleTogglePublish}
             >
-              {status === 'published' ? en.admin.blogEditorUnpublish : en.admin.blogEditorPublish}
+              {status === 'published' ? t.admin.blogEditorUnpublish : t.admin.blogEditorPublish}
             </Button>
             <Button size="sm" disabled={saving || publishing} onClick={handleSave}>
-              {saving ? en.admin.blogEditorSaving : en.admin.blogEditorSave}
+              {saving ? t.admin.blogEditorSaving : t.admin.blogEditorSave}
             </Button>
           </div>
         }
@@ -213,51 +214,51 @@ export default function BlogEditorPage({ params }: { params: Promise<{ id: strin
       ) : (
         <div className="flex flex-col gap-5">
           {/* Title */}
-          <FormField label={en.admin.blogEditorTitle} htmlFor="blog-title">
+          <FormField label={t.admin.blogEditorTitle} htmlFor="blog-title">
             <Input
               id="blog-title"
               value={title}
               onChange={(e) => handleTitleChange(e.target.value)}
-              placeholder={en.admin.blogEditorTitle}
+              placeholder={t.admin.blogEditorTitle}
             />
           </FormField>
 
           {/* Slug */}
-          <FormField label={en.admin.blogEditorSlug} htmlFor="blog-slug" error={slugError}>
+          <FormField label={t.admin.blogEditorSlug} htmlFor="blog-slug" error={slugError}>
             <Input
               id="blog-slug"
               value={slug}
               onChange={(e) => handleSlugChange(e.target.value)}
               placeholder="my-post-slug"
             />
-            <p className="text-xs text-muted-foreground">{en.admin.blogEditorSlugHint}</p>
+            <p className="text-xs text-muted-foreground">{t.admin.blogEditorSlugHint}</p>
           </FormField>
 
           {/* Excerpt */}
-          <FormField label={en.admin.blogEditorExcerpt} htmlFor="blog-excerpt" optional>
+          <FormField label={t.admin.blogEditorExcerpt} htmlFor="blog-excerpt" optional>
             <Textarea
               id="blog-excerpt"
               rows={3}
               value={excerpt}
               onChange={(e) => setExcerpt(e.target.value)}
-              placeholder={en.admin.blogEditorExcerpt}
+              placeholder={t.admin.blogEditorExcerpt}
             />
-            <p className="text-xs text-muted-foreground">{en.admin.blogEditorExcerptHint}</p>
+            <p className="text-xs text-muted-foreground">{t.admin.blogEditorExcerptHint}</p>
           </FormField>
 
           {/* Tags */}
-          <FormField label={en.admin.blogEditorTags} htmlFor="blog-tags" optional>
+          <FormField label={t.admin.blogEditorTags} htmlFor="blog-tags" optional>
             <Input
               id="blog-tags"
               value={tags}
               onChange={(e) => setTags(e.target.value)}
               placeholder="tag1, tag2, tag3"
             />
-            <p className="text-xs text-muted-foreground">{en.admin.blogEditorTagsHint}</p>
+            <p className="text-xs text-muted-foreground">{t.admin.blogEditorTagsHint}</p>
           </FormField>
 
           {/* Cover image */}
-          <FormField label={en.admin.blogEditorCover} htmlFor="blog-cover" optional>
+          <FormField label={t.admin.blogEditorCover} htmlFor="blog-cover" optional>
             <ImageUpload
               endpoint="/api/admin/blog/image"
               deleteEndpoint={(key) => `/api/admin/blog/image/${key}`}
@@ -274,14 +275,14 @@ export default function BlogEditorPage({ params }: { params: Promise<{ id: strin
                 id="blog-cover-alt"
                 value={coverAlt}
                 onChange={(e) => setCoverAlt(e.target.value)}
-                placeholder={en.admin.blogEditorCoverAlt}
+                placeholder={t.admin.blogEditorCoverAlt}
                 className="mt-2"
               />
             )}
           </FormField>
 
           {/* Body */}
-          <FormField label={en.admin.blogEditorBody} htmlFor="blog-body">
+          <FormField label={t.admin.blogEditorBody} htmlFor="blog-body">
             <RichText
               value={bodyHtml}
               onChange={setBodyHtml}
@@ -297,10 +298,10 @@ export default function BlogEditorPage({ params }: { params: Promise<{ id: strin
               disabled={publishing || saving}
               onClick={handleTogglePublish}
             >
-              {status === 'published' ? en.admin.blogEditorUnpublish : en.admin.blogEditorPublish}
+              {status === 'published' ? t.admin.blogEditorUnpublish : t.admin.blogEditorPublish}
             </Button>
             <Button size="sm" disabled={saving || publishing} onClick={handleSave}>
-              {saving ? en.admin.blogEditorSaving : en.admin.blogEditorSave}
+              {saving ? t.admin.blogEditorSaving : t.admin.blogEditorSave}
             </Button>
           </div>
         </div>

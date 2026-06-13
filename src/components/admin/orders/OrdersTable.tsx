@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { HelpTip } from '@/components/common/HelpTip'
 import { formatPrice, formatDate } from '@/lib/utils/index'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import type { AdminOrder } from '@/lib/types/admin'
 
 const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
@@ -21,6 +21,7 @@ interface OrdersTableProps {
 }
 
 export function OrdersTable({ orders }: OrdersTableProps) {
+  const t = useT()
   if (orders.length === 0) {
     return <p className="py-12 text-center text-sm text-muted-foreground">No orders found.</p>
   }
@@ -35,13 +36,13 @@ export function OrdersTable({ orders }: OrdersTableProps) {
             <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
                 Method
-                <HelpTip text={en.tooltips.orders.method} />
+                <HelpTip text={t.tooltips.orders.method} />
               </span>
             </th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
                 Status
-                <HelpTip text={en.tooltips.orders.status} />
+                <HelpTip text={t.tooltips.orders.status} />
               </span>
             </th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Total</th>
@@ -68,13 +69,12 @@ export function OrdersTable({ orders }: OrdersTableProps) {
                 </p>
               </td>
               <td className="hidden sm:table-cell px-4 py-3 text-muted-foreground">
-                {en.paymentMethodLabels[
-                  order.paymentMethod as keyof typeof en.paymentMethodLabels
-                ] ?? order.paymentMethod}
+                {t.paymentMethodLabels[order.paymentMethod as keyof typeof t.paymentMethodLabels] ??
+                  order.paymentMethod}
               </td>
               <td className="px-4 py-3">
                 <Badge variant={statusVariant[order.status] ?? 'outline'} className="capitalize">
-                  {en.orderStatusLabels[order.status as keyof typeof en.orderStatusLabels] ??
+                  {t.orderStatusLabels[order.status as keyof typeof t.orderStatusLabels] ??
                     order.status}
                 </Badge>
               </td>

@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { useApiResource } from '@/hooks/useApiResource'
 import type { ProductWithVariants } from '@/lib/types/product'
 
@@ -16,16 +16,17 @@ interface ProductsResponse {
 }
 
 export default function AdminProductsPage() {
+  const t = useT()
   const { data, loading } = useApiResource<ProductsResponse>('/api/admin/products')
 
   return (
     <div className="flex flex-col gap-5">
       <AdminPageHeader
-        title={en.admin.products}
+        title={t.admin.products}
         actions={
           <Link href="/admin/products/new" className={cn(buttonVariants({ size: 'sm' }))}>
             <Plus className="size-4 mr-1.5" aria-hidden />
-            {en.admin.addProduct}
+            {t.admin.addProduct}
           </Link>
         }
       />
@@ -55,7 +56,7 @@ export default function AdminProductsPage() {
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{product.name}</span>
                     <Badge variant={product.active ? 'default' : 'secondary'}>
-                      {product.active ? en.admin.active : en.admin.inactive}
+                      {product.active ? t.admin.active : t.admin.inactive}
                     </Badge>
                   </div>
                   <span className="text-xs text-muted-foreground">
@@ -70,13 +71,13 @@ export default function AdminProductsPage() {
                     className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}
                   >
                     <ExternalLink className="size-3.5 mr-1" aria-hidden />
-                    {en.admin.viewProduct}
+                    {t.admin.viewProduct}
                   </Link>
                   <Link
                     href={`/admin/products/${product.id}`}
                     className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
                   >
-                    {en.admin.editProduct}
+                    {t.admin.editProduct}
                   </Link>
                 </div>
               </div>

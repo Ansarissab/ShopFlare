@@ -5,8 +5,9 @@ import { StatCard } from '@/components/admin/shared/StatCard'
 import { Skeleton } from '@/components/ui/skeleton'
 import { apiGet } from '@/lib/api'
 import { formatPrice } from '@/lib/utils/index'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import type { AnalyticsCustomersResponse, RfmSegment } from '@/lib/types/analytics'
+import type { Dictionary } from '@/lib/i18n/index'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -19,28 +20,31 @@ function shortDate(iso: string): string {
 }
 
 // ─── RFM segment config ───────────────────────────────────────────────────────
+// NOTE: was module-scope referencing en.; moved to a factory function accepting t.
 
-const RFM_CONFIG: Record<RfmSegment, { label: string; classes: string }> = {
-  champions: {
-    label: en.admin.analyticsSegmentChampions,
-    classes: 'text-green-700 bg-green-50 border-green-200',
-  },
-  loyal: {
-    label: en.admin.analyticsSegmentLoyal,
-    classes: 'text-blue-700 bg-blue-50 border-blue-200',
-  },
-  at_risk: {
-    label: en.admin.analyticsSegmentAtRisk,
-    classes: 'text-yellow-700 bg-yellow-50 border-yellow-200',
-  },
-  new: {
-    label: en.admin.analyticsSegmentNew,
-    classes: 'text-purple-700 bg-purple-50 border-purple-200',
-  },
-  other: {
-    label: en.admin.analyticsSegmentOther,
-    classes: 'text-zinc-500 bg-zinc-50 border-zinc-200',
-  },
+function buildRfmConfig(t: Dictionary): Record<RfmSegment, { label: string; classes: string }> {
+  return {
+    champions: {
+      label: t.admin.analyticsSegmentChampions,
+      classes: 'text-green-700 bg-green-50 border-green-200',
+    },
+    loyal: {
+      label: t.admin.analyticsSegmentLoyal,
+      classes: 'text-blue-700 bg-blue-50 border-blue-200',
+    },
+    at_risk: {
+      label: t.admin.analyticsSegmentAtRisk,
+      classes: 'text-yellow-700 bg-yellow-50 border-yellow-200',
+    },
+    new: {
+      label: t.admin.analyticsSegmentNew,
+      classes: 'text-purple-700 bg-purple-50 border-purple-200',
+    },
+    other: {
+      label: t.admin.analyticsSegmentOther,
+      classes: 'text-zinc-500 bg-zinc-50 border-zinc-200',
+    },
+  }
 }
 
 const RFM_ORDER: RfmSegment[] = ['champions', 'loyal', 'at_risk', 'new', 'other']
@@ -64,6 +68,8 @@ function CustomersSkeleton() {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function CustomersTab({ period }: { period: string }) {
+  const t = useT()
+  const RFM_CONFIG = buildRfmConfig(t)
   // `loaded` holds the fetch result together with the period it was fetched for.
   // Deriving `loading` from a period mismatch during render (instead of a
   // synchronous setState inside the effect) avoids cascading re-renders while
@@ -93,7 +99,7 @@ export function CustomersTab({ period }: { period: string }) {
 
   if (loading) return <CustomersSkeleton />
   if (!data) {
-    return <p className="text-sm text-muted-foreground">{en.admin.analyticsNoData}</p>
+    return <p className="text-sm text-muted-foreground">{t.admin.analyticsNoData}</p>
   }
 
   const { summary, topCustomers, rfmSegments } = data
@@ -114,31 +120,31 @@ export function CustomersTab({ period }: { period: string }) {
       {/* ── Stat cards ───────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatCard
-          label={en.admin.analyticsTotalCustomers}
+          label={t.admin.analyticsTotalCustomers}
           value={summary.totalCustomers}
-          help={en.tooltips.analytics.totalCustomers}
+          help={t.tooltips.analytics.totalCustomers}
         />
         <StatCard
-          label={en.admin.analyticsReturning}
+          label={t.admin.analyticsReturning}
           value={summary.returningCustomers}
           sub={`${returningPct}% of total`}
-          help={en.tooltips.analytics.returning}
+          help={t.tooltips.analytics.returning}
         />
         <StatCard
-          label={en.admin.analyticsRepeatRate}
+          label={t.admin.analyticsRepeatRate}
           value={`${summary.repeatRatePct}%`}
-          help={en.tooltips.analytics.repeatRate}
+          help={t.tooltips.analytics.repeatRate}
         />
         <StatCard
-          label={en.admin.analyticsAvgClv}
+          label={t.admin.analyticsAvgClv}
           value={formatPrice(summary.avgClvCents)}
-          help={en.tooltips.analytics.clv}
+          help={t.tooltips.analytics.clv}
         />
       </div>
 
       {/* ── RFM segments ─────────────────────────────────────────────────── */}
       <div className="flex flex-col gap-3 rounded-xl border p-5">
-        <p className="text-sm font-semibold">{en.admin.analyticsRfmSegments}</p>
+        <p className="text-sm font-semibold">{t.admin.analyticsRfmSegments}</p>
         <div className="flex flex-wrap gap-3">
           {RFM_ORDER.map((seg) => {
             const { label, classes } = RFM_CONFIG[seg]
@@ -159,10 +165,10 @@ export function CustomersTab({ period }: { period: string }) {
       {/* ── Top customers table ───────────────────────────────────────────── */}
       <div className="flex flex-col rounded-xl border">
         <div className="border-b px-5 py-4">
-          <p className="text-sm font-semibold">{en.admin.analyticsTopCustomers}</p>
+          <p className="text-sm font-semibold">{t.admin.analyticsTopCustomers}</p>
         </div>
         {topCustomers.length === 0 ? (
-          <p className="px-5 py-6 text-sm text-muted-foreground">{en.admin.analyticsNoData}</p>
+          <p className="px-5 py-6 text-sm text-muted-foreground">{t.admin.analyticsNoData}</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -170,14 +176,14 @@ export function CustomersTab({ period }: { period: string }) {
                 <tr className="border-b text-xs text-muted-foreground">
                   <th className="px-5 py-2 text-left font-medium">Customer</th>
                   <th className="hidden sm:table-cell px-5 py-2 text-right font-medium">
-                    {en.admin.analyticsOrders}
+                    {t.admin.analyticsOrders}
                   </th>
-                  <th className="px-5 py-2 text-right font-medium">{en.admin.analyticsSpent}</th>
+                  <th className="px-5 py-2 text-right font-medium">{t.admin.analyticsSpent}</th>
                   <th className="hidden md:table-cell px-5 py-2 text-right font-medium">
-                    {en.admin.analyticsFirstOrder}
+                    {t.admin.analyticsFirstOrder}
                   </th>
                   <th className="hidden md:table-cell px-5 py-2 text-right font-medium">
-                    {en.admin.analyticsLastOrder}
+                    {t.admin.analyticsLastOrder}
                   </th>
                 </tr>
               </thead>

@@ -20,10 +20,11 @@ import { buttonVariants } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { formatPrice } from '@/lib/utils/index'
 import { useApiResource } from '@/hooks/useApiResource'
 import type { AdminOrdersResponse } from '@/lib/types/admin'
+import type { Dictionary } from '@/lib/i18n/index'
 
 // ─── Chart helpers ────────────────────────────────────────────────────────────
 
@@ -73,7 +74,7 @@ interface DashboardStats {
   }[]
 }
 
-function computeStats(data: AdminOrdersResponse | null): DashboardStats {
+function computeStats(data: AdminOrdersResponse | null, t: Dictionary): DashboardStats {
   if (!data) {
     return {
       total: 0,
@@ -115,7 +116,7 @@ function computeStats(data: AdminOrdersResponse | null): DashboardStats {
   const statusBreakdown = Object.entries(statusMap)
     .filter(([, v]) => v > 0)
     .map(([name, value]) => ({
-      name: en.orderStatusLabels[name as keyof typeof en.orderStatusLabels] ?? name,
+      name: t.orderStatusLabels[name as keyof typeof t.orderStatusLabels] ?? name,
       value,
       color: STATUS_COLORS[name] ?? '#6B6B62',
     }))
@@ -142,23 +143,24 @@ function computeStats(data: AdminOrdersResponse | null): DashboardStats {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function AdminDashboardPage() {
+  const t = useT()
   const { data, loading } = useApiResource<AdminOrdersResponse>('/api/admin/orders?limit=200')
-  const stats = computeStats(data)
+  const stats = computeStats(data, t)
 
   return (
     <div className="flex flex-col gap-8">
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">{en.admin.dashboard}</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t.admin.dashboard}</h1>
         <div className="flex flex-wrap gap-2">
           <Link
             href="/admin/products/new"
             className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
           >
-            {en.admin.addProduct}
+            {t.admin.addProduct}
           </Link>
           <Link href="/admin/pos" className={cn(buttonVariants({ size: 'sm' }))}>
-            {en.admin.pos}
+            {t.admin.pos}
           </Link>
         </div>
       </div>
@@ -181,25 +183,25 @@ export default function AdminDashboardPage() {
           {/* ── Stat cards ───────────────────────────────────────────────── */}
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <StatCard
-              label={en.admin.totalOrders}
+              label={t.admin.totalOrders}
               value={stats.total}
               sub={`${stats.cancelled} cancelled · ${stats.delivered} delivered`}
-              help={en.tooltips.dashboard.totalOrders}
+              help={t.tooltips.dashboard.totalOrders}
             />
             <StatCard
-              label={en.admin.totalRevenue}
+              label={t.admin.totalRevenue}
               value={formatPrice(stats.revenueCents)}
               sub={`excl. cancelled · avg ${formatPrice(stats.avgOrderCents)}/order`}
-              help={en.tooltips.dashboard.revenue}
+              help={t.tooltips.dashboard.revenue}
             />
             <StatCard
-              label={en.admin.pendingOrders}
+              label={t.admin.pendingOrders}
               value={stats.pending}
               sub={stats.pending > 0 ? 'need attention' : 'all caught up'}
-              help={en.tooltips.dashboard.pending}
+              help={t.tooltips.dashboard.pending}
             />
             <StatCard
-              label={en.admin.lowStockAlert}
+              label={t.admin.lowStockAlert}
               value={stats.lowStock}
               sub="variants below threshold"
               href="/admin/products"
@@ -210,7 +212,7 @@ export default function AdminDashboardPage() {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             {/* Revenue area chart */}
             <div className="flex flex-col gap-4 rounded-xl border p-5 lg:col-span-2">
-              <p className="text-sm font-semibold">{en.admin.revenueChart}</p>
+              <p className="text-sm font-semibold">{t.admin.revenueChart}</p>
               <ResponsiveContainer width="100%" height={220}>
                 <AreaChart
                   data={stats.revenueByDay}
@@ -261,7 +263,7 @@ export default function AdminDashboardPage() {
 
             {/* Order status donut */}
             <div className="flex flex-col gap-4 rounded-xl border p-5">
-              <p className="text-sm font-semibold">{en.admin.ordersChart}</p>
+              <p className="text-sm font-semibold">{t.admin.ordersChart}</p>
               {stats.statusBreakdown.length > 0 ? (
                 <ResponsiveContainer width="100%" height={220}>
                   <PieChart>
@@ -296,7 +298,7 @@ export default function AdminDashboardPage() {
                 </ResponsiveContainer>
               ) : (
                 <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
-                  {en.admin.noOrdersYet}
+                  {t.admin.noOrdersYet}
                 </div>
               )}
             </div>
@@ -305,18 +307,18 @@ export default function AdminDashboardPage() {
           {/* ── Recent Orders ─────────────────────────────────────────────── */}
           <div className="flex flex-col gap-2 rounded-xl border">
             <div className="flex items-center justify-between border-b px-5 py-4">
-              <p className="text-sm font-semibold">{en.admin.recentOrders}</p>
+              <p className="text-sm font-semibold">{t.admin.recentOrders}</p>
               <Link
                 href="/admin/orders"
                 className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
               >
-                {en.common.viewAll}
+                {t.common.viewAll}
                 <ArrowRight className="size-3" />
               </Link>
             </div>
 
             {stats.recentOrders.length === 0 ? (
-              <p className="px-5 py-6 text-sm text-muted-foreground">{en.admin.noOrdersYet}</p>
+              <p className="px-5 py-6 text-sm text-muted-foreground">{t.admin.noOrdersYet}</p>
             ) : (
               <div className="flex flex-col divide-y">
                 {stats.recentOrders.map((o) => (
@@ -331,7 +333,7 @@ export default function AdminDashboardPage() {
                     <span className="flex-1 truncate font-medium">{o.customerName}</span>
                     <span className="shrink-0 font-semibold">{formatPrice(o.totalCents)}</span>
                     <Badge variant="secondary" className="capitalize shrink-0">
-                      {en.orderStatusLabels[o.status as keyof typeof en.orderStatusLabels] ??
+                      {t.orderStatusLabels[o.status as keyof typeof t.orderStatusLabels] ??
                         o.status}
                     </Badge>
                     <span className="w-16 shrink-0 text-right text-xs text-muted-foreground">

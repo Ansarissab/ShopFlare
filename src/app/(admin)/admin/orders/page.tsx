@@ -10,12 +10,13 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { ORDER_STATUSES } from '@/lib/constants'
 import { useApiResource } from '@/hooks/useApiResource'
 import type { AdminOrdersResponse } from '@/lib/types/admin'
 
 export default function AdminOrdersPage() {
+  const t = useT()
   const [statusFilter, setStatusFilter] = useState<string>('all')
 
   const queryString = statusFilter !== 'all' ? `?status=${statusFilter}&limit=50` : '?limit=50'
@@ -24,20 +25,20 @@ export default function AdminOrdersPage() {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">{en.admin.orders}</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t.admin.orders}</h1>
 
         <Select
           value={statusFilter}
           onValueChange={(v: string | null) => setStatusFilter(v ?? 'all')}
         >
-          <SelectTrigger className="w-40" aria-label={en.admin.filterByStatus}>
-            <SelectValue placeholder={en.admin.allStatuses} />
+          <SelectTrigger className="w-40" aria-label={t.admin.filterByStatus}>
+            <SelectValue placeholder={t.admin.allStatuses} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All</SelectItem>
             {ORDER_STATUSES.map((s) => (
               <SelectItem key={s} value={s} className="capitalize">
-                {en.orderStatusLabels[s]}
+                {t.orderStatusLabels[s]}
               </SelectItem>
             ))}
           </SelectContent>

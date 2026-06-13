@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { FormField } from '@/components/common/FormField'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { apiPost, apiPut, ApiError } from '@/lib/api'
 import { slugify } from '@/lib/utils/index'
 import { createCategorySchema } from '@/lib/schemas/admin'
@@ -38,6 +38,7 @@ interface CategoryFormValues {
 }
 
 export function CategoryForm({ category, parentOptions, onSuccess }: CategoryFormProps) {
+  const t = useT()
   const isEdit = Boolean(category)
 
   const {
@@ -92,16 +93,16 @@ export function CategoryForm({ category, parentOptions, onSuccess }: CategoryFor
     try {
       if (isEdit && category?.id) {
         await apiPut(`/api/admin/categories/${category.id}`, data)
-        toast.success(en.admin.categoryUpdated)
+        toast.success(t.admin.categoryUpdated)
       } else {
         await apiPost('/api/admin/categories', data)
-        toast.success(en.admin.categoryCreated)
+        toast.success(t.admin.categoryCreated)
       }
       onSuccess()
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.status === 409) {
-          setError('slug', { message: en.admin.slugTaken })
+          setError('slug', { message: t.admin.slugTaken })
           return
         }
         if (err.status === 422) {
@@ -112,7 +113,7 @@ export function CategoryForm({ category, parentOptions, onSuccess }: CategoryFor
           }
         }
       }
-      toast.error(err instanceof Error ? err.message : en.errors.networkError)
+      toast.error(err instanceof Error ? err.message : t.errors.networkError)
     }
   }
 
@@ -122,7 +123,7 @@ export function CategoryForm({ category, parentOptions, onSuccess }: CategoryFor
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 max-w-2xl">
-      <FormField label={en.admin.categoryName} htmlFor="cat-name" error={errors.name?.message}>
+      <FormField label={t.admin.categoryName} htmlFor="cat-name" error={errors.name?.message}>
         <Input
           id="cat-name"
           {...register('name', {
@@ -134,10 +135,10 @@ export function CategoryForm({ category, parentOptions, onSuccess }: CategoryFor
       </FormField>
 
       <FormField
-        label={en.admin.categorySlug}
+        label={t.admin.categorySlug}
         htmlFor="cat-slug"
         error={errors.slug?.message}
-        help={en.admin.slugAutoHint}
+        help={t.admin.slugAutoHint}
       >
         <Input
           id="cat-slug"
@@ -148,7 +149,7 @@ export function CategoryForm({ category, parentOptions, onSuccess }: CategoryFor
       </FormField>
 
       <FormField
-        label={en.admin.categoryDescription}
+        label={t.admin.categoryDescription}
         htmlFor="cat-desc"
         error={errors.description?.message}
         optional
@@ -163,7 +164,7 @@ export function CategoryForm({ category, parentOptions, onSuccess }: CategoryFor
       </FormField>
 
       <FormField
-        label={en.admin.categoryParent}
+        label={t.admin.categoryParent}
         htmlFor="cat-parent"
         error={errors.parentId?.message}
       >
@@ -174,10 +175,10 @@ export function CategoryForm({ category, parentOptions, onSuccess }: CategoryFor
           }
         >
           <SelectTrigger id="cat-parent">
-            <SelectValue placeholder={en.admin.categoryParentNone} />
+            <SelectValue placeholder={t.admin.categoryParentNone} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="__none__">{en.admin.categoryParentNone}</SelectItem>
+            <SelectItem value="__none__">{t.admin.categoryParentNone}</SelectItem>
             {filteredParentOptions.map((opt) => (
               <SelectItem key={opt.id} value={opt.id}>
                 {opt.name}
@@ -188,7 +189,7 @@ export function CategoryForm({ category, parentOptions, onSuccess }: CategoryFor
       </FormField>
 
       <FormField
-        label={en.admin.categorySortOrder}
+        label={t.admin.categorySortOrder}
         htmlFor="cat-sort"
         error={errors.sortOrder?.message}
       >
@@ -209,13 +210,13 @@ export function CategoryForm({ category, parentOptions, onSuccess }: CategoryFor
           onCheckedChange={(v) => setValue('active', v === true, { shouldValidate: true })}
         />
         <Label htmlFor="cat-active" className="cursor-pointer text-sm">
-          {en.admin.categoryActive}
+          {t.admin.categoryActive}
         </Label>
       </div>
 
       <div className="pt-2">
         <Button type="submit" size="sm" disabled={isSubmitting}>
-          {isSubmitting ? en.admin.saving : isEdit ? en.admin.editCategory : en.admin.addCategory}
+          {isSubmitting ? t.admin.saving : isEdit ? t.admin.editCategory : t.admin.addCategory}
         </Button>
       </div>
     </form>

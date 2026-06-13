@@ -8,11 +8,12 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { CouponsTable } from '@/components/admin/coupons/CouponsTable'
 import { CouponForm } from '@/components/admin/coupons/CouponForm'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { useApiResource } from '@/hooks/useApiResource'
 import type { CouponsResponse, AdminCoupon } from '@/lib/types/admin'
 
 export default function AdminCouponsPage() {
+  const t = useT()
   const [formKey, setFormKey] = useState(0)
   const [resourcePath, setResourcePath] = useState('/api/admin/coupons')
   const [showForm, setShowForm] = useState(false)
@@ -55,12 +56,12 @@ export default function AdminCouponsPage() {
   return (
     <div className="flex flex-col gap-5">
       <AdminPageHeader
-        title={en.admin.coupons}
+        title={t.admin.coupons}
         actions={
           !showForm ? (
             <Button size="sm" onClick={handleAdd}>
               <Plus className="size-3.5 mr-1" aria-hidden />
-              {en.admin.addCoupon}
+              {t.admin.addCoupon}
             </Button>
           ) : undefined
         }

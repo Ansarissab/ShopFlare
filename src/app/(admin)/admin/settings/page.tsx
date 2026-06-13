@@ -17,7 +17,7 @@ import { FormField } from '@/components/common/FormField'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { RichText } from '@/components/shared/RichText'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import {
   CURRENCIES,
   LOCALES,
@@ -38,6 +38,7 @@ import { useStoreConfig } from '@/hooks/useStoreConfig'
 import { DATA_UPDATED_CHANNEL } from '@/hooks/useApiResource'
 
 export default function AdminSettingsPage() {
+  const t = useT()
   const { config, loading } = useStoreConfig()
 
   const [storeName, setStoreName] = useState('')
@@ -153,12 +154,12 @@ export default function AdminSettingsPage() {
       form.append('file', file)
       const { logoUrl: url } = await apiUpload<{ logoUrl: string }>('/api/admin/config/logo', form)
       setLogoUrl(url)
-      toast.success(en.admin.logoUploaded)
+      toast.success(t.admin.logoUploaded)
       if (typeof BroadcastChannel !== 'undefined') {
         new BroadcastChannel(DATA_UPDATED_CHANNEL).postMessage('config-updated')
       }
     } catch {
-      toast.error(en.errors.networkError)
+      toast.error(t.errors.networkError)
     } finally {
       setLogoUploading(false)
       e.target.value = ''
@@ -169,12 +170,12 @@ export default function AdminSettingsPage() {
     try {
       await apiDelete('/api/admin/config/logo')
       setLogoUrl('')
-      toast.success(en.admin.logoRemoved)
+      toast.success(t.admin.logoRemoved)
       if (typeof BroadcastChannel !== 'undefined') {
         new BroadcastChannel(DATA_UPDATED_CHANNEL).postMessage('config-updated')
       }
     } catch {
-      toast.error(en.errors.networkError)
+      toast.error(t.errors.networkError)
     }
   }
 
@@ -186,12 +187,12 @@ export default function AdminSettingsPage() {
       const form = new FormData()
       form.append('file', file)
       await apiUpload('/api/admin/config/favicon', form)
-      toast.success(en.admin.logoUploaded)
+      toast.success(t.admin.logoUploaded)
       if (typeof BroadcastChannel !== 'undefined') {
         new BroadcastChannel(DATA_UPDATED_CHANNEL).postMessage('config-updated')
       }
     } catch {
-      toast.error(en.errors.networkError)
+      toast.error(t.errors.networkError)
     } finally {
       setFaviconUploading(false)
       e.target.value = ''
@@ -240,12 +241,12 @@ export default function AdminSettingsPage() {
         enabledLocales,
         defaultLocale,
       })
-      toast.success(en.admin.settingsSaved)
+      toast.success(t.admin.settingsSaved)
       if (typeof BroadcastChannel !== 'undefined') {
         new BroadcastChannel(DATA_UPDATED_CHANNEL).postMessage('config-updated')
       }
     } catch {
-      toast.error(en.errors.networkError)
+      toast.error(t.errors.networkError)
     } finally {
       setSaving(false)
     }
@@ -264,10 +265,10 @@ export default function AdminSettingsPage() {
   return (
     <div className="flex flex-col gap-6 max-w-lg">
       <AdminPageHeader
-        title={en.admin.storeSettings}
+        title={t.admin.storeSettings}
         actions={
           <Button onClick={handleSave} disabled={saving}>
-            {saving ? en.admin.saving : en.admin.save}
+            {saving ? t.admin.saving : t.admin.save}
           </Button>
         }
       />
@@ -275,14 +276,14 @@ export default function AdminSettingsPage() {
       {/* Appearance */}
       <div className="flex flex-col gap-4 rounded-lg border p-5">
         <div className="flex flex-col gap-1">
-          <h2 className="text-sm font-semibold">{en.admin.appearance}</h2>
-          <p className="text-xs text-muted-foreground">{en.admin.appearanceHint}</p>
+          <h2 className="text-sm font-semibold">{t.admin.appearance}</h2>
+          <p className="text-xs text-muted-foreground">{t.admin.appearanceHint}</p>
         </div>
 
         {/* Style presets — each card sets all appearance fields at once */}
         <div className="flex flex-col gap-1.5">
-          <span className="text-xs font-medium">{en.admin.stylePresets}</span>
-          <p className="text-xs text-muted-foreground">{en.admin.stylePresetsHint}</p>
+          <span className="text-xs font-medium">{t.admin.stylePresets}</span>
+          <p className="text-xs text-muted-foreground">{t.admin.stylePresetsHint}</p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {STYLE_PRESETS.map((preset) => {
@@ -329,9 +330,9 @@ export default function AdminSettingsPage() {
         {/* Color pickers */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FormField
-            label={en.admin.primaryColor}
+            label={t.admin.primaryColor}
             htmlFor="a-primary"
-            help={en.tooltips.settings.primaryColor}
+            help={t.tooltips.settings.primaryColor}
           >
             <div className="flex items-center gap-2">
               <input
@@ -351,9 +352,9 @@ export default function AdminSettingsPage() {
             </div>
           </FormField>
           <FormField
-            label={en.admin.accentColor}
+            label={t.admin.accentColor}
             htmlFor="a-accent"
-            help={en.tooltips.settings.accentColor}
+            help={t.tooltips.settings.accentColor}
           >
             <div className="flex items-center gap-2">
               <input
@@ -377,9 +378,9 @@ export default function AdminSettingsPage() {
         {/* Selects: radius / font / color mode */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <FormField
-            label={en.admin.borderRadius}
+            label={t.admin.borderRadius}
             htmlFor="a-radius"
-            help={en.tooltips.settings.radius}
+            help={t.tooltips.settings.radius}
           >
             <Select value={radius} onValueChange={(v: string | null) => setRadius(v ?? 'md')}>
               <SelectTrigger id="a-radius" className="w-full">
@@ -395,9 +396,9 @@ export default function AdminSettingsPage() {
             </Select>
           </FormField>
           <FormField
-            label={en.admin.fontFamily}
+            label={t.admin.fontFamily}
             htmlFor="a-font"
-            help={en.tooltips.settings.fontFamily}
+            help={t.tooltips.settings.fontFamily}
           >
             <Select
               value={fontFamily}
@@ -416,9 +417,9 @@ export default function AdminSettingsPage() {
             </Select>
           </FormField>
           <FormField
-            label={en.admin.colorMode}
+            label={t.admin.colorMode}
             htmlFor="a-mode"
-            help={en.tooltips.settings.colorMode}
+            help={t.tooltips.settings.colorMode}
           >
             <Select
               value={colorMode}
@@ -428,9 +429,9 @@ export default function AdminSettingsPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="light">{en.admin.colorModeLight}</SelectItem>
-                <SelectItem value="dark">{en.admin.colorModeDark}</SelectItem>
-                <SelectItem value="system">{en.admin.colorModeSystem}</SelectItem>
+                <SelectItem value="light">{t.admin.colorModeLight}</SelectItem>
+                <SelectItem value="dark">{t.admin.colorModeDark}</SelectItem>
+                <SelectItem value="system">{t.admin.colorModeSystem}</SelectItem>
               </SelectContent>
             </Select>
           </FormField>
@@ -439,9 +440,9 @@ export default function AdminSettingsPage() {
         {/* Selects: density / hero style */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FormField
-            label={en.admin.styleDensity}
+            label={t.admin.styleDensity}
             htmlFor="a-density"
-            help={en.tooltips.settings.density}
+            help={t.tooltips.settings.density}
           >
             <Select
               value={density}
@@ -460,9 +461,9 @@ export default function AdminSettingsPage() {
             </Select>
           </FormField>
           <FormField
-            label={en.admin.styleHeroStyle}
+            label={t.admin.styleHeroStyle}
             htmlFor="a-hero-style"
-            help={en.tooltips.settings.heroStyle}
+            help={t.tooltips.settings.heroStyle}
           >
             <Select
               value={heroStyle}
@@ -486,7 +487,7 @@ export default function AdminSettingsPage() {
             contrast reflects their selection, not a fixed app defect. Excluded
             from the automated a11y contrast gate via data-color-preview. */}
         <div className="flex flex-col gap-2">
-          <span className="text-xs text-muted-foreground">{en.admin.livePreview}</span>
+          <span className="text-xs text-muted-foreground">{t.admin.livePreview}</span>
           <div className="flex items-center gap-3" data-color-preview>
             <span
               className="px-3 py-1.5 text-xs font-medium"
@@ -517,7 +518,7 @@ export default function AdminSettingsPage() {
         </div>
 
         {/* Logo upload */}
-        <FormField label={en.admin.logo} htmlFor="a-logo" help={en.tooltips.settings.logo}>
+        <FormField label={t.admin.logo} htmlFor="a-logo" help={t.tooltips.settings.logo}>
           <div className="flex items-center gap-3">
             {logoUrl && (
               <div className="relative h-10 w-24 shrink-0">
@@ -546,18 +547,18 @@ export default function AdminSettingsPage() {
               disabled={logoUploading}
               onClick={() => logoInputRef.current?.click()}
             >
-              {logoUploading ? en.admin.saving : en.admin.uploadLogo}
+              {logoUploading ? t.admin.saving : t.admin.uploadLogo}
             </Button>
             {logoUrl && (
               <Button type="button" variant="ghost" size="sm" onClick={handleRemoveLogo}>
-                {en.admin.removeLogo}
+                {t.admin.removeLogo}
               </Button>
             )}
           </div>
         </FormField>
 
         {/* Favicon upload */}
-        <FormField label={en.admin.favicon} htmlFor="a-favicon" help={en.tooltips.settings.favicon}>
+        <FormField label={t.admin.favicon} htmlFor="a-favicon" help={t.tooltips.settings.favicon}>
           <div className="flex items-center gap-3">
             <input
               ref={faviconInputRef}
@@ -574,7 +575,7 @@ export default function AdminSettingsPage() {
               disabled={faviconUploading}
               onClick={() => faviconInputRef.current?.click()}
             >
-              {faviconUploading ? en.admin.saving : en.admin.uploadFavicon}
+              {faviconUploading ? t.admin.saving : t.admin.uploadFavicon}
             </Button>
           </div>
         </FormField>
@@ -583,15 +584,15 @@ export default function AdminSettingsPage() {
       {/* Tax */}
       <div className="flex flex-col gap-4 rounded-lg border p-5">
         <div className="flex flex-col gap-1">
-          <h2 className="text-sm font-semibold">{en.admin.taxSettings}</h2>
-          <p className="text-xs text-muted-foreground">{en.admin.taxSettingsHint}</p>
+          <h2 className="text-sm font-semibold">{t.admin.taxSettings}</h2>
+          <p className="text-xs text-muted-foreground">{t.admin.taxSettingsHint}</p>
         </div>
 
         {/* Enable toggle */}
         <FormField
-          label={en.admin.taxEnabled}
+          label={t.admin.taxEnabled}
           htmlFor="t-enabled"
-          help={en.tooltips.settings.taxEnabled}
+          help={t.tooltips.settings.taxEnabled}
         >
           <div className="flex items-center gap-2">
             <input
@@ -601,7 +602,7 @@ export default function AdminSettingsPage() {
               onChange={(e) => setTaxEnabled(e.target.checked)}
               className="h-4 w-4 cursor-pointer rounded border"
             />
-            <span className="text-xs text-muted-foreground">{en.admin.taxEnabledHint}</span>
+            <span className="text-xs text-muted-foreground">{t.admin.taxEnabledHint}</span>
           </div>
         </FormField>
 
@@ -609,9 +610,9 @@ export default function AdminSettingsPage() {
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
-                label={en.admin.taxName}
+                label={t.admin.taxName}
                 htmlFor="t-name"
-                help={en.tooltips.settings.taxName}
+                help={t.tooltips.settings.taxName}
               >
                 <Input
                   id="t-name"
@@ -622,9 +623,9 @@ export default function AdminSettingsPage() {
                 />
               </FormField>
               <FormField
-                label={en.admin.taxRate}
+                label={t.admin.taxRate}
                 htmlFor="t-rate"
-                help={en.tooltips.settings.taxRate}
+                help={t.tooltips.settings.taxRate}
               >
                 <Input
                   id="t-rate"
@@ -641,9 +642,9 @@ export default function AdminSettingsPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
-                label={en.admin.taxBasis}
+                label={t.admin.taxBasis}
                 htmlFor="t-basis"
-                help={en.tooltips.settings.taxBasis}
+                help={t.tooltips.settings.taxBasis}
               >
                 <Select
                   value={taxBasis}
@@ -653,17 +654,17 @@ export default function AdminSettingsPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="subtotal">{en.admin.taxBasisSubtotal}</SelectItem>
+                    <SelectItem value="subtotal">{t.admin.taxBasisSubtotal}</SelectItem>
                     <SelectItem value="subtotal_and_shipping">
-                      {en.admin.taxBasisSubtotalShipping}
+                      {t.admin.taxBasisSubtotalShipping}
                     </SelectItem>
                   </SelectContent>
                 </Select>
               </FormField>
               <FormField
-                label={en.admin.taxInclusive}
+                label={t.admin.taxInclusive}
                 htmlFor="t-inclusive"
-                help={en.tooltips.settings.taxInclusive}
+                help={t.tooltips.settings.taxInclusive}
               >
                 <div className="flex items-center gap-2 pt-1">
                   <input
@@ -678,9 +679,9 @@ export default function AdminSettingsPage() {
             </div>
 
             <FormField
-              label={en.admin.taxRegistrationNumber}
+              label={t.admin.taxRegistrationNumber}
               htmlFor="t-reg"
-              help={en.tooltips.settings.taxRegistration}
+              help={t.tooltips.settings.taxRegistration}
             >
               <Input
                 id="t-reg"
@@ -694,9 +695,9 @@ export default function AdminSettingsPage() {
             {/* Live preview */}
             {Number(taxRateInput) > 0 && (
               <div className="rounded-md bg-muted/50 p-3 text-xs flex flex-col gap-1">
-                <p className="font-medium text-muted-foreground">{en.admin.livePreview}</p>
+                <p className="font-medium text-muted-foreground">{t.admin.livePreview}</p>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">{en.cart.subtotal}</span>
+                  <span className="text-muted-foreground">{t.cart.subtotal}</span>
                   <span>5,000</span>
                 </div>
                 {!taxInclusive && (
@@ -710,7 +711,7 @@ export default function AdminSettingsPage() {
                 {taxInclusive && (
                   <div className="flex justify-between text-muted-foreground">
                     <span>
-                      {taxName} {en.admin.taxInclusive.toLowerCase()}
+                      {taxName} {t.admin.taxInclusive.toLowerCase()}
                     </span>
                     <span>
                       {Math.round(5000 - 5000 / (1 + Number(taxRateInput) / 100)).toLocaleString()}
@@ -718,7 +719,7 @@ export default function AdminSettingsPage() {
                   </div>
                 )}
                 <div className="flex justify-between font-semibold border-t pt-1 mt-1">
-                  <span>{en.cart.total}</span>
+                  <span>{t.cart.total}</span>
                   <span>
                     {taxInclusive
                       ? '5,000'
@@ -734,10 +735,10 @@ export default function AdminSettingsPage() {
       {/* Identity */}
       <div className="flex flex-col gap-4 rounded-lg border p-5">
         <h2 className="text-sm font-semibold">Identity</h2>
-        <FormField label={en.admin.storeName} htmlFor="s-name">
+        <FormField label={t.admin.storeName} htmlFor="s-name">
           <Input id="s-name" value={storeName} onChange={(e) => setStoreName(e.target.value)} />
         </FormField>
-        <FormField label={en.admin.tagline} htmlFor="s-tagline">
+        <FormField label={t.admin.tagline} htmlFor="s-tagline">
           <Input id="s-tagline" value={tagline} onChange={(e) => setTagline(e.target.value)} />
         </FormField>
       </div>
@@ -745,7 +746,7 @@ export default function AdminSettingsPage() {
       {/* Contact */}
       <div className="flex flex-col gap-4 rounded-lg border p-5">
         <h2 className="text-sm font-semibold">Contact</h2>
-        <FormField label={en.admin.whatsappNumber} htmlFor="s-wa">
+        <FormField label={t.admin.whatsappNumber} htmlFor="s-wa">
           <Input
             id="s-wa"
             type="tel"
@@ -754,7 +755,7 @@ export default function AdminSettingsPage() {
             placeholder="+92300..."
           />
         </FormField>
-        <FormField label={en.admin.enableWhatsApp} htmlFor="s-wa-enabled">
+        <FormField label={t.admin.enableWhatsApp} htmlFor="s-wa-enabled">
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -763,10 +764,10 @@ export default function AdminSettingsPage() {
               onChange={(e) => setWhatsappEnabled(e.target.checked)}
               className="h-4 w-4 cursor-pointer rounded border"
             />
-            <span className="text-xs text-muted-foreground">{en.admin.enableWhatsAppHint}</span>
+            <span className="text-xs text-muted-foreground">{t.admin.enableWhatsAppHint}</span>
           </div>
         </FormField>
-        <FormField label={en.admin.enableReviews} htmlFor="s-reviews-enabled">
+        <FormField label={t.admin.enableReviews} htmlFor="s-reviews-enabled">
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -775,10 +776,10 @@ export default function AdminSettingsPage() {
               onChange={(e) => setReviewsEnabled(e.target.checked)}
               className="h-4 w-4 cursor-pointer rounded border"
             />
-            <span className="text-xs text-muted-foreground">{en.admin.enableReviewsHint}</span>
+            <span className="text-xs text-muted-foreground">{t.admin.enableReviewsHint}</span>
           </div>
         </FormField>
-        <FormField label={en.admin.contactEmail} htmlFor="s-email">
+        <FormField label={t.admin.contactEmail} htmlFor="s-email">
           <Input
             id="s-email"
             type="email"
@@ -794,7 +795,7 @@ export default function AdminSettingsPage() {
           <h2 className="text-sm font-semibold">SEO / LLM Discovery</h2>
         </div>
 
-        <FormField label={en.seo.llmDiscoveryLabel} htmlFor="s-llm-discovery">
+        <FormField label={t.seo.llmDiscoveryLabel} htmlFor="s-llm-discovery">
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -803,11 +804,11 @@ export default function AdminSettingsPage() {
               onChange={(e) => setLlmDiscoveryEnabled(e.target.checked)}
               className="h-4 w-4 cursor-pointer rounded border"
             />
-            <span className="text-xs text-muted-foreground">{en.seo.llmDiscoveryHelp}</span>
+            <span className="text-xs text-muted-foreground">{t.seo.llmDiscoveryHelp}</span>
           </div>
         </FormField>
 
-        <FormField label={en.seo.aiTrainingLabel} htmlFor="s-ai-training">
+        <FormField label={t.seo.aiTrainingLabel} htmlFor="s-ai-training">
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -816,11 +817,11 @@ export default function AdminSettingsPage() {
               onChange={(e) => setAiTrainingAllowed(e.target.checked)}
               className="h-4 w-4 cursor-pointer rounded border"
             />
-            <span className="text-xs text-muted-foreground">{en.seo.aiTrainingHelp}</span>
+            <span className="text-xs text-muted-foreground">{t.seo.aiTrainingHelp}</span>
           </div>
         </FormField>
 
-        <FormField label={en.seo.faqEnabledLabel} htmlFor="s-faq-enabled">
+        <FormField label={t.seo.faqEnabledLabel} htmlFor="s-faq-enabled">
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -833,13 +834,13 @@ export default function AdminSettingsPage() {
         </FormField>
 
         {faqEnabled && (
-          <FormField label={en.seo.faqContentLabel} htmlFor="s-faq-content">
-            <p className="text-xs text-muted-foreground mb-2">{en.seo.faqContentHelp}</p>
+          <FormField label={t.seo.faqContentLabel} htmlFor="s-faq-content">
+            <p className="text-xs text-muted-foreground mb-2">{t.seo.faqContentHelp}</p>
             <RichText value={faqContent} onChange={setFaqContent} />
           </FormField>
         )}
 
-        <FormField label={en.admin.enableBlog} htmlFor="s-blog-enabled">
+        <FormField label={t.admin.enableBlog} htmlFor="s-blog-enabled">
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -850,17 +851,17 @@ export default function AdminSettingsPage() {
             />
           </div>
         </FormField>
-        <p className="text-sm text-muted-foreground -mt-2">{en.admin.enableBlogHint}</p>
+        <p className="text-sm text-muted-foreground -mt-2">{t.admin.enableBlogHint}</p>
       </div>
 
       {/* Languages */}
       <div className="flex flex-col gap-4 rounded-lg border p-5">
         <div className="flex flex-col gap-1">
-          <h2 className="text-sm font-semibold">{en.admin.localesHeading}</h2>
-          <p className="text-xs text-muted-foreground">{en.admin.localesDescription}</p>
+          <h2 className="text-sm font-semibold">{t.admin.localesHeading}</h2>
+          <p className="text-xs text-muted-foreground">{t.admin.localesDescription}</p>
         </div>
 
-        <FormField label={en.admin.enabledLocalesLabel} htmlFor="s-locales">
+        <FormField label={t.admin.enabledLocalesLabel} htmlFor="s-locales">
           <div className="flex flex-col gap-2">
             {SHIPPED_LOCALES.map((loc) => {
               const isEn = loc === 'en'
@@ -891,7 +892,7 @@ export default function AdminSettingsPage() {
           </div>
         </FormField>
 
-        <FormField label={en.admin.defaultLocaleLabel} htmlFor="s-default-locale">
+        <FormField label={t.admin.defaultLocaleLabel} htmlFor="s-default-locale">
           <Select
             value={defaultLocale}
             onValueChange={(v: string | null) => setDefaultLocale((v as LocaleCode) ?? 'en')}
@@ -914,9 +915,9 @@ export default function AdminSettingsPage() {
       <div className="flex flex-col gap-4 rounded-lg border p-5">
         <h2 className="text-sm font-semibold">Payments &amp; Shipping</h2>
         <FormField
-          label={en.admin.currency}
+          label={t.admin.currency}
           htmlFor="s-currency"
-          help={en.tooltips.settings.currency}
+          help={t.tooltips.settings.currency}
         >
           <Select value={currency} onValueChange={(v: string | null) => setCurrency(v ?? 'PKR')}>
             <SelectTrigger id="s-currency" className="w-full">
@@ -932,9 +933,9 @@ export default function AdminSettingsPage() {
           </Select>
         </FormField>
         <FormField
-          label={en.admin.flatShippingRate}
+          label={t.admin.flatShippingRate}
           htmlFor="s-flat"
-          help={en.tooltips.settings.flatShipping}
+          help={t.tooltips.settings.flatShipping}
         >
           <Input
             id="s-flat"
@@ -945,9 +946,9 @@ export default function AdminSettingsPage() {
           />
         </FormField>
         <FormField
-          label={en.admin.freeShippingThreshold}
+          label={t.admin.freeShippingThreshold}
           htmlFor="s-threshold"
-          help={en.tooltips.settings.freeShipThreshold}
+          help={t.tooltips.settings.freeShipThreshold}
         >
           <Input
             id="s-threshold"
@@ -957,7 +958,7 @@ export default function AdminSettingsPage() {
             onChange={(e) => setFreeThreshold(e.target.value)}
           />
         </FormField>
-        <FormField label={en.admin.productPageSize} htmlFor="s-page-size">
+        <FormField label={t.admin.productPageSize} htmlFor="s-page-size">
           <Input
             id="s-page-size"
             type="number"
@@ -967,17 +968,17 @@ export default function AdminSettingsPage() {
             value={productPageSize}
             onChange={(e) => setProductPageSize(e.target.value)}
           />
-          <p className="text-xs text-muted-foreground mt-1">{en.admin.productPageSizeHint}</p>
+          <p className="text-xs text-muted-foreground mt-1">{t.admin.productPageSizeHint}</p>
         </FormField>
       </div>
 
       {/* Bank Transfer Details */}
       <div className="flex flex-col gap-4 rounded-lg border p-5">
         <div className="flex flex-col gap-1">
-          <h2 className="text-sm font-semibold">{en.admin.bankSectionTitle}</h2>
-          <p className="text-xs text-muted-foreground">{en.admin.bankSectionHint}</p>
+          <h2 className="text-sm font-semibold">{t.admin.bankSectionTitle}</h2>
+          <p className="text-xs text-muted-foreground">{t.admin.bankSectionHint}</p>
         </div>
-        <FormField label={en.admin.bankName} htmlFor="s-bank-name">
+        <FormField label={t.admin.bankName} htmlFor="s-bank-name">
           <Input
             id="s-bank-name"
             value={bankName}
@@ -985,21 +986,21 @@ export default function AdminSettingsPage() {
             placeholder="Meezan Bank"
           />
         </FormField>
-        <FormField label={en.admin.bankAccountTitle} htmlFor="s-bank-title">
+        <FormField label={t.admin.bankAccountTitle} htmlFor="s-bank-title">
           <Input
             id="s-bank-title"
             value={bankAccountTitle}
             onChange={(e) => setBankAccountTitle(e.target.value)}
           />
         </FormField>
-        <FormField label={en.admin.bankAccountNumber} htmlFor="s-bank-acct">
+        <FormField label={t.admin.bankAccountNumber} htmlFor="s-bank-acct">
           <Input
             id="s-bank-acct"
             value={bankAccountNumber}
             onChange={(e) => setBankAccountNumber(e.target.value)}
           />
         </FormField>
-        <FormField label={en.admin.bankIban} htmlFor="s-bank-iban">
+        <FormField label={t.admin.bankIban} htmlFor="s-bank-iban">
           <Input
             id="s-bank-iban"
             value={bankIban}
@@ -1007,7 +1008,7 @@ export default function AdminSettingsPage() {
             placeholder="PK00MEZN..."
           />
         </FormField>
-        <FormField label={en.admin.bankInstructions} htmlFor="s-bank-note">
+        <FormField label={t.admin.bankInstructions} htmlFor="s-bank-note">
           <Textarea
             id="s-bank-note"
             rows={2}

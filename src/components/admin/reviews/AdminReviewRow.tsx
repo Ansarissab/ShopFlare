@@ -8,20 +8,21 @@ import { Button } from '@/components/ui/button'
 import { ReviewStars } from '@/components/store/product/ReviewStars'
 import { apiPatch, apiDelete } from '@/lib/api'
 import { formatDate } from '@/lib/utils/index'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import type { AdminReviewRowProps } from '@/lib/types/admin'
 
 export function AdminReviewRow({ review, onChanged }: AdminReviewRowProps) {
+  const t = useT()
   const [busy, setBusy] = useState(false)
 
   async function handleApprove() {
     setBusy(true)
     try {
       await apiPatch(`/api/admin/reviews/${review.id}`, { approved: true })
-      toast.success(en.admin.reviewApproved)
+      toast.success(t.admin.reviewApproved)
       onChanged()
     } catch {
-      toast.error(en.errors.networkError)
+      toast.error(t.errors.networkError)
     } finally {
       setBusy(false)
     }
@@ -31,24 +32,24 @@ export function AdminReviewRow({ review, onChanged }: AdminReviewRowProps) {
     setBusy(true)
     try {
       await apiPatch(`/api/admin/reviews/${review.id}`, { approved: false })
-      toast.success(en.admin.reviewRejected)
+      toast.success(t.admin.reviewRejected)
       onChanged()
     } catch {
-      toast.error(en.errors.networkError)
+      toast.error(t.errors.networkError)
     } finally {
       setBusy(false)
     }
   }
 
   async function handleDelete() {
-    if (!confirm(en.admin.deleteReviewConfirm)) return
+    if (!confirm(t.admin.deleteReviewConfirm)) return
     setBusy(true)
     try {
       await apiDelete(`/api/admin/reviews/${review.id}`)
-      toast.success(en.admin.reviewDeleted)
+      toast.success(t.admin.reviewDeleted)
       onChanged()
     } catch {
-      toast.error(en.errors.networkError)
+      toast.error(t.errors.networkError)
     } finally {
       setBusy(false)
     }
@@ -58,7 +59,7 @@ export function AdminReviewRow({ review, onChanged }: AdminReviewRowProps) {
     <tr className="border-b last:border-0 hover:bg-muted/30 transition-colors align-top">
       <td className="px-4 py-3">
         <Badge variant={review.approved ? 'default' : 'secondary'}>
-          {review.approved ? en.admin.approvedReviews : en.admin.pendingReviews}
+          {review.approved ? t.admin.approvedReviews : t.admin.pendingReviews}
         </Badge>
       </td>
       <td className="px-4 py-3 text-sm font-medium">{review.productName}</td>
@@ -87,7 +88,7 @@ export function AdminReviewRow({ review, onChanged }: AdminReviewRowProps) {
               disabled={busy}
               onClick={handleApprove}
             >
-              {en.admin.approveReview}
+              {t.admin.approveReview}
             </Button>
           ) : (
             <Button
@@ -98,7 +99,7 @@ export function AdminReviewRow({ review, onChanged }: AdminReviewRowProps) {
               disabled={busy}
               onClick={handleReject}
             >
-              {en.admin.rejectReview}
+              {t.admin.rejectReview}
             </Button>
           )}
           <Button
@@ -108,7 +109,7 @@ export function AdminReviewRow({ review, onChanged }: AdminReviewRowProps) {
             className="size-7 text-destructive hover:text-destructive"
             disabled={busy}
             onClick={handleDelete}
-            aria-label={en.admin.deleteReview}
+            aria-label={t.admin.deleteReview}
           >
             <Trash2 className="size-3.5" aria-hidden />
           </Button>

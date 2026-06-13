@@ -8,18 +8,11 @@ import { Textarea } from '@/components/ui/textarea'
 import { Skeleton } from '@/components/ui/skeleton'
 import { FormField } from '@/components/common/FormField'
 import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { apiGet, apiPut } from '@/lib/api'
 import { formatDate } from '@/lib/utils/index'
 import { POLICY_SLUGS } from '@/lib/constants'
 import type { AdminPagesResponse, StorePage } from '@/lib/types/admin'
-
-const POLICY_LABELS: Record<string, string> = {
-  shipping: en.policies.shipping,
-  returns: en.policies.returns,
-  privacy: en.policies.privacy,
-  terms: en.policies.terms,
-}
 
 interface EditState {
   title: string
@@ -28,6 +21,15 @@ interface EditState {
 }
 
 export default function AdminPagesPage() {
+  const t = useT()
+
+  const POLICY_LABELS: Record<string, string> = {
+    shipping: t.policies.shipping,
+    returns: t.policies.returns,
+    privacy: t.policies.privacy,
+    terms: t.policies.terms,
+  }
+
   const [pages, setPages] = useState<StorePage[]>([])
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState<string | null>(null)
@@ -36,7 +38,7 @@ export default function AdminPagesPage() {
   useEffect(() => {
     apiGet<AdminPagesResponse>('/api/admin/pages')
       .then((res) => setPages(res.pages))
-      .catch(() => toast.error(en.errors.networkError))
+      .catch(() => toast.error(t.errors.networkError))
       .finally(() => setLoading(false))
   }, [])
 
@@ -76,10 +78,10 @@ export default function AdminPagesPage() {
         }
         return [...prev, updated]
       })
-      toast.success(en.admin.pageSaved)
+      toast.success(t.admin.pageSaved)
       setEditing(null)
     } catch {
-      toast.error(en.errors.networkError)
+      toast.error(t.errors.networkError)
     } finally {
       setEditState((s) => ({ ...s, saving: false }))
     }
@@ -97,7 +99,7 @@ export default function AdminPagesPage() {
 
   return (
     <div className="flex flex-col gap-6 max-w-2xl">
-      <AdminPageHeader title={en.admin.policyPages} />
+      <AdminPageHeader title={t.admin.policyPages} />
 
       {POLICY_SLUGS.map((slug) => {
         const saved = pages.find((p) => p.slug === slug)
@@ -110,7 +112,7 @@ export default function AdminPagesPage() {
                 <span className="text-sm font-semibold">{POLICY_LABELS[slug]}</span>
                 {saved?.updatedAt && (
                   <span className="text-xs text-muted-foreground">
-                    {en.policies.lastUpdated.replace(
+                    {t.policies.lastUpdated.replace(
                       '{date}',
                       formatDate(
                         saved.updatedAt,
@@ -123,14 +125,14 @@ export default function AdminPagesPage() {
               </div>
               {!isEditing && (
                 <Button variant="outline" size="sm" onClick={() => startEdit(slug)}>
-                  {en.admin.editPage}
+                  {t.admin.editPage}
                 </Button>
               )}
             </div>
 
             {isEditing && (
               <div className="flex flex-col gap-4">
-                <FormField label={en.admin.pageTitle} htmlFor={`title-${slug}`}>
+                <FormField label={t.admin.pageTitle} htmlFor={`title-${slug}`}>
                   <Input
                     id={`title-${slug}`}
                     value={editState.title}
@@ -138,21 +140,21 @@ export default function AdminPagesPage() {
                   />
                 </FormField>
 
-                <FormField label={en.admin.pageContent} htmlFor={`content-${slug}`}>
+                <FormField label={t.admin.pageContent} htmlFor={`content-${slug}`}>
                   <Textarea
                     id={`content-${slug}`}
                     rows={12}
                     value={editState.content}
                     onChange={(e) => setEditState((s) => ({ ...s, content: e.target.value }))}
-                    placeholder={en.admin.pageContentHint}
+                    placeholder={t.admin.pageContentHint}
                     className="resize-y font-mono text-xs"
                   />
                 </FormField>
-                <p className="text-xs text-muted-foreground -mt-2">{en.admin.pageContentHint}</p>
+                <p className="text-xs text-muted-foreground -mt-2">{t.admin.pageContentHint}</p>
 
                 <div className="flex gap-2">
                   <Button onClick={() => handleSave(slug)} disabled={editState.saving} size="sm">
-                    {editState.saving ? en.admin.saving : en.admin.save}
+                    {editState.saving ? t.admin.saving : t.admin.save}
                   </Button>
                   <Button
                     variant="ghost"
@@ -160,7 +162,7 @@ export default function AdminPagesPage() {
                     onClick={cancelEdit}
                     disabled={editState.saving}
                   >
-                    {en.admin.cancel}
+                    {t.admin.cancel}
                   </Button>
                 </div>
               </div>
@@ -171,7 +173,7 @@ export default function AdminPagesPage() {
                 {saved?.content ? (
                   saved.content.slice(0, 120) + (saved.content.length > 120 ? '…' : '')
                 ) : (
-                  <em>{en.policies.empty}</em>
+                  <em>{t.policies.empty}</em>
                 )}
               </p>
             )}

@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/select'
 import { OrderLineItem } from '@/components/common/OrderLineItem'
 import { cn } from '@/lib/utils'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { formatPrice } from '@/lib/utils/index'
 import { ORDER_STATUSES } from '@/lib/constants'
 import { apiPatch } from '@/lib/api'
@@ -27,6 +27,7 @@ import { useApiResource } from '@/hooks/useApiResource'
 import type { AdminOrderDetail } from '@/lib/types/admin'
 
 export default function AdminOrderDetailPage() {
+  const t = useT()
   const params = useParams<{ id: string }>()
   const { data, loading, notFound } = useApiResource<AdminOrderDetail>(
     params?.id ? `/api/admin/orders/${params.id}` : null,
@@ -42,10 +43,10 @@ export default function AdminOrderDetailPage() {
     setSaving(true)
     try {
       await apiPatch(`/api/admin/orders/${params.id}/status`, { status: newStatus })
-      toast.success(en.admin.statusUpdated)
+      toast.success(t.admin.statusUpdated)
       window.location.reload()
     } catch {
-      toast.error(en.errors.networkError)
+      toast.error(t.errors.networkError)
     } finally {
       setSaving(false)
     }
@@ -59,10 +60,10 @@ export default function AdminOrderDetailPage() {
         trackingNumber: trackingNumber.trim(),
         carrier: carrier.trim() || undefined,
       })
-      toast.success(en.admin.trackingAdded)
+      toast.success(t.admin.trackingAdded)
       window.location.reload()
     } catch {
-      toast.error(en.errors.networkError)
+      toast.error(t.errors.networkError)
     } finally {
       setSaving(false)
     }
@@ -101,10 +102,10 @@ export default function AdminOrderDetailPage() {
           <ArrowLeft className="size-4" />
         </Link>
         <h1 className="text-xl font-bold tracking-tight">
-          {en.admin.orderDetail} — {order.orderNumber}
+          {t.admin.orderDetail} — {order.orderNumber}
         </h1>
         <Badge variant="secondary" className="capitalize ml-auto">
-          {en.orderStatusLabels[order.status as keyof typeof en.orderStatusLabels] ?? order.status}
+          {t.orderStatusLabels[order.status as keyof typeof t.orderStatusLabels] ?? order.status}
         </Badge>
       </div>
 
@@ -150,13 +151,13 @@ export default function AdminOrderDetailPage() {
       {/* Totals */}
       <div className="flex flex-col gap-1.5 text-sm">
         <div className="flex justify-between">
-          <span className="text-muted-foreground">{en.cart.subtotal}</span>
+          <span className="text-muted-foreground">{t.cart.subtotal}</span>
           <span>{formatPrice(order.subtotalCents)}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-muted-foreground">{en.cart.shipping}</span>
+          <span className="text-muted-foreground">{t.cart.shipping}</span>
           <span>
-            {order.shippingCents === 0 ? en.cart.shippingFree : formatPrice(order.shippingCents)}
+            {order.shippingCents === 0 ? t.cart.shippingFree : formatPrice(order.shippingCents)}
           </span>
         </div>
         {order.discountCents > 0 && (
@@ -167,13 +168,13 @@ export default function AdminOrderDetailPage() {
         )}
         {order.taxCents > 0 && (
           <div className="flex justify-between">
-            <span className="text-muted-foreground">{en.cart.tax}</span>
+            <span className="text-muted-foreground">{t.cart.tax}</span>
             <span>{formatPrice(order.taxCents)}</span>
           </div>
         )}
         <Separator />
         <div className="flex justify-between font-semibold text-base">
-          <span>{en.cart.total}</span>
+          <span>{t.cart.total}</span>
           <span>{formatPrice(order.totalCents)}</span>
         </div>
       </div>
@@ -184,12 +185,12 @@ export default function AdminOrderDetailPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {/* Status update */}
         <div className="flex flex-col gap-2 rounded-lg border p-4">
-          <p className="text-sm font-medium">{en.admin.updateStatus}</p>
+          <p className="text-sm font-medium">{t.admin.updateStatus}</p>
           <Select value={newStatus} onValueChange={(v: string | null) => setNewStatus(v ?? '')}>
             <SelectTrigger>
               <SelectValue
                 placeholder={
-                  en.orderStatusLabels[order.status as keyof typeof en.orderStatusLabels] ??
+                  t.orderStatusLabels[order.status as keyof typeof t.orderStatusLabels] ??
                   order.status
                 }
               />
@@ -197,7 +198,7 @@ export default function AdminOrderDetailPage() {
             <SelectContent>
               {ORDER_STATUSES.map((s) => (
                 <SelectItem key={s} value={s} className="capitalize">
-                  {en.orderStatusLabels[s]}
+                  {t.orderStatusLabels[s]}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -208,20 +209,20 @@ export default function AdminOrderDetailPage() {
             disabled={!newStatus || saving}
             className="mt-auto"
           >
-            {saving ? en.admin.saving : en.admin.updateStatus}
+            {saving ? t.admin.saving : t.admin.updateStatus}
           </Button>
         </div>
 
         {/* Tracking */}
         <div className="flex flex-col gap-2 rounded-lg border p-4">
-          <p className="text-sm font-medium">{en.admin.addTracking}</p>
+          <p className="text-sm font-medium">{t.admin.addTracking}</p>
           <Input
-            placeholder={en.admin.trackingNumber}
+            placeholder={t.admin.trackingNumber}
             value={trackingNumber}
             onChange={(e) => setTrackingNumber(e.target.value)}
           />
           <Input
-            placeholder={`${en.admin.carrier} ${en.common.optional}`}
+            placeholder={`${t.admin.carrier} ${t.common.optional}`}
             value={carrier}
             onChange={(e) => setCarrier(e.target.value)}
           />
@@ -231,7 +232,7 @@ export default function AdminOrderDetailPage() {
             disabled={!trackingNumber.trim() || saving}
             className="mt-auto"
           >
-            {saving ? en.admin.saving : en.admin.addTracking}
+            {saving ? t.admin.saving : t.admin.addTracking}
           </Button>
         </div>
       </div>
@@ -239,11 +240,11 @@ export default function AdminOrderDetailPage() {
       {order.trackingNumber && (
         <div className="rounded-lg border bg-muted/40 p-4 text-sm">
           <p className="font-medium">
-            {en.admin.trackingNumber}: {order.trackingNumber}
+            {t.admin.trackingNumber}: {order.trackingNumber}
           </p>
           {order.carrier && (
             <p className="text-muted-foreground">
-              {en.admin.carrier}: {order.carrier}
+              {t.admin.carrier}: {order.carrier}
             </p>
           )}
         </div>

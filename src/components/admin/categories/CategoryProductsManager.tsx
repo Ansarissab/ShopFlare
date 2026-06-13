@@ -5,7 +5,7 @@ import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { apiGet, apiPut } from '@/lib/api'
 import type { ProductWithVariants } from '@/lib/types/product'
 
@@ -22,6 +22,7 @@ export function CategoryProductsManager({
   categoryId,
   initialProducts,
 }: CategoryProductsManagerProps) {
+  const t = useT()
   // Products assigned to this category (ordered)
   const [assigned, setAssigned] = useState<ProductWithVariants[]>(initialProducts)
   // All products fetched for the picker
@@ -52,9 +53,9 @@ export function CategoryProductsManager({
       setAssigned(newAssigned)
       setShowPicker(false)
       setSearch('')
-      toast.success(en.admin.categoryUpdated)
+      toast.success(t.admin.categoryUpdated)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : en.errors.networkError)
+      toast.error(err instanceof Error ? err.message : t.errors.networkError)
     } finally {
       setSaving(false)
     }
@@ -69,9 +70,9 @@ export function CategoryProductsManager({
         categoryIds: remainingCategoryIds,
       })
       setAssigned(newAssigned)
-      toast.success(en.admin.categoryUpdated)
+      toast.success(t.admin.categoryUpdated)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : en.errors.networkError)
+      toast.error(err instanceof Error ? err.message : t.errors.networkError)
     } finally {
       setSaving(false)
     }
@@ -90,7 +91,7 @@ export function CategoryProductsManager({
       })
       setAssigned(newAssigned)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : en.errors.networkError)
+      toast.error(err instanceof Error ? err.message : t.errors.networkError)
     } finally {
       setSaving(false)
     }
@@ -105,7 +106,7 @@ export function CategoryProductsManager({
   return (
     <div className="rounded-lg border p-5 flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold">{en.admin.categoryProducts}</h2>
+        <h2 className="text-sm font-semibold">{t.admin.categoryProducts}</h2>
         <Button
           type="button"
           variant="outline"
@@ -114,7 +115,7 @@ export function CategoryProductsManager({
           disabled={saving}
         >
           <Plus className="size-3.5 mr-1" aria-hidden />
-          {en.admin.addProductsToCategory}
+          {t.admin.addProductsToCategory}
         </Button>
       </div>
 
@@ -157,7 +158,7 @@ export function CategoryProductsManager({
 
       {/* Assigned products list */}
       {assigned.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{en.admin.noProductsAssigned}</p>
+        <p className="text-sm text-muted-foreground">{t.admin.noProductsAssigned}</p>
       ) : (
         <div className="flex flex-col gap-2">
           {assigned.map((item, idx) => (

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { formatPrice } from '@/lib/utils/index'
 import { apiGet } from '@/lib/api'
 import type {
@@ -35,6 +35,7 @@ function TabSkeleton() {
 }
 
 export function ProductsTab({ period }: { period: string }) {
+  const t = useT()
   const [data, setData] = useState<AnalyticsProductsResponse | null>(null)
   // Track which period `data` belongs to. While it differs from the current
   // `period` prop we are loading — derived during render, so no synchronous
@@ -62,7 +63,7 @@ export function ProductsTab({ period }: { period: string }) {
   }, [period])
 
   if (loading) return <TabSkeleton />
-  if (!data) return <p className="text-sm text-muted-foreground">{en.admin.analyticsNoData}</p>
+  if (!data) return <p className="text-sm text-muted-foreground">{t.admin.analyticsNoData}</p>
 
   const leaderboard = sorted(data.leaderboard.slice(0, 50), sort)
 
@@ -71,7 +72,7 @@ export function ProductsTab({ period }: { period: string }) {
       {/* ── Product Leaderboard ─────────────────────────────────────────── */}
       <div className="flex flex-col rounded-xl border">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-4">
-          <p className="text-sm font-semibold">{en.admin.analyticsLeaderboard}</p>
+          <p className="text-sm font-semibold">{t.admin.analyticsLeaderboard}</p>
           <div className="flex gap-1">
             {(['revenue', 'units', 'orders'] as SortKey[]).map((k) => (
               <Button
@@ -82,16 +83,16 @@ export function ProductsTab({ period }: { period: string }) {
                 onClick={() => setSort(k)}
               >
                 {k === 'revenue'
-                  ? en.admin.totalRevenue
+                  ? t.admin.totalRevenue
                   : k === 'units'
-                    ? en.admin.analyticsUnitsSold
-                    : en.admin.analyticsOrders}
+                    ? t.admin.analyticsUnitsSold
+                    : t.admin.analyticsOrders}
               </Button>
             ))}
           </div>
         </div>
         {leaderboard.length === 0 ? (
-          <p className="px-5 py-6 text-sm text-muted-foreground">{en.admin.analyticsNoData}</p>
+          <p className="px-5 py-6 text-sm text-muted-foreground">{t.admin.analyticsNoData}</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -100,16 +101,16 @@ export function ProductsTab({ period }: { period: string }) {
                   <th className="w-8 px-2 sm:px-5 py-2 text-left font-medium">#</th>
                   <th className="px-2 sm:px-5 py-2 text-left font-medium">Product</th>
                   <th className="hidden sm:table-cell px-2 sm:px-5 py-2 text-right font-medium">
-                    {en.admin.analyticsOrders}
+                    {t.admin.analyticsOrders}
                   </th>
                   <th className="hidden sm:table-cell px-2 sm:px-5 py-2 text-right font-medium">
-                    {en.admin.analyticsUnitsSold}
+                    {t.admin.analyticsUnitsSold}
                   </th>
                   <th className="px-2 sm:px-5 py-2 text-right font-medium">
-                    {en.admin.totalRevenue}
+                    {t.admin.totalRevenue}
                   </th>
                   <th className="hidden md:table-cell px-2 sm:px-5 py-2 text-right font-medium">
-                    {en.admin.analyticsAov}
+                    {t.admin.analyticsAov}
                   </th>
                 </tr>
               </thead>
@@ -147,10 +148,10 @@ export function ProductsTab({ period }: { period: string }) {
         {/* By Variant */}
         <div className="flex flex-col rounded-xl border">
           <div className="border-b px-5 py-4">
-            <p className="text-sm font-semibold">{en.admin.analyticsVariantBreakdown}</p>
+            <p className="text-sm font-semibold">{t.admin.analyticsVariantBreakdown}</p>
           </div>
           {data.variants.length === 0 ? (
-            <p className="px-5 py-6 text-sm text-muted-foreground">{en.admin.analyticsNoData}</p>
+            <p className="px-5 py-6 text-sm text-muted-foreground">{t.admin.analyticsNoData}</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -158,9 +159,9 @@ export function ProductsTab({ period }: { period: string }) {
                   <tr className="border-b text-xs text-muted-foreground">
                     <th className="px-5 py-2 text-left font-medium">Variant</th>
                     <th className="hidden sm:table-cell px-5 py-2 text-right font-medium">
-                      {en.admin.analyticsUnitsSold}
+                      {t.admin.analyticsUnitsSold}
                     </th>
-                    <th className="px-5 py-2 text-right font-medium">{en.admin.totalRevenue}</th>
+                    <th className="px-5 py-2 text-right font-medium">{t.admin.totalRevenue}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
@@ -192,10 +193,10 @@ export function ProductsTab({ period }: { period: string }) {
         {/* By Size */}
         <div className="flex flex-col rounded-xl border">
           <div className="border-b px-5 py-4">
-            <p className="text-sm font-semibold">{en.admin.analyticsSizeBreakdown}</p>
+            <p className="text-sm font-semibold">{t.admin.analyticsSizeBreakdown}</p>
           </div>
           {data.sizes.length === 0 ? (
-            <p className="px-5 py-6 text-sm text-muted-foreground">{en.admin.analyticsNoData}</p>
+            <p className="px-5 py-6 text-sm text-muted-foreground">{t.admin.analyticsNoData}</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -203,9 +204,9 @@ export function ProductsTab({ period }: { period: string }) {
                   <tr className="border-b text-xs text-muted-foreground">
                     <th className="px-5 py-2 text-left font-medium">Size</th>
                     <th className="hidden sm:table-cell px-5 py-2 text-right font-medium">
-                      {en.admin.analyticsUnitsSold}
+                      {t.admin.analyticsUnitsSold}
                     </th>
-                    <th className="px-5 py-2 text-right font-medium">{en.admin.totalRevenue}</th>
+                    <th className="px-5 py-2 text-right font-medium">{t.admin.totalRevenue}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
@@ -231,7 +232,7 @@ export function ProductsTab({ period }: { period: string }) {
       {data.slowMovers.length > 0 && (
         <div className="flex flex-col rounded-xl border">
           <div className="border-b px-5 py-4">
-            <p className="text-sm font-semibold">{en.admin.analyticsSlowMovers}</p>
+            <p className="text-sm font-semibold">{t.admin.analyticsSlowMovers}</p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -239,12 +240,12 @@ export function ProductsTab({ period }: { period: string }) {
                 <tr className="border-b text-xs text-muted-foreground">
                   <th className="px-5 py-2 text-left font-medium">Product</th>
                   <th className="hidden sm:table-cell px-5 py-2 text-right font-medium">
-                    {en.admin.analyticsUnitsSold}
+                    {t.admin.analyticsUnitsSold}
                   </th>
                   <th className="hidden sm:table-cell px-5 py-2 text-right font-medium">
-                    {en.admin.analyticsStockOnHand}
+                    {t.admin.analyticsStockOnHand}
                   </th>
-                  <th className="px-5 py-2 text-right font-medium">{en.admin.analyticsTurnover}</th>
+                  <th className="px-5 py-2 text-right font-medium">{t.admin.analyticsTurnover}</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -256,7 +257,7 @@ export function ProductsTab({ period }: { period: string }) {
                     </td>
                     <td className="hidden sm:table-cell px-5 py-3 text-right tabular-nums">
                       {m.unlimited ? (
-                        <span className="text-muted-foreground">{en.admin.analyticsUnlimited}</span>
+                        <span className="text-muted-foreground">{t.admin.analyticsUnlimited}</span>
                       ) : (
                         m.stockOnHand
                       )}

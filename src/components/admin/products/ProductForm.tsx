@@ -13,7 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { FormField } from '@/components/common/FormField'
 import { ImageUpload } from '@/components/admin/products/ImageUpload'
 import { ProductCategoryPicker } from '@/components/admin/categories/ProductCategoryPicker'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { apiPost, apiPut, apiDelete, apiGet, ApiError } from '@/lib/api'
 import { updateSizeOptionSchema } from '@/lib/schemas'
 import { formatPrice } from '@/lib/utils/index'
@@ -28,6 +28,7 @@ import type { AnalyticsProductDetail } from '@/lib/types/analytics'
 // ─── Per-product stats panel (edit mode only) ─────────────────────────────────
 
 function ProductStatsPanel({ productId }: { productId: string }) {
+  const t = useT()
   const [stats, setStats] = useState<AnalyticsProductDetail | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -40,7 +41,7 @@ function ProductStatsPanel({ productId }: { productId: string }) {
 
   return (
     <div className="rounded-lg border p-5 flex flex-col gap-4">
-      <h2 className="text-sm font-semibold">{en.admin.analyticsProductStats}</h2>
+      <h2 className="text-sm font-semibold">{t.admin.analyticsProductStats}</h2>
 
       {loading ? (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -52,23 +53,23 @@ function ProductStatsPanel({ productId }: { productId: string }) {
         <>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div className="rounded-lg border p-3">
-              <p className="text-xs text-muted-foreground">{en.admin.analyticsUnitsSold}</p>
+              <p className="text-xs text-muted-foreground">{t.admin.analyticsUnitsSold}</p>
               <p className="text-base font-semibold">{stats.unitsSold.toLocaleString()}</p>
             </div>
             <div className="rounded-lg border p-3">
-              <p className="text-xs text-muted-foreground">{en.admin.analyticsOrders}</p>
+              <p className="text-xs text-muted-foreground">{t.admin.analyticsOrders}</p>
               <p className="text-base font-semibold">{stats.orders.toLocaleString()}</p>
             </div>
             <div className="rounded-lg border p-3">
-              <p className="text-xs text-muted-foreground">{en.admin.totalRevenue}</p>
+              <p className="text-xs text-muted-foreground">{t.admin.totalRevenue}</p>
               <p className="text-base font-semibold">{formatPrice(stats.revenueCents)}</p>
             </div>
             <div className="rounded-lg border p-3">
-              <p className="text-xs text-muted-foreground">{en.admin.analyticsLastSold}</p>
+              <p className="text-xs text-muted-foreground">{t.admin.analyticsLastSold}</p>
               <p className="text-base font-semibold">
                 {stats.lastSoldAt
                   ? new Date(stats.lastSoldAt).toLocaleDateString()
-                  : en.admin.analyticsNeverSold}
+                  : t.admin.analyticsNeverSold}
               </p>
             </div>
           </div>
@@ -76,7 +77,7 @@ function ProductStatsPanel({ productId }: { productId: string }) {
           {stats.affinityPartners.length > 0 && (
             <div className="flex flex-col gap-2">
               <p className="text-xs font-medium text-muted-foreground">
-                {en.admin.analyticsFrequentlyBoughtWith}
+                {t.admin.analyticsFrequentlyBoughtWith}
               </p>
               <div className="flex flex-col gap-1">
                 {stats.affinityPartners.slice(0, 3).map((partner) => (
@@ -86,7 +87,7 @@ function ProductStatsPanel({ productId }: { productId: string }) {
                   >
                     <span>{partner.productName}</span>
                     <span className="text-xs text-muted-foreground">
-                      {en.admin.analyticsTimesTogether}: {partner.pairCount}
+                      {t.admin.analyticsTimesTogether}: {partner.pairCount}
                     </span>
                   </div>
                 ))}
@@ -118,6 +119,7 @@ type LocalSize = Omit<SizeOption, 'id' | 'variantId'> & {
 }
 
 export function ProductForm({ initial }: ProductFormProps) {
+  const t = useT()
   const router = useRouter()
 
   const [name, setName] = useState(initial?.product.name ?? '')
@@ -155,7 +157,7 @@ export function ProductForm({ initial }: ProductFormProps) {
 
   async function saveProduct() {
     if (!name.trim()) {
-      toast.error(en.errors.required.replace('{field}', en.admin.productName))
+      toast.error(t.errors.required.replace('{field}', t.admin.productName))
       return
     }
 
@@ -173,7 +175,7 @@ export function ProductForm({ initial }: ProductFormProps) {
         await apiPut(`/api/admin/products/${productId}/categories`, {
           categoryIds: selectedCategoryIds,
         })
-        toast.success(en.admin.productUpdated)
+        toast.success(t.admin.productUpdated)
       } else {
         const created = await apiPost<{ id: string }>('/api/admin/products', {
           name,
@@ -184,12 +186,12 @@ export function ProductForm({ initial }: ProductFormProps) {
         await apiPut(`/api/admin/products/${created.id}/categories`, {
           categoryIds: selectedCategoryIds,
         })
-        toast.success(en.admin.productCreated)
+        toast.success(t.admin.productCreated)
         router.push(`/admin/products/${created.id}`)
         return
       }
     } catch {
-      toast.error(en.errors.networkError)
+      toast.error(t.errors.networkError)
     } finally {
       setSaving(false)
     }
@@ -210,9 +212,9 @@ export function ProductForm({ initial }: ProductFormProps) {
       })
       setVariants((prev) => [...prev, { ...newVariant, images: [], sizes: [] }])
       setExpandedVariant(newVariant.id)
-      toast.success(en.admin.variantCreated)
+      toast.success(t.admin.variantCreated)
     } catch {
-      toast.error(en.errors.networkError)
+      toast.error(t.errors.networkError)
     }
   }
 
@@ -228,20 +230,20 @@ export function ProductForm({ initial }: ProductFormProps) {
         label: variant.label,
         colorHex: variant.colorHex,
       })
-      toast.success(en.admin.saved)
+      toast.success(t.admin.saved)
     } catch {
-      toast.error(en.errors.networkError)
+      toast.error(t.errors.networkError)
     }
   }
 
   async function deleteVariant(variantId: string) {
-    if (!confirm(en.admin.deleteProductConfirm)) return
+    if (!confirm(t.admin.deleteProductConfirm)) return
     try {
       await apiDelete(`/api/admin/products/variants/${variantId}`)
       setVariants((prev) => prev.filter((v) => v.id !== variantId))
-      toast.success(en.admin.variantDeleted)
+      toast.success(t.admin.variantDeleted)
     } catch {
-      toast.error(en.errors.networkError)
+      toast.error(t.errors.networkError)
     }
   }
 
@@ -261,9 +263,9 @@ export function ProductForm({ initial }: ProductFormProps) {
           v.id === variantId ? { ...v, sizes: [...(v.sizes as LocalSize[]), newSize] } : v,
         ),
       )
-      toast.success(en.admin.sizeCreated)
+      toast.success(t.admin.sizeCreated)
     } catch {
-      toast.error(en.errors.networkError)
+      toast.error(t.errors.networkError)
     }
   }
 
@@ -320,7 +322,7 @@ export function ProductForm({ initial }: ProductFormProps) {
         const { [sizeId]: _, ...rest } = prev
         return rest
       })
-      toast.success(en.admin.saved)
+      toast.success(t.admin.saved)
     } catch (err) {
       if (err instanceof ApiError && err.status === 400) {
         const body = err.body as { issues?: { path: string[]; message: string }[] }
@@ -334,7 +336,7 @@ export function ProductForm({ initial }: ProductFormProps) {
           return
         }
       }
-      toast.error(err instanceof Error ? err.message : en.errors.networkError)
+      toast.error(err instanceof Error ? err.message : t.errors.networkError)
     }
   }
 
@@ -348,9 +350,9 @@ export function ProductForm({ initial }: ProductFormProps) {
             : v,
         ),
       )
-      toast.success(en.admin.sizeDeleted)
+      toast.success(t.admin.sizeDeleted)
     } catch {
-      toast.error(en.errors.networkError)
+      toast.error(t.errors.networkError)
     }
   }
 
@@ -378,11 +380,11 @@ export function ProductForm({ initial }: ProductFormProps) {
       <div className="rounded-lg border p-5 flex flex-col gap-4">
         <h2 className="text-sm font-semibold">Basic Info</h2>
 
-        <FormField label={en.admin.productName} htmlFor="product-name">
+        <FormField label={t.admin.productName} htmlFor="product-name">
           <Input id="product-name" value={name} onChange={(e) => setName(e.target.value)} />
         </FormField>
 
-        <FormField label={en.admin.productDescription} htmlFor="product-desc">
+        <FormField label={t.admin.productDescription} htmlFor="product-desc">
           <Textarea
             id="product-desc"
             rows={3}
@@ -395,29 +397,29 @@ export function ProductForm({ initial }: ProductFormProps) {
         <div className="flex items-center gap-2">
           <Checkbox
             id="product-active"
-            aria-label={en.admin.active}
+            aria-label={t.admin.active}
             checked={active}
             onCheckedChange={(v: boolean) => setActive(v === true)}
           />
           <label htmlFor="product-active" className="text-sm cursor-pointer">
-            {en.admin.active}
+            {t.admin.active}
           </label>
         </div>
 
         <div className="flex items-center gap-2">
           <Checkbox
             id="product-reviews-enabled"
-            aria-label={en.admin.enableReviewsProduct}
+            aria-label={t.admin.enableReviewsProduct}
             checked={reviewsEnabled}
             onCheckedChange={(v: boolean) => setReviewsEnabled(v === true)}
           />
           <label htmlFor="product-reviews-enabled" className="text-sm cursor-pointer">
-            {en.admin.enableReviewsProduct}
+            {t.admin.enableReviewsProduct}
           </label>
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium">{en.admin.categories}</label>
+          <label className="text-sm font-medium">{t.admin.categories}</label>
           <ProductCategoryPicker
             selectedIds={selectedCategoryIds}
             onChange={setSelectedCategoryIds}
@@ -425,7 +427,7 @@ export function ProductForm({ initial }: ProductFormProps) {
         </div>
 
         <Button onClick={saveProduct} disabled={saving} size="sm">
-          {saving ? en.admin.saving : initial ? en.admin.saved : en.admin.createProduct}
+          {saving ? t.admin.saving : initial ? t.admin.saved : t.admin.createProduct}
         </Button>
       </div>
 
@@ -436,15 +438,15 @@ export function ProductForm({ initial }: ProductFormProps) {
       {initial?.product.id && (
         <div className="rounded-lg border p-5 flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold">{en.admin.variants}</h2>
+            <h2 className="text-sm font-semibold">{t.admin.variants}</h2>
             <Button size="sm" variant="outline" onClick={addVariant}>
               <Plus className="size-3.5 mr-1" aria-hidden />
-              {en.admin.addVariant}
+              {t.admin.addVariant}
             </Button>
           </div>
 
           {variants.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{en.admin.noVariantsYet}</p>
+            <p className="text-sm text-muted-foreground">{t.admin.noVariantsYet}</p>
           ) : (
             <div className="flex flex-col gap-3">
               {variants.map((variant) => {
@@ -489,7 +491,7 @@ export function ProductForm({ initial }: ProductFormProps) {
                           e.stopPropagation()
                           deleteVariant(variant.id)
                         }}
-                        aria-label={en.admin.deleteVariant}
+                        aria-label={t.admin.deleteVariant}
                       >
                         <Trash2 className="size-3.5" aria-hidden />
                       </Button>
@@ -500,9 +502,9 @@ export function ProductForm({ initial }: ProductFormProps) {
                         {/* Variant fields */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <FormField
-                            label={en.admin.variantLabel}
+                            label={t.admin.variantLabel}
                             htmlFor={`variant-label-${variant.id}`}
-                            help={en.tooltips.product.variantLabel}
+                            help={t.tooltips.product.variantLabel}
                           >
                             <Input
                               id={`variant-label-${variant.id}`}
@@ -511,9 +513,9 @@ export function ProductForm({ initial }: ProductFormProps) {
                             />
                           </FormField>
                           <FormField
-                            label={en.admin.colorHex}
+                            label={t.admin.colorHex}
                             htmlFor={`variant-color-${variant.id}`}
-                            help={en.tooltips.product.colorHex}
+                            help={t.tooltips.product.colorHex}
                           >
                             <div className="flex gap-2">
                               <Input
@@ -541,7 +543,7 @@ export function ProductForm({ initial }: ProductFormProps) {
                           </FormField>
                         </div>
                         <Button size="sm" variant="outline" onClick={() => saveVariant(variant.id)}>
-                          {en.admin.saveVariant}
+                          {t.admin.saveVariant}
                         </Button>
 
                         <Separator />
@@ -549,7 +551,7 @@ export function ProductForm({ initial }: ProductFormProps) {
                         {/* Images */}
                         <div>
                           <p className="text-xs font-medium text-muted-foreground mb-2">
-                            {en.admin.variantImages}
+                            {t.admin.variantImages}
                           </p>
                           <ImageUpload
                             variantId={variant.id}
@@ -567,12 +569,12 @@ export function ProductForm({ initial }: ProductFormProps) {
                             <p className="text-xs font-medium text-muted-foreground">Sizes</p>
                             <Button size="sm" variant="ghost" onClick={() => addSize(variant.id)}>
                               <Plus className="size-3.5 mr-1" aria-hidden />
-                              {en.admin.addSize}
+                              {t.admin.addSize}
                             </Button>
                           </div>
 
                           {(variant.sizes as LocalSize[]).length === 0 ? (
-                            <p className="text-xs text-muted-foreground">{en.admin.noSizesYet}</p>
+                            <p className="text-xs text-muted-foreground">{t.admin.noSizesYet}</p>
                           ) : (
                             <div className="flex flex-col gap-3">
                               {(variant.sizes as LocalSize[]).map((size) => {
@@ -583,10 +585,10 @@ export function ProductForm({ initial }: ProductFormProps) {
                                     className="grid grid-cols-2 gap-2 items-end sm:grid-cols-4 lg:grid-cols-[1fr_1fr_1fr_1fr_auto]"
                                   >
                                     <FormField
-                                      label={en.admin.sizeName}
+                                      label={t.admin.sizeName}
                                       htmlFor={`size-name-${size.id}`}
                                       error={errs.size}
-                                      help={en.tooltips.product.sizeName}
+                                      help={t.tooltips.product.sizeName}
                                     >
                                       <Input
                                         id={`size-name-${size.id}`}
@@ -603,10 +605,10 @@ export function ProductForm({ initial }: ProductFormProps) {
                                       />
                                     </FormField>
                                     <FormField
-                                      label={en.admin.priceCents}
+                                      label={t.admin.priceCents}
                                       htmlFor={`size-price-${size.id}`}
                                       error={errs.priceCents}
-                                      help={en.tooltips.product.priceCents}
+                                      help={t.tooltips.product.priceCents}
                                     >
                                       <Input
                                         id={`size-price-${size.id}`}
@@ -625,10 +627,10 @@ export function ProductForm({ initial }: ProductFormProps) {
                                       />
                                     </FormField>
                                     <FormField
-                                      label={en.admin.stock}
+                                      label={t.admin.stock}
                                       htmlFor={`size-stock-${size.id}`}
                                       error={errs.stock}
-                                      help={en.tooltips.product.stock}
+                                      help={t.tooltips.product.stock}
                                     >
                                       <Input
                                         id={`size-stock-${size.id}`}
@@ -647,10 +649,10 @@ export function ProductForm({ initial }: ProductFormProps) {
                                       />
                                     </FormField>
                                     <FormField
-                                      label={en.admin.sku}
+                                      label={t.admin.sku}
                                       htmlFor={`size-sku-${size.id}`}
                                       error={errs.sku}
-                                      help={en.tooltips.product.sku}
+                                      help={t.tooltips.product.sku}
                                     >
                                       <Input
                                         id={`size-sku-${size.id}`}
@@ -673,7 +675,7 @@ export function ProductForm({ initial }: ProductFormProps) {
                                         variant="outline"
                                         onClick={() => saveSize(size.id, variant.id)}
                                       >
-                                        {en.admin.saveSize}
+                                        {t.admin.saveSize}
                                       </Button>
                                       <Button
                                         type="button"
@@ -681,7 +683,7 @@ export function ProductForm({ initial }: ProductFormProps) {
                                         variant="ghost"
                                         className="text-destructive hover:text-destructive size-9"
                                         onClick={() => deleteSize(variant.id, size.id)}
-                                        aria-label={en.admin.deleteSize}
+                                        aria-label={t.admin.deleteSize}
                                       >
                                         <Trash2 className="size-3.5" aria-hidden />
                                       </Button>
@@ -705,23 +707,23 @@ export function ProductForm({ initial }: ProductFormProps) {
       {/* Danger zone */}
       {initial?.product.id && (
         <div className="rounded-lg border border-destructive/30 p-5 flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-destructive">{en.admin.dangerZone}</h2>
+          <h2 className="text-sm font-semibold text-destructive">{t.admin.dangerZone}</h2>
           <Button
             variant="destructive"
             size="sm"
             className="w-fit"
             onClick={async () => {
-              if (!confirm(en.admin.deleteProductConfirm)) return
+              if (!confirm(t.admin.deleteProductConfirm)) return
               try {
                 await apiDelete(`/api/admin/products/${initial.product.id}`)
-                toast.success(en.admin.productDeleted)
+                toast.success(t.admin.productDeleted)
                 router.push('/admin/products')
               } catch {
-                toast.error(en.errors.networkError)
+                toast.error(t.errors.networkError)
               }
             }}
           >
-            {en.admin.deleteProduct}
+            {t.admin.deleteProduct}
           </Button>
         </div>
       )}

@@ -12,35 +12,36 @@
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { usePushSubscription } from '@/hooks/usePushSubscription'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 
 export function EnablePushButton() {
+  const t = useT()
   const { supported, permission, enabled, enable, loading } = usePushSubscription()
 
   if (!supported) {
-    return <p className="text-xs text-muted-foreground">{en.notifications.pushUnsupported}</p>
+    return <p className="text-xs text-muted-foreground">{t.notifications.pushUnsupported}</p>
   }
 
   if (permission === 'denied') {
-    return <p className="text-xs text-muted-foreground">{en.notifications.pushBlocked}</p>
+    return <p className="text-xs text-muted-foreground">{t.notifications.pushBlocked}</p>
   }
 
   if (enabled) {
-    return <p className="text-xs text-muted-foreground">{en.notifications.pushEnabled}</p>
+    return <p className="text-xs text-muted-foreground">{t.notifications.pushEnabled}</p>
   }
 
   async function handleClick() {
     const ok = await enable()
     if (ok) {
-      toast.success(en.notifications.pushEnabled)
+      toast.success(t.notifications.pushEnabled)
     } else {
-      toast.error(en.notifications.pushBlocked)
+      toast.error(t.notifications.pushBlocked)
     }
   }
 
   return (
     <Button size="sm" variant="outline" onClick={handleClick} disabled={loading}>
-      {loading ? en.notifications.enabling : en.notifications.enablePush}
+      {loading ? t.notifications.enabling : t.notifications.enablePush}
     </Button>
   )
 }

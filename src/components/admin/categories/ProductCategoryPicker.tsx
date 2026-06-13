@@ -3,10 +3,11 @@
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { useApiResource } from '@/hooks/useApiResource'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import type { CategoryNode, ProductCategoryPickerProps } from '@/lib/types/category'
 
 export function ProductCategoryPicker({ selectedIds, onChange }: ProductCategoryPickerProps) {
+  const t = useT()
   const { data, loading } = useApiResource<{ categories: CategoryNode[] }>('/api/categories')
 
   const categories = data?.categories ?? []
@@ -30,7 +31,7 @@ export function ProductCategoryPicker({ selectedIds, onChange }: ProductCategory
   if (categories.length === 0) {
     return (
       <div className="max-h-[200px] overflow-y-auto rounded-md border p-2">
-        <p className="text-xs text-muted-foreground px-1 py-0.5">{en.admin.noCategories}</p>
+        <p className="text-xs text-muted-foreground px-1 py-0.5">{t.admin.noCategories}</p>
       </div>
     )
   }

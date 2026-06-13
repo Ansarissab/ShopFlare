@@ -22,24 +22,25 @@ import {
   Newspaper,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-
-const navItems = [
-  { href: '/admin', label: en.admin.dashboard, icon: LayoutDashboard },
-  { href: '/admin/products', label: en.admin.products, icon: Package },
-  { href: '/admin/categories', label: en.admin.categories, icon: FolderTree },
-  { href: '/admin/orders', label: en.admin.orders, icon: ShoppingCart },
-  { href: '/admin/pos', label: en.admin.pos, icon: Monitor },
-  { href: '/admin/coupons', label: en.admin.coupons, icon: Tag },
-  { href: '/admin/reviews', label: en.admin.reviews, icon: Star },
-  { href: '/admin/notify', label: en.admin.notifyRequests, icon: BellRing },
-  { href: '/admin/landing', label: en.admin.landingPage, icon: Layers },
-  { href: '/admin/blog', label: en.admin.blog, icon: Newspaper },
-  { href: '/admin/pages', label: en.admin.pages, icon: FileText },
-  { href: '/admin/settings', label: en.admin.settings, icon: Settings },
-  { href: '/admin/analytics', label: en.admin.analytics, icon: BarChart2 },
-] as const
+import { AdminLocaleSwitcher } from '@/components/admin/AdminLocaleSwitcher'
+// Stable module-scope data — no string values, so safe outside a component
+const NAV_ITEMS: { href: string; labelKey: string; icon: React.ElementType }[] = [
+  { href: '/admin', labelKey: 'dashboard', icon: LayoutDashboard },
+  { href: '/admin/products', labelKey: 'products', icon: Package },
+  { href: '/admin/categories', labelKey: 'categories', icon: FolderTree },
+  { href: '/admin/orders', labelKey: 'orders', icon: ShoppingCart },
+  { href: '/admin/pos', labelKey: 'pos', icon: Monitor },
+  { href: '/admin/coupons', labelKey: 'coupons', icon: Tag },
+  { href: '/admin/reviews', labelKey: 'reviews', icon: Star },
+  { href: '/admin/notify', labelKey: 'notifyRequests', icon: BellRing },
+  { href: '/admin/landing', labelKey: 'landingPage', icon: Layers },
+  { href: '/admin/blog', labelKey: 'blog', icon: Newspaper },
+  { href: '/admin/pages', labelKey: 'pages', icon: FileText },
+  { href: '/admin/settings', labelKey: 'settings', icon: Settings },
+  { href: '/admin/analytics', labelKey: 'analytics', icon: BarChart2 },
+]
 
 // Shared nav list — used in both the desktop aside and the mobile Sheet drawer
 function SidebarNav({
@@ -50,10 +51,12 @@ function SidebarNav({
   onNavigate?: () => void
 }) {
   const pathname = usePathname()
+  const t = useT()
 
   return (
     <nav className="flex flex-col gap-0.5 p-2">
-      {navItems.map(({ href, label, icon: Icon }) => {
+      {NAV_ITEMS.map(({ href, labelKey, icon: Icon }) => {
+        const label = t.admin[labelKey as keyof typeof t.admin] as string
         const active = href === '/admin' ? pathname === '/admin' : pathname.startsWith(href)
 
         return (
@@ -92,8 +95,9 @@ export function MobileAdminNav() {
         <Menu className="size-5" aria-hidden />
       </SheetTrigger>
       <SheetContent side="left" className="w-56 p-0">
-        <div className="flex h-14 items-center border-b px-4">
+        <div className="flex h-14 items-center justify-between border-b px-4">
           <span className="text-sm font-semibold tracking-tight">Admin</span>
+          <AdminLocaleSwitcher />
         </div>
         <SidebarNav onNavigate={() => setOpen(false)} />
       </SheetContent>
@@ -132,6 +136,13 @@ export function AdminSidebar() {
       </div>
 
       <SidebarNav collapsed={collapsed} />
+
+      {/* Sidebar footer — locale switcher always visible on desktop */}
+      {!collapsed && (
+        <div className="mt-auto border-t p-3">
+          <AdminLocaleSwitcher />
+        </div>
+      )}
     </aside>
   )
 }

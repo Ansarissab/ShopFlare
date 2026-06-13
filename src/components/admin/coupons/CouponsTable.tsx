@@ -5,7 +5,7 @@ import { Pencil, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { HelpTip } from '@/components/common/HelpTip'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { apiDelete } from '@/lib/api'
 import { formatDate } from '@/lib/utils/index'
 import type { CouponRowProps, CouponsTableProps } from '@/lib/types/admin'
@@ -13,14 +13,15 @@ import type { CouponRowProps, CouponsTableProps } from '@/lib/types/admin'
 // ─── CouponRow ───────────────────────────────────────────────────────────────
 
 function CouponRow({ coupon, onEdit, onDeleted }: CouponRowProps) {
+  const t = useT()
   async function handleDelete() {
-    if (!confirm(en.admin.deleteCouponConfirm)) return
+    if (!confirm(t.admin.deleteCouponConfirm)) return
     try {
       await apiDelete(`/api/admin/coupons/${coupon.id}`)
-      toast.success(en.admin.couponDeleted)
+      toast.success(t.admin.couponDeleted)
       onDeleted()
     } catch {
-      toast.error(en.errors.networkError)
+      toast.error(t.errors.networkError)
     }
   }
 
@@ -31,7 +32,7 @@ function CouponRow({ coupon, onEdit, onDeleted }: CouponRowProps) {
       <td className="px-4 py-3 font-mono text-xs font-semibold">{coupon.code}</td>
       <td className="hidden sm:table-cell px-4 py-3 text-sm">
         <span className="capitalize">
-          {coupon.type === 'percentage' ? en.admin.couponTypePercentage : en.admin.couponTypeFixed}
+          {coupon.type === 'percentage' ? t.admin.couponTypePercentage : t.admin.couponTypeFixed}
         </span>
       </td>
       <td className="px-4 py-3 text-sm font-medium">{valueLabel}</td>
@@ -44,13 +45,13 @@ function CouponRow({ coupon, onEdit, onDeleted }: CouponRowProps) {
       </td>
       <td className="px-4 py-3">
         <Badge variant={coupon.active ? 'default' : 'secondary'}>
-          {coupon.active ? en.admin.active : en.admin.inactive}
+          {coupon.active ? t.admin.active : t.admin.inactive}
         </Badge>
       </td>
       <td className="hidden sm:table-cell px-4 py-3">
         {coupon.stripeCouponId ? (
           <Badge variant="outline" className="text-xs">
-            {en.admin.syncStripeCoupon}
+            {t.admin.syncStripeCoupon}
           </Badge>
         ) : (
           <span className="text-xs text-muted-foreground">—</span>
@@ -64,7 +65,7 @@ function CouponRow({ coupon, onEdit, onDeleted }: CouponRowProps) {
             variant="ghost"
             className="size-7"
             onClick={() => onEdit(coupon)}
-            aria-label={en.admin.editCoupon}
+            aria-label={t.admin.editCoupon}
           >
             <Pencil className="size-3.5" aria-hidden />
           </Button>
@@ -74,7 +75,7 @@ function CouponRow({ coupon, onEdit, onDeleted }: CouponRowProps) {
             variant="ghost"
             className="size-7 text-destructive hover:text-destructive"
             onClick={handleDelete}
-            aria-label={en.admin.deleteCoupon}
+            aria-label={t.admin.deleteCoupon}
           >
             <Trash2 className="size-3.5" aria-hidden />
           </Button>
@@ -87,8 +88,9 @@ function CouponRow({ coupon, onEdit, onDeleted }: CouponRowProps) {
 // ─── CouponsTable ─────────────────────────────────────────────────────────────
 
 export function CouponsTable({ coupons, onEdit, onDeleted }: CouponsTableProps) {
+  const t = useT()
   if (coupons.length === 0) {
-    return <p className="py-12 text-center text-sm text-muted-foreground">{en.admin.noCoupons}</p>
+    return <p className="py-12 text-center text-sm text-muted-foreground">{t.admin.noCoupons}</p>
   }
 
   return (
@@ -97,30 +99,30 @@ export function CouponsTable({ coupons, onEdit, onDeleted }: CouponsTableProps) 
         <thead>
           <tr className="border-b bg-muted/50">
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-              {en.admin.couponCode}
+              {t.admin.couponCode}
             </th>
             <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">
-              {en.admin.couponType}
+              {t.admin.couponType}
             </th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-              {en.admin.couponValue}
+              {t.admin.couponValue}
             </th>
             <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
-                {en.admin.usedCount}
-                <HelpTip text={en.tooltips.coupon.used} />
+                {t.admin.usedCount}
+                <HelpTip text={t.tooltips.coupon.used} />
               </span>
             </th>
             <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">
-              {en.admin.expiresAt}
+              {t.admin.expiresAt}
             </th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-              {en.admin.active}
+              {t.admin.active}
             </th>
             <th className="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
-                {en.admin.stripeColumn}
-                <HelpTip text={en.tooltips.coupon.stripe} />
+                {t.admin.stripeColumn}
+                <HelpTip text={t.tooltips.coupon.stripe} />
               </span>
             </th>
             <th className="px-4 py-3" />

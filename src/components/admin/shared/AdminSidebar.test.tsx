@@ -8,6 +8,13 @@ let mockPathname = '/admin'
 
 vi.mock('next/navigation', () => ({
   usePathname: () => mockPathname,
+  useSearchParams: () => new URLSearchParams(),
+}))
+
+// AdminLocaleSwitcher uses useStoreConfig — mock it so it renders nothing
+// (single locale) and doesn't break sidebar tests
+vi.mock('@/hooks/useStoreConfig', () => ({
+  useStoreConfig: () => ({ config: { enabledLocales: ['en'] } }),
 }))
 
 vi.mock('next/link', async () => {

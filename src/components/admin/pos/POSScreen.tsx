@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { FormField } from '@/components/common/FormField'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { formatPrice } from '@/lib/utils/index'
 import { buildWhatsAppOrderUrl } from '@/lib/whatsapp'
 import { isFeatureEnabled } from '@/lib/features'
@@ -32,6 +32,7 @@ interface ProductsResponse {
 }
 
 export function POSScreen() {
+  const t = useT()
   const { data, loading } = useApiResource<ProductsResponse>('/api/products')
   const { config } = useStoreConfig()
 
@@ -110,9 +111,9 @@ export function POSScreen() {
       setCompletedOrderNumber(orderNumber)
       setSaleItems([])
       setCustomerPhone('')
-      toast.success(en.pos.saleCompleted)
+      toast.success(t.pos.saleCompleted)
     } catch {
-      toast.error(en.errors.orderFailed)
+      toast.error(t.errors.orderFailed)
     } finally {
       setSubmitting(false)
     }
@@ -139,17 +140,17 @@ export function POSScreen() {
     return (
       <div className="flex flex-col items-center gap-4 py-16 text-center">
         <CheckCircle2 className="size-16 text-[--color-success]" strokeWidth={1.5} aria-hidden />
-        <h2 className="text-xl font-bold">{en.pos.saleCompleted}</h2>
+        <h2 className="text-xl font-bold">{t.pos.saleCompleted}</h2>
         <p className="text-muted-foreground font-mono">
-          {en.pos.orderNumber.replace('{number}', completedOrderNumber)}
+          {t.pos.orderNumber.replace('{number}', completedOrderNumber)}
         </p>
         <div className="flex gap-3">
           {isFeatureEnabled(config, 'whatsappEnabled') && config?.whatsappNumber && (
             <Button variant="outline" onClick={() => handleSendWhatsApp(completedOrderNumber)}>
-              {en.pos.sendWhatsApp}
+              {t.pos.sendWhatsApp}
             </Button>
           )}
-          <Button onClick={() => setCompletedOrderNumber(null)}>{en.pos.newSale}</Button>
+          <Button onClick={() => setCompletedOrderNumber(null)}>{t.pos.newSale}</Button>
         </div>
       </div>
     )
@@ -159,7 +160,7 @@ export function POSScreen() {
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px]">
       {/* Left: product selector */}
       <div className="flex flex-col gap-4">
-        <h2 className="text-sm font-semibold">{en.pos.selectProduct}</h2>
+        <h2 className="text-sm font-semibold">{t.pos.selectProduct}</h2>
 
         {loading ? (
           <div className="flex flex-col gap-3">
@@ -168,7 +169,7 @@ export function POSScreen() {
             ))}
           </div>
         ) : products.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{en.pos.noProducts}</p>
+          <p className="text-sm text-muted-foreground">{t.pos.noProducts}</p>
         ) : (
           <div className="flex flex-col gap-3">
             {/* Product */}
@@ -180,8 +181,8 @@ export function POSScreen() {
                 setSelectedSizeId('')
               }}
             >
-              <SelectTrigger aria-label={en.pos.selectProduct}>
-                <SelectValue placeholder={en.pos.selectProduct} />
+              <SelectTrigger aria-label={t.pos.selectProduct}>
+                <SelectValue placeholder={t.pos.selectProduct} />
               </SelectTrigger>
               <SelectContent>
                 {products.map(({ product }) => (
@@ -201,8 +202,8 @@ export function POSScreen() {
                   setSelectedSizeId('')
                 }}
               >
-                <SelectTrigger aria-label={en.pos.selectVariant}>
-                  <SelectValue placeholder={en.pos.selectVariant} />
+                <SelectTrigger aria-label={t.pos.selectVariant}>
+                  <SelectValue placeholder={t.pos.selectVariant} />
                 </SelectTrigger>
                 <SelectContent>
                   {selectedProduct.variants.map((v) => (
@@ -227,8 +228,8 @@ export function POSScreen() {
                 value={selectedSizeId}
                 onValueChange={(v: string | null) => setSelectedSizeId(v ?? '')}
               >
-                <SelectTrigger aria-label={en.pos.selectSize}>
-                  <SelectValue placeholder={en.pos.selectSize} />
+                <SelectTrigger aria-label={t.pos.selectSize}>
+                  <SelectValue placeholder={t.pos.selectSize} />
                 </SelectTrigger>
                 <SelectContent>
                   {selectedVariant.sizes.map((s) => (
@@ -236,7 +237,7 @@ export function POSScreen() {
                       {s.size} — {formatPrice(s.priceCents, config?.currency)}
                       {s.stock === 0 && (
                         <Badge variant="destructive" className="ml-2 text-xs">
-                          {en.store.outOfStock}
+                          {t.store.outOfStock}
                         </Badge>
                       )}
                     </SelectItem>
@@ -247,7 +248,7 @@ export function POSScreen() {
 
             <Button onClick={handleAddToSale} disabled={!selectedSize} size="sm">
               <Plus className="size-4 mr-1.5" aria-hidden />
-              {en.pos.addToSale}
+              {t.pos.addToSale}
             </Button>
           </div>
         )}
@@ -255,7 +256,7 @@ export function POSScreen() {
 
       {/* Right: sale summary */}
       <div className="flex flex-col gap-4 rounded-lg border bg-card p-4 sm:p-5">
-        <h2 className="text-sm font-semibold">{en.pos.currentSale}</h2>
+        <h2 className="text-sm font-semibold">{t.pos.currentSale}</h2>
 
         {saleItems.length === 0 ? (
           <p className="text-sm text-muted-foreground py-4 text-center">No items added.</p>
@@ -324,14 +325,14 @@ export function POSScreen() {
         <Separator />
 
         <div className="flex justify-between text-sm font-semibold">
-          <span>{en.cart.total}</span>
+          <span>{t.cart.total}</span>
           <span>{formatPrice(subtotalCents, config?.currency)}</span>
         </div>
 
         <FormField
-          label={en.pos.customerPhone}
+          label={t.pos.customerPhone}
           htmlFor="pos-phone"
-          help={en.tooltips.pos.customerPhone}
+          help={t.tooltips.pos.customerPhone}
         >
           <Input
             id="pos-phone"
@@ -350,7 +351,7 @@ export function POSScreen() {
             onClick={() => setSaleItems([])}
             disabled={saleItems.length === 0}
           >
-            {en.pos.clearSale}
+            {t.pos.clearSale}
           </Button>
           <Button
             size="sm"
@@ -358,7 +359,7 @@ export function POSScreen() {
             onClick={completeSale}
             disabled={saleItems.length === 0 || submitting}
           >
-            {submitting ? '…' : en.pos.completeSale}
+            {submitting ? '…' : t.pos.completeSale}
           </Button>
         </div>
       </div>

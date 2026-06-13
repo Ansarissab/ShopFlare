@@ -1,13 +1,14 @@
 'use client'
 
 import { Badge } from '@/components/ui/badge'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
 import type { NotifyRequestRowProps } from '@/lib/types/admin'
 import { formatDate } from '@/lib/utils/index'
 
 export function NotifyRequestRow({ request }: NotifyRequestRowProps) {
+  const t = useT()
   const { productName, variantLabel, size, waiting, lastRequestedAt, inStock } = request
 
   const formattedDate = formatDate(
@@ -22,7 +23,7 @@ export function NotifyRequestRow({ request }: NotifyRequestRowProps) {
       <div className="flex flex-col gap-0.5 min-w-0">
         <span className="font-medium truncate">{productName}</span>
         <span className="text-muted-foreground truncate">
-          {variantLabel} — {en.admin.notifySize}: {size}
+          {variantLabel} — {t.admin.notifySize}: {size}
         </span>
       </div>
 
@@ -30,17 +31,17 @@ export function NotifyRequestRow({ request }: NotifyRequestRowProps) {
       <div className="flex items-center gap-2 sm:gap-4 sm:ml-4 sm:shrink-0">
         {/* waiting count */}
         <span className="text-muted-foreground text-xs">
-          {en.admin.notifyRequestsFor.replace('{count}', String(waiting))}
+          {t.admin.notifyRequestsFor.replace('{count}', String(waiting))}
         </span>
 
         {/* in-stock badge */}
         <Badge variant={inStock ? 'default' : 'secondary'}>
-          {inStock ? en.admin.notifyInStock : en.admin.notifyOutOfStock}
+          {inStock ? t.admin.notifyInStock : t.admin.notifyOutOfStock}
         </Badge>
 
         {/* last requested date */}
         <span className="text-muted-foreground text-xs whitespace-nowrap">
-          {en.admin.notifyRequestedAt}: {formattedDate}
+          {t.admin.notifyRequestedAt}: {formattedDate}
         </span>
       </div>
     </div>

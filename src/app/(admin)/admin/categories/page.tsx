@@ -9,13 +9,14 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { CategoryTree } from '@/components/admin/categories/CategoryTree'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { useApiResource } from '@/hooks/useApiResource'
 import { apiDelete, apiPut } from '@/lib/api'
 import type { CategoryTreeResponse, CategoryNode } from '@/lib/types/category'
 import type { Category } from '@/lib/types/category'
 
 export default function AdminCategoriesPage() {
+  const t = useT()
   const [resourcePath, setResourcePath] = useState('/api/admin/categories')
 
   const refetch = useCallback(() => {
@@ -42,18 +43,18 @@ export default function AdminCategoriesPage() {
       ])
       refetch()
     } catch {
-      toast.error(en.errors.networkError)
+      toast.error(t.errors.networkError)
     }
   }
 
   async function handleDelete(categoryId: string) {
-    if (!window.confirm(en.admin.deleteCategoryConfirm)) return
+    if (!window.confirm(t.admin.deleteCategoryConfirm)) return
     try {
       await apiDelete(`/api/admin/categories/${categoryId}`)
-      toast.success(en.admin.categoryDeleted)
+      toast.success(t.admin.categoryDeleted)
       refetch()
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : en.errors.networkError)
+      toast.error(err instanceof Error ? err.message : t.errors.networkError)
     }
   }
 
@@ -65,11 +66,11 @@ export default function AdminCategoriesPage() {
   return (
     <div className="flex flex-col gap-5">
       <AdminPageHeader
-        title={en.admin.categories}
+        title={t.admin.categories}
         actions={
           <Link href="/admin/categories/new" className={cn(buttonVariants({ size: 'sm' }))}>
             <Plus className="size-3.5 mr-1" aria-hidden />
-            {en.admin.addCategory}
+            {t.admin.addCategory}
           </Link>
         }
       />

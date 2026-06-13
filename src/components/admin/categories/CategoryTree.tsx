@@ -3,7 +3,7 @@
 import { ChevronUp, ChevronDown, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { cn } from '@/lib/utils'
 import type { CategoryTreeProps, CategoryNode } from '@/lib/types/category'
 import type { Category } from '@/lib/types/category'
@@ -21,6 +21,7 @@ function CategoryRow({
   onEdit: CategoryTreeProps['onEdit']
   onDelete: CategoryTreeProps['onDelete']
 }) {
+  const t = useT()
   return (
     <>
       <div
@@ -37,7 +38,7 @@ function CategoryRow({
             {node.name}
           </span>
           <Badge variant={node.active ? 'default' : 'secondary'} className="shrink-0">
-            {node.active ? en.admin.active : en.admin.inactive}
+            {node.active ? t.admin.active : t.admin.inactive}
           </Badge>
           <Badge variant="outline" className="shrink-0 text-xs">
             {node.productCount} {node.productCount === 1 ? 'product' : 'products'}
@@ -70,10 +71,10 @@ function CategoryRow({
             variant="ghost"
             size="sm"
             onClick={() => onEdit(node as Category)}
-            aria-label={en.admin.editCategory}
+            aria-label={t.admin.editCategory}
           >
             <Pencil className="size-3.5 mr-1" aria-hidden />
-            {en.admin.editCategory}
+            {t.admin.editCategory}
           </Button>
           <Button
             type="button"
@@ -81,7 +82,7 @@ function CategoryRow({
             size="icon"
             className="size-7 text-destructive hover:text-destructive"
             onClick={() => onDelete(node.id)}
-            aria-label={en.admin.deleteCategory}
+            aria-label={t.admin.deleteCategory}
           >
             <Trash2 className="size-3.5" aria-hidden />
           </Button>
@@ -103,9 +104,10 @@ function CategoryRow({
 }
 
 export function CategoryTree({ categories, onReorder, onEdit, onDelete }: CategoryTreeProps) {
+  const t = useT()
   if (categories.length === 0) {
     return (
-      <div className="py-16 text-center text-sm text-muted-foreground">{en.admin.noCategories}</div>
+      <div className="py-16 text-center text-sm text-muted-foreground">{t.admin.noCategories}</div>
     )
   }
 

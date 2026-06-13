@@ -22,20 +22,13 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ProductsTab } from '@/components/admin/analytics/ProductsTab'
 import { CustomersTab } from '@/components/admin/analytics/CustomersTab'
 import { FunnelTab } from '@/components/admin/analytics/FunnelTab'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { formatPrice } from '@/lib/utils/index'
 import { apiGet } from '@/lib/api'
 import type { AnalyticsResponse } from '@/lib/types/analytics'
 import type { AnalyticsPeriod } from '@/lib/constants'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-
-const PERIODS: { value: AnalyticsPeriod; label: string }[] = [
-  { value: '7d', label: en.admin.analyticsPeriod7d },
-  { value: '30d', label: en.admin.analyticsPeriod30d },
-  { value: '90d', label: en.admin.analyticsPeriod90d },
-  { value: 'all', label: en.admin.analyticsPeriodAll },
-]
 
 const PAYMENT_LABELS: Record<string, string> = {
   cod: 'Cash on Delivery',
@@ -89,6 +82,7 @@ function OverviewSkeleton() {
 // ─── Overview tab ─────────────────────────────────────────────────────────────
 
 function OverviewTab({ period }: { period: AnalyticsPeriod }) {
+  const t = useT()
   const [data, setData] = useState<AnalyticsResponse | null>(null)
   const [loading, setLoading] = useState(true)
   // Reset to the loading state synchronously during render whenever `period`
@@ -108,45 +102,45 @@ function OverviewTab({ period }: { period: AnalyticsPeriod }) {
   }, [period])
 
   if (loading) return <OverviewSkeleton />
-  if (!data) return <p className="text-sm text-muted-foreground">{en.admin.analyticsNoData}</p>
+  if (!data) return <p className="text-sm text-muted-foreground">{t.admin.analyticsNoData}</p>
 
   return (
     <>
       {/* ── Stat cards ─────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatCard
-          label={en.admin.totalRevenue}
+          label={t.admin.totalRevenue}
           value={formatPrice(data.summary.totalRevenueCents)}
           sub={`${data.summary.totalOrders} orders total`}
-          help={en.tooltips.analytics.revenue}
+          help={t.tooltips.analytics.revenue}
         />
         <StatCard
-          label={en.admin.totalOrders}
+          label={t.admin.totalOrders}
           value={data.summary.totalOrders - data.summary.cancelledOrders}
           sub={`${data.summary.cancelledOrders} cancelled`}
-          help={en.tooltips.analytics.orders}
+          help={t.tooltips.analytics.orders}
         />
         <StatCard
-          label={en.admin.analyticsAvgOrder}
+          label={t.admin.analyticsAvgOrder}
           value={formatPrice(avgOrderCents(data.summary))}
           sub={`${data.summary.deliveredOrders} delivered`}
-          help={en.tooltips.analytics.aov}
+          help={t.tooltips.analytics.aov}
         />
         <StatCard
-          label={en.admin.analyticsDiscountsGiven}
+          label={t.admin.analyticsDiscountsGiven}
           value={formatPrice(data.summary.totalDiscountCents)}
           sub={`${data.couponStats.length} coupons used`}
-          help={en.tooltips.analytics.discounts}
+          help={t.tooltips.analytics.discounts}
         />
       </div>
 
       {/* ── Revenue trend + Payment methods ────────────────────────────── */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="flex flex-col gap-3 rounded-xl border p-5 lg:col-span-2">
-          <p className="text-sm font-semibold">{en.admin.analyticsRevenueTrend}</p>
+          <p className="text-sm font-semibold">{t.admin.analyticsRevenueTrend}</p>
           {data.revenueByDay.length === 0 ? (
             <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
-              {en.admin.analyticsNoData}
+              {t.admin.analyticsNoData}
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={240}>
@@ -202,10 +196,10 @@ function OverviewTab({ period }: { period: AnalyticsPeriod }) {
         </div>
 
         <div className="flex flex-col gap-3 rounded-xl border p-5">
-          <p className="text-sm font-semibold">{en.admin.analyticsPaymentMethods}</p>
+          <p className="text-sm font-semibold">{t.admin.analyticsPaymentMethods}</p>
           {data.paymentMethods.length === 0 ? (
             <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
-              {en.admin.analyticsNoData}
+              {t.admin.analyticsNoData}
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={240}>
@@ -244,10 +238,10 @@ function OverviewTab({ period }: { period: AnalyticsPeriod }) {
       {/* ── Top products ───────────────────────────────────────────────── */}
       <div className="flex flex-col rounded-xl border">
         <div className="border-b px-5 py-4">
-          <p className="text-sm font-semibold">{en.admin.analyticsTopProducts}</p>
+          <p className="text-sm font-semibold">{t.admin.analyticsTopProducts}</p>
         </div>
         {data.topProducts.length === 0 ? (
-          <p className="px-5 py-6 text-sm text-muted-foreground">{en.admin.analyticsNoData}</p>
+          <p className="px-5 py-6 text-sm text-muted-foreground">{t.admin.analyticsNoData}</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -255,10 +249,10 @@ function OverviewTab({ period }: { period: AnalyticsPeriod }) {
                 <tr className="border-b text-xs text-muted-foreground">
                   <th className="px-2 sm:px-5 py-2 text-left font-medium">Product</th>
                   <th className="hidden sm:table-cell px-2 sm:px-5 py-2 text-right font-medium">
-                    {en.admin.analyticsUnitsSold}
+                    {t.admin.analyticsUnitsSold}
                   </th>
                   <th className="px-2 sm:px-5 py-2 text-right font-medium">
-                    {en.admin.totalRevenue}
+                    {t.admin.totalRevenue}
                   </th>
                 </tr>
               </thead>
@@ -287,7 +281,7 @@ function OverviewTab({ period }: { period: AnalyticsPeriod }) {
       {data.couponStats.length > 0 && (
         <div className="flex flex-col rounded-xl border">
           <div className="border-b px-5 py-4">
-            <p className="text-sm font-semibold">{en.admin.analyticsCoupons}</p>
+            <p className="text-sm font-semibold">{t.admin.analyticsCoupons}</p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -295,7 +289,7 @@ function OverviewTab({ period }: { period: AnalyticsPeriod }) {
                 <tr className="border-b text-xs text-muted-foreground">
                   <th className="px-2 sm:px-5 py-2 text-left font-medium">Coupon Code</th>
                   <th className="hidden sm:table-cell px-2 sm:px-5 py-2 text-right font-medium">
-                    {en.admin.analyticsUses}
+                    {t.admin.analyticsUses}
                   </th>
                   <th className="px-2 sm:px-5 py-2 text-right font-medium">Total Discount</th>
                 </tr>
@@ -324,7 +318,15 @@ function OverviewTab({ period }: { period: AnalyticsPeriod }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function AdminAnalyticsPage() {
+  const t = useT()
   const [period, setPeriod] = useState<AnalyticsPeriod>('30d')
+
+  const PERIODS: { value: AnalyticsPeriod; label: string }[] = [
+    { value: '7d', label: t.admin.analyticsPeriod7d },
+    { value: '30d', label: t.admin.analyticsPeriod30d },
+    { value: '90d', label: t.admin.analyticsPeriod90d },
+    { value: 'all', label: t.admin.analyticsPeriodAll },
+  ]
 
   const periodSelector = (
     <div className="flex gap-1">
@@ -344,14 +346,14 @@ export default function AdminAnalyticsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <AdminPageHeader title={en.admin.analytics} actions={periodSelector} />
+      <AdminPageHeader title={t.admin.analytics} actions={periodSelector} />
 
       <Tabs defaultValue="overview">
         <TabsList variant="line">
-          <TabsTrigger value="overview">{en.admin.analyticsTabOverview}</TabsTrigger>
-          <TabsTrigger value="products">{en.admin.analyticsTabProducts}</TabsTrigger>
-          <TabsTrigger value="customers">{en.admin.analyticsTabCustomers}</TabsTrigger>
-          <TabsTrigger value="funnel">{en.admin.analyticsTabFunnel}</TabsTrigger>
+          <TabsTrigger value="overview">{t.admin.analyticsTabOverview}</TabsTrigger>
+          <TabsTrigger value="products">{t.admin.analyticsTabProducts}</TabsTrigger>
+          <TabsTrigger value="customers">{t.admin.analyticsTabCustomers}</TabsTrigger>
+          <TabsTrigger value="funnel">{t.admin.analyticsTabFunnel}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="flex flex-col gap-6 pt-4">

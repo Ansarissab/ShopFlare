@@ -8,11 +8,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { TurnstileWidget } from '@/components/store/checkout/TurnstileWidget'
 import { apiPost, setAdminToken, ApiError } from '@/lib/api'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 
 export default function AdminLoginPage() {
   const router = useRouter()
-  const t = en.admin
+  const dict = useT()
+  const t = dict.admin
   const [password, setPassword] = useState('')
   const [turnstileToken, setTurnstileToken] = useState('')
   const [loading, setLoading] = useState(false)

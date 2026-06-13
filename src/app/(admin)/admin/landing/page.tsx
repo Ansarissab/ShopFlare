@@ -10,7 +10,7 @@ import { FormField } from '@/components/common/FormField'
 import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { RichText } from '@/components/shared/RichText'
 import { ImageUpload } from '@/components/shared/ImageUpload'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { apiGet, apiPut } from '@/lib/api'
 import { useStoreConfig } from '@/hooks/useStoreConfig'
 import { DATA_UPDATED_CHANNEL } from '@/hooks/useApiResource'
@@ -18,14 +18,6 @@ import { LANDING_SECTION_KEYS } from '@/lib/constants'
 import type { LandingSectionKey } from '@/lib/constants'
 import type { LandingSection } from '@/lib/types'
 import type { ProductWithVariants } from '@/lib/types/product'
-
-const SECTION_LABELS: Record<LandingSectionKey, string> = {
-  hero: en.admin.landingSectionHero,
-  story: en.admin.landingSectionStory,
-  featured: en.admin.landingSectionFeatured,
-  reviews: en.admin.landingSectionReviews,
-  cta: en.admin.landingSectionCta,
-}
 
 interface AdminLandingResponse {
   sections: Record<LandingSectionKey, LandingSection>
@@ -44,6 +36,16 @@ function broadcastUpdated() {
 }
 
 export default function AdminLandingPage() {
+  const t = useT()
+
+  const SECTION_LABELS: Record<LandingSectionKey, string> = {
+    hero: t.admin.landingSectionHero,
+    story: t.admin.landingSectionStory,
+    featured: t.admin.landingSectionFeatured,
+    reviews: t.admin.landingSectionReviews,
+    cta: t.admin.landingSectionCta,
+  }
+
   const { config, loading: configLoading } = useStoreConfig()
   const [landing, setLanding] = useState<AdminLandingResponse | null>(null)
   const [loadingLanding, setLoadingLanding] = useState(true)
@@ -69,7 +71,7 @@ export default function AdminLandingPage() {
         setFeaturedIds(landingRes.featuredProductIds ?? [])
         setAllProducts(productsRes.products ?? [])
       })
-      .catch(() => toast.error(en.errors.networkError))
+      .catch(() => toast.error(t.errors.networkError))
       .finally(() => setLoadingLanding(false))
   }, [])
 
@@ -82,7 +84,7 @@ export default function AdminLandingPage() {
       setLandingOverride(null) // let config refresh take over
     } catch {
       setLandingOverride(!enabled)
-      toast.error(en.errors.networkError)
+      toast.error(t.errors.networkError)
     } finally {
       setFlagSaving(false)
     }
@@ -115,10 +117,10 @@ export default function AdminLandingPage() {
         ctaHref: section.ctaHref,
         imageR2Key: section.imageR2Key,
       })
-      toast.success(en.admin.landingSaved)
+      toast.success(t.admin.landingSaved)
       broadcastUpdated()
     } catch {
-      toast.error(en.errors.networkError)
+      toast.error(t.errors.networkError)
     } finally {
       setSectionSaving((s) => ({ ...s, [key]: false }))
     }
@@ -128,10 +130,10 @@ export default function AdminLandingPage() {
     setFeaturedSaving(true)
     try {
       await apiPut('/api/admin/landing/featured', { productIds: featuredIds })
-      toast.success(en.admin.landingFeaturedSaved)
+      toast.success(t.admin.landingFeaturedSaved)
       broadcastUpdated()
     } catch {
-      toast.error(en.errors.networkError)
+      toast.error(t.errors.networkError)
     } finally {
       setFeaturedSaving(false)
     }
@@ -161,14 +163,14 @@ export default function AdminLandingPage() {
 
   return (
     <div className="flex flex-col gap-8 max-w-2xl">
-      <AdminPageHeader title={en.admin.landingPage} />
-      <p className="text-sm text-muted-foreground -mt-6">{en.admin.landingPageHint}</p>
+      <AdminPageHeader title={t.admin.landingPage} />
+      <p className="text-sm text-muted-foreground -mt-6">{t.admin.landingPageHint}</p>
 
       {/* Master toggle */}
       <label className="flex items-center justify-between rounded-lg border p-4 cursor-pointer">
         <div>
-          <p className="font-medium">{en.admin.landingEnabled}</p>
-          <p className="text-xs text-muted-foreground">{en.admin.landingEnabledHint}</p>
+          <p className="font-medium">{t.admin.landingEnabled}</p>
+          <p className="text-xs text-muted-foreground">{t.admin.landingEnabledHint}</p>
         </div>
         <input
           type="checkbox"
@@ -191,7 +193,7 @@ export default function AdminLandingPage() {
               <h2 className="font-semibold text-base">{SECTION_LABELS[key]}</h2>
               <label className="flex items-center gap-2 cursor-pointer">
                 <span className="text-sm text-muted-foreground">
-                  {en.admin.landingSectionEnabled}
+                  {t.admin.landingSectionEnabled}
                 </span>
                 <input
                   type="checkbox"
@@ -204,7 +206,7 @@ export default function AdminLandingPage() {
 
             {/* Fields vary by section */}
             {(key === 'hero' || key === 'story' || key === 'featured' || key === 'cta') && (
-              <FormField label={en.admin.landingHeading} htmlFor={`${key}-heading`}>
+              <FormField label={t.admin.landingHeading} htmlFor={`${key}-heading`}>
                 <Input
                   id={`${key}-heading`}
                   value={section.heading ?? ''}
@@ -215,21 +217,21 @@ export default function AdminLandingPage() {
 
             {(key === 'hero' || key === 'cta') && (
               <>
-                <FormField label={en.admin.landingSubtext} htmlFor={`${key}-subtext`}>
+                <FormField label={t.admin.landingSubtext} htmlFor={`${key}-subtext`}>
                   <Input
                     id={`${key}-subtext`}
                     value={section.subtext ?? ''}
                     onChange={(e) => updateSection(key, { subtext: e.target.value })}
                   />
                 </FormField>
-                <FormField label={en.admin.landingCtaText} htmlFor={`${key}-ctatext`}>
+                <FormField label={t.admin.landingCtaText} htmlFor={`${key}-ctatext`}>
                   <Input
                     id={`${key}-ctatext`}
                     value={section.ctaText ?? ''}
                     onChange={(e) => updateSection(key, { ctaText: e.target.value })}
                   />
                 </FormField>
-                <FormField label={en.admin.landingCtaHref} htmlFor={`${key}-ctahref`}>
+                <FormField label={t.admin.landingCtaHref} htmlFor={`${key}-ctahref`}>
                   <Input
                     id={`${key}-ctahref`}
                     value={section.ctaHref ?? ''}
@@ -240,7 +242,7 @@ export default function AdminLandingPage() {
             )}
 
             {key === 'story' && (
-              <FormField label={en.admin.landingBodyHtml} htmlFor={`${key}-body`}>
+              <FormField label={t.admin.landingBodyHtml} htmlFor={`${key}-body`}>
                 <RichText
                   value={section.bodyHtml ?? ''}
                   onChange={(html) => updateSection(key, { bodyHtml: html })}
@@ -250,7 +252,7 @@ export default function AdminLandingPage() {
             )}
 
             {(key === 'hero' || key === 'story') && (
-              <FormField label={en.admin.landingImage} htmlFor={`${key}-image`}>
+              <FormField label={t.admin.landingImage} htmlFor={`${key}-image`}>
                 <ImageUpload<ImageUploadResult>
                   endpoint="/api/admin/landing/image"
                   extraFields={{ sectionKey: key }}
@@ -269,7 +271,7 @@ export default function AdminLandingPage() {
 
             <div className="flex justify-end">
               <Button onClick={() => saveSection(key)} disabled={saving}>
-                {saving ? en.admin.saving : en.admin.save}
+                {saving ? t.admin.saving : t.admin.save}
               </Button>
             </div>
           </div>
@@ -278,8 +280,8 @@ export default function AdminLandingPage() {
 
       {/* Featured products multiselect */}
       <div className="rounded-lg border p-5 flex flex-col gap-4">
-        <h2 className="font-semibold text-base">{en.admin.landingFeaturedProducts}</h2>
-        <p className="text-xs text-muted-foreground">{en.admin.landingFeaturedHint}</p>
+        <h2 className="font-semibold text-base">{t.admin.landingFeaturedProducts}</h2>
+        <p className="text-xs text-muted-foreground">{t.admin.landingFeaturedHint}</p>
 
         {/* Current ordered list */}
         {featuredIds.length > 0 && (
@@ -347,7 +349,7 @@ export default function AdminLandingPage() {
 
         <div className="flex justify-end">
           <Button onClick={saveFeatured} disabled={featuredSaving}>
-            {featuredSaving ? en.admin.saving : en.admin.save}
+            {featuredSaving ? t.admin.saving : t.admin.save}
           </Button>
         </div>
       </div>

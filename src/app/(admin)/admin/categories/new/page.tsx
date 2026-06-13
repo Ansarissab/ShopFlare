@@ -4,11 +4,12 @@ import { useRouter } from 'next/navigation'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { CategoryForm } from '@/components/admin/categories/CategoryForm'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { useApiResource } from '@/hooks/useApiResource'
 import type { CategoryTreeResponse } from '@/lib/types/category'
 
 export default function NewCategoryPage() {
+  const t = useT()
   const router = useRouter()
   const { data, loading } = useApiResource<CategoryTreeResponse>('/api/admin/categories')
 
@@ -19,7 +20,7 @@ export default function NewCategoryPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <AdminPageHeader title={en.admin.addCategory} backHref="/admin/categories" />
+      <AdminPageHeader title={t.admin.addCategory} backHref="/admin/categories" />
 
       {loading ? (
         <div className="flex flex-col gap-3 max-w-2xl">

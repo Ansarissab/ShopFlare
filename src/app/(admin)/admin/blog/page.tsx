@@ -15,12 +15,13 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { apiGet, apiPost, apiDelete } from '@/lib/api'
 import { formatDate } from '@/lib/utils/index'
 import type { BlogPost } from '@/lib/types/blog'
 
 export default function AdminBlogListPage() {
+  const t = useT()
   const router = useRouter()
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
@@ -35,7 +36,7 @@ export default function AdminBlogListPage() {
         if (!cancelled) setPosts(res.posts)
       })
       .catch(() => {
-        if (!cancelled) toast.error(en.errors.networkError)
+        if (!cancelled) toast.error(t.errors.networkError)
       })
       .finally(() => {
         if (!cancelled) setLoading(false)
@@ -69,7 +70,7 @@ export default function AdminBlogListPage() {
         ),
       )
     } catch {
-      toast.error(en.errors.networkError)
+      toast.error(t.errors.networkError)
     } finally {
       setToggling(null)
     }
@@ -83,7 +84,7 @@ export default function AdminBlogListPage() {
       setPosts((prev) => prev.filter((p) => p.id !== deleteTarget.id))
       setDeleteTarget(null)
     } catch {
-      toast.error(en.errors.networkError)
+      toast.error(t.errors.networkError)
     } finally {
       setDeleting(false)
     }
@@ -92,11 +93,11 @@ export default function AdminBlogListPage() {
   return (
     <div className="flex flex-col gap-5">
       <AdminPageHeader
-        title={en.admin.blog}
+        title={t.admin.blog}
         actions={
           <Button size="sm" onClick={() => router.push('/admin/blog/new')}>
             <Plus className="size-3.5 mr-1" aria-hidden />
-            {en.admin.addPost}
+            {t.admin.addPost}
           </Button>
         }
       />
@@ -109,7 +110,7 @@ export default function AdminBlogListPage() {
         </div>
       ) : posts.length === 0 ? (
         <p className="py-12 text-center text-sm text-muted-foreground">
-          {en.admin.blogEditorNoPosts}
+          {t.admin.blogEditorNoPosts}
         </p>
       ) : (
         <div className="flex flex-col gap-2">
@@ -123,12 +124,12 @@ export default function AdminBlogListPage() {
                 <div className="flex items-center gap-2">
                   <Badge variant={post.status === 'published' ? 'default' : 'secondary'}>
                     {post.status === 'published'
-                      ? en.admin.blogEditorPublished
-                      : en.admin.blogEditorDraft}
+                      ? t.admin.blogEditorPublished
+                      : t.admin.blogEditorDraft}
                   </Badge>
                   {post.publishedAt && (
                     <span className="text-xs text-muted-foreground">
-                      {en.admin.blogEditorPublishedAt}: {formatDate(post.publishedAt)}
+                      {t.admin.blogEditorPublishedAt}: {formatDate(post.publishedAt)}
                     </span>
                   )}
                 </div>
@@ -141,7 +142,7 @@ export default function AdminBlogListPage() {
                   onClick={() => router.push(`/admin/blog/${post.id}`)}
                 >
                   <Pencil className="size-3.5 mr-1" aria-hidden />
-                  {en.admin.editPage}
+                  {t.admin.editPage}
                 </Button>
 
                 <Button
@@ -151,8 +152,8 @@ export default function AdminBlogListPage() {
                   onClick={() => handleTogglePublish(post)}
                 >
                   {post.status === 'published'
-                    ? en.admin.blogEditorUnpublish
-                    : en.admin.blogEditorPublish}
+                    ? t.admin.blogEditorUnpublish
+                    : t.admin.blogEditorPublish}
                 </Button>
 
                 <Button
@@ -177,15 +178,15 @@ export default function AdminBlogListPage() {
       >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>{en.admin.blog}</DialogTitle>
+            <DialogTitle>{t.admin.blog}</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-muted-foreground">{en.admin.blogEditorDeleteConfirm}</p>
+          <p className="text-sm text-muted-foreground">{t.admin.blogEditorDeleteConfirm}</p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleting}>
-              {en.admin.cancel}
+              {t.admin.cancel}
             </Button>
             <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
-              {deleting ? en.admin.blogEditorDeleting : en.admin.deleteReview}
+              {deleting ? t.admin.blogEditorDeleting : t.admin.deleteReview}
             </Button>
           </DialogFooter>
         </DialogContent>

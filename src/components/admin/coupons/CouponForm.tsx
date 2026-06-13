@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { FormField } from '@/components/common/FormField'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { apiPost, apiPut } from '@/lib/api'
 import type { CouponFormProps, AdminCoupon } from '@/lib/types/admin'
 
@@ -29,6 +29,7 @@ function toLocalDatetimeInput(iso: string): string {
 }
 
 export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
+  const t = useT()
   const isEdit = !!coupon
 
   const [code, setCode] = useState(coupon?.code ?? '')
@@ -48,11 +49,11 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
     e.preventDefault()
 
     if (!code.trim()) {
-      toast.error(en.errors.required.replace('{field}', en.admin.couponCode))
+      toast.error(t.errors.required.replace('{field}', t.admin.couponCode))
       return
     }
     if (!value || Number(value) <= 0) {
-      toast.error(en.errors.required.replace('{field}', en.admin.couponValue))
+      toast.error(t.errors.required.replace('{field}', t.admin.couponValue))
       return
     }
 
@@ -72,15 +73,15 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
 
       if (isEdit && coupon) {
         await apiPut<AdminCoupon>(`/api/admin/coupons/${coupon.id}`, payload)
-        toast.success(en.admin.couponUpdated)
+        toast.success(t.admin.couponUpdated)
       } else {
         await apiPost<AdminCoupon>('/api/admin/coupons', payload)
-        toast.success(en.admin.couponCreated)
+        toast.success(t.admin.couponCreated)
       }
 
       onSaved()
     } catch (err) {
-      const msg = err instanceof Error ? err.message : en.errors.networkError
+      const msg = err instanceof Error ? err.message : t.errors.networkError
       toast.error(msg)
     } finally {
       setSaving(false)
@@ -89,20 +90,20 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <h2 className="text-sm font-semibold">{isEdit ? en.admin.editCoupon : en.admin.addCoupon}</h2>
+      <h2 className="text-sm font-semibold">{isEdit ? t.admin.editCoupon : t.admin.addCoupon}</h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <FormField label={en.admin.couponCode} htmlFor="coupon-code">
+        <FormField label={t.admin.couponCode} htmlFor="coupon-code">
           <Input
             id="coupon-code"
             value={code}
             onChange={(e) => setCode(e.target.value.toUpperCase())}
-            placeholder={en.admin.couponCodePlaceholder}
+            placeholder={t.admin.couponCodePlaceholder}
             disabled={isEdit}
           />
         </FormField>
 
-        <FormField label={en.admin.couponType} htmlFor="coupon-type" help={en.tooltips.coupon.type}>
+        <FormField label={t.admin.couponType} htmlFor="coupon-type" help={t.tooltips.coupon.type}>
           <Select
             value={type}
             onValueChange={(v: string | null) => setType(v as 'percentage' | 'fixed')}
@@ -112,18 +113,14 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="percentage">{en.admin.couponTypePercentage}</SelectItem>
-              <SelectItem value="fixed">{en.admin.couponTypeFixed}</SelectItem>
+              <SelectItem value="percentage">{t.admin.couponTypePercentage}</SelectItem>
+              <SelectItem value="fixed">{t.admin.couponTypeFixed}</SelectItem>
             </SelectContent>
           </Select>
         </FormField>
       </div>
 
-      <FormField
-        label={en.admin.couponValue}
-        htmlFor="coupon-value"
-        help={en.tooltips.coupon.value}
-      >
+      <FormField label={t.admin.couponValue} htmlFor="coupon-value" help={t.tooltips.coupon.value}>
         <Input
           id="coupon-value"
           type="number"
@@ -132,12 +129,12 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder={
-            type === 'percentage' ? en.admin.couponValuePercentHint : en.admin.couponValueFixedHint
+            type === 'percentage' ? t.admin.couponValuePercentHint : t.admin.couponValueFixedHint
           }
           disabled={isEdit}
         />
         <p className="text-xs text-muted-foreground">
-          {type === 'percentage' ? en.admin.couponValuePercentHint : en.admin.couponValueFixedHint}
+          {type === 'percentage' ? t.admin.couponValuePercentHint : t.admin.couponValueFixedHint}
         </p>
       </FormField>
 
@@ -145,10 +142,10 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <FormField
-          label={en.admin.minOrderCents}
+          label={t.admin.minOrderCents}
           htmlFor="coupon-min-order"
           optional
-          help={en.tooltips.coupon.minOrder}
+          help={t.tooltips.coupon.minOrder}
         >
           <Input
             id="coupon-min-order"
@@ -160,10 +157,10 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
         </FormField>
 
         <FormField
-          label={en.admin.maxDiscountCents}
+          label={t.admin.maxDiscountCents}
           htmlFor="coupon-max-discount"
           optional
-          help={en.tooltips.coupon.maxDiscount}
+          help={t.tooltips.coupon.maxDiscount}
         >
           <Input
             id="coupon-max-discount"
@@ -175,10 +172,10 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
         </FormField>
 
         <FormField
-          label={en.admin.usageLimit}
+          label={t.admin.usageLimit}
           htmlFor="coupon-usage-limit"
           optional
-          help={en.tooltips.coupon.usageLimit}
+          help={t.tooltips.coupon.usageLimit}
         >
           <Input
             id="coupon-usage-limit"
@@ -190,9 +187,9 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
         </FormField>
 
         <FormField
-          label={en.admin.perCustomerLimit}
+          label={t.admin.perCustomerLimit}
           htmlFor="coupon-per-customer"
-          help={en.tooltips.coupon.perCustomer}
+          help={t.tooltips.coupon.perCustomer}
         >
           <Input
             id="coupon-per-customer"
@@ -205,10 +202,10 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
       </div>
 
       <FormField
-        label={en.admin.expiresAt}
+        label={t.admin.expiresAt}
         htmlFor="coupon-expires"
         optional
-        help={en.tooltips.coupon.expiresAt}
+        help={t.tooltips.coupon.expiresAt}
       >
         <Input
           id="coupon-expires"
@@ -225,13 +222,13 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
           onCheckedChange={(v: boolean) => setActive(v === true)}
         />
         <label htmlFor="coupon-active" className="text-sm cursor-pointer">
-          {en.admin.active}
+          {t.admin.active}
         </label>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-2 pt-1">
         <Button type="submit" size="sm" disabled={saving} className="w-full sm:w-auto">
-          {saving ? en.admin.saving : en.admin.save}
+          {saving ? t.admin.saving : t.admin.save}
         </Button>
         <Button
           type="button"
@@ -241,7 +238,7 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
           disabled={saving}
           className="w-full sm:w-auto"
         >
-          {en.admin.cancel}
+          {t.admin.cancel}
         </Button>
       </div>
     </form>

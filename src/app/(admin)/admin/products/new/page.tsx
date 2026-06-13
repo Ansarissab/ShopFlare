@@ -1,11 +1,12 @@
 import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { ProductForm } from '@/components/admin/products/ProductForm'
-import { en } from '@/lib/i18n/en'
+import { getT } from '@/lib/i18n/server'
 
-export default function NewProductPage() {
+export default async function NewProductPage() {
+  const t = await getT()
   return (
     <div className="flex flex-col gap-5">
-      <AdminPageHeader title={en.admin.addProduct} backHref="/admin/products" />
+      <AdminPageHeader title={t.admin.addProduct} backHref="/admin/products" />
       <ProductForm />
     </div>
   )

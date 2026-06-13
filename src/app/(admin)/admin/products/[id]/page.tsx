@@ -7,12 +7,13 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { buttonVariants } from '@/components/ui/button'
 import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { ProductForm } from '@/components/admin/products/ProductForm'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { cn } from '@/lib/utils'
 import { useApiResource } from '@/hooks/useApiResource'
 import type { ProductWithVariants } from '@/lib/types/product'
 
 export default function EditProductPage() {
+  const t = useT()
   const params = useParams<{ id: string }>()
   const { data, loading, notFound } = useApiResource<ProductWithVariants>(
     params?.id ? `/api/admin/products/${params.id}` : null,
@@ -21,7 +22,7 @@ export default function EditProductPage() {
   return (
     <div className="flex flex-col gap-5">
       <AdminPageHeader
-        title={en.admin.editProduct}
+        title={t.admin.editProduct}
         backHref="/admin/products"
         actions={
           params?.id && (
@@ -32,7 +33,7 @@ export default function EditProductPage() {
               className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
             >
               <ExternalLink className="size-3.5 mr-1.5" aria-hidden />
-              {en.admin.viewProduct}
+              {t.admin.viewProduct}
             </Link>
           )
         }
