@@ -12,6 +12,7 @@
     ".visual-baselines/**",
     "public/sw.js",
     "public/sw.js.map",
-    "pnpm-lock.yaml"
+    "pnpm-lock.yaml",
+    "**/*.md"
   ]
 }
