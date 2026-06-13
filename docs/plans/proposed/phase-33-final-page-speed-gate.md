@@ -1,8 +1,134 @@
 # Phase 33 — Final page-speed gate across all Locales
 
 Status: Proposed. Planned 2026-06-12 (grill-with-docs). Runs LAST — after all features land.
-Closes the loop opened in [Phase 27](./phase-27-page-speed-baseline.md). See
+Closes the loop opened in [Phase 27](../done/phase-27-page-speed-baseline.md). See
 [roadmap](./phases-27-33-roadmap.md).
+
+Baseline measurements, per-metric pass/fail, and the Phase-27 fix log are in
+[`docs/perf/phase-27-budget.md`](../../perf/phase-27-budget.md). Lighthouse snapshots are
+in [`lighthouse_results/v1/`](../../../lighthouse_results/v1/).
+
+---
+
+## Carried over from Phase 27 (enforced acceptance criteria)
+
+Phase 27 is done. The items below were measured, validated where possible locally, and
+explicitly deferred to this phase because they require the **deployed CF edge with real R2
+images** to validate correctly. Each is a concrete, checkable gate — not a vague note.
+
+### AC-1 SSR the catalog grid so the LCP image is in the initial HTML
+
+**Why deferred:** The `Catalog` component calls `useSearchParams()`, which marks it as a
+client component and triggers Next.js's `BAILOUT_TO_CLIENT_SIDE_RENDERING` on the home
+route. Product images are therefore not in the initial HTML; the LCP image is only
+discovered post-hydration. This makes LCP ~1.3 s worse than it needs to be (confirmed by
+Phase-27 Lighthouse: `requestDiscoverable: false` on the LCP image). Fixing it requires
+splitting the client search-input from the server-rendered product grid — a medium refactor
+that was out of scope for Phase 27.
+
+**Acceptance (verify on deployed `*.workers.dev` or custom domain):**
+
+- `curl https://<deployed-url>/` contains the first product `<img>` tag with
+  `fetchpriority="high"` in the initial HTML response body.
+- No `BAILOUT_TO_CLIENT_SIDE_RENDERING` comment wrapping the catalog grid in the HTML
+  source.
+- Chrome DevTools → LCP element is server-discoverable (Lighthouse reports
+  `requestDiscoverable: true` for the LCP image).
+- Implementation path: extract the product grid into an RSC; keep `useSearchParams` only
+  in the search-input client component. Read search params server-side via `searchParams`
+  prop on the page, or pass them down as props to avoid the client bailout.
+
+### AC-2 Mobile Lighthouse ≥ 95 on deployed CF edge with R2 images
+
+**Why deferred:** Local Lighthouse is not representative — picsum.photos external-origin
+latency inflates LCP, and Lighthouse's 4× CPU emulation inflates TBT far beyond real
+devices (2,030 ms emulated vs 6 ms real-browser TBT proxy on localhost). The clean
+`localhost:3000` prod-build run (no extensions) gave desktop 83 / mobile 70 — better than
+the dev+extensions 69 but still not meaningful for the LCP gate. With R2 images
+(same-origin, Cloudflare CDN, right-sized), LCP should drop significantly.
+
+**Acceptance (measure via PageSpeed Insights or a clean Chrome Lighthouse against the
+public URL — not localhost, not a Tailscale tunnel):**
+
+| Metric                          | Gate    |
+| ------------------------------- | ------- |
+| Lighthouse Performance (mobile) | ≥ 95    |
+| LCP                             | < 2.5 s |
+| TBT                             | < 200ms |
+| CLS                             | < 0.1   |
+
+Measure on `/` (catalog), `/product/<id>`, and `/shop` (if landing page enabled).
+Run twice (cold + warm) and take the warm result. No browser extensions active.
+
+> **Note on the Tailscale tunnel:** a prior Phase-27 run via the tunnel gave perf=55,
+> LCP=6.2 s, TBT=320 ms because the DERP relay added ~4.5 s cold TTFB. That run is not
+> representative. Use the real public workers.dev URL.
+
+### AC-3 Polyfill reduction and no admin-lib leak — confirmed on deployed bundle
+
+**Why deferred:** confirmed locally in Phase 27 (no `recharts`/`trix`/`browser-image-compression`/
+`fuse.js` in the storefront bundle; explicit modern `browserslist` drops `Object.hasOwn`,
+`queueMicrotask`, `URLSearchParams` polyfills). Re-confirm on the deployed build to rule
+out any regression introduced by Phases 28–32.
+
+**Acceptance:**
+
+- `pnpm build` bundle analysis (or `next build --debug`) shows no admin-only libraries
+  (`recharts`, `trix`, `browser-image-compression`, `fuse.js`) in any storefront chunk.
+- The deployed bundle does not include legacy polyfills for `Array.prototype.at`,
+  `flat`, or `flatMap` (confirm via `grep` on the built `.js` assets or a bundlesize audit).
+
+### AC-4 Image delivery — right-sized R2 assets (no local-seed waste)
+
+**Why captured here:** `images.unoptimized: true` is intentional (`CF Workers can't run
+sharp` — see [`docs/perf/phase-27-budget.md`](../../perf/phase-27-budget.md)). In Phase 27,
+the LCP image was `https://picsum.photos/seed/…/800/800` displayed at ~358 px — a
+~2.2× oversize penalty that does not exist with properly-sized R2 uploads. Phase 33 is
+the point at which real merchant images are in place.
+
+**Acceptance:**
+
+- Confirm the image upload flow (admin) stores images at ≤ 1× the largest display size
+  (currently `800 px` wide for the product card at full viewport, meaning ≤ 800 px wide
+  is acceptable; verify the `ImageUpload` component's compression target).
+- After uploading a real product image, `curl -I <r2-image-url>` returns `content-length`
+  consistent with the compressed size (not the raw upload).
+- Document in this plan (or link to an ADR) whether an R2 image-resizing step or
+  upload-time compression is the chosen lever. Do not leave this as an implicit assumption.
+
+### AC-5 CLS — already passes; lock it
+
+**Status: done (Phase 27).** CLS fixed from 0.156 → ~0 (desktop) / 0.043 (mobile) via
+SWR `fallbackData` seeding the product grid on first paint. Residual 0.0175 is the
+entrance-animation settle — well inside "Good". See
+[`docs/perf/phase-27-budget.md`](../../perf/phase-27-budget.md) for the after-fix table.
+
+**Acceptance (regression guard only):**
+
+- Real-browser CLS on `/` remains < 0.1 after Phases 28–32 land (announcement bar,
+  search overlay, i18n layout shifts are the new CLS risks).
+- No `<ProductListingSkeleton>` visible during first paint on a warm page load
+  (SSR seed still present).
+
+### AC-6 Env-independent wins — no regressions
+
+**Status: done (Phase 27).** Shipped and locked by regression tests:
+
+- Deferred SW registration until `load` event (commit `f369d53`; regression test in
+  `538e36d`).
+- `geistMono` `preload: false` (commit `f369d53`).
+- `sizes` on HeroSection fill images (commit `f369d53`).
+- Above-the-fold product images `priority` + explicit `fetchPriority="high"` (commit
+  `cbdafc9`; required because Next 16 deprecated auto-setting `fetchpriority` from the
+  `priority` prop alone).
+- `NotifyMeDialog` lazy-loaded via `next/dynamic` (RHF + zod off the `/` bundle).
+- Explicit modern `browserslist` (drops Object.hasOwn / queueMicrotask / URLSearchParams
+  polyfills from the default config).
+
+**Acceptance (regression guard):** `pnpm verify` green; Lighthouse on `/` does not show
+any of these as opportunities/diagnostics.
+
+---
 
 ## Steps
 
