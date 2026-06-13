@@ -69,6 +69,11 @@ export interface ProductCardProps {
   className?: string
   /** Inline styles forwarded to the root element (e.g. transition-delay for stagger) */
   style?: React.CSSProperties
+  /**
+   * When true, the product image is loaded eagerly with fetchpriority=high (Next.js `priority`).
+   * Pass for the first few above-the-fold cards to improve LCP; leave false for the rest.
+   */
+  priority?: boolean
 }
 
 export interface ProductHeroProps {

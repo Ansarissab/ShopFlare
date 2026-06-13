@@ -19,6 +19,7 @@ export function ProductCard({
   isNew,
   className,
   style,
+  priority = false,
 }: ProductCardProps) {
   const viewportRef = useViewportPrefetch<HTMLAnchorElement>(`/api/products/${product.id}`)
   const { addItem, openCart } = useCart()
@@ -78,6 +79,7 @@ export function ProductCard({
             alt={product.name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            priority={priority}
             className={cn(
               'object-cover',
               // Zoom on hover — transform only, never "all". Gated by prefers-reduced-motion

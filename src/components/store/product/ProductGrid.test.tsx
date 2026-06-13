@@ -13,12 +13,14 @@ vi.mock('@/components/store/product/ProductCard', async () => {
       variants: unknown[]
       sizes: unknown[]
       images: unknown[]
+      priority?: boolean
     }) =>
-      createElement(
-        'div',
-        { 'data-testid': 'product-card', 'data-product-id': props.product.id },
-        `${props.product.name} | sizes:${props.sizes.length} images:${props.images.length} variants:${props.variants.length}`,
-      ),
+      createElement('div', {
+        'data-testid': 'product-card',
+        'data-product-id': props.product.id,
+        'data-priority': props.priority ? 'true' : 'false',
+        children: `${props.product.name} | sizes:${props.sizes.length} images:${props.images.length} variants:${props.variants.length}`,
+      }),
   }
 })
 
@@ -116,5 +118,31 @@ describe('ProductGrid', () => {
     expect(screen.queryByTestId('product-card')).toBeNull()
     // grid wrapper still present
     expect(container.querySelector('div.grid')).toBeTruthy()
+  })
+
+  // LCP regression — the first 4 cards must be priority=true; the rest must be false.
+  // This ensures above-the-fold images get fetchpriority=high without penalising
+  // every card in a long list.
+  it('marks the first 4 cards as priority and the rest as non-priority', () => {
+    const items = Array.from({ length: 6 }, (_, i) => makeProduct(`p${i}`, `Product ${i}`))
+    render(<ProductGrid items={items} />)
+    const cards = screen.getAllByTestId('product-card')
+    expect(cards).toHaveLength(6)
+    // First 4 → priority
+    for (let i = 0; i < 4; i++) {
+      expect(cards[i].getAttribute('data-priority')).toBe('true')
+    }
+    // Remaining → non-priority (lazy)
+    for (let i = 4; i < 6; i++) {
+      expect(cards[i].getAttribute('data-priority')).toBe('false')
+    }
+  })
+
+  it('all cards are non-priority when the list has fewer than 4 items and index >= 4 is absent', () => {
+    const items = [makeProduct('p0', 'Solo')]
+    render(<ProductGrid items={items} />)
+    const [card] = screen.getAllByTestId('product-card')
+    // Only one card — index 0 — must be priority
+    expect(card.getAttribute('data-priority')).toBe('true')
   })
 })

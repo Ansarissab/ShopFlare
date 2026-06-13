@@ -18,7 +18,8 @@ vi.mock('next/image', async () => {
       props: React.ImgHTMLAttributes<HTMLImageElement> & { fill?: boolean; priority?: boolean },
     ) => {
       const { fill, priority, ...rest } = props
-      return createElement('img', rest)
+      // Expose priority as a data attribute so tests can assert on LCP behaviour.
+      return createElement('img', { ...rest, 'data-priority': priority ? 'true' : 'false' })
     },
   }
 })
@@ -161,5 +162,41 @@ describe('ProductCard', () => {
     render(<ProductCard product={product} variants={many} sizes={[size]} images={[image]} />)
     // 7 color variants, 5 dots shown → +2 overflow
     expect(screen.getByText('+2')).toBeTruthy()
+  })
+
+  // CLS regression — the image wrapper must carry an aspect-ratio class so height is
+  // reserved before the image bytes arrive, preventing layout shift (CLS < 0.1).
+  it('image wrapper has aspect-ratio class to reserve space before image loads (CLS guard)', () => {
+    const { container } = render(
+      <ProductCard product={product} variants={[variant]} sizes={[size]} images={[image]} />,
+    )
+    // The div.relative wrapping the <Image fill> must have a fixed aspect ratio.
+    const wrapper = container.querySelector('div.relative')
+    expect(wrapper).not.toBeNull()
+    // Tailwind class is aspect-[4/5]; check for the substring "aspect-" to be robust
+    // against future ratio tweaks while still catching a missing class entirely.
+    expect(wrapper!.className).toMatch(/aspect-/)
+  })
+
+  // LCP regression — cards with priority=true must render the image as priority
+  // (fetchpriority=high / no lazy loading); cards without must stay lazy.
+  it('renders image with priority when priority prop is true', () => {
+    render(
+      <ProductCard
+        product={product}
+        variants={[variant]}
+        sizes={[size]}
+        images={[image]}
+        priority
+      />,
+    )
+    const img = screen.getByAltText('Classic Tee') as HTMLImageElement
+    expect(img.getAttribute('data-priority')).toBe('true')
+  })
+
+  it('renders image without priority by default (stays lazy for below-fold cards)', () => {
+    render(<ProductCard product={product} variants={[variant]} sizes={[size]} images={[image]} />)
+    const img = screen.getByAltText('Classic Tee') as HTMLImageElement
+    expect(img.getAttribute('data-priority')).toBe('false')
   })
 })
