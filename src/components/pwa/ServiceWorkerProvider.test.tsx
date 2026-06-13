@@ -239,6 +239,30 @@ describe('ServiceWorkerProvider', () => {
     expect(reloadSpy).toHaveBeenCalledTimes(1)
   })
 
+  it('defers registration until the load event when readyState is not complete', async () => {
+    // Force document into a non-complete state before render.
+    Object.defineProperty(document, 'readyState', { configurable: true, value: 'loading' })
+
+    const container = installSW()
+    render(
+      <ServiceWorkerProvider>
+        <div>x</div>
+      </ServiceWorkerProvider>,
+    )
+
+    // Registration must NOT have fired yet — SW deferral is active.
+    expect(container.register).not.toHaveBeenCalled()
+
+    // Simulate the browser finishing loading.
+    window.dispatchEvent(new Event('load'))
+
+    // Registration must now be called with the correct SW path.
+    await waitFor(() => expect(container.register).toHaveBeenCalledWith('/sw.js'))
+
+    // Restore readyState so subsequent tests get jsdom's default.
+    Object.defineProperty(document, 'readyState', { configurable: true, value: 'complete' })
+  })
+
   it('swallows registration failures', async () => {
     const container = installSW({ registerImpl: () => Promise.reject(new Error('boom')) })
     render(
