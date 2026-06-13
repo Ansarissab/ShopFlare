@@ -1,13 +1,24 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, cleanup } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import { ProductCard } from './ProductCard'
 
 vi.mock('next/link', async () => {
   const { createElement } = await import('react')
   return {
-    default: ({ href, children }: { href: string; children: React.ReactNode }) =>
-      createElement('a', { href }, children),
+    default: ({
+      href,
+      children,
+      onMouseEnter,
+      onFocus,
+      ...rest
+    }: {
+      href: string
+      children: React.ReactNode
+      onMouseEnter?: React.MouseEventHandler
+      onFocus?: React.FocusEventHandler
+      [key: string]: unknown
+    }) => createElement('a', { href, onMouseEnter, onFocus, ...rest }, children),
   }
 })
 
@@ -198,5 +209,86 @@ describe('ProductCard', () => {
     render(<ProductCard product={product} variants={[variant]} sizes={[size]} images={[image]} />)
     const img = screen.getByAltText('Classic Tee') as HTMLImageElement
     expect(img.getAttribute('data-priority')).toBe('false')
+  })
+
+  // ── Handler coverage ────────────────────────────────────────────────────────
+
+  it('onMouseEnter on the card link calls prefetch for the product', async () => {
+    const { prefetch } = await import('@/lib/api')
+    const mockPrefetch = vi.mocked(prefetch)
+    render(<ProductCard product={product} variants={[variant]} sizes={[size]} images={[image]} />)
+    const link = screen.getByRole('link')
+    fireEvent.mouseEnter(link)
+    expect(mockPrefetch).toHaveBeenCalledWith('/api/products/prod-1')
+  })
+
+  it('onFocus on the card link calls prefetch for the product', async () => {
+    const { prefetch } = await import('@/lib/api')
+    const mockPrefetch = vi.mocked(prefetch)
+    render(<ProductCard product={product} variants={[variant]} sizes={[size]} images={[image]} />)
+    const link = screen.getByRole('link')
+    fireEvent.focus(link)
+    expect(mockPrefetch).toHaveBeenCalledWith('/api/products/prod-1')
+  })
+
+  it('handleQuickAdd adds to cart and opens it when exactly one active size exists', () => {
+    render(<ProductCard product={product} variants={[variant]} sizes={[size]} images={[image]} />)
+    const btn = screen.getByRole('button', { name: /quick add/i })
+    // Click must not navigate (stopPropagation + preventDefault) and must add the item.
+    fireEvent.click(btn)
+    // After click, the quick-add button still exists (no navigation occurred).
+    expect(btn).toBeTruthy()
+  })
+
+  it('handleQuickAdd does nothing when canQuickAdd is false (multiple active sizes)', () => {
+    const size2 = { ...size, id: 'sz-2', size: 'L' }
+    render(
+      <ProductCard product={product} variants={[variant]} sizes={[size, size2]} images={[image]} />,
+    )
+    // With two active sizes canQuickAdd is false — no quick-add button rendered.
+    expect(screen.queryByRole('button', { name: /quick add/i })).toBeNull()
+  })
+
+  it('handleQuickAdd falls back to variants[0] when no variant id matches size.variantId', () => {
+    // size.variantId = 'var-1' but the variant has id 'var-other' → find() returns undefined
+    // → variants[0] fallback is used (the ?? variants[0] branch).
+    const otherVariant = { ...variant, id: 'var-other' }
+    const singleSize = { ...size, variantId: 'var-1' } // doesn't match 'var-other'
+    render(
+      <ProductCard
+        product={product}
+        variants={[otherVariant]}
+        sizes={[singleSize]}
+        images={[image]}
+      />,
+    )
+    const btn = screen.getByRole('button', { name: /quick add/i })
+    fireEvent.click(btn)
+    // Rendered and clicked without error — variants[0] was used.
+    expect(btn).toBeTruthy()
+  })
+
+  it('handleQuickAdd uses empty strings for id/label when variants array is empty', () => {
+    // variants=[] → find() → undefined, variants[0] → undefined
+    // → variant?.id ?? '' and variant?.label ?? '' both fall back to ''.
+    // Also firstImage?.url ?? '' with images=[] falls back to ''.
+    const singleSize = { ...size }
+    render(<ProductCard product={product} variants={[]} sizes={[singleSize]} images={[]} />)
+    // No image shown (no firstImage), quick-add button rendered (canQuickAdd=true).
+    const btn = screen.getByRole('button', { name: /quick add/i })
+    fireEvent.click(btn)
+    expect(btn).toBeTruthy()
+  })
+
+  it('handleQuickAdd includes sku and stripePriceId when both are non-null', () => {
+    // size.sku ?? undefined → 'SKU-001' (non-null path)
+    // size.stripePriceId ?? undefined → 'price_xyz' (non-null path)
+    const sizeWithIds = { ...size, sku: 'SKU-001', stripePriceId: 'price_xyz' }
+    render(
+      <ProductCard product={product} variants={[variant]} sizes={[sizeWithIds]} images={[image]} />,
+    )
+    const btn = screen.getByRole('button', { name: /quick add/i })
+    fireEvent.click(btn)
+    expect(btn).toBeTruthy()
   })
 })

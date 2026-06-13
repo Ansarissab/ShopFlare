@@ -20,7 +20,7 @@ export type { ApiResourceState }
 // subscribers (useApiResource with refetchOnChannel + useStoreConfig).
 export const DATA_UPDATED_CHANNEL = 'shopflare:data-updated'
 
-export interface UseApiResourceOptions {
+export interface UseApiResourceOptions<T = unknown> {
   // Re-fetch silently when the browser tab regains focus. Use for data that
   // can change in another tab or context (e.g. store config).
   refetchOnFocus?: boolean
@@ -28,6 +28,10 @@ export interface UseApiResourceOptions {
   refetchOnChannel?: boolean
   // Re-fetch in the background every N milliseconds (e.g. 60_000 for 60 s).
   refetchInterval?: number
+  // SSR-seeded initial data. When provided the hook starts in a non-loading
+  // state (no skeleton on first paint) and still revalidates in the background.
+  // Has no effect if the path is already in the in-memory cache (cache wins).
+  fallbackData?: T
 }
 
 const _cache = new Map<string, unknown>()
@@ -37,14 +41,19 @@ const shouldCache = (path: string) => !path.startsWith('/api/orders')
 
 export function useApiResource<T>(
   path: string | null,
-  opts?: UseApiResourceOptions,
+  opts?: UseApiResourceOptions<T>,
 ): ApiResourceState<T> {
-  const [data, setData] = useState<T | null>(() =>
-    path && shouldCache(path) && _cache.has(path) ? (_cache.get(path) as T) : null,
-  )
-  const [loading, setLoading] = useState(() =>
-    path ? !(shouldCache(path) && _cache.has(path)) : true,
-  )
+  const [data, setData] = useState<T | null>(() => {
+    if (path && shouldCache(path) && _cache.has(path)) return _cache.get(path) as T
+    if (opts?.fallbackData !== undefined) return opts.fallbackData
+    return null
+  })
+  const [loading, setLoading] = useState(() => {
+    if (path && shouldCache(path) && _cache.has(path)) return false
+    if (opts?.fallbackData !== undefined) return false
+    // No cache, no fallback: start loading (or stay loading if path is null).
+    return true
+  })
   const [error, setError] = useState<string | null>(null)
   const [notFound, setNotFound] = useState(false)
   // Bump to trigger a silent background re-fetch without resetting state.
@@ -83,8 +92,10 @@ export function useApiResource<T>(
 
     async function fetchData() {
       // Only show loading/skeleton on first fetch — background refetches update
-      // data silently so the UI doesn't flash.
-      if (isInitial && !(shouldCache(resolvedPath) && _cache.has(resolvedPath))) {
+      // data silently so the UI doesn't flash. Skip this reset when fallbackData
+      // was provided (SSR seed): the UI already has real data so no skeleton needed.
+      const hasFallback = opts?.fallbackData !== undefined
+      if (isInitial && !(shouldCache(resolvedPath) && _cache.has(resolvedPath)) && !hasFallback) {
         setData(null)
         setError(null)
         setNotFound(false)

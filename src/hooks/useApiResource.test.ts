@@ -207,4 +207,85 @@ describe('useApiResource', () => {
     // No interval scheduled — only the initial fetch.
     expect(mockApiGet).toHaveBeenCalledTimes(1)
   })
+
+  it('ignores a negative refetchInterval (second branch of the guard)', async () => {
+    // refetchInterval = -1: !opts?.refetchInterval is false (non-zero), but
+    // opts.refetchInterval <= 0 is true → the second OR branch short-circuits.
+    const path = uniquePath()
+    mockApiGet.mockResolvedValue({ v: 1 })
+    const { result } = renderHook(() => useApiResource(path, { refetchInterval: -1 }))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    // No interval scheduled — only the initial fetch.
+    expect(mockApiGet).toHaveBeenCalledTimes(1)
+  })
+
+  it('refetchOnChannel skips setup when BroadcastChannel is unavailable', async () => {
+    // Simulate an environment where BroadcastChannel is not defined.
+    const original = global.BroadcastChannel
+    // @ts-expect-error — intentionally deleting to test the guard branch
+    delete global.BroadcastChannel
+    try {
+      const path = uniquePath()
+      mockApiGet.mockResolvedValue({ v: 1 })
+      const { result } = renderHook(() => useApiResource(path, { refetchOnChannel: true }))
+      await waitFor(() => expect(result.current.loading).toBe(false))
+      // Only initial fetch — no channel listener set up.
+      expect(mockApiGet).toHaveBeenCalledTimes(1)
+    } finally {
+      global.BroadcastChannel = original
+    }
+  })
+
+  // CLS regression — SSR-seeded fallbackData must suppress the first-paint skeleton
+  // while still triggering a background revalidation fetch.
+  describe('fallbackData', () => {
+    it('starts non-loading with fallback data — no skeleton on first paint', () => {
+      const path = uniquePath()
+      mockApiGet.mockResolvedValue({ products: [] })
+      const fallback = { products: [{ id: 'p1' }] }
+      const { result } = renderHook(() =>
+        useApiResource<{ products: { id: string }[] }>(path, { fallbackData: fallback }),
+      )
+      // Must be immediately non-loading with the seeded data — no await needed.
+      expect(result.current.loading).toBe(false)
+      expect(result.current.data).toEqual(fallback)
+      expect(result.current.error).toBeNull()
+    })
+
+    it('still fires a background revalidation fetch after seeding', async () => {
+      const path = uniquePath()
+      const fresh = { products: [{ id: 'fresh' }] }
+      mockApiGet.mockResolvedValue(fresh)
+      const fallback = { products: [{ id: 'stale' }] }
+      const { result } = renderHook(() =>
+        useApiResource<{ products: { id: string }[] }>(path, { fallbackData: fallback }),
+      )
+      // Immediately seeded, not loading.
+      expect(result.current.loading).toBe(false)
+      expect(result.current.data).toEqual(fallback)
+
+      // Background fetch resolves and updates data silently.
+      await waitFor(() => expect(result.current.data).toEqual(fresh))
+      expect(mockApiGet).toHaveBeenCalledWith(path)
+      // Loading never flipped to true (no skeleton flash during revalidation).
+      expect(result.current.loading).toBe(false)
+    })
+
+    it('cache takes precedence over fallbackData', async () => {
+      // Pre-warm cache by fetching once on a dedicated path.
+      const path = uniquePath()
+      const cached = { products: [{ id: 'cached' }] }
+      mockApiGet.mockResolvedValue(cached)
+      const first = renderHook(() => useApiResource<{ products: { id: string }[] }>(path))
+      await waitFor(() => expect(first.result.current.data).toEqual(cached))
+
+      // Second mount with a different fallbackData — cache value must win.
+      const stale = { products: [{ id: 'stale-fallback' }] }
+      const second = renderHook(() =>
+        useApiResource<{ products: { id: string }[] }>(path, { fallbackData: stale }),
+      )
+      expect(second.result.current.data).toEqual(cached)
+      expect(second.result.current.loading).toBe(false)
+    })
+  })
 })

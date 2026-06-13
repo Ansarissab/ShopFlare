@@ -21,6 +21,11 @@ import { useProductSearch } from '@/hooks/useProductSearch'
 interface CatalogProps {
   /** Base path for URL sync — '/' when landing is OFF, '/shop' when ON. */
   basePath?: string
+  /**
+   * SSR-seeded product list from the RSC page. When provided the catalog renders
+   * the real grid on first paint (no skeleton) and still revalidates via the hook.
+   */
+  initialProducts?: ProductWithVariants[]
 }
 
 function ProductListingSkeleton() {
@@ -48,14 +53,21 @@ function findCategoryBySlug(categories: CategoryNode[], slug: string): CategoryN
   return null
 }
 
-export function Catalog({ basePath = '/' }: CatalogProps) {
+export function Catalog({ basePath = '/', initialProducts }: CatalogProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { config } = useStoreConfig()
 
+  const fallback = initialProducts ? { products: initialProducts } : undefined
+
   const { data, loading, error } = useApiResource<{ products: ProductWithVariants[] }>(
     '/api/products',
-    { refetchInterval: 60_000, refetchOnFocus: true, refetchOnChannel: true },
+    {
+      refetchInterval: 60_000,
+      refetchOnFocus: true,
+      refetchOnChannel: true,
+      fallbackData: fallback,
+    },
   )
   const { data: catData } = useApiResource<{ categories: CategoryNode[] }>('/api/categories')
 

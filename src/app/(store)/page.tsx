@@ -80,11 +80,19 @@ export default async function StorePage() {
     )
   }
 
+  // Server-fetch initial products so Catalog renders the real grid on first paint
+  // (eliminates the skeleton→grid CLS swap). The hook still revalidates in the
+  // background via refetchInterval/refetchOnFocus/refetchOnChannel.
+  const productsRaw = await fetchFromWorker<{ products: ProductWithVariants[] }>('/api/products', {
+    revalidate: 300,
+  })
+  const initialProducts = productsRaw?.products ?? []
+
   return (
     <>
       {faqItems.length > 0 && <JsonLd data={faqPageJsonLd(faqItems)} />}
       <Suspense>
-        <StorePageClient />
+        <StorePageClient initialProducts={initialProducts} />
       </Suspense>
       {faqItems.length > 0 && (
         <div className={layout.page}>
