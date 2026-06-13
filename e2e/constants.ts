@@ -4,8 +4,10 @@
 export const E2E_ADMIN_PASSWORD = 'e2e-admin-password'
 export const E2E_ADMIN_SESSION_SECRET = 'e2e-session-secret-key-do-not-use-in-prod'
 
-// Local API worker (wrangler dev). The frontend talks to it on this fixed port.
-export const WORKER_URL = 'http://localhost:8787'
+// Local API worker (wrangler dev). Port comes from PW_WORKER_PORT (set by the
+// e2e launcher so it matches the dynamic port wrangler was actually booted on).
+// Falls back to 8787 for bare `playwright test` runs without the launcher.
+export const WORKER_URL = `http://localhost:${process.env.PW_WORKER_PORT ?? 8787}`
 
 // localStorage key the AdminShell reads to decide "logged in" (mirrors lib/api.ts).
 export const ADMIN_TOKEN_KEY = 'shopflare_admin_token'

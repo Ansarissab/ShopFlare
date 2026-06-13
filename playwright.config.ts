@@ -1,16 +1,18 @@
 import { defineConfig, devices } from '@playwright/test'
 import { ADMIN_STORAGE_STATE, E2E_ADMIN_PASSWORD, E2E_ADMIN_SESSION_SECRET } from './e2e/constants'
 
-// Port comes from the e2e launcher (scripts/e2e.mjs), which scans for a free port
-// ONCE and exports it as PW_PORT so this config AND every Playwright worker share
-// the same value. Run e2e via `pnpm test:e2e` (not bare `playwright test`) so
-// PW_PORT is set; without it we fall back to 3000. A busy :3000 (e.g. another local
-// app) is sidestepped because the launcher picks the next free port.
+// Ports come from the e2e launcher (scripts/e2e.mjs), which scans for free ports
+// ONCE and exports them as PW_PORT / PW_WORKER_PORT so this config AND every
+// Playwright worker share the same values. Run e2e via `pnpm test:e2e` (not bare
+// `playwright test`) so both vars are set; without them we fall back to 3000/8787.
+// A busy :3000 or :8787 (e.g. user's own procfile) never blocks e2e.
 const explicitBase = process.env.BASE_URL
 const port = explicitBase
   ? Number(new URL(explicitBase).port || 3000)
   : Number(process.env.PW_PORT ?? 3000)
 const baseURL = explicitBase ?? `http://localhost:${port}`
+// Worker port: dynamic from launcher, or 8787 fallback for bare `playwright test`.
+const workerPort = Number(process.env.PW_WORKER_PORT ?? 8787)
 
 export default defineConfig({
   testDir: './e2e',
@@ -40,10 +42,13 @@ export default defineConfig({
         // Port the Next frontend EXPLICITLY (`-p`), not via the PORT env — both
         // next dev AND wrangler dev read PORT, so a shared env makes the worker
         // grab the port and Playwright would hit the API (401/404) instead of the
-        // app. wrangler keeps its own default port (8787). The worker runs in
-        // development env with deterministic admin auth (--var) so auth.setup.ts can
-        // log in without touching real secrets.
-        command: `pnpm exec concurrently -k -n web,worker -c cyan,magenta "pnpm exec next dev -p ${port}" "pnpm exec wrangler dev worker/index.ts --var ENVIRONMENT:development --var ADMIN_DEV_BYPASS:1 --var ADMIN_PASSWORD:${E2E_ADMIN_PASSWORD} --var ADMIN_SESSION_SECRET:${E2E_ADMIN_SESSION_SECRET}"`,
+        // app. The worker uses a dynamic port (PW_WORKER_PORT, fallback 8787) so a
+        // busy :8787 (user's procfile worker) never blocks this suite. The
+        // NEXT_PUBLIC_WORKER_URL prefix tells both client and SSR fetches where the
+        // worker is; worker-url.ts accepts any http://localhost:<port> in dev.
+        // --inspector-port 0 lets the OS pick a free inspector port so the default
+        // :9229 doesn't collide with another running Node/wrangler process.
+        command: `pnpm exec concurrently -k -n web,worker -c cyan,magenta "NEXT_PUBLIC_WORKER_URL=http://localhost:${workerPort} pnpm exec next dev -p ${port}" "pnpm exec wrangler dev worker/index.ts --port ${workerPort} --inspector-port 0 --var ENVIRONMENT:development --var ADMIN_DEV_BYPASS:1 --var ADMIN_PASSWORD:${E2E_ADMIN_PASSWORD} --var ADMIN_SESSION_SECRET:${E2E_ADMIN_SESSION_SECRET}"`,
         url: baseURL,
         // Always boot our own server on the free port — never reuse a foreign
         // process squatting on :3000.

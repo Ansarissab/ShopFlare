@@ -38,16 +38,19 @@ console.log('[e2e] Seeding local D1…')
 spawnSync('pnpm', ['db:seed:local'], { stdio: 'inherit' })
 
 const port = process.env.PW_PORT || String(await freePort(3000))
+// Scan a second free port for the worker, starting after the app port so they
+// never collide. This removes the hardcoded :8787 dependency — if the user's
+// procfile worker (or anything else) holds 8787, e2e still boots cleanly.
+const workerPort = process.env.PW_WORKER_PORT || String(await freePort(Number(port) + 1))
 const child = spawn('./node_modules/.bin/playwright', ['test', ...process.argv.slice(2)], {
   stdio: 'inherit',
   env: {
     ...process.env,
     PW_PORT: String(port),
-    // e2e exercises the LOCAL stack (wrangler dev on :8787). Force the worker URL to
-    // localhost so BOTH the client fetch (lib/api.ts) AND the CSP connect-src
-    // (next.config.ts) agree. Otherwise .env.local's production NEXT_PUBLIC_WORKER_URL
-    // leaks into the CSP and the browser blocks every localhost API call.
-    NEXT_PUBLIC_WORKER_URL: 'http://localhost:8787',
+    PW_WORKER_PORT: String(workerPort),
+    // Tell both the client fetch (lib/api.ts) AND the CSP (next.config.ts) where
+    // the worker actually lives. worker-url.ts accepts any localhost:<port> in dev.
+    NEXT_PUBLIC_WORKER_URL: `http://localhost:${workerPort}`,
   },
 })
 child.on('exit', (code) => process.exit(code ?? 1))
