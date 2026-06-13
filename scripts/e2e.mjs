@@ -12,21 +12,31 @@
 import net from 'node:net'
 import { spawn, spawnSync } from 'node:child_process'
 
-function freePort(start) {
-  return new Promise((resolve) => {
-    let p = start
-    const tryPort = () => {
-      if (p > start + 100) return resolve(start)
-      const s = net.createServer()
-      s.once('error', () => {
-        p++
-        tryPort()
-      })
-      s.once('listening', () => s.close(() => resolve(p)))
-      s.listen(p, '127.0.0.1')
-    }
-    tryPort()
+// Attempt to bind a TCP server on `candidate`; resolve with `candidate` if free,
+// reject (EADDRINUSE) if occupied. Caller increments and retries.
+function probePort(candidate) {
+  return new Promise((resolve, reject) => {
+    const s = net.createServer()
+    s.once('error', reject)
+    s.once('listening', () => s.close(() => resolve(candidate)))
+    s.listen(candidate, '127.0.0.1')
   })
+}
+
+// Scan upward from `start` until we bind-and-release a port successfully.
+// Unlike the old impl, on exhaustion we throw rather than returning an occupied
+// port — the caller must never receive a port that is already in use.
+async function freePort(start, exclude = new Set()) {
+  for (let p = start; p <= start + 200; p++) {
+    if (exclude.has(p)) continue
+    try {
+      await probePort(p)
+      return p // bind succeeded → port is free
+    } catch {
+      // EADDRINUSE or similar — try next
+    }
+  }
+  throw new Error(`[e2e] No free port found in range ${start}–${start + 200}`)
 }
 
 // Seed the local D1 so the storefront is never empty during e2e. Both steps are
@@ -37,11 +47,45 @@ spawnSync('pnpm', ['db:migrate:local'], { stdio: 'inherit' })
 console.log('[e2e] Seeding local D1…')
 spawnSync('pnpm', ['db:seed:local'], { stdio: 'inherit' })
 
-const port = process.env.PW_PORT || String(await freePort(3000))
-// Scan a second free port for the worker, starting after the app port so they
-// never collide. This removes the hardcoded :8787 dependency — if the user's
-// procfile worker (or anything else) holds 8787, e2e still boots cleanly.
-const workerPort = process.env.PW_WORKER_PORT || String(await freePort(Number(port) + 1))
+// Determine app port: re-validate any pre-set PW_PORT (a stale export may point
+// at an occupied port), then scan from 3000 if needed.
+let port
+if (process.env.PW_PORT) {
+  const candidate = Number(process.env.PW_PORT)
+  try {
+    await probePort(candidate)
+    port = candidate // pre-set value is genuinely free
+  } catch {
+    console.warn(`[e2e] PW_PORT=${candidate} is occupied — scanning for free port…`)
+    port = await freePort(3000)
+  }
+} else {
+  port = await freePort(3000)
+}
+
+// Determine worker port: re-validate any pre-set PW_WORKER_PORT, then scan from
+// 8787+ (skipping the chosen app port so they can never be equal).
+let workerPort
+const excludeFromWorker = new Set([port])
+if (process.env.PW_WORKER_PORT) {
+  const candidate = Number(process.env.PW_WORKER_PORT)
+  if (excludeFromWorker.has(candidate)) {
+    console.warn(`[e2e] PW_WORKER_PORT=${candidate} collides with app port — scanning…`)
+    workerPort = await freePort(8787, excludeFromWorker)
+  } else {
+    try {
+      await probePort(candidate)
+      workerPort = candidate
+    } catch {
+      console.warn(`[e2e] PW_WORKER_PORT=${candidate} is occupied — scanning for free port…`)
+      workerPort = await freePort(8787, excludeFromWorker)
+    }
+  }
+} else {
+  workerPort = await freePort(8787, excludeFromWorker)
+}
+
+console.log(`[e2e] app port: ${port}  worker port: ${workerPort}`)
 const child = spawn('./node_modules/.bin/playwright', ['test', ...process.argv.slice(2)], {
   stdio: 'inherit',
   env: {
