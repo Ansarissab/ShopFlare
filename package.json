@@ -29,7 +29,6 @@
     "test:smoke": "node scripts/e2e.mjs --grep @smoke",
     "test:visual": "node scripts/e2e.mjs e2e/visual.spec.ts --workers=1",
     "test:visual:update": "node scripts/e2e.mjs e2e/visual.spec.ts --workers=1 --update-snapshots",
-    "test:visual:docker": "docker build -t shopflare-visual e2e && docker run --rm -v $PWD/.visual-baselines:/work/.visual-baselines shopflare-visual",
     "test:e2e:ui": "node scripts/e2e.mjs --ui",
     "test:all": "pnpm test:coverage && pnpm test:integration && pnpm test:e2e:full",
     "verify": "node scripts/ci.mjs",

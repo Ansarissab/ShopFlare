@@ -25,10 +25,9 @@
  *     Full suite EXCLUDING @smoke and visual: specs.
  *     Port base 3200 / worker 8987.                             [skip: --quick]
  *
- *   Step 6 — visual (opt-in via --visual; native local runner, NO Docker):
+ *   Step 6 — visual (opt-in via --visual; native local runner):
  *     Native pnpm test:visual. Baselines are machine-specific; run
  *     `pnpm test:visual:update` once to regenerate if they're stale.
- *     test:visual:docker remains available in package.json but is NOT used here.
  *                                                               [skip: unless --visual]
  *
  * Why integration + smoke are NOT concurrent:
@@ -53,7 +52,7 @@
  *   | 3     | integration                              | 1            | --quick                   |
  *   | 4     | smoke                                    | 1            | --quick                   |
  *   | 5     | e2e                                      | 1            | --quick                   |
- *   | 6     | visual (native, no Docker)               | 1            | unless --visual           |
+ *   | 6     | visual (native, opt-in)                  | 1            | unless --visual           |
  *   +-------+------------------------------------------+--------------+---------------------------+
  *
  * Usage:
@@ -245,9 +244,8 @@ try {
   }
 
   // ── Step 6: visual — opt-in only (--visual flag), native local runner ─────
-  // Uses pnpm test:visual (native, no Docker) so it's cheap and always available.
-  // Baselines are machine-specific; regenerate with `pnpm test:visual:update`.
-  // test:visual:docker remains in package.json but is NOT invoked here.
+  // Uses pnpm test:visual (native). Baselines are machine-specific;
+  // regenerate with `pnpm test:visual:update`.
   // Skipped by default — pass --visual to include it.
   if (withVisual) {
     await runStep('visual', 'pnpm', ['test:visual'])

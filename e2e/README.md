@@ -15,15 +15,21 @@ Playwright smoke + E2E + visual + a11y test suite.
 
 One command runs the whole quality bar, fail-fast (the Rails `bin/ci` idea):
 
-  pnpm verify              typecheck → lint → unit+coverage → integration → build
-  pnpm verify --quick      typecheck + lint + unit only (fast loop)
+  pnpm verify              typecheck → lint+build+unit → integration → smoke → e2e
+  pnpm verify --visual     full gate + native visual regression
+  pnpm verify --quick      typecheck + lint + unit only (fast loop, skips everything after unit)
   pnpm verify --no-build   skip the production build
 
 (`pnpm run ci` is an alias — bare `pnpm ci` is a reserved pnpm builtin, so use
 `pnpm verify` or `pnpm run ci`.)
 
-E2E / visual / a11y are NOT in `pnpm ci` (they need a running dev server + Chromium) —
-run them with the commands above.
+Step ordering (all test processes sequential, never overlapping):
+  1. typecheck          — fail-fast, ~5s
+  2. lint + build + unit+coverage — concurrent (ONE test process)
+  3. integration        — miniflare/workerd, alone
+  4. smoke              — @smoke critical-path specs, fail-fast before full e2e
+  5. e2e                — full suite excluding @smoke + visual: (no double-running)
+  6. visual             — native screenshot regression (opt-in: pnpm verify --visual)
 
 ## Coverage scope
 
@@ -38,7 +44,9 @@ Baselines live in .visual-baselines/ (gitignored, persistent across reboots).
 Generate on main: pnpm test:visual:update
 Switch branch, then run: pnpm test:visual to diff.
 
-Cross-OS determinism: pnpm test:visual:docker (runs inside playwright-jammy container).
+Visual runs natively on the host machine. Baselines are machine-specific; if they
+are stale after a Playwright upgrade or UI change, regenerate with:
+  pnpm test:visual:update
 
 ## Layers
 
