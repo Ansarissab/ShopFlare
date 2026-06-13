@@ -9,7 +9,7 @@ Verification, Cookie Consent, Announcement Bar), [ADR 0015](../../adr/0015-i18n-
 
 | Order | Phase | File |
 |-------|-------|------|
-| 1 | Page-speed baseline + quick wins | [phase-27](./phase-27-page-speed-baseline.md) |
+| 1 | Page-speed baseline + quick wins ✅ done | [phase-27](../done/phase-27-page-speed-baseline.md) |
 | 2 | i18n Locale engine + codemod (foundation) | [phase-28](./phase-28-i18n-locale-engine.md) |
 | 3 | Header cluster: search + nav + announcement bar | [phase-29](./phase-29-header-search-nav-announcement.md) |
 | 4 | FAQ: structured, /faq, per-product, accordion | [phase-30](./phase-30-faq-structured.md) |

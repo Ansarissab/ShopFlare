@@ -1,8 +1,16 @@
 # Phase 27 — Page-speed baseline + quick wins
 
-Status: Proposed. Planned 2026-06-12 (grill-with-docs). Execute FIRST in the 27–33 batch —
-establish a measured baseline before later phases add weight. See
-[roadmap](./phases-27-33-roadmap.md).
+Status: **Done** (2026-06-13). Planned 2026-06-12 (grill-with-docs). Executed FIRST in the
+27–33 batch — measured baseline established before later phases add weight. See
+[roadmap](../proposed/phases-27-33-roadmap.md) and measured results in
+[docs/perf/phase-27-budget.md](../../perf/phase-27-budget.md).
+
+Outcome: baseline captured (gstack browser + mobile Lighthouse over tailscale HTTPS);
+env-independent offenders fixed — CLS 0.156 → 0.0175 (SSR initial products), LCP image
+prioritized, SW registration deferred, redundant font preload dropped, hero `sizes` added.
+All `pnpm verify` gates green. The official ≥95 mobile-Lighthouse **lab** score is not
+provable on the local-only setup (CPU-throttle + tunnel + local-SSR artifacts) and is
+carried to **Phase 33** (CF-edge re-validation), as this roadmap already specifies.
 
 **Committed target:** mobile Lighthouse ≥ 95 on all Locales, LCP < 2.5s, TBT < 200ms,
 CLS < 0.1. (Today ≈ 66%.) Default Locale (en) is the hard gate here; all-Locale
