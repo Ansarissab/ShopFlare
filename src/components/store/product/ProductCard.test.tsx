@@ -26,11 +26,19 @@ vi.mock('next/image', async () => {
   const { createElement } = await import('react')
   return {
     default: (
-      props: React.ImgHTMLAttributes<HTMLImageElement> & { fill?: boolean; priority?: boolean },
+      props: React.ImgHTMLAttributes<HTMLImageElement> & {
+        fill?: boolean
+        priority?: boolean
+        fetchPriority?: string
+      },
     ) => {
-      const { fill, priority, ...rest } = props
-      // Expose priority as a data attribute so tests can assert on LCP behaviour.
-      return createElement('img', { ...rest, 'data-priority': priority ? 'true' : 'false' })
+      const { fill, priority, fetchPriority, ...rest } = props
+      // Expose priority + fetchPriority as data attributes so tests can assert LCP behaviour.
+      return createElement('img', {
+        ...rest,
+        'data-priority': priority ? 'true' : 'false',
+        'data-fetchpriority': fetchPriority,
+      })
     },
   }
 })
@@ -189,9 +197,9 @@ describe('ProductCard', () => {
     expect(wrapper!.className).toMatch(/aspect-/)
   })
 
-  // LCP regression — cards with priority=true must render the image as priority
-  // (fetchpriority=high / no lazy loading); cards without must stay lazy.
-  it('renders image with priority when priority prop is true', () => {
+  // LCP regression — cards with priority=true must render the image with fetchpriority=high
+  // so the browser resource-hint fires immediately without waiting for JS.
+  it('renders image with priority and fetchpriority=high when priority prop is true', () => {
     render(
       <ProductCard
         product={product}
@@ -203,12 +211,14 @@ describe('ProductCard', () => {
     )
     const img = screen.getByAltText('Classic Tee') as HTMLImageElement
     expect(img.getAttribute('data-priority')).toBe('true')
+    expect(img.getAttribute('data-fetchpriority')).toBe('high')
   })
 
-  it('renders image without priority by default (stays lazy for below-fold cards)', () => {
+  it('renders image without priority and fetchpriority=auto by default (stays lazy for below-fold cards)', () => {
     render(<ProductCard product={product} variants={[variant]} sizes={[size]} images={[image]} />)
     const img = screen.getByAltText('Classic Tee') as HTMLImageElement
     expect(img.getAttribute('data-priority')).toBe('false')
+    expect(img.getAttribute('data-fetchpriority')).toBe('auto')
   })
 
   // ── Handler coverage ────────────────────────────────────────────────────────

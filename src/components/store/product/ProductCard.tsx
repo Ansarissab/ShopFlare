@@ -80,6 +80,7 @@ export function ProductCard({
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             priority={priority}
+            fetchPriority={priority ? 'high' : 'auto'}
             className={cn(
               'object-cover',
               // Zoom on hover — transform only, never "all". Gated by prefers-reduced-motion
