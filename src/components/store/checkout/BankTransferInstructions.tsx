@@ -29,7 +29,7 @@ export function BankTransferInstructions({
   ]
 
   return (
-    <div className="w-full rounded-lg border bg-muted/40 p-5 text-left">
+    <div className="w-full rounded-lg border bg-muted/40 p-5 text-start">
       <h2 className="text-base font-semibold">{t.heading}</h2>
       <p className="mt-1 text-sm text-muted-foreground">{t.intro.replace('{amount}', amount)}</p>
       <p className="text-sm text-muted-foreground">

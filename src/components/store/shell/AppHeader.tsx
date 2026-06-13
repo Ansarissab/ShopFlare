@@ -28,7 +28,7 @@ export function AppHeader() {
       >
         <ShoppingCart className="h-5 w-5" />
         {cartCount > 0 && (
-          <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground">
+          <span className="absolute top-1 inset-e-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground">
             {cartCount > 9 ? '9+' : cartCount}
           </span>
         )}

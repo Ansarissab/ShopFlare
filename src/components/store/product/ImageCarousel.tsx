@@ -66,8 +66,8 @@ export function ImageCarousel({ images, className }: ImageCarouselProps) {
         </CarouselContent>
         {images.length > 1 && (
           <>
-            <CarouselPrevious className="-left-4" />
-            <CarouselNext className="-right-4" />
+            <CarouselPrevious className="-inset-s-4" />
+            <CarouselNext className="-inset-e-4" />
           </>
         )}
       </Carousel>

@@ -96,7 +96,7 @@ export function ProductCard({
           </div>
         )}
 
-        {isNew && <Badge className="absolute left-2 top-2">{t.product.new}</Badge>}
+        {isNew && <Badge className="absolute start-2 top-2">{t.product.new}</Badge>}
 
         {/* Quick-add affordance — revealed on hover, only for single-size products.
             Multi-size products skip this overlay; the whole card is a <Link> to the PDP

@@ -101,7 +101,7 @@ export default async function BlogIndexPage() {
                           )}
                         </time>
                       )}
-                      <span className="text-xs font-medium text-primary ml-auto">
+                      <span className="text-xs font-medium text-primary ms-auto">
                         {t.blog.readMore} →
                       </span>
                     </div>

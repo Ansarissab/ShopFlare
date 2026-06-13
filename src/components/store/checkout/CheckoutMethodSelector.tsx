@@ -111,7 +111,7 @@ export function CheckoutMethodSelector() {
               aria-checked={selected}
               onClick={() => setActive(m.value)}
               className={cn(
-                'flex items-start gap-3 rounded-lg border p-4 text-left transition-colors',
+                'flex items-start gap-3 rounded-lg border p-4 text-start transition-colors',
                 selected
                   ? 'border-primary bg-primary/5 ring-1 ring-primary'
                   : 'border-border hover:bg-muted/40',

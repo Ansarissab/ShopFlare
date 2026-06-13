@@ -40,7 +40,7 @@ export function StorefrontHeader() {
                   fill
                   priority
                   sizes="128px"
-                  className="object-contain object-left"
+                  className="object-contain object-left rtl:object-right"
                   unoptimized
                 />
               </span>
@@ -80,7 +80,7 @@ export function StorefrontHeader() {
           >
             <ShoppingCart className="h-5 w-5" />
             {itemCount > 0 && (
-              <Badge className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full p-0 text-[10px]">
+              <Badge className="absolute -top-1 -inset-e-1 flex h-4 w-4 items-center justify-center rounded-full p-0 text-[10px]">
                 {itemCount > 99 ? '99+' : itemCount}
               </Badge>
             )}

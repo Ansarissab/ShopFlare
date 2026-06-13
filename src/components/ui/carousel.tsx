@@ -180,8 +180,11 @@ function CarouselPrevious({
       className={cn(
         'absolute touch-manipulation rounded-full',
         orientation === 'horizontal'
-          ? 'top-1/2 -left-12 -translate-y-1/2'
+          ? 'top-1/2 -inset-s-12 -translate-y-1/2'
           : '-top-12 left-1/2 -translate-x-1/2 rotate-90',
+        // NOTE: embla scroll-direction RTL (direction: 'rtl' opt) is a known
+        // follow-up — button positions flip correctly via logical -start-/-end-
+        // but embla still scrolls LTR internally under RTL layouts.
         className,
       )}
       disabled={!canScrollPrev}
@@ -210,7 +213,7 @@ function CarouselNext({
       className={cn(
         'absolute touch-manipulation rounded-full',
         orientation === 'horizontal'
-          ? 'top-1/2 -right-12 -translate-y-1/2'
+          ? 'top-1/2 -inset-e-12 -translate-y-1/2'
           : '-bottom-12 left-1/2 -translate-x-1/2 rotate-90',
         className,
       )}

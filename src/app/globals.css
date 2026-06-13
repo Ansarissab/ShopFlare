@@ -210,9 +210,28 @@ nav, [data-tab-bar] {
   from { transform: translateX(15px); opacity: 0; }
 }
 
+/* RTL: negate the slide direction so transitions read right-to-left */
+[dir='rtl'] ::view-transition-old(root) {
+  animation: slide-out-rtl 200ms ease-in both;
+}
+
+[dir='rtl'] ::view-transition-new(root) {
+  animation: slide-in-rtl 200ms ease-out both;
+}
+
+@keyframes slide-out-rtl {
+  to { transform: translateX(15px); opacity: 0; }
+}
+
+@keyframes slide-in-rtl {
+  from { transform: translateX(-15px); opacity: 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(root),
-  ::view-transition-new(root) {
+  ::view-transition-new(root),
+  [dir='rtl'] ::view-transition-old(root),
+  [dir='rtl'] ::view-transition-new(root) {
     animation: none;
   }
 }

@@ -51,7 +51,7 @@ export function CategoryNav({ categories }: CategoryNavProps) {
                 </DropdownMenuItem>
                 {cat.children.map((child) => (
                   <DropdownMenuItem key={child.id}>
-                    <Link href={`/category/${child.slug}`} className="w-full pl-2">
+                    <Link href={`/category/${child.slug}`} className="w-full ps-2">
                       {child.name}
                     </Link>
                   </DropdownMenuItem>

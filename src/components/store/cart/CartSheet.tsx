@@ -5,7 +5,8 @@ import { toast } from 'sonner'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { useT } from '@/lib/i18n/Provider'
+import { useT, useLocale } from '@/lib/i18n/Provider'
+import { LOCALES } from '@/lib/constants'
 import { calculateShipping, calculateTax } from '@/lib/utils/index'
 import { useCart, useCartSubtotalCents } from '@/hooks/useCart'
 import { useStoreConfig } from '@/hooks/useStoreConfig'
@@ -17,6 +18,7 @@ import type { CartSheetProps } from '@/lib/types/cart'
 
 export function CartSheet({ flatRateCents = 0, thresholdCents = 0 }: CartSheetProps) {
   const t = useT()
+  const isRtl = LOCALES[useLocale()].dir === 'rtl'
   const { items, isOpen, closeCart } = useCart()
   const subtotalCents = useCartSubtotalCents()
   const shippingCents = calculateShipping(subtotalCents, flatRateCents, thresholdCents)
@@ -62,7 +64,10 @@ export function CartSheet({ flatRateCents = 0, thresholdCents = 0 }: CartSheetPr
         if (!open) closeCart()
       }}
     >
-      <SheetContent side="right" className="flex flex-col p-0 sm:max-w-md w-full">
+      <SheetContent
+        side={isRtl ? 'left' : 'right'}
+        className="flex flex-col p-0 sm:max-w-md w-full"
+      >
         <SheetHeader className="px-4 pt-4 pb-2">
           <SheetTitle>{t.cart.title}</SheetTitle>
         </SheetHeader>

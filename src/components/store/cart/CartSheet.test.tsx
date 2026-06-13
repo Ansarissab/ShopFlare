@@ -2,6 +2,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react'
 import { CartSheet } from './CartSheet'
+import { TProvider } from '@/lib/i18n/Provider'
 import { en } from '@/lib/i18n/en'
 
 // ─── Mocks ─────────────────────────────────────────────────────────────────────
@@ -287,5 +288,33 @@ describe('CartSheet — handleApplyCoupon', () => {
     render(<CartSheet />)
     fireEvent.click(screen.getByTestId('apply'))
     await waitFor(() => expect(toastError).toHaveBeenCalledWith(en.cart.couponInvalid))
+  })
+})
+
+describe('CartSheet — RTL side prop', () => {
+  it('renders SheetContent with side="left" under Urdu (RTL) locale', () => {
+    render(
+      <TProvider locale="ur">
+        <CartSheet />
+      </TProvider>,
+    )
+    const content = document.querySelector('[data-slot="sheet-content"]')
+    expect(content?.getAttribute('data-side')).toBe('left')
+  })
+
+  it('renders SheetContent with side="right" under English (LTR) locale', () => {
+    render(
+      <TProvider locale="en">
+        <CartSheet />
+      </TProvider>,
+    )
+    const content = document.querySelector('[data-slot="sheet-content"]')
+    expect(content?.getAttribute('data-side')).toBe('right')
+  })
+
+  it('renders SheetContent with side="right" when no TProvider is present (default locale)', () => {
+    render(<CartSheet />)
+    const content = document.querySelector('[data-slot="sheet-content"]')
+    expect(content?.getAttribute('data-side')).toBe('right')
   })
 })

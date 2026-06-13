@@ -74,7 +74,7 @@ export function AppTabBar() {
                 )}
               />
               {tab.key === 'cart' && cartCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground">
+                <span className="absolute -top-1.5 -inset-e-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground">
                   {cartCount > 9 ? '9+' : cartCount}
                 </span>
               )}

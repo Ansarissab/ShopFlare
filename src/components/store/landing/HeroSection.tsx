@@ -112,7 +112,7 @@ export async function HeroSection({
           {imageUrl && (
             <div
               className={cn(
-                'pointer-events-none absolute inset-y-0 right-0 w-full sm:w-3/5 lg:w-1/2',
+                'pointer-events-none absolute inset-y-0 right-0 rtl:right-auto rtl:left-0 w-full sm:w-3/5 lg:w-1/2',
               )}
               aria-hidden="true"
             >
@@ -124,8 +124,8 @@ export async function HeroSection({
                 className="object-cover object-center"
                 priority
               />
-              {/* gradient veil: left-to-right so text stays legible on mobile */}
-              <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent sm:via-background/60 sm:to-transparent" />
+              {/* gradient veil: flows from text side toward image so text stays legible on mobile */}
+              <div className="absolute inset-0 bg-linear-to-r rtl:bg-linear-to-l from-background via-background/80 to-transparent sm:via-background/60 sm:to-transparent" />
             </div>
           )}
 
