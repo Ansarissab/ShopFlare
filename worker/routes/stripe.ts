@@ -13,10 +13,6 @@ import { notifyNewOrder } from 'worker/lib/notify'
 import { rowsChanged } from 'worker/lib/d1'
 import type { Bindings } from 'worker/types'
 
-// Stock-reserving statuses: any order in one of these states holds reserved
-// inventory that must be released when the order is cancelled.
-const STOCK_HOLDING_STATUSES = ['pending', 'confirmed', 'processing'] as const
-
 const app = new Hono<{ Bindings: Bindings }>()
 
 // ─── Validation schema ────────────────────────────────────────────────────────
