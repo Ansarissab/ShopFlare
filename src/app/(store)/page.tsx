@@ -10,6 +10,7 @@ import { isFeatureEnabled } from '@/lib/features'
 import { layout } from '@/lib/styles'
 import type { StoreConfig } from '@/lib/types/common'
 import type { ProductWithVariants } from '@/lib/types/product'
+import type { CategoryNode } from '@/lib/types/category'
 import type { LandingData } from '@/lib/types'
 import StorePageClient from './StorePageClient'
 import { LandingPage } from '@/components/store/landing/LandingPage'
@@ -80,19 +81,23 @@ export default async function StorePage() {
     )
   }
 
-  // Server-fetch initial products so Catalog renders the real grid on first paint
-  // (eliminates the skeleton→grid CLS swap). The hook still revalidates in the
-  // background via refetchInterval/refetchOnFocus/refetchOnChannel.
-  const productsRaw = await fetchFromWorker<{ products: ProductWithVariants[] }>('/api/products', {
-    revalidate: 300,
-  })
+  // Server-fetch initial products + categories so Catalog renders the real grid
+  // on first paint (eliminates the skeleton→grid CLS swap) and both server and
+  // client first-render with the same category list (prevents hydration mismatch
+  // caused by the module-level _cache in useApiResource being populated from a
+  // previous navigation before Catalog's useState initializer runs on the client).
+  const [productsRaw, categoriesRaw] = await Promise.all([
+    fetchFromWorker<{ products: ProductWithVariants[] }>('/api/products', { revalidate: 300 }),
+    fetchFromWorker<{ categories: CategoryNode[] }>('/api/categories', { revalidate: 300 }),
+  ])
   const initialProducts = productsRaw?.products ?? []
+  const initialCategories = categoriesRaw?.categories ?? []
 
   return (
     <>
       {faqItems.length > 0 && <JsonLd data={faqPageJsonLd(faqItems)} />}
       <Suspense>
-        <StorePageClient initialProducts={initialProducts} />
+        <StorePageClient initialProducts={initialProducts} initialCategories={initialCategories} />
       </Suspense>
       {faqItems.length > 0 && (
         <div className={layout.page}>

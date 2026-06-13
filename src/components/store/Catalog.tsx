@@ -26,6 +26,13 @@ interface CatalogProps {
    * the real grid on first paint (no skeleton) and still revalidates via the hook.
    */
   initialProducts?: ProductWithVariants[]
+  /**
+   * SSR-seeded category list from the RSC page. Prevents a server/client hydration
+   * mismatch: without it the server renders with no categories (the hook can't
+   * fire effects during SSR) while the client may see cached category data on its
+   * first render, producing a different DOM structure.
+   */
+  initialCategories?: CategoryNode[]
 }
 
 function ProductListingSkeleton() {
@@ -53,12 +60,13 @@ function findCategoryBySlug(categories: CategoryNode[], slug: string): CategoryN
   return null
 }
 
-export function Catalog({ basePath = '/', initialProducts }: CatalogProps) {
+export function Catalog({ basePath = '/', initialProducts, initialCategories }: CatalogProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { config } = useStoreConfig()
 
   const fallback = initialProducts ? { products: initialProducts } : undefined
+  const catFallback = initialCategories ? { categories: initialCategories } : undefined
 
   const { data, loading, error } = useApiResource<{ products: ProductWithVariants[] }>(
     '/api/products',
@@ -69,7 +77,9 @@ export function Catalog({ basePath = '/', initialProducts }: CatalogProps) {
       fallbackData: fallback,
     },
   )
-  const { data: catData } = useApiResource<{ categories: CategoryNode[] }>('/api/categories')
+  const { data: catData } = useApiResource<{ categories: CategoryNode[] }>('/api/categories', {
+    fallbackData: catFallback,
+  })
 
   const [activeCategory, setActiveCategory] = useState<string | null>(
     () => searchParams?.get('category') ?? null,
