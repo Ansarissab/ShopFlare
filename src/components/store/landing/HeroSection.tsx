@@ -34,6 +34,7 @@ export function HeroSection({
               src={imageUrl}
               alt={heading}
               fill
+              sizes="100vw"
               className="object-cover brightness-50"
               priority
             />
@@ -54,7 +55,14 @@ export function HeroSection({
         <div className="mx-auto max-w-3xl px-4 py-16 text-center">
           {imageUrl && (
             <div className="relative mx-auto mb-8 h-64 w-full overflow-hidden rounded-xl sm:h-80">
-              <Image src={imageUrl} alt={heading} fill className="object-cover" priority />
+              <Image
+                src={imageUrl}
+                alt={heading}
+                fill
+                sizes="(max-width: 768px) 100vw, 768px"
+                className="object-cover"
+                priority
+              />
             </div>
           )}
           <h1 className="text-4xl sm:text-5xl">{heading}</h1>
@@ -71,7 +79,14 @@ export function HeroSection({
         <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-16 sm:flex-row-reverse sm:items-center sm:px-6 lg:px-8">
           {imageUrl && (
             <div className="relative h-64 w-full overflow-hidden rounded-xl sm:h-80 sm:flex-1">
-              <Image src={imageUrl} alt={heading} fill className="object-cover" priority />
+              <Image
+                src={imageUrl}
+                alt={heading}
+                fill
+                sizes="(max-width: 640px) 100vw, 50vw"
+                className="object-cover"
+                priority
+              />
             </div>
           )}
           <div className="flex-1">

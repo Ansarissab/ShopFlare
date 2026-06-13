@@ -37,26 +37,36 @@ export function ServiceWorkerProvider({ children }: { children: React.ReactNode 
       })
     }
 
-    navigator.serviceWorker
-      .register('/sw.js')
-      .then((r) => {
-        setRegistration(r)
+    function registerSW() {
+      navigator.serviceWorker
+        .register('/sw.js')
+        .then((r) => {
+          setRegistration(r)
 
-        if (r.waiting) handleWaiting(r.waiting)
+          if (r.waiting) handleWaiting(r.waiting)
 
-        r.addEventListener('updatefound', () => {
-          const newSW = r.installing
-          if (!newSW) return
-          newSW.addEventListener('statechange', () => {
-            if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
-              handleWaiting(newSW)
-            }
+          r.addEventListener('updatefound', () => {
+            const newSW = r.installing
+            if (!newSW) return
+            newSW.addEventListener('statechange', () => {
+              if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+                handleWaiting(newSW)
+              }
+            })
           })
         })
-      })
-      .catch(() => {
-        /* SW unavailable — ignore */
-      })
+        .catch(() => {
+          /* SW unavailable — ignore */
+        })
+    }
+
+    // Defer SW registration until after the page load event so it doesn't
+    // compete with LCP-critical resources on the main thread.
+    if (document.readyState === 'complete') {
+      registerSW()
+    } else {
+      window.addEventListener('load', registerSW, { once: true })
+    }
 
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if (reloadingRef.current) return

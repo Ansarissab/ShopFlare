@@ -8,7 +8,12 @@ import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
 import type { StoreConfig } from '@/lib/types/common'
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'], display: 'swap' })
-const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'], display: 'swap' })
+const geistMono = Geist_Mono({
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
+  display: 'swap',
+  preload: false,
+})
 // Design-system display font — used for h1–h4 via --font-display CSS variable.
 // next/font self-hosts automatically; no external request at runtime.
 const instrumentSerif = Instrument_Serif({
