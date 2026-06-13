@@ -10,7 +10,11 @@ import { ImageCarousel } from '@/components/store/product/ImageCarousel'
 import { VariantSelector } from '@/components/store/product/VariantSelector'
 import { SizePicker } from '@/components/store/product/SizePicker'
 import { ProductActions } from '@/components/store/product/ProductActions'
-import { NotifyMeDialog } from '@/components/store/product/NotifyMeDialog'
+import dynamic from 'next/dynamic'
+
+const NotifyMeDialog = dynamic(() => import('./NotifyMeDialog').then((m) => m.NotifyMeDialog), {
+  ssr: false,
+})
 import type { ProductHeroProps } from '@/lib/types/product'
 
 export function ProductHero({
@@ -134,8 +138,8 @@ export function ProductHero({
         />
       </div>
 
-      {/* Notify Me dialog — owned here because we know which size is OOS */}
-      {notifyTarget && currentVariant && (
+      {/* Notify Me dialog — deferred chunk; only mounted after first open */}
+      {notifyOpen && notifyTarget && currentVariant && (
         <NotifyMeDialog
           sizeOptionId={notifyTarget.id}
           productName={product.name}

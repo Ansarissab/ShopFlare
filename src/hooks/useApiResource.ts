@@ -9,7 +9,7 @@
 // guard on `params?.slug` / `params?.orderId` inside their own useEffect and
 // simply return the skeleton while the router is still hydrating the params.
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { apiGet, ApiError } from '@/lib/api'
 import type { ApiResourceState } from '@/lib/types/common'
 
@@ -59,6 +59,12 @@ export function useApiResource<T>(
   // Bump to trigger a silent background re-fetch without resetting state.
   const [refetchKey, setRefetchKey] = useState(0)
 
+  // Capture whether fallbackData was provided at mount — it is a one-time seed
+  // used to suppress the loading skeleton on first paint. Stored in a ref so the
+  // fetch effect does not need opts.fallbackData in its dependency array (the
+  // seeding decision is fixed at mount; we never re-apply it on subsequent renders).
+  const hasFallbackRef = useRef(opts?.fallbackData !== undefined)
+
   useEffect(() => {
     if (!opts?.refetchOnFocus) return
     const onVisible = () => {
@@ -94,8 +100,11 @@ export function useApiResource<T>(
       // Only show loading/skeleton on first fetch — background refetches update
       // data silently so the UI doesn't flash. Skip this reset when fallbackData
       // was provided (SSR seed): the UI already has real data so no skeleton needed.
-      const hasFallback = opts?.fallbackData !== undefined
-      if (isInitial && !(shouldCache(resolvedPath) && _cache.has(resolvedPath)) && !hasFallback) {
+      if (
+        isInitial &&
+        !(shouldCache(resolvedPath) && _cache.has(resolvedPath)) &&
+        !hasFallbackRef.current
+      ) {
         setData(null)
         setError(null)
         setNotFound(false)

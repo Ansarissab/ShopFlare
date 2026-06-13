@@ -15,12 +15,15 @@ vi.mock('@/components/store/product/ProductCard', async () => {
       images: unknown[]
       priority?: boolean
     }) =>
-      createElement('div', {
-        'data-testid': 'product-card',
-        'data-product-id': props.product.id,
-        'data-priority': props.priority ? 'true' : 'false',
-        children: `${props.product.name} | sizes:${props.sizes.length} images:${props.images.length} variants:${props.variants.length}`,
-      }),
+      createElement(
+        'div',
+        {
+          'data-testid': 'product-card',
+          'data-product-id': props.product.id,
+          'data-priority': props.priority ? 'true' : 'false',
+        },
+        `${props.product.name} | sizes:${props.sizes.length} images:${props.images.length} variants:${props.variants.length}`,
+      ),
   }
 })
 

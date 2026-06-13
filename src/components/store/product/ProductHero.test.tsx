@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, fireEvent, cleanup } from '@testing-library/react'
+import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react'
 import { ProductHero } from './ProductHero'
 import { en } from '@/lib/i18n/en'
 import type {
@@ -331,14 +331,18 @@ describe('ProductHero', () => {
     expect(screen.getByTestId('actions').getAttribute('data-adding')).toBe('true')
   })
 
-  it('opens the notify dialog when notify-me is clicked', () => {
+  it('opens the notify dialog when notify-me is clicked', async () => {
     render(<ProductHero {...makeProps()} />)
-    expect(screen.getByTestId('notify-dialog').getAttribute('data-open')).toBe('false')
+    // Dialog is not mounted until first open (deferred chunk gate)
+    expect(screen.queryByTestId('notify-dialog')).toBeNull()
     fireEvent.click(screen.getByTestId('notify'))
-    expect(screen.getByTestId('notify-dialog').getAttribute('data-open')).toBe('true')
+    // next/dynamic resolves async — wait for the lazy chunk to render
+    await waitFor(() =>
+      expect(screen.getByTestId('notify-dialog').getAttribute('data-open')).toBe('true'),
+    )
   })
 
-  it('targets the first OOS size for the notify dialog', () => {
+  it('targets the first OOS size for the notify dialog', async () => {
     render(
       <ProductHero
         {...makeProps({
@@ -348,7 +352,12 @@ describe('ProductHero', () => {
         })}
       />,
     )
-    expect(screen.getByTestId('notify-dialog').getAttribute('data-size-id')).toBe('s-oos')
+    // Open the dialog first (it's gate-mounted only when open)
+    fireEvent.click(screen.getByTestId('notify'))
+    // next/dynamic resolves async — wait for the lazy chunk
+    await waitFor(() =>
+      expect(screen.getByTestId('notify-dialog').getAttribute('data-size-id')).toBe('s-oos'),
+    )
   })
 
   it('does not render the notify dialog when no sizes exist for the variant', () => {
