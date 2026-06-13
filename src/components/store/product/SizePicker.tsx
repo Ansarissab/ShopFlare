@@ -2,19 +2,20 @@
 
 import { cn } from '@/lib/utils'
 import { formatPrice } from '@/lib/utils/index'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { LOW_STOCK_THRESHOLD } from '@/lib/constants'
 import { Badge } from '@/components/ui/badge'
 import type { SizePickerProps } from '@/lib/types/product'
 
 export function SizePicker({ sizes, selectedSizeId, onSelect, className }: SizePickerProps) {
+  const t = useT()
   if (sizes.length === 0) return null
 
   const activeSizes = sizes.filter((s) => s.active)
 
   return (
     <div className={cn('flex flex-col gap-2', className)}>
-      <p className="text-sm font-medium text-foreground">{en.store.selectSize}</p>
+      <p className="text-sm font-medium text-foreground">{t.store.selectSize}</p>
       <div className="flex flex-wrap gap-2">
         {activeSizes.map((size) => {
           const isOOS = size.stock === 0
@@ -51,7 +52,7 @@ export function SizePicker({ sizes, selectedSizeId, onSelect, className }: SizeP
 
               {isOOS && (
                 <Badge variant="outline" className="text-xs px-1.5 py-0 h-4 pointer-events-none">
-                  {en.store.outOfStock}
+                  {t.store.outOfStock}
                 </Badge>
               )}
 
@@ -60,7 +61,7 @@ export function SizePicker({ sizes, selectedSizeId, onSelect, className }: SizeP
                   variant="destructive"
                   className="text-xs px-1.5 py-0 h-4 pointer-events-none"
                 >
-                  {en.store.lowStock.replace('{count}', String(size.stock))}
+                  {t.store.lowStock.replace('{count}', String(size.stock))}
                 </Badge>
               )}
             </div>

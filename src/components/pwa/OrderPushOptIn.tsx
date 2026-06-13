@@ -4,13 +4,14 @@ import { useState } from 'react'
 import { Bell, BellOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { usePushSubscription } from '@/hooks/usePushSubscription'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 
 type Props = {
   orderNumber: string
 }
 
 export function OrderPushOptIn({ orderNumber }: Props) {
+  const t = useT()
   const [dismissed, setDismissed] = useState(false)
 
   const { supported, permission, enabled, enable, loading } = usePushSubscription({
@@ -25,13 +26,13 @@ export function OrderPushOptIn({ orderNumber }: Props) {
       <div className="flex items-center gap-2 min-w-0">
         <Bell className="h-4 w-4 shrink-0 text-primary" />
         <div className="min-w-0">
-          <p className="font-medium">{en.pwa.orderPushEnableTitle}</p>
-          <p className="text-xs text-muted-foreground truncate">{en.pwa.orderPushEnableBody}</p>
+          <p className="font-medium">{t.pwa.orderPushEnableTitle}</p>
+          <p className="text-xs text-muted-foreground truncate">{t.pwa.orderPushEnableBody}</p>
         </div>
       </div>
       <div className="flex gap-2">
         <Button size="sm" onClick={() => enable()} disabled={loading} className="w-full sm:w-auto">
-          {loading ? '…' : en.pwa.orderPushEnableAction}
+          {loading ? '…' : t.pwa.orderPushEnableAction}
         </Button>
         <Button
           size="sm"

@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { JsonLd } from '@/components/shared/JsonLd'
 import { CategoryProductSection } from '@/components/store/categories/CategoryProductSection'
 import { layout } from '@/lib/styles'
-import { en } from '@/lib/i18n/en'
+import { getT } from '@/lib/i18n/server'
 import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
 import { buildPageMetadata } from '@/lib/seo/metadata'
 import { breadcrumbListJsonLd, collectionPageJsonLd } from '@/lib/seo/jsonld'
@@ -20,13 +20,14 @@ interface PageProps {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const t = await getT()
   const { slug } = await params
   const [data, config] = await Promise.all([
     fetchFromWorker<CategoryDetailResponse>(`/api/categories/${slug}`, { revalidate: 60 }),
     fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: 300 }),
   ])
 
-  if (!data) return { title: en.product.notFound }
+  if (!data) return { title: t.product.notFound }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
 

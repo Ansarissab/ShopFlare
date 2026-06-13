@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { JsonLd } from '@/components/shared/JsonLd'
 import { layout } from '@/lib/styles'
-import { en } from '@/lib/i18n/en'
+import { getT } from '@/lib/i18n/server'
 import { fetchFromWorker, r2Url } from '@/lib/server/fetchFromWorker'
 import { buildPageMetadata } from '@/lib/seo/metadata'
 import { breadcrumbListJsonLd } from '@/lib/seo/jsonld'
@@ -14,12 +14,13 @@ import type { StoreConfig } from '@/lib/types/common'
 export const revalidate = 60
 
 export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT()
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
   const config = await fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: 300 })
   return {
     ...buildPageMetadata({
-      title: en.blog.pageTitle,
-      description: en.blog.pageDescription,
+      title: t.blog.pageTitle,
+      description: t.blog.pageDescription,
       canonical: `${siteUrl}/blog`,
       storeName: config?.storeName,
     }),
@@ -31,6 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function BlogIndexPage() {
+  const t = await getT()
   const [data, config] = await Promise.all([
     fetchFromWorker<BlogListResponse>('/api/blog', { revalidate: 60 }),
     fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: 300 }),
@@ -44,7 +46,7 @@ export default async function BlogIndexPage() {
 
   const breadcrumb = breadcrumbListJsonLd([
     { name: config?.storeName ?? 'Home', url: siteUrl || '/' },
-    { name: en.blog.pageTitle, url: null },
+    { name: t.blog.pageTitle, url: null },
   ])
 
   return (
@@ -52,10 +54,10 @@ export default async function BlogIndexPage() {
       <JsonLd data={breadcrumb} />
 
       <div className="mx-auto w-full max-w-5xl px-4 py-10">
-        <h1 className="text-3xl font-bold tracking-tight mb-8">{en.blog.pageTitle}</h1>
+        <h1 className="text-3xl font-bold tracking-tight mb-8">{t.blog.pageTitle}</h1>
 
         {posts.length === 0 ? (
-          <p className="text-muted-foreground text-center py-16">{en.blog.noPosts}</p>
+          <p className="text-muted-foreground text-center py-16">{t.blog.noPosts}</p>
         ) : (
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {posts.map((post) => {
@@ -89,7 +91,7 @@ export default async function BlogIndexPage() {
                     <div className="flex items-center justify-between mt-auto pt-2">
                       {post.publishedAt && (
                         <time dateTime={post.publishedAt} className="text-xs text-muted-foreground">
-                          {en.blog.publishedOn.replace(
+                          {t.blog.publishedOn.replace(
                             '{date}',
                             new Date(post.publishedAt).toLocaleDateString('en-US', {
                               year: 'numeric',
@@ -100,7 +102,7 @@ export default async function BlogIndexPage() {
                         </time>
                       )}
                       <span className="text-xs font-medium text-primary ml-auto">
-                        {en.blog.readMore} →
+                        {t.blog.readMore} →
                       </span>
                     </div>
                     {post.tags.length > 0 && (

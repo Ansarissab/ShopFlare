@@ -1,25 +1,21 @@
 import type { Metadata } from 'next'
 import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
 import { buildPageMetadata } from '@/lib/seo/metadata'
-import { en } from '@/lib/i18n/en'
+import { getT } from '@/lib/i18n/server'
+import type { Dictionary } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { layout } from '@/lib/styles'
 import type { HealthReport } from '@/lib/types/health'
 import type { StoreConfig } from '@/lib/types/common'
 
 export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT()
   const config = await fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: 300 })
   return buildPageMetadata({
-    title: en.status.title,
-    description: en.status.description,
+    title: t.status.title,
+    description: t.status.description,
     storeName: config?.storeName,
   })
-}
-
-const SERVICE_LABELS: Record<string, string> = {
-  db: en.status.service.database,
-  kv: en.status.service.storage,
-  r2: en.status.service.media,
 }
 
 function StatusDot({ ok }: { ok: boolean }) {
@@ -39,15 +35,17 @@ function ServiceRow({
   ok,
   latencyMs,
   error,
+  t,
 }: {
   name: string
   ok: boolean
   latencyMs: number
   error?: string
+  t: Dictionary
 }) {
   const label = ok
-    ? en.status.latency.replace('{ms}', String(latencyMs))
-    : (error ?? en.status.checkFailed)
+    ? t.status.latency.replace('{ms}', String(latencyMs))
+    : (error ?? t.status.checkFailed)
 
   return (
     <div className="flex items-center justify-between py-3">
@@ -67,7 +65,7 @@ function ServiceRow({
               : 'bg-destructive/10 text-destructive',
           )}
         >
-          {ok ? en.status.up : en.status.down}
+          {ok ? t.status.up : t.status.down}
         </span>
       </div>
     </div>
@@ -75,6 +73,14 @@ function ServiceRow({
 }
 
 export default async function StatusPage() {
+  const t = await getT()
+
+  const SERVICE_LABELS: Record<string, string> = {
+    db: t.status.service.database,
+    kv: t.status.service.storage,
+    r2: t.status.service.media,
+  }
+
   // allowNonOk: a 503 body is a valid degraded HealthReport — read it rather than discarding.
   const report = await fetchFromWorker<HealthReport>('/healthz', {
     revalidate: false,
@@ -94,10 +100,10 @@ export default async function StatusPage() {
   return (
     <div className={cn(layout.detailPage, 'max-w-2xl')}>
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">{en.status.title}</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t.status.title}</h1>
         {lastChecked && (
           <p className="mt-1 text-xs text-muted-foreground">
-            {en.status.lastChecked.replace('{time}', lastChecked)}
+            {t.status.lastChecked.replace('{time}', lastChecked)}
           </p>
         )}
       </div>
@@ -111,7 +117,7 @@ export default async function StatusPage() {
         )}
       >
         <StatusDot ok={isOk} />
-        {isOk ? en.status.allOperational : en.status.degraded}
+        {isOk ? t.status.allOperational : t.status.degraded}
       </div>
 
       {report ? (
@@ -124,12 +130,13 @@ export default async function StatusPage() {
                 ok={check.ok}
                 latencyMs={check.latencyMs}
                 error={check.error}
+                t={t}
               />
             ),
           )}
         </div>
       ) : (
-        <p className="text-sm text-muted-foreground">{en.status.checkFailed}</p>
+        <p className="text-sm text-muted-foreground">{t.status.checkFailed}</p>
       )}
     </div>
   )

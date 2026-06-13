@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { notifyMeSchema, type NotifyMeInput } from '@/lib/schemas'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import type { NotifyMeDialogProps } from '@/lib/types/product'
 import { apiPost } from '@/lib/api'
 
@@ -26,6 +26,7 @@ export function NotifyMeDialog({
   open,
   onOpenChange,
 }: NotifyMeDialogProps) {
+  const t = useT()
   const {
     register,
     handleSubmit,
@@ -48,11 +49,11 @@ export function NotifyMeDialog({
         ...(values.phone ? { phone: values.phone } : {}),
       })
 
-      toast.success(en.store.notifySuccess)
+      toast.success(t.store.notifySuccess)
       reset()
       onOpenChange(false)
     } catch {
-      toast.error(en.errors.networkError)
+      toast.error(t.errors.networkError)
     }
   }
 
@@ -60,7 +61,7 @@ export function NotifyMeDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{en.store.notifyMe}</DialogTitle>
+          <DialogTitle>{t.store.notifyMe}</DialogTitle>
           <DialogDescription>
             {"We'll let you know when "}
             <strong>
@@ -74,7 +75,7 @@ export function NotifyMeDialog({
           <input type="hidden" {...register('sizeOptionId')} />
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="notify-email">{en.checkout.email}</Label>
+            <Label htmlFor="notify-email">{t.checkout.email}</Label>
             <Input
               id="notify-email"
               type="email"
@@ -83,11 +84,11 @@ export function NotifyMeDialog({
               aria-invalid={!!errors.email}
               {...register('email')}
             />
-            {errors.email && <p className="text-sm text-destructive">{en.errors.invalidEmail}</p>}
+            {errors.email && <p className="text-sm text-destructive">{t.errors.invalidEmail}</p>}
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="notify-phone">{en.checkout.phone}</Label>
+            <Label htmlFor="notify-phone">{t.checkout.phone}</Label>
             <Input
               id="notify-phone"
               type="tel"
@@ -96,13 +97,13 @@ export function NotifyMeDialog({
               aria-invalid={!!errors.phone}
               {...register('phone')}
             />
-            {errors.phone && <p className="text-sm text-destructive">{en.errors.invalidPhone}</p>}
+            {errors.phone && <p className="text-sm text-destructive">{t.errors.invalidPhone}</p>}
           </div>
 
           {errors.root && <p className="text-sm text-destructive">{errors.root.message}</p>}
 
           <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {en.store.notifyMe}
+            {t.store.notifyMe}
           </Button>
         </form>
       </DialogContent>

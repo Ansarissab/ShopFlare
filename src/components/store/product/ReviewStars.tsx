@@ -2,7 +2,7 @@
 
 import { Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import type { ReviewStarsProps } from '@/lib/types/product'
 
 /**
@@ -10,6 +10,7 @@ import type { ReviewStarsProps } from '@/lib/types/product'
  * Interactive when `onChange` is provided; read-only otherwise.
  */
 export function ReviewStars({ rating, onChange, className }: ReviewStarsProps) {
+  const t = useT()
   const interactive = typeof onChange === 'function'
 
   return (
@@ -18,8 +19,8 @@ export function ReviewStars({ rating, onChange, className }: ReviewStarsProps) {
       role={interactive ? 'radiogroup' : 'img'}
       aria-label={
         interactive
-          ? en.reviews.selectRating
-          : en.reviews.starsAriaLabel.replace('{rating}', String(rating))
+          ? t.reviews.selectRating
+          : t.reviews.starsAriaLabel.replace('{rating}', String(rating))
       }
     >
       {[1, 2, 3, 4, 5].map((star) => {
@@ -29,7 +30,7 @@ export function ReviewStars({ rating, onChange, className }: ReviewStarsProps) {
             key={star}
             type="button"
             onClick={() => onChange(star)}
-            aria-label={(star === 1 ? en.reviews.starLabel : en.reviews.starLabelPlural).replace(
+            aria-label={(star === 1 ? t.reviews.starLabel : t.reviews.starLabelPlural).replace(
               '{count}',
               String(star),
             )}

@@ -7,7 +7,7 @@ import { SearchBar } from '@/components/store/search/SearchBar'
 import { InfiniteScrollSentinel } from '@/components/shared/InfiniteScrollSentinel'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { useProductSearch } from '@/hooks/useProductSearch'
 import type { ProductWithVariants } from '@/lib/types/product'
 
@@ -28,6 +28,7 @@ export function CategoryProductSection({
   thresholdCents,
   initialQuery = '',
 }: CategoryProductSectionProps) {
+  const t = useT()
   const router = useRouter()
   const searchParams = useSearchParams()
   const [query, setQuery] = useState(() => searchParams?.get('q') ?? initialQuery)
@@ -52,19 +53,19 @@ export function CategoryProductSection({
       <div className={cn(layout.centeredState, 'min-h-[30vh]')}>
         <SearchBar value={query} onChange={setQuery} />
         <p className="text-muted-foreground mt-4">
-          {en.store.searchNoResults} &quot;{query}&quot;
+          {t.store.searchNoResults} &quot;{query}&quot;
         </p>
         <button
           type="button"
           onClick={() => setQuery('')}
           className="mt-2 text-sm text-primary underline-offset-4 hover:underline"
         >
-          {en.store.searchClearHint}
+          {t.store.searchClearHint}
         </button>
       </div>
     ) : (
       <div className={cn(layout.centeredState, 'min-h-[30vh]')}>
-        <p className="text-muted-foreground">{en.store.categoryEmpty}</p>
+        <p className="text-muted-foreground">{t.store.categoryEmpty}</p>
       </div>
     )
   }

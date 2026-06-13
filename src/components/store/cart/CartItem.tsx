@@ -3,13 +3,14 @@
 import Image from 'next/image'
 import { MinusIcon, PlusIcon, TrashIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { cn } from '@/lib/utils'
 import { formatPrice } from '@/lib/utils/index'
 import { useCart } from '@/hooks/useCart'
 import type { CartItemProps } from '@/lib/types/cart'
 
 export function CartItem({ item }: CartItemProps) {
+  const t = useT()
   const { updateQuantity, removeItem } = useCart()
 
   return (
@@ -40,7 +41,7 @@ export function CartItem({ item }: CartItemProps) {
               variant="ghost"
               size="icon-xs"
               onClick={() => updateQuantity(item.sizeOptionId, item.quantity - 1)}
-              aria-label={`${en.cart.quantity} -1`}
+              aria-label={`${t.cart.quantity} -1`}
             >
               <MinusIcon />
             </Button>
@@ -49,7 +50,7 @@ export function CartItem({ item }: CartItemProps) {
               variant="ghost"
               size="icon-xs"
               onClick={() => updateQuantity(item.sizeOptionId, item.quantity + 1)}
-              aria-label={`${en.cart.quantity} +1`}
+              aria-label={`${t.cart.quantity} +1`}
             >
               <PlusIcon />
             </Button>
@@ -65,7 +66,7 @@ export function CartItem({ item }: CartItemProps) {
             variant="ghost"
             size="icon-xs"
             onClick={() => removeItem(item.sizeOptionId)}
-            aria-label={en.cart.remove}
+            aria-label={t.cart.remove}
             className="text-destructive hover:text-destructive"
           >
             <TrashIcon />

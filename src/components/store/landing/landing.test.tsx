@@ -1,11 +1,16 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, cleanup } from '@testing-library/react'
+import { render, screen, cleanup, act } from '@testing-library/react'
+import React, { Suspense } from 'react'
 import { en } from '@/lib/i18n/en'
 import type { LandingSection } from '@/lib/types'
 import type { ProductWithVariants } from '@/lib/types/product'
 
 // ── Shared mocks ────────────────────────────────────────────────────────────
+
+vi.mock('@/lib/i18n/server', () => ({
+  getT: () => Promise.resolve(en),
+}))
 
 vi.mock('next/link', async () => {
   const { createElement } = await import('react')
@@ -92,7 +97,7 @@ describe('CTABand', () => {
   // Dynamic import to avoid hoisting issues with mocks
   async function renderCTA(props: Partial<LandingSection> = {}) {
     const { CTABand } = await import('./CTABand')
-    return render(<CTABand section={makeSection({ sectionKey: 'cta', ...props })} />)
+    return render(await CTABand({ section: makeSection({ sectionKey: 'cta', ...props }) }))
   }
 
   it('renders default heading when section.heading is null', async () => {
@@ -130,11 +135,11 @@ describe('HeroSection', () => {
   ) {
     const { HeroSection } = await import('./HeroSection')
     return render(
-      <HeroSection
-        section={makeSection(sectionOverrides)}
-        heroStyle={heroStyle}
-        imageUrl={imageUrl}
-      />,
+      await HeroSection({
+        section: makeSection(sectionOverrides),
+        heroStyle,
+        imageUrl,
+      }),
     )
   }
 
@@ -196,10 +201,10 @@ describe('StorySection', () => {
   ) {
     const { StorySection } = await import('./StorySection')
     return render(
-      <StorySection
-        section={makeSection({ sectionKey: 'story', ...sectionOverrides })}
-        imageUrl={imageUrl}
-      />,
+      await StorySection({
+        section: makeSection({ sectionKey: 'story', ...sectionOverrides }),
+        imageUrl,
+      }),
     )
   }
 
@@ -263,10 +268,10 @@ describe('FeaturedProductsStrip', () => {
   ) {
     const { FeaturedProductsStrip } = await import('./FeaturedProductsStrip')
     return render(
-      <FeaturedProductsStrip
-        section={makeSection({ sectionKey: 'featured', ...sectionOverrides })}
-        products={products}
-      />,
+      await FeaturedProductsStrip({
+        section: makeSection({ sectionKey: 'featured', ...sectionOverrides }),
+        products,
+      }),
     )
   }
 
@@ -353,15 +358,21 @@ describe('LandingPage', () => {
     products: ProductWithVariants[] = [],
   ) {
     const { LandingPage } = await import('./LandingPage')
-    return render(
-      <LandingPage
-        landing={{
-          sections: makeAllSections(sectionOverrides) as never,
-          featuredProducts: products,
-        }}
-        storeConfig={{ storeName: 'TestStore' }}
-      />,
-    )
+    let result: ReturnType<typeof render> | undefined
+    await act(async () => {
+      result = render(
+        <Suspense fallback={null}>
+          <LandingPage
+            landing={{
+              sections: makeAllSections(sectionOverrides) as never,
+              featuredProducts: products,
+            }}
+            storeConfig={{ storeName: 'TestStore' }}
+          />
+        </Suspense>,
+      )
+    })
+    return result!
   }
 
   it('renders enabled sections', async () => {

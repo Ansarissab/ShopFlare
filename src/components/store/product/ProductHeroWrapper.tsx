@@ -10,12 +10,13 @@ import { buildWhatsAppOrderUrl } from '@/lib/whatsapp'
 import { buildProductMaps } from '@/lib/utils/index'
 import { DEFAULT_CURRENCY } from '@/lib/constants'
 import { isFeatureEnabled } from '@/lib/features'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { apiPost } from '@/lib/api'
 import type { CartItem } from '@/hooks/useCart'
 import type { SizeOption, ProductHeroWrapperProps } from '@/lib/types/product'
 
 export function ProductHeroWrapper({ item }: ProductHeroWrapperProps) {
+  const t = useT()
   const { addItem, openCart } = useCart()
   const { config } = useStoreConfig()
   const router = useRouter()
@@ -64,7 +65,7 @@ export function ProductHeroWrapper({ item }: ProductHeroWrapperProps) {
           router.push(url)
           return
         } catch {
-          toast.error(en.errors.orderFailed)
+          toast.error(t.errors.orderFailed)
           // fall through to cart fallback
         }
       }
@@ -77,7 +78,7 @@ export function ProductHeroWrapper({ item }: ProductHeroWrapperProps) {
   const handleWhatsApp = useCallback(
     (size: SizeOption) => {
       if (!config?.whatsappNumber) {
-        toast.error(en.errors.networkError)
+        toast.error(t.errors.networkError)
         return
       }
       const variant = item.variants.find((v) => v.sizes.some((s: SizeOption) => s.id === size.id))

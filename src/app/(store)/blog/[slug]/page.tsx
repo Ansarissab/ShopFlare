@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { JsonLd } from '@/components/shared/JsonLd'
 import { RenderHtml } from '@/components/shared/RenderHtml'
 import { layout } from '@/lib/styles'
-import { en } from '@/lib/i18n/en'
+import { getT } from '@/lib/i18n/server'
 import { fetchFromWorker, r2Url } from '@/lib/server/fetchFromWorker'
 import { buildPageMetadata } from '@/lib/seo/metadata'
 import { articleJsonLd, breadcrumbListJsonLd } from '@/lib/seo/jsonld'
@@ -19,13 +19,14 @@ interface PageProps {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const t = await getT()
   const { slug } = await params
   const [post, config] = await Promise.all([
     fetchFromWorker<BlogPost>(`/api/blog/${slug}`, { revalidate: 60 }),
     fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: 300 }),
   ])
 
-  if (!post) return { title: en.blog.pageTitle }
+  if (!post) return { title: t.blog.pageTitle }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
   const coverUrl = r2Url(post.coverR2Key)
@@ -40,6 +41,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function BlogPostPage({ params }: PageProps) {
+  const t = await getT()
   const { slug } = await params
   const [post, config] = await Promise.all([
     fetchFromWorker<BlogPost>(`/api/blog/${slug}`, { revalidate: 60 }),
@@ -63,7 +65,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   const breadcrumb = breadcrumbListJsonLd([
     { name: config?.storeName ?? 'Home', url: siteUrl || '/' },
-    { name: en.blog.breadcrumbBlog, url: `${siteUrl}/blog` },
+    { name: t.blog.breadcrumbBlog, url: `${siteUrl}/blog` },
     { name: post.title, url: null },
   ])
 
@@ -91,7 +93,7 @@ export default async function BlogPostPage({ params }: PageProps) {
           </Link>
           <span aria-hidden>/</span>
           <Link href="/blog" className="hover:underline">
-            {en.blog.breadcrumbBlog}
+            {t.blog.breadcrumbBlog}
           </Link>
           <span aria-hidden>/</span>
           <span className="truncate max-w-[20ch]">{post.title}</span>
@@ -116,7 +118,7 @@ export default async function BlogPostPage({ params }: PageProps) {
           <h1 className="text-3xl font-bold tracking-tight leading-tight mb-3">{post.title}</h1>
           {publishedDate && (
             <time dateTime={post.publishedAt ?? ''} className="text-sm text-muted-foreground">
-              {en.blog.publishedOn.replace('{date}', publishedDate)}
+              {t.blog.publishedOn.replace('{date}', publishedDate)}
             </time>
           )}
           {post.tags.length > 0 && (

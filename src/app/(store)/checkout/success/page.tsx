@@ -7,13 +7,14 @@ import { CheckCircle2 } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { useCart } from '@/hooks/useCart'
 import { apiGet } from '@/lib/api'
 import { BankTransferInstructions } from '@/components/store/checkout/BankTransferInstructions'
 import { OrderPushOptIn } from '@/components/pwa/OrderPushOptIn'
 
 function SuccessContent() {
+  const t = useT()
   const searchParams = useSearchParams()
   const clearCart = useCart((state) => state.clearCart)
 
@@ -62,7 +63,7 @@ function SuccessContent() {
     method === 'cod'
       ? 'Your order will be confirmed by our team shortly.'
       : method === 'bank_transfer'
-        ? en.bankTransfer.awaitingPayment
+        ? t.bankTransfer.awaitingPayment
         : "Payment confirmed. You'll receive an email receipt."
 
   return (
@@ -70,13 +71,13 @@ function SuccessContent() {
       <CheckCircle2 className="size-20 text-[--color-success]" strokeWidth={1.5} aria-hidden />
 
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">{en.checkout.orderConfirmed}</h1>
-        <p className="text-muted-foreground">{en.checkout.thankYou}</p>
+        <h1 className="text-3xl font-bold tracking-tight">{t.checkout.orderConfirmed}</h1>
+        <p className="text-muted-foreground">{t.checkout.thankYou}</p>
       </div>
 
       {trackOrderNumber && (
         <p className="rounded-md bg-muted px-4 py-2 text-sm font-medium">
-          {en.checkout.orderNumber.replace('{number}', trackOrderNumber)}
+          {t.checkout.orderNumber.replace('{number}', trackOrderNumber)}
         </p>
       )}
 
@@ -96,11 +97,11 @@ function SuccessContent() {
             href={`/track/${trackOrderNumber}${contactParam ? `?c=${encodeURIComponent(contactParam)}` : ''}`}
             className={cn(buttonVariants({ size: 'lg' }))}
           >
-            {en.tracking.track}
+            {t.tracking.track}
           </Link>
         ) : null}
         <Link href="/" className={cn(buttonVariants({ variant: 'outline', size: 'lg' }))}>
-          {en.store.continueShopping}
+          {t.store.continueShopping}
         </Link>
       </div>
     </div>

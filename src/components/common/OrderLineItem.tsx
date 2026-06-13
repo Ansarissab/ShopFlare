@@ -4,7 +4,7 @@
 
 import Image from 'next/image'
 import { formatPrice } from '@/lib/utils/index'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 
 export interface OrderLineItemProps {
   imageUrl?: string | null
@@ -27,6 +27,7 @@ export function OrderLineItem({
   quantity,
   priceCents,
 }: OrderLineItemProps) {
+  const t = useT()
   return (
     <li className="flex items-center gap-3">
       {/* Thumbnail */}
@@ -45,7 +46,7 @@ export function OrderLineItem({
           {variantLabel} · {size}
         </span>
         <span className="text-muted-foreground">
-          {en.cart.quantity}: {quantity}
+          {t.cart.quantity}: {quantity}
         </span>
       </div>
 

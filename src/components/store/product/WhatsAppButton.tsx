@@ -2,7 +2,7 @@
 
 import { MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { buildWhatsAppOrderUrl } from '@/lib/whatsapp'
 import type { WhatsAppButtonProps } from '@/lib/types/product'
 
@@ -17,6 +17,7 @@ export function WhatsAppButton({
   quantity = 1,
   disabled = false,
 }: WhatsAppButtonProps) {
+  const t = useT()
   function handleClick() {
     if (disabled) return
     const url = buildWhatsAppOrderUrl({
@@ -40,7 +41,7 @@ export function WhatsAppButton({
       onClick={handleClick}
     >
       <MessageCircle className="size-4" />
-      {en.store.orderOnWhatsApp}
+      {t.store.orderOnWhatsApp}
     </Button>
   )
 }

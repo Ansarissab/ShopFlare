@@ -10,7 +10,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { INSTALL_DISMISSED_KEY } from '@/lib/constants'
 import { useIsStandalone } from '@/hooks/useDisplayMode'
 
@@ -51,6 +51,7 @@ function useHydrated(): boolean {
 }
 
 export function InstallPrompt() {
+  const t = useT()
   const isStandalone = useIsStandalone()
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [showIosSheet, setShowIosSheet] = useState(false)
@@ -107,12 +108,12 @@ export function InstallPrompt() {
         <div className="fixed bottom-[var(--safe-bottom,0)] left-0 right-0 z-50 border-t bg-background p-3 sm:p-4 shadow-lg animate-in slide-in-from-bottom-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <p className="font-medium text-sm">{en.pwa.installTitle}</p>
-              <p className="text-xs text-muted-foreground truncate">{en.pwa.installBody}</p>
+              <p className="font-medium text-sm">{t.pwa.installTitle}</p>
+              <p className="text-xs text-muted-foreground truncate">{t.pwa.installBody}</p>
             </div>
             <div className="flex gap-2">
               <Button size="sm" onClick={handleInstall} className="w-full sm:w-auto">
-                {en.pwa.installAction}
+                {t.pwa.installAction}
               </Button>
               <Button
                 size="sm"
@@ -136,8 +137,8 @@ export function InstallPrompt() {
       >
         <SheetContent side="bottom" className="pb-[calc(1.5rem+var(--safe-bottom,0px))]">
           <SheetHeader className="text-left">
-            <SheetTitle>{en.pwa.installIosTitle}</SheetTitle>
-            <SheetDescription>{en.pwa.installBody}</SheetDescription>
+            <SheetTitle>{t.pwa.installIosTitle}</SheetTitle>
+            <SheetDescription>{t.pwa.installBody}</SheetDescription>
           </SheetHeader>
           <div className="mt-4 space-y-3">
             <div className="flex items-center gap-3">
@@ -145,24 +146,24 @@ export function InstallPrompt() {
                 1
               </span>
               <span className="text-sm flex items-center gap-1">
-                {en.pwa.installIosStep1} <Share className="inline h-4 w-4" />
+                {t.pwa.installIosStep1} <Share className="inline h-4 w-4" />
               </span>
             </div>
             <div className="flex items-center gap-3">
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
                 2
               </span>
-              <span className="text-sm">{en.pwa.installIosStep2}</span>
+              <span className="text-sm">{t.pwa.installIosStep2}</span>
             </div>
             <div className="flex items-center gap-3">
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
                 3
               </span>
-              <span className="text-sm">{en.pwa.installIosStep3}</span>
+              <span className="text-sm">{t.pwa.installIosStep3}</span>
             </div>
           </div>
           <Button className="mt-6 w-full" variant="outline" onClick={handleDismiss}>
-            {en.pwa.installIosClose}
+            {t.pwa.installIosClose}
           </Button>
         </SheetContent>
       </Sheet>

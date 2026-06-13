@@ -6,7 +6,7 @@ import { Home, ShoppingBag, Package, Menu, ShoppingCart } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useIsStandalone } from '@/hooks/useDisplayMode'
 import { useCartItemCount, useCart } from '@/hooks/useCart'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { vibrate } from '@/lib/utils/haptics'
 import { layout, safeArea } from '@/lib/styles'
 import { useStoreConfig } from '@/hooks/useStoreConfig'
@@ -21,6 +21,7 @@ type Tab = {
 }
 
 export function AppTabBar() {
+  const t = useT()
   const isStandalone = useIsStandalone()
   const pathname = usePathname()
   const cartCount = useCartItemCount()
@@ -31,24 +32,24 @@ export function AppTabBar() {
   if (!isStandalone) return null
 
   const tabs: Tab[] = [
-    { key: 'home', label: en.pwa.tabHome, href: '/', icon: Home },
+    { key: 'home', label: t.pwa.tabHome, href: '/', icon: Home },
     {
       key: 'shop',
-      label: en.pwa.tabShop,
+      label: t.pwa.tabShop,
       href: catalogHref(config?.landingEnabled),
       icon: ShoppingBag,
     },
     {
       key: 'cart',
-      label: en.pwa.tabCart,
+      label: t.pwa.tabCart,
       icon: ShoppingCart,
       onClick: () => {
         vibrate('light')
         openCart()
       },
     },
-    { key: 'track', label: en.pwa.tabTrack, href: '/track', icon: Package },
-    { key: 'menu', label: en.pwa.tabMenu, href: '/#menu', icon: Menu },
+    { key: 'track', label: t.pwa.tabTrack, href: '/track', icon: Package },
+    { key: 'menu', label: t.pwa.tabMenu, href: '/#menu', icon: Menu },
   ]
 
   return (

@@ -1,11 +1,12 @@
 import Link from 'next/link'
-import { en } from '@/lib/i18n/en'
+import { getT } from '@/lib/i18n/server'
 import type { CTABandProps } from '@/lib/types'
 
-export function CTABand({ section }: CTABandProps) {
-  const heading = section.heading || en.store.ctaDefaultHeading
-  const subtext = section.subtext || en.store.ctaDefaultSubtext
-  const ctaText = section.ctaText || en.store.ctaDefaultCta
+export async function CTABand({ section }: CTABandProps) {
+  const t = await getT()
+  const heading = section.heading || t.store.ctaDefaultHeading
+  const subtext = section.subtext || t.store.ctaDefaultSubtext
+  const ctaText = section.ctaText || t.store.ctaDefaultCta
   const ctaHref = section.ctaHref || '/shop'
 
   return (

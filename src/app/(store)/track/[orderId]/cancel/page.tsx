@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { TurnstileWidget } from '@/components/store/checkout/TurnstileWidget'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { formatPrice } from '@/lib/utils/index'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
@@ -34,6 +34,7 @@ type PageState =
 type Phase = 'verify' | 'data' | 'success' | 'error'
 
 function CancelOrderContent() {
+  const t = useT()
   const params = useParams<{ orderId: string }>()
   const searchParams = useSearchParams()
 
@@ -106,7 +107,7 @@ function CancelOrderContent() {
       )
       setPhase('success')
     } catch {
-      // Reset Turnstile so the user can retry with a fresh token.
+      // Reset Turnstile so the user can retry with a fresh tokt.
       setTurnstileToken(null)
       setPhase('error')
     } finally {
@@ -119,19 +120,19 @@ function CancelOrderContent() {
     return (
       <div className={cn(layout.formPage, 'max-w-md')}>
         <div className="flex flex-col gap-1">
-          <h1 className="text-xl font-semibold">{en.checkout.cancelOrder}</h1>
-          <p className="text-sm text-muted-foreground">{en.tracking.verifyContactPrompt}</p>
+          <h1 className="text-xl font-semibold">{t.checkout.cancelOrder}</h1>
+          <p className="text-sm text-muted-foreground">{t.tracking.verifyContactPrompt}</p>
         </div>
         <Input
           type="text"
           autoComplete="email tel"
-          placeholder={en.tracking.contactPlaceholder}
+          placeholder={t.tracking.contactPlaceholder}
           value={contactInput}
           onChange={(e) => setContactInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && submitContact()}
         />
         <Button onClick={submitContact} disabled={!contactInput.trim()}>
-          {en.tracking.track}
+          {t.tracking.track}
         </Button>
       </div>
     )
@@ -153,9 +154,9 @@ function CancelOrderContent() {
   if (pageState === 'not_found') {
     return (
       <div className={cn(layout.centeredState, 'max-w-md')}>
-        <h1 className="text-xl font-semibold">{en.tracking.notFound}</h1>
+        <h1 className="text-xl font-semibold">{t.tracking.notFound}</h1>
         <Link href="/track" className="text-sm text-primary underline-offset-4 hover:underline">
-          {en.tracking.backToTracking}
+          {t.tracking.backToTracking}
         </Link>
       </div>
     )
@@ -165,19 +166,18 @@ function CancelOrderContent() {
   if (pageState === 'cannot_cancel') {
     return (
       <div className={cn(layout.centeredState, 'max-w-md')}>
-        <h1 className="text-xl font-semibold">{en.checkout.cannotCancel}</h1>
+        <h1 className="text-xl font-semibold">{t.checkout.cannotCancel}</h1>
         {order && (
           <p className="text-sm text-muted-foreground capitalize">
-            {en.tracking.status}:{' '}
-            {en.orderStatusLabels[order.status as keyof typeof en.orderStatusLabels] ??
-              order.status}
+            {t.tracking.status}:{' '}
+            {t.orderStatusLabels[order.status as keyof typeof t.orderStatusLabels] ?? order.status}
           </p>
         )}
         <Link
           href={`/track/${params?.orderId}`}
           className="text-sm text-primary underline-offset-4 hover:underline"
         >
-          {en.tracking.viewOrder}
+          {t.tracking.viewOrder}
         </Link>
       </div>
     )
@@ -202,10 +202,10 @@ function CancelOrderContent() {
             />
           </svg>
         </div>
-        <h1 className="text-xl font-semibold">{en.checkout.orderCancelled}</h1>
-        <p className="text-sm text-muted-foreground">{en.checkout.cancelSuccess}</p>
+        <h1 className="text-xl font-semibold">{t.checkout.orderCancelled}</h1>
+        <p className="text-sm text-muted-foreground">{t.checkout.cancelSuccess}</p>
         <Link href="/" className="text-sm text-primary underline-offset-4 hover:underline">
-          {en.store.continueShopping}
+          {t.store.continueShopping}
         </Link>
       </div>
     )
@@ -215,9 +215,9 @@ function CancelOrderContent() {
   if (pageState === 'error') {
     return (
       <div className={cn(layout.centeredState, 'max-w-md')}>
-        <h1 className="text-xl font-semibold">{en.errors.networkError}</h1>
+        <h1 className="text-xl font-semibold">{t.errors.networkError}</h1>
         <Button variant="outline" onClick={() => setPhase('data')}>
-          {en.tracking.track}
+          {t.tracking.track}
         </Button>
       </div>
     )
@@ -227,10 +227,10 @@ function CancelOrderContent() {
   return (
     <div className={layout.formPage}>
       <div className="flex flex-col gap-1">
-        <h1 className="text-xl font-semibold">{en.checkout.cancelOrder}</h1>
+        <h1 className="text-xl font-semibold">{t.checkout.cancelOrder}</h1>
         {order && (
           <p className="text-sm text-muted-foreground">
-            {en.checkout.orderNumber.replace('{number}', order.orderNumber)}
+            {t.checkout.orderNumber.replace('{number}', order.orderNumber)}
             {' · '}
             {formatPrice(order.totalCents)}
           </p>
@@ -238,14 +238,14 @@ function CancelOrderContent() {
       </div>
 
       <div className="rounded-lg border bg-card p-4 sm:p-5 text-card-foreground flex flex-col gap-4">
-        <p className="text-sm">{en.checkout.cancelConfirm}</p>
+        <p className="text-sm">{t.checkout.cancelConfirm}</p>
 
         <Separator />
 
         {/* Reason textarea */}
         <div className="flex flex-col gap-1.5">
           <label htmlFor="cancel-reason" className="text-sm font-medium">
-            {en.checkout.cancelReason}
+            {t.checkout.cancelReason}
           </label>
           <Textarea
             id="cancel-reason"
@@ -253,7 +253,7 @@ function CancelOrderContent() {
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             className="resize-none"
-            placeholder={en.tracking.cancelReasonPlaceholder}
+            placeholder={t.tracking.cancelReasonPlaceholder}
           />
         </div>
 
@@ -265,7 +265,7 @@ function CancelOrderContent() {
             onCheckedChange={(val: boolean) => setConfirmed(val === true)}
           />
           <label htmlFor="cancel-confirm-check" className="text-sm cursor-pointer select-none">
-            {en.checkout.cancelConfirm}
+            {t.checkout.cancelConfirm}
           </label>
         </div>
       </div>
@@ -282,7 +282,7 @@ function CancelOrderContent() {
         }}
       />
       {turnstileError && (
-        <p className="text-xs text-destructive">{en.checkout.securityCheckFailed}</p>
+        <p className="text-xs text-destructive">{t.checkout.securityCheckFailed}</p>
       )}
 
       {/* Actions */}
@@ -293,13 +293,13 @@ function CancelOrderContent() {
           disabled={!confirmed || submitting || !turnstileToken}
           onClick={handleCancel}
         >
-          {submitting ? en.tracking.cancelling : en.checkout.cancelOrder}
+          {submitting ? t.tracking.cancelling : t.checkout.cancelOrder}
         </Button>
         <Link
           href={`/track/${params?.orderId}`}
           className={cn(buttonVariants({ variant: 'outline' }), 'flex-1 justify-center')}
         >
-          {en.tracking.keepOrder}
+          {t.tracking.keepOrder}
         </Link>
       </div>
     </div>

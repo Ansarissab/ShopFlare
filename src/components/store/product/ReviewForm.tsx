@@ -15,10 +15,11 @@ import { TurnstileWidget } from '@/components/store/checkout/TurnstileWidget'
 import { ReviewStars } from '@/components/store/product/ReviewStars'
 import { submitReviewSchema, type SubmitReviewInput } from '@/lib/schemas'
 import { apiPost, ApiError } from '@/lib/api'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import type { ReviewFormProps } from '@/lib/types/product'
 
 export function ReviewForm({ productId, onSubmitted }: ReviewFormProps) {
+  const t = useT()
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
   const [turnstileError, setTurnstileError] = useState(false)
 
@@ -45,7 +46,7 @@ export function ReviewForm({ productId, onSubmitted }: ReviewFormProps) {
 
   async function onSubmit(values: SubmitReviewInput) {
     if (!turnstileToken) {
-      toast.error(en.checkout.securityCheckFailed)
+      toast.error(t.checkout.securityCheckFailed)
       return
     }
 
@@ -53,22 +54,22 @@ export function ReviewForm({ productId, onSubmitted }: ReviewFormProps) {
       await apiPost('/api/reviews', values, {
         headers: { 'X-Turnstile-Token': turnstileToken },
       })
-      toast.success(en.reviews.submitted)
+      toast.success(t.reviews.submitted)
       reset()
       onSubmitted()
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.status === 409) {
-          toast.error(en.reviews.alreadyReviewed)
+          toast.error(t.reviews.alreadyReviewed)
         } else if (err.status === 422) {
-          toast.error(en.reviews.notEligible)
+          toast.error(t.reviews.notEligible)
         } else if (err.status === 403) {
-          toast.error(en.reviews.verifyFailed)
+          toast.error(t.reviews.verifyFailed)
         } else {
-          toast.error(en.reviews.submitFailed)
+          toast.error(t.reviews.submitFailed)
         }
       } else {
-        toast.error(en.reviews.submitFailed)
+        toast.error(t.reviews.submitFailed)
       }
     }
   }
@@ -79,11 +80,11 @@ export function ReviewForm({ productId, onSubmitted }: ReviewFormProps) {
 
       {/* Verified-purchase section */}
       <div className="rounded-lg border bg-muted/30 p-4 flex flex-col gap-3">
-        <p className="text-sm font-medium">{en.reviews.verifyTitle}</p>
-        <p className="text-xs text-muted-foreground">{en.reviews.verifyBody}</p>
+        <p className="text-sm font-medium">{t.reviews.verifyTitle}</p>
+        <p className="text-xs text-muted-foreground">{t.reviews.verifyBody}</p>
 
         <FormField
-          label={en.reviews.orderNumber}
+          label={t.reviews.orderNumber}
           htmlFor="review-order-number"
           error={errors.orderNumber?.message}
         >
@@ -91,14 +92,14 @@ export function ReviewForm({ productId, onSubmitted }: ReviewFormProps) {
             id="review-order-number"
             type="text"
             autoComplete="off"
-            placeholder={en.reviews.orderNumberPlaceholder}
+            placeholder={t.reviews.orderNumberPlaceholder}
             aria-invalid={!!errors.orderNumber}
             {...register('orderNumber')}
           />
         </FormField>
 
         <FormField
-          label={en.reviews.contact}
+          label={t.reviews.contact}
           htmlFor="review-contact"
           error={errors.contact?.message}
         >
@@ -106,7 +107,7 @@ export function ReviewForm({ productId, onSubmitted }: ReviewFormProps) {
             id="review-contact"
             type="text"
             autoComplete="email"
-            placeholder={en.reviews.contactPlaceholder}
+            placeholder={t.reviews.contactPlaceholder}
             aria-invalid={!!errors.contact}
             {...register('contact')}
           />
@@ -115,7 +116,7 @@ export function ReviewForm({ productId, onSubmitted }: ReviewFormProps) {
 
       {/* Review content */}
       <FormField
-        label={en.reviews.yourName}
+        label={t.reviews.yourName}
         htmlFor="review-name"
         error={errors.customerName?.message}
       >
@@ -129,16 +130,16 @@ export function ReviewForm({ productId, onSubmitted }: ReviewFormProps) {
       </FormField>
 
       <div className="flex flex-col gap-1.5">
-        <span className="text-sm font-medium leading-none">{en.reviews.yourRating}</span>
+        <span className="text-sm font-medium leading-none">{t.reviews.yourRating}</span>
         <ReviewStars
           rating={rating}
           onChange={(r) => setValue('rating', r, { shouldValidate: true })}
         />
-        {errors.rating && <p className="text-xs text-destructive">{en.reviews.ratingRequired}</p>}
+        {errors.rating && <p className="text-xs text-destructive">{t.reviews.ratingRequired}</p>}
       </div>
 
       <FormField
-        label={en.reviews.yourReview}
+        label={t.reviews.yourReview}
         htmlFor="review-body"
         optional
         error={errors.body?.message}
@@ -146,7 +147,7 @@ export function ReviewForm({ productId, onSubmitted }: ReviewFormProps) {
         <Textarea
           id="review-body"
           rows={4}
-          placeholder={en.reviews.reviewPlaceholder}
+          placeholder={t.reviews.reviewPlaceholder}
           aria-invalid={!!errors.body}
           {...register('body')}
         />
@@ -154,13 +155,13 @@ export function ReviewForm({ productId, onSubmitted }: ReviewFormProps) {
 
       {/* Turnstile */}
       {turnstileError ? (
-        <p className="text-xs text-destructive">{en.checkout.securityCheckFailed}</p>
+        <p className="text-xs text-destructive">{t.checkout.securityCheckFailed}</p>
       ) : (
         <TurnstileWidget onVerify={setTurnstileToken} onError={() => setTurnstileError(true)} />
       )}
 
       <Button type="submit" disabled={isSubmitting || !turnstileToken} className="w-full">
-        {isSubmitting ? en.reviews.submitting : en.reviews.submit}
+        {isSubmitting ? t.reviews.submitting : t.reviews.submit}
       </Button>
     </form>
   )

@@ -1,7 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import type { VariantSelectorProps } from '@/lib/types/product'
 
 export function VariantSelector({
@@ -10,11 +10,12 @@ export function VariantSelector({
   onSelect,
   className,
 }: VariantSelectorProps) {
+  const t = useT()
   if (variants.length === 0) return null
 
   return (
     <div className={cn('flex flex-col gap-2', className)}>
-      <p className="text-sm font-medium text-foreground">{en.store.selectVariant}</p>
+      <p className="text-sm font-medium text-foreground">{t.store.selectVariant}</p>
       <div className="flex flex-wrap gap-2">
         {variants.map((variant) => {
           const isSelected = variant.id === selectedVariantId

@@ -1,10 +1,11 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import type { CategoryFilterProps } from '@/lib/types/category'
 
 export function CategoryFilter({ categories, activeSlug, onChange }: CategoryFilterProps) {
+  const t = useT()
   if (categories.length === 0) return null
 
   return (
@@ -22,7 +23,7 @@ export function CategoryFilter({ categories, activeSlug, onChange }: CategoryFil
               : 'border border-border text-muted-foreground hover:bg-muted hover:text-foreground',
           )}
         >
-          {en.store.allProducts}
+          {t.store.allProducts}
         </button>
 
         {categories.map((cat) => (

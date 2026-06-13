@@ -2,7 +2,7 @@
 
 import { ReviewStars } from '@/components/store/product/ReviewStars'
 import { useApiResource } from '@/hooks/useApiResource'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { formatDate } from '@/lib/utils/index'
 import type { ReviewsStripProps } from '@/lib/types'
 
@@ -17,7 +17,8 @@ interface StoreReviewsResponse {
 }
 
 export function ReviewsStrip({ section }: ReviewsStripProps) {
-  const heading = section.heading || en.store.reviewsHeading
+  const t = useT()
+  const heading = section.heading || t.store.reviewsHeading
   const { data, loading } = useApiResource<StoreReviewsResponse>('/api/reviews/store')
 
   const reviews = data?.reviews ?? []

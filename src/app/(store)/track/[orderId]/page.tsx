@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator'
 import { OrderTimeline } from '@/components/store/tracking/OrderTimeline'
 import { OrderLineItem } from '@/components/common/OrderLineItem'
 import { BankTransferInstructions } from '@/components/store/checkout/BankTransferInstructions'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { formatPrice, formatDate } from '@/lib/utils/index'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
@@ -47,6 +47,7 @@ function TrackingSkeleton() {
 }
 
 function OrderTrackingContent() {
+  const t = useT()
   const params = useParams<{ orderId: string }>()
   const searchParams = useSearchParams()
 
@@ -70,10 +71,10 @@ function OrderTrackingContent() {
   if (error) {
     return (
       <div className={cn(layout.centeredState, 'max-w-2xl')}>
-        <h1 className="text-2xl font-semibold tracking-tight">{en.tracking.notFound}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">{t.tracking.notFound}</h1>
         <p className="text-sm text-muted-foreground">{error}</p>
         <Link href="/track" className="text-sm text-primary underline-offset-4 hover:underline">
-          {en.tracking.backToTracking}
+          {t.tracking.backToTracking}
         </Link>
       </div>
     )
@@ -82,8 +83,8 @@ function OrderTrackingContent() {
   if (notFound || !data) {
     return (
       <div className={cn(layout.centeredState, 'max-w-2xl')}>
-        <h1 className="text-2xl font-semibold tracking-tight">{en.tracking.notFound}</h1>
-        <p className="text-sm text-muted-foreground">{en.tracking.notFoundBody}</p>
+        <h1 className="text-2xl font-semibold tracking-tight">{t.tracking.notFound}</h1>
+        <p className="text-sm text-muted-foreground">{t.tracking.notFoundBody}</p>
         <Link href="/track" className="text-sm text-primary underline-offset-4 hover:underline">
           Back to tracking
         </Link>
@@ -100,10 +101,10 @@ function OrderTrackingContent() {
       <div className="flex flex-col gap-1">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <h1 className="text-xl font-semibold tracking-tight">
-            {en.checkout.orderNumber.replace('{number}', order.orderNumber)}
+            {t.checkout.orderNumber.replace('{number}', order.orderNumber)}
           </h1>
           <Badge variant="secondary" className="capitalize">
-            {en.paymentMethodLabels[order.paymentMethod as keyof typeof en.paymentMethodLabels] ??
+            {t.paymentMethodLabels[order.paymentMethod as keyof typeof t.paymentMethodLabels] ??
               order.paymentMethod}
           </Badge>
         </div>
@@ -150,30 +151,30 @@ function OrderTrackingContent() {
       {/* Totals */}
       <div className="flex flex-col gap-1.5 text-sm">
         <div className="flex justify-between">
-          <span className="text-muted-foreground">{en.cart.subtotal}</span>
+          <span className="text-muted-foreground">{t.cart.subtotal}</span>
           <span>{formatPrice(order.subtotalCents)}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-muted-foreground">{en.cart.shipping}</span>
+          <span className="text-muted-foreground">{t.cart.shipping}</span>
           <span>
-            {order.shippingCents === 0 ? en.cart.shippingFree : formatPrice(order.shippingCents)}
+            {order.shippingCents === 0 ? t.cart.shippingFree : formatPrice(order.shippingCents)}
           </span>
         </div>
         {order.discountCents > 0 && (
           <div className="flex justify-between text-success">
-            <span>{en.cart.couponApplied}</span>
+            <span>{t.cart.couponApplied}</span>
             <span>-{formatPrice(order.discountCents)}</span>
           </div>
         )}
         {order.taxCents > 0 && (
           <div className="flex justify-between">
-            <span className="text-muted-foreground">{en.cart.tax}</span>
+            <span className="text-muted-foreground">{t.cart.tax}</span>
             <span>{formatPrice(order.taxCents)}</span>
           </div>
         )}
         <Separator />
         <div className="flex justify-between font-semibold text-base">
-          <span>{en.cart.total}</span>
+          <span>{t.cart.total}</span>
           <span>{formatPrice(order.totalCents)}</span>
         </div>
       </div>
@@ -192,7 +193,7 @@ function OrderTrackingContent() {
             ' w-full border-destructive text-destructive hover:bg-destructive/10 justify-center'
           }
         >
-          {en.checkout.cancelOrder}
+          {t.checkout.cancelOrder}
         </Link>
       )}
     </div>

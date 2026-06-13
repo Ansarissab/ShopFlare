@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { TurnstileWidget } from '@/components/store/checkout/TurnstileWidget'
 import { FormField } from '@/components/common/FormField'
-import { en, requiredMsg } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { codOrderSchema, type CodOrder } from '@/lib/schemas'
 import { useCart } from '@/hooks/useCart'
 import { apiPost } from '@/lib/api'
@@ -23,6 +23,7 @@ type FormValues = CodOrder['shippingAddress']
  * `method` they pass to the success page, so the form lives here once.
  */
 export function ManualOrderForm({ endpoint, successMethod, submitLabel }: ManualOrderFormProps) {
+  const t = useT()
   const router = useRouter()
   const items = useCart((s) => s.items)
   const couponCode = useCart((s) => s.couponCode)
@@ -40,7 +41,7 @@ export function ManualOrderForm({ endpoint, successMethod, submitLabel }: Manual
 
   async function onSubmit(shippingAddress: FormValues) {
     if (!turnstileToken) {
-      toast.error(requiredMsg('Security check'))
+      toast.error(t.errors.required.replace('{field}', 'Security check'))
       return
     }
 
@@ -64,7 +65,7 @@ export function ManualOrderForm({ endpoint, successMethod, submitLabel }: Manual
       const cParam = contactHint ? `&c=${encodeURIComponent(contactHint)}` : ''
       router.push(`/checkout/success?method=${successMethod}&orderId=${orderNumber}${cParam}`)
     } catch {
-      toast.error(en.errors.orderFailed)
+      toast.error(t.errors.orderFailed)
     }
   }
 
@@ -72,9 +73,9 @@ export function ManualOrderForm({ endpoint, successMethod, submitLabel }: Manual
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
       {/* Full Name */}
       <FormField
-        label={en.checkout.name}
+        label={t.checkout.name}
         htmlFor="ship-name"
-        error={errors.name ? requiredMsg(en.checkout.name) : undefined}
+        error={errors.name ? t.errors.required.replace('{field}', t.checkout.name) : undefined}
       >
         <Input
           id="ship-name"
@@ -86,9 +87,9 @@ export function ManualOrderForm({ endpoint, successMethod, submitLabel }: Manual
 
       {/* Phone */}
       <FormField
-        label={en.checkout.phone}
+        label={t.checkout.phone}
         htmlFor="ship-phone"
-        error={errors.phone ? en.errors.invalidPhone : undefined}
+        error={errors.phone ? t.errors.invalidPhone : undefined}
       >
         <Input
           id="ship-phone"
@@ -101,10 +102,10 @@ export function ManualOrderForm({ endpoint, successMethod, submitLabel }: Manual
 
       {/* Email (optional) */}
       <FormField
-        label={en.checkout.email}
+        label={t.checkout.email}
         htmlFor="ship-email"
         optional
-        error={errors.email ? en.errors.invalidEmail : undefined}
+        error={errors.email ? t.errors.invalidEmail : undefined}
       >
         <Input
           id="ship-email"
@@ -117,9 +118,11 @@ export function ManualOrderForm({ endpoint, successMethod, submitLabel }: Manual
 
       {/* Street Address */}
       <FormField
-        label={en.checkout.address}
+        label={t.checkout.address}
         htmlFor="ship-address"
-        error={errors.address ? requiredMsg(en.checkout.address) : undefined}
+        error={
+          errors.address ? t.errors.required.replace('{field}', t.checkout.address) : undefined
+        }
       >
         <Input
           id="ship-address"
@@ -132,9 +135,9 @@ export function ManualOrderForm({ endpoint, successMethod, submitLabel }: Manual
       {/* City + State row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <FormField
-          label={en.checkout.city}
+          label={t.checkout.city}
           htmlFor="ship-city"
-          error={errors.city ? requiredMsg(en.checkout.city) : undefined}
+          error={errors.city ? t.errors.required.replace('{field}', t.checkout.city) : undefined}
         >
           <Input
             id="ship-city"
@@ -144,21 +147,23 @@ export function ManualOrderForm({ endpoint, successMethod, submitLabel }: Manual
           />
         </FormField>
 
-        <FormField label={en.checkout.state} htmlFor="ship-state" optional>
+        <FormField label={t.checkout.state} htmlFor="ship-state" optional>
           <Input id="ship-state" autoComplete="address-level1" {...register('state')} />
         </FormField>
       </div>
 
       {/* Postal Code + Country row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <FormField label={en.checkout.postalCode} htmlFor="ship-postal" optional>
+        <FormField label={t.checkout.postalCode} htmlFor="ship-postal" optional>
           <Input id="ship-postal" autoComplete="postal-code" {...register('postalCode')} />
         </FormField>
 
         <FormField
-          label={en.checkout.country}
+          label={t.checkout.country}
           htmlFor="ship-country"
-          error={errors.country ? requiredMsg(en.checkout.country) : undefined}
+          error={
+            errors.country ? t.errors.required.replace('{field}', t.checkout.country) : undefined
+          }
         >
           <Input
             id="ship-country"
@@ -182,7 +187,7 @@ export function ManualOrderForm({ endpoint, successMethod, submitLabel }: Manual
         }}
       />
       {turnstileError && (
-        <p className="text-xs text-destructive">{en.checkout.securityCheckFailed}</p>
+        <p className="text-xs text-destructive">{t.checkout.securityCheckFailed}</p>
       )}
 
       <Button type="submit" size="lg" className="w-full" disabled={isSubmitting || !turnstileToken}>

@@ -1,6 +1,6 @@
 'use client'
 
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { formatPrice } from '@/lib/utils/index'
 import { useStoreConfig } from '@/hooks/useStoreConfig'
 import type { BankTransferInstructionsProps } from '@/lib/types/checkout'
@@ -14,10 +14,11 @@ export function BankTransferInstructions({
   orderNumber,
   totalCents,
 }: BankTransferInstructionsProps) {
+  const dict = useT()
   const { config } = useStoreConfig()
   if (!config?.bankAccountNumber) return null
 
-  const t = en.bankTransfer
+  const t = dict.bankTransfer
   const amount = formatPrice(totalCents, config.currency)
 
   const rows: Array<[string, string | undefined]> = [

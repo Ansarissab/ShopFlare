@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { calculateShipping, calculateTax } from '@/lib/utils/index'
 import { useCart, useCartSubtotalCents } from '@/hooks/useCart'
 import { useStoreConfig } from '@/hooks/useStoreConfig'
@@ -16,6 +16,7 @@ import { CartSummary } from '@/components/store/cart/CartSummary'
 import type { CartSheetProps } from '@/lib/types/cart'
 
 export function CartSheet({ flatRateCents = 0, thresholdCents = 0 }: CartSheetProps) {
+  const t = useT()
   const { items, isOpen, closeCart } = useCart()
   const subtotalCents = useCartSubtotalCents()
   const shippingCents = calculateShipping(subtotalCents, flatRateCents, thresholdCents)
@@ -45,10 +46,10 @@ export function CartSheet({ flatRateCents = 0, thresholdCents = 0 }: CartSheetPr
         applyCoupon(code, result.discountCents)
         return true
       }
-      toast.error(result.message ?? en.cart.couponInvalid)
+      toast.error(result.message ?? t.cart.couponInvalid)
       return false
     } catch (err) {
-      const msg = err instanceof ApiError ? err.message : en.cart.couponInvalid
+      const msg = err instanceof ApiError ? err.message : t.cart.couponInvalid
       toast.error(msg)
       return false
     }
@@ -63,18 +64,18 @@ export function CartSheet({ flatRateCents = 0, thresholdCents = 0 }: CartSheetPr
     >
       <SheetContent side="right" className="flex flex-col p-0 sm:max-w-md w-full">
         <SheetHeader className="px-4 pt-4 pb-2">
-          <SheetTitle>{en.cart.title}</SheetTitle>
+          <SheetTitle>{t.cart.title}</SheetTitle>
         </SheetHeader>
 
         {items.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-4 px-4 text-center">
-            <p className="text-muted-foreground">{en.cart.empty}</p>
+            <p className="text-muted-foreground">{t.cart.empty}</p>
             <Link
               href="/"
               onClick={closeCart}
               className="text-sm font-medium text-primary underline-offset-4 hover:underline"
             >
-              {en.store.continueShopping}
+              {t.store.continueShopping}
             </Link>
           </div>
         ) : (

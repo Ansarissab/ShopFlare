@@ -2,7 +2,7 @@
 
 import { Loader2, ShoppingCart, Zap, MessageCircle, Banknote, Bell } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { cn } from '@/lib/utils'
 import type { ProductActionsProps } from '@/lib/types/product'
 
@@ -18,6 +18,7 @@ export function ProductActions({
   onNotifyMe,
   className,
 }: ProductActionsProps) {
+  const t = useT()
   const hasSelection = selectedSize !== null
 
   if (allSizesOOS) {
@@ -25,7 +26,7 @@ export function ProductActions({
       <div className={cn('flex flex-col gap-3', className)}>
         <Button variant="outline" size="lg" className="w-full gap-2 min-h-11" onClick={onNotifyMe}>
           <Bell className="size-4" />
-          {en.store.notifyMe}
+          {t.store.notifyMe}
         </Button>
       </div>
     )
@@ -45,7 +46,7 @@ export function ProductActions({
         ) : (
           <ShoppingCart className="size-4" />
         )}
-        {en.store.addToCart}
+        {t.store.addToCart}
       </Button>
 
       {/* Secondary: Buy Now (Stripe Checkout) */}
@@ -57,7 +58,7 @@ export function ProductActions({
         onClick={onBuyNow}
       >
         <Zap className="size-4" />
-        {en.store.buyNow}
+        {t.store.buyNow}
       </Button>
 
       {/* Contextual: WhatsApp + COD — only when size is selected */}
@@ -68,12 +69,12 @@ export function ProductActions({
           {showWhatsApp && (
             <Button variant="outline" size="lg" className="gap-2 min-h-11" onClick={onWhatsApp}>
               <MessageCircle className="size-4" />
-              <span className="truncate">{en.store.orderOnWhatsApp}</span>
+              <span className="truncate">{t.store.orderOnWhatsApp}</span>
             </Button>
           )}
           <Button variant="outline" size="lg" className="gap-2 min-h-11" onClick={onCOD}>
             <Banknote className="size-4" />
-            <span className="truncate">{en.store.cashOnDelivery}</span>
+            <span className="truncate">{t.store.cashOnDelivery}</span>
           </Button>
         </div>
       )}

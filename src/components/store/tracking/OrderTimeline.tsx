@@ -2,7 +2,7 @@
 
 import type { ReactElement } from 'react'
 import { Badge } from '@/components/ui/badge'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { ORDER_STATUSES, type OrderStatus } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import type { OrderTimelineProps } from '@/lib/types/order'
@@ -84,12 +84,13 @@ function StepIcon({ step, state }: { step: string; state: StepState }) {
 }
 
 export function OrderTimeline({ status, trackingNumber, carrier }: OrderTimelineProps) {
+  const t = useT()
   if (status === 'cancelled') {
     return (
       <div className="flex flex-col gap-3">
-        <p className="text-sm font-medium text-muted-foreground">{en.tracking.status}</p>
+        <p className="text-sm font-medium text-muted-foreground">{t.tracking.status}</p>
         <Badge variant="destructive" className="w-fit text-sm px-3 py-1">
-          {en.orderStatusLabels.cancelled}
+          {t.orderStatusLabels.cancelled}
         </Badge>
       </div>
     )
@@ -97,7 +98,7 @@ export function OrderTimeline({ status, trackingNumber, carrier }: OrderTimeline
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-sm font-medium text-muted-foreground">{en.tracking.timeline}</p>
+      <p className="text-sm font-medium text-muted-foreground">{t.tracking.timeline}</p>
 
       {/* Steps */}
       <ol className="flex flex-col gap-0">
@@ -129,7 +130,7 @@ export function OrderTimeline({ status, trackingNumber, carrier }: OrderTimeline
                     'text-(--muted-fg)': state === 'upcoming',
                   })}
                 >
-                  {en.orderStatusLabels[step as keyof typeof en.orderStatusLabels]}
+                  {t.orderStatusLabels[step as keyof typeof t.orderStatusLabels]}
                 </span>
 
                 {/* Show tracking info under the 'shipped' step */}
@@ -137,12 +138,12 @@ export function OrderTimeline({ status, trackingNumber, carrier }: OrderTimeline
                   <div className="flex flex-col gap-0.5 text-xs text-muted-foreground">
                     {carrier && (
                       <span>
-                        {en.tracking.carrier}: {carrier}
+                        {t.tracking.carrier}: {carrier}
                       </span>
                     )}
                     {trackingNumber && (
                       <span>
-                        {en.tracking.trackingNumber}:{' '}
+                        {t.tracking.trackingNumber}:{' '}
                         <span className="font-mono">{trackingNumber}</span>
                       </span>
                     )}

@@ -5,7 +5,7 @@ import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { formatPrice, getPriceRange } from '@/lib/utils/index'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { ImageCarousel } from '@/components/store/product/ImageCarousel'
 import { VariantSelector } from '@/components/store/product/VariantSelector'
 import { SizePicker } from '@/components/store/product/SizePicker'
@@ -33,6 +33,7 @@ export function ProductHero({
   isAddingToCart = false,
   className,
 }: ProductHeroProps) {
+  const t = useT()
   const [selectedVariantId, setSelectedVariantId] = React.useState<string>(variants[0]?.id ?? '')
   const [selectedSizeId, setSelectedSizeId] = React.useState<string | null>(null)
   const [notifyOpen, setNotifyOpen] = React.useState(false)
@@ -79,8 +80,8 @@ export function ProductHero({
         {/* Badges */}
         {(isNew || isPopular) && (
           <div className="flex gap-2">
-            {isNew && <Badge>{en.product.new}</Badge>}
-            {isPopular && <Badge variant="secondary">{en.product.popularChoice}</Badge>}
+            {isNew && <Badge>{t.product.new}</Badge>}
+            {isPopular && <Badge variant="secondary">{t.product.popularChoice}</Badge>}
           </div>
         )}
 
@@ -96,7 +97,7 @@ export function ProductHero({
           </p>
         )}
         {allSizesOOS && (
-          <p className="text-sm font-medium text-muted-foreground">{en.store.outOfStock}</p>
+          <p className="text-sm font-medium text-muted-foreground">{t.store.outOfStock}</p>
         )}
 
         <Separator />

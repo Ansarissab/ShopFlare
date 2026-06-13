@@ -5,10 +5,11 @@ import { useStoreConfig } from '@/hooks/useStoreConfig'
 import { isFeatureEnabled } from '@/lib/features'
 import { buildWhatsAppContactUrl } from '@/lib/whatsapp'
 import { useIsStandalone } from '@/hooks/useDisplayMode'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { cn } from '@/lib/utils'
 
 export function WhatsAppWidget() {
+  const t = useT()
   const { config } = useStoreConfig()
   const isStandalone = useIsStandalone()
 
@@ -23,7 +24,7 @@ export function WhatsAppWidget() {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={en.store.whatsappWidgetLabel}
+      aria-label={t.store.whatsappWidgetLabel}
       className={cn(
         // WhatsApp brand green — intentional exception to CSS var rule (matches WhatsAppButton.tsx)
         'fixed right-4 z-50 flex size-14 items-center justify-center rounded-full',

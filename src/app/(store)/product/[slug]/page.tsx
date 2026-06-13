@@ -5,7 +5,7 @@ import { ProductHeroWrapper } from '@/components/store/product/ProductHeroWrappe
 import { ReviewsSection } from '@/components/store/product/ReviewsSection'
 import { JsonLd } from '@/components/shared/JsonLd'
 import { layout } from '@/lib/styles'
-import { en } from '@/lib/i18n/en'
+import { getT } from '@/lib/i18n/server'
 import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
 import { buildPageMetadata } from '@/lib/seo/metadata'
 import { productJsonLd, breadcrumbListJsonLd } from '@/lib/seo/jsonld'
@@ -19,13 +19,14 @@ interface PageProps {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const t = await getT()
   const { slug } = await params
   const [item, config] = await Promise.all([
     fetchFromWorker<ProductWithVariants>(`/api/products/${slug}`, { revalidate: 60 }),
     fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: 300 }),
   ])
 
-  if (!item) return { title: en.product.notFound }
+  if (!item) return { title: t.product.notFound }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
   const firstImage = item.variants[0]?.images[0]?.url
@@ -41,6 +42,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function ProductDetailPage({ params }: PageProps) {
+  const t = await getT()
   const { slug } = await params
   const [item, config, reviewsData] = await Promise.all([
     fetchFromWorker<ProductWithVariants>(`/api/products/${slug}`, { revalidate: 60 }),
@@ -88,7 +90,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
           href={catalogHref(config?.landingEnabled)}
           className="hover:text-foreground transition-colors"
         >
-          {en.store.allProducts}
+          {t.store.allProducts}
         </Link>
         <span aria-hidden>/</span>
         <span className="text-foreground truncate">{item.product.name}</span>

@@ -5,9 +5,10 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 
 export function TrackingForm() {
+  const t = useT()
   const router = useRouter()
   const [orderNumber, setOrderNumber] = useState('')
   const [contact, setContact] = useState('')
@@ -18,11 +19,11 @@ export function TrackingForm() {
     setError('')
 
     if (!orderNumber.trim()) {
-      setError(en.errors.required.replace('{field}', en.tracking.orderNumber))
+      setError(t.errors.required.replace('{field}', t.tracking.orderNumber))
       return
     }
     if (!contact.trim()) {
-      setError(en.errors.required.replace('{field}', en.tracking.email))
+      setError(t.errors.required.replace('{field}', t.tracking.email))
       return
     }
 
@@ -34,7 +35,7 @@ export function TrackingForm() {
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
       {/* Order Number */}
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="track-order-number">{en.tracking.orderNumber}</Label>
+        <Label htmlFor="track-order-number">{t.tracking.orderNumber}</Label>
         <Input
           id="track-order-number"
           placeholder="ORD-XXXXXX"
@@ -47,7 +48,7 @@ export function TrackingForm() {
 
       {/* Email or Phone */}
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="track-contact">{en.tracking.email}</Label>
+        <Label htmlFor="track-contact">{t.tracking.email}</Label>
         <Input
           id="track-contact"
           type="text"
@@ -61,7 +62,7 @@ export function TrackingForm() {
       {error && <p className="text-xs text-destructive">{error}</p>}
 
       <Button type="submit" className="w-full">
-        {en.tracking.track}
+        {t.tracking.track}
       </Button>
     </form>
   )

@@ -2,7 +2,7 @@
 
 import { Label } from '@/components/ui/label'
 import { HelpTip } from '@/components/common/HelpTip'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import type { FieldProps } from '@/lib/types/common'
 
 export type { FieldProps }
@@ -19,6 +19,7 @@ export type { FieldProps }
  *   </div>
  */
 export function FormField({ label, htmlFor, optional = false, error, help, children }: FieldProps) {
+  const t = useT()
   return (
     <div className="flex flex-col gap-1.5">
       <Label htmlFor={htmlFor}>
@@ -26,7 +27,7 @@ export function FormField({ label, htmlFor, optional = false, error, help, child
         {optional && (
           <>
             {' '}
-            <span className="text-xs text-muted-foreground">{en.common.optional}</span>
+            <span className="text-xs text-muted-foreground">{t.common.optional}</span>
           </>
         )}
         {help && <HelpTip text={help} />}

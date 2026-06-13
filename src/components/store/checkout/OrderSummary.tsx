@@ -1,7 +1,7 @@
 'use client'
 
 import { Separator } from '@/components/ui/separator'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import {
   formatPrice,
   calculateShipping,
@@ -13,6 +13,7 @@ import { useStoreConfig } from '@/hooks/useStoreConfig'
 import { OrderLineItem } from '@/components/common/OrderLineItem'
 
 export function OrderSummary() {
+  const t = useT()
   const items = useCart((s) => s.items)
   const discountCents = useCart((s) => s.discountCents)
   const subtotalCents = useCartSubtotalCents()
@@ -62,21 +63,19 @@ export function OrderSummary() {
       {/* Totals */}
       <div className="flex flex-col gap-1.5 text-sm">
         <div className="flex justify-between">
-          <span className="text-muted-foreground">{en.cart.subtotal}</span>
+          <span className="text-muted-foreground">{t.cart.subtotal}</span>
           <span>{formatPrice(subtotalCents)}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-muted-foreground">{en.cart.shipping}</span>
-          <span>{shippingCents === 0 ? en.cart.shippingFree : formatPrice(shippingCents)}</span>
+          <span className="text-muted-foreground">{t.cart.shipping}</span>
+          <span>{shippingCents === 0 ? t.cart.shippingFree : formatPrice(shippingCents)}</span>
         </div>
         {taxEnabled && taxCents > 0 && (
           <div className="flex justify-between">
             <span className="text-muted-foreground">
               {taxInclusive
-                ? en.cart.taxIncluded.replace('{name}', taxName)
-                : en.cart.taxRateLabel
-                    .replace('{name}', taxName)
-                    .replace('{rate}', String(taxRate))}
+                ? t.cart.taxIncluded.replace('{name}', taxName)
+                : t.cart.taxRateLabel.replace('{name}', taxName).replace('{rate}', String(taxRate))}
             </span>
             <span className={taxInclusive ? 'text-xs text-muted-foreground' : ''}>
               {formatPrice(taxCents)}
@@ -85,13 +84,13 @@ export function OrderSummary() {
         )}
         {discountCents > 0 && (
           <div className="flex justify-between text-success">
-            <span>{en.cart.couponApplied}</span>
+            <span>{t.cart.couponApplied}</span>
             <span>-{formatPrice(discountCents)}</span>
           </div>
         )}
         <Separator />
         <div className="flex justify-between font-semibold">
-          <span>{en.cart.total}</span>
+          <span>{t.cart.total}</span>
           <span>{formatPrice(totalCents)}</span>
         </div>
       </div>

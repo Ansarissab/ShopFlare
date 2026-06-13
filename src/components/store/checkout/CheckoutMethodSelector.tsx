@@ -5,7 +5,7 @@ import { CreditCard, Banknote, Building2, MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ManualOrderForm } from '@/components/store/checkout/ManualOrderForm'
 import { TurnstileWidget } from '@/components/store/checkout/TurnstileWidget'
-import { en, requiredMsg } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { useCart } from '@/hooks/useCart'
 import { useStoreConfig } from '@/hooks/useStoreConfig'
 import { toast } from 'sonner'
@@ -22,6 +22,7 @@ interface Method {
 }
 
 export function CheckoutMethodSelector() {
+  const t = useT()
   const items = useCart((s) => s.items)
   const { config } = useStoreConfig()
   const [active, setActive] = useState<MethodValue>('cod')
@@ -34,37 +35,37 @@ export function CheckoutMethodSelector() {
   const methods: Method[] = [
     {
       value: 'card',
-      label: en.checkout.payWithCard,
-      description: en.checkout.cardDescription,
+      label: t.checkout.payWithCard,
+      description: t.checkout.cardDescription,
       icon: CreditCard,
     },
     {
       value: 'cod',
-      label: en.store.cashOnDelivery,
-      description: en.checkout.codDescription,
+      label: t.store.cashOnDelivery,
+      description: t.checkout.codDescription,
       icon: Banknote,
     },
     ...(bankEnabled
       ? [
           {
             value: 'bank' as const,
-            label: en.checkout.bankTransfer,
-            description: en.checkout.bankDescription,
+            label: t.checkout.bankTransfer,
+            description: t.checkout.bankDescription,
             icon: Building2,
           },
         ]
       : []),
     {
       value: 'whatsapp',
-      label: en.store.orderOnWhatsApp,
-      description: en.checkout.whatsappDescription,
+      label: t.store.orderOnWhatsApp,
+      description: t.checkout.whatsappDescription,
       icon: MessageCircle,
     },
   ]
 
   async function handleStripeCheckout() {
     if (!turnstileToken) {
-      toast.error(requiredMsg('Security check'))
+      toast.error(t.errors.required.replace('{field}', 'Security check'))
       return
     }
     setStripeLoading(true)
@@ -74,7 +75,7 @@ export function CheckoutMethodSelector() {
         .map((i) => ({ stripePriceId: i.stripePriceId!, quantity: i.quantity }))
 
       if (stripeItems.length === 0) {
-        toast.error(en.errors.orderFailed)
+        toast.error(t.errors.orderFailed)
         return
       }
 
@@ -85,7 +86,7 @@ export function CheckoutMethodSelector() {
       )
       window.location.href = url
     } catch {
-      toast.error(en.errors.orderFailed)
+      toast.error(t.errors.orderFailed)
     } finally {
       setStripeLoading(false)
     }
@@ -96,7 +97,7 @@ export function CheckoutMethodSelector() {
       {/* Method selector — behaves as a radio group */}
       <div
         role="radiogroup"
-        aria-label={en.checkout.paymentMethodLegend}
+        aria-label={t.checkout.paymentMethodLegend}
         className="grid grid-cols-1 sm:grid-cols-2 gap-2"
       >
         {methods.map((m) => {
@@ -138,7 +139,7 @@ export function CheckoutMethodSelector() {
       <div className="rounded-lg border p-4 sm:p-5">
         {active === 'card' && (
           <div className="flex flex-col gap-3">
-            <p className="text-sm text-muted-foreground">{en.checkout.stripeRedirectNote}</p>
+            <p className="text-sm text-muted-foreground">{t.checkout.stripeRedirectNote}</p>
             <TurnstileWidget
               onVerify={(token) => {
                 setTurnstileToken(token)
@@ -150,7 +151,7 @@ export function CheckoutMethodSelector() {
               }}
             />
             {turnstileError && (
-              <p className="text-xs text-destructive">{en.checkout.securityCheckFailed}</p>
+              <p className="text-xs text-destructive">{t.checkout.securityCheckFailed}</p>
             )}
             <Button
               size="lg"
@@ -158,7 +159,7 @@ export function CheckoutMethodSelector() {
               onClick={handleStripeCheckout}
               disabled={stripeLoading || !turnstileToken}
             >
-              {stripeLoading ? '…' : en.checkout.payWithCard}
+              {stripeLoading ? '…' : t.checkout.payWithCard}
             </Button>
           </div>
         )}
@@ -167,17 +168,17 @@ export function CheckoutMethodSelector() {
           <ManualOrderForm
             endpoint="/api/orders/cod"
             successMethod="cod"
-            submitLabel={en.checkout.placeOrder}
+            submitLabel={t.checkout.placeOrder}
           />
         )}
 
         {active === 'bank' && (
           <div className="flex flex-col gap-4">
-            <p className="text-sm text-muted-foreground">{en.checkout.bankTransferNote}</p>
+            <p className="text-sm text-muted-foreground">{t.checkout.bankTransferNote}</p>
             <ManualOrderForm
               endpoint="/api/orders/bank-transfer"
               successMethod="bank_transfer"
-              submitLabel={en.checkout.placeOrder}
+              submitLabel={t.checkout.placeOrder}
             />
           </div>
         )}
@@ -185,7 +186,7 @@ export function CheckoutMethodSelector() {
         {active === 'whatsapp' && (
           <p className="text-sm text-muted-foreground">
             WhatsApp ordering is available directly on each product page. Visit the product you want
-            and tap &ldquo;{en.store.orderOnWhatsApp}&rdquo; to send your order.
+            and tap &ldquo;{t.store.orderOnWhatsApp}&rdquo; to send your order.
           </p>
         )}
       </div>

@@ -11,10 +11,11 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import type { CategoryNavProps } from '@/lib/types/category'
 
 export function CategoryNav({ categories }: CategoryNavProps) {
+  const t = useT()
   if (categories.length === 0) return null
 
   return (
@@ -24,7 +25,7 @@ export function CategoryNav({ categories }: CategoryNavProps) {
           <button className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors outline-none" />
         }
       >
-        {en.store.browseCategories}
+        {t.store.browseCategories}
         <ChevronDown className="h-4 w-4 opacity-60" />
       </DropdownMenuTrigger>
 

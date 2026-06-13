@@ -5,7 +5,7 @@ import { RenderHtml } from '@/components/shared/RenderHtml'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
 import { formatDate } from '@/lib/utils/index'
-import { en } from '@/lib/i18n/en'
+import { getT } from '@/lib/i18n/server'
 import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
 import { buildPageMetadata } from '@/lib/seo/metadata'
 import { JsonLd } from '@/components/shared/JsonLd'
@@ -25,13 +25,14 @@ const plainText = (html: string) =>
     .slice(0, 155)
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const t = await getT()
   const { slug } = await params
   const [page, config] = await Promise.all([
     fetchFromWorker<StorePage>(`/api/pages/${slug}`, { revalidate: 300 }),
     fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: 300 }),
   ])
 
-  if (!page) return { title: en.policies.notFound }
+  if (!page) return { title: t.policies.notFound }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
 
@@ -45,6 +46,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function PolicyPage({ params }: PageProps) {
+  const t = await getT()
   const { slug } = await params
   const [page, config] = await Promise.all([
     fetchFromWorker<StorePage>(`/api/pages/${slug}`, { revalidate: 300 }),
@@ -81,7 +83,7 @@ export default async function PolicyPage({ params }: PageProps) {
       <JsonLd data={webPage} />
       <h1 className="text-2xl font-bold tracking-tight">{page.title}</h1>
       <p className="text-xs text-muted-foreground">
-        {en.policies.lastUpdated.replace('{date}', updatedDate)}
+        {t.policies.lastUpdated.replace('{date}', updatedDate)}
       </p>
 
       {page.content ? (
@@ -93,11 +95,11 @@ export default async function PolicyPage({ params }: PageProps) {
           </div>
         )
       ) : (
-        <p className="text-sm text-muted-foreground italic">{en.policies.empty}</p>
+        <p className="text-sm text-muted-foreground italic">{t.policies.empty}</p>
       )}
 
       <Link href="/" className="text-sm text-primary underline-offset-4 hover:underline w-fit">
-        {en.policies.backToStore}
+        {t.policies.backToStore}
       </Link>
     </div>
   )

@@ -10,7 +10,7 @@ import { SearchBar } from '@/components/store/search/SearchBar'
 import { InfiniteScrollSentinel } from '@/components/shared/InfiniteScrollSentinel'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { DEFAULT_PRODUCT_PAGE_SIZE } from '@/lib/constants'
 import type { ProductWithVariants } from '@/lib/types/product'
 import type { CategoryNode } from '@/lib/types/category'
@@ -61,6 +61,7 @@ function findCategoryBySlug(categories: CategoryNode[], slug: string): CategoryN
 }
 
 export function Catalog({ basePath = '/', initialProducts, initialCategories }: CatalogProps) {
+  const t = useT()
   const router = useRouter()
   const searchParams = useSearchParams()
   const { config } = useStoreConfig()
@@ -128,8 +129,8 @@ export function Catalog({ basePath = '/', initialProducts, initialCategories }: 
   if (items.length === 0) {
     return (
       <div className={cn(layout.centeredState, 'max-w-7xl')}>
-        <h1>{en.store.comingSoon}</h1>
-        <p className="text-muted-foreground">{en.store.comingSoonBody}</p>
+        <h1>{t.store.comingSoon}</h1>
+        <p className="text-muted-foreground">{t.store.comingSoonBody}</p>
       </div>
     )
   }
@@ -144,7 +145,7 @@ export function Catalog({ basePath = '/', initialProducts, initialCategories }: 
 
   return (
     <div className={layout.page}>
-      <h1 className="sr-only">{en.store.allProducts}</h1>
+      <h1 className="sr-only">{t.store.allProducts}</h1>
       <div className="mb-4">
         <SearchBar value={query} onChange={setQuery} />
       </div>
@@ -163,29 +164,29 @@ export function Catalog({ basePath = '/', initialProducts, initialCategories }: 
         query ? (
           <div className={cn(layout.centeredState, 'min-h-[30vh]')}>
             <p className="text-muted-foreground">
-              {en.store.searchNoResults} &quot;{query}&quot;
+              {t.store.searchNoResults} &quot;{query}&quot;
             </p>
             <button
               type="button"
               onClick={() => setQuery('')}
               className="mt-2 text-sm text-primary underline-offset-4 hover:underline"
             >
-              {en.store.searchClearHint}
+              {t.store.searchClearHint}
             </button>
           </div>
         ) : (
           <div className={cn(layout.centeredState, 'min-h-[30vh]')}>
-            <p className="text-muted-foreground">{en.store.categoryEmpty}</p>
+            <p className="text-muted-foreground">{t.store.categoryEmpty}</p>
           </div>
         )
       ) : (
         <>
           <p className="mb-6 font-mono text-xs uppercase tracking-wide text-muted-foreground">
             {hasMore
-              ? en.store.showingProductsOf
+              ? t.store.showingProductsOf
                   .replace('{shown}', String(visibleItems.length))
                   .replace('{total}', String(totalFiltered))
-              : en.store.showingProducts.replace('{count}', String(totalFiltered))}
+              : t.store.showingProducts.replace('{count}', String(totalFiltered))}
           </p>
           <ProductGrid items={visibleItems} />
           <InfiniteScrollSentinel

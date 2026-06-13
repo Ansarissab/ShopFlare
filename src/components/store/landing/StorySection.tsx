@@ -1,13 +1,14 @@
 import Image from 'next/image'
 import { RenderHtml } from '@/components/shared/RenderHtml'
-import { en } from '@/lib/i18n/en'
+import { getT } from '@/lib/i18n/server'
 import type { StorySectionProps } from '@/lib/types'
 
-export function StorySection({
+export async function StorySection({
   section,
   imageUrl,
 }: StorySectionProps & { imageUrl: string | null }) {
-  const heading = section.heading || en.store.storyDefaultHeading
+  const t = await getT()
+  const heading = section.heading || t.store.storyDefaultHeading
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" aria-label={heading}>

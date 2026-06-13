@@ -4,10 +4,11 @@ import { useEffect, useSyncExternalStore } from 'react'
 import { useRouter } from 'next/navigation'
 import { CheckoutMethodSelector } from '@/components/store/checkout/CheckoutMethodSelector'
 import { OrderSummary } from '@/components/store/checkout/OrderSummary'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { useCart } from '@/hooks/useCart'
 
 export default function CheckoutPage() {
+  const t = useT()
   const router = useRouter()
   const items = useCart((s) => s.items)
   // Guard against Zustand persist hydration race: items is [] on the first
@@ -30,7 +31,7 @@ export default function CheckoutPage() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8 md:py-12">
-      <h1 className="mb-8 text-2xl font-bold tracking-tight">{en.checkout.title}</h1>
+      <h1 className="mb-8 text-2xl font-bold tracking-tight">{t.checkout.title}</h1>
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-[1fr_360px]">
         {/* Left: method selector + active form */}

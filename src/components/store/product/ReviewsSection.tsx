@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ReviewStars } from '@/components/store/product/ReviewStars'
 import { ReviewForm } from '@/components/store/product/ReviewForm'
 import { useApiResource } from '@/hooks/useApiResource'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import type { ReviewsSectionProps, ProductReviewsResponse } from '@/lib/types/product'
 import { formatDate } from '@/lib/utils/index'
 
@@ -17,6 +17,7 @@ export function ReviewsSection({
   reviewsEnabled = true,
   className,
 }: ReviewsSectionProps) {
+  const t = useT()
   const [showForm, setShowForm] = useState(false)
   const { data, loading, error } = useApiResource<ProductReviewsResponse>(
     reviewsEnabled ? `/api/reviews/product/${productId}` : null,
@@ -32,11 +33,11 @@ export function ReviewsSection({
     <section aria-labelledby="reviews-heading" className={className}>
       <div className="flex items-center justify-between mb-4">
         <h2 id="reviews-heading" className="text-xl font-semibold tracking-tight">
-          {en.reviews.sectionTitle}
+          {t.reviews.sectionTitle}
         </h2>
         {!showForm && (
           <Button variant="outline" size="sm" onClick={() => setShowForm(true)}>
-            {en.reviews.writeReview}
+            {t.reviews.writeReview}
           </Button>
         )}
       </div>
@@ -49,7 +50,7 @@ export function ReviewsSection({
             onSubmitted={handleSubmitted}
           />
           <Button variant="ghost" size="sm" className="mt-2" onClick={() => setShowForm(false)}>
-            {en.reviews.cancel}
+            {t.reviews.cancel}
           </Button>
           <Separator className="my-6" />
         </>
@@ -63,7 +64,7 @@ export function ReviewsSection({
         </div>
       )}
 
-      {!loading && error && <p className="text-sm text-destructive">{en.errors.networkError}</p>}
+      {!loading && error && <p className="text-sm text-destructive">{t.errors.networkError}</p>}
 
       {!loading && !error && data && (
         <>
@@ -73,10 +74,10 @@ export function ReviewsSection({
               <div className="flex items-center gap-3 mb-4">
                 <ReviewStars rating={Math.round(data.average)} />
                 <span className="text-sm font-medium">
-                  {en.reviews.averageOf.replace('{average}', String(data.average))}
+                  {t.reviews.averageOf.replace('{average}', String(data.average))}
                 </span>
                 <span className="text-sm text-muted-foreground">
-                  {en.reviews.basedOn.replace('{count}', String(data.count))}
+                  {t.reviews.basedOn.replace('{count}', String(data.count))}
                 </span>
               </div>
 
@@ -90,7 +91,7 @@ export function ReviewsSection({
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium">{review.customerName}</span>
                         <span className="text-xs text-muted-foreground">
-                          {en.reviews.verifiedPurchase}
+                          {t.reviews.verifiedPurchase}
                         </span>
                       </div>
                       <time dateTime={review.createdAt} className="text-xs text-muted-foreground">
@@ -106,7 +107,7 @@ export function ReviewsSection({
               </ul>
             </>
           ) : (
-            <p className="text-sm text-muted-foreground py-4">{en.reviews.noReviews}</p>
+            <p className="text-sm text-muted-foreground py-4">{t.reviews.noReviews}</p>
           )}
         </>
       )}

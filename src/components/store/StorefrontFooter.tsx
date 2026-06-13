@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import { Separator } from '@/components/ui/separator'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { layout } from '@/lib/styles'
 import { useStoreConfig } from '@/hooks/useStoreConfig'
 
 export function StorefrontFooter() {
+  const t = useT()
   const { config } = useStoreConfig()
   const year = new Date().getFullYear()
 
@@ -25,28 +26,28 @@ export function StorefrontFooter() {
               href="/policy/shipping"
               className="hover:text-foreground transition-colors px-2 py-1"
             >
-              {en.policies.shipping}
+              {t.policies.shipping}
             </Link>
             <Separator orientation="vertical" className="h-4" />
             <Link
               href="/policy/returns"
               className="hover:text-foreground transition-colors px-2 py-1"
             >
-              {en.policies.returns}
+              {t.policies.returns}
             </Link>
             <Separator orientation="vertical" className="h-4" />
             <Link
               href="/policy/privacy"
               className="hover:text-foreground transition-colors px-2 py-1"
             >
-              {en.policies.privacy}
+              {t.policies.privacy}
             </Link>
             <Separator orientation="vertical" className="h-4" />
             <Link
               href="/policy/terms"
               className="hover:text-foreground transition-colors px-2 py-1"
             >
-              {en.policies.terms}
+              {t.policies.terms}
             </Link>
           </nav>
         </div>

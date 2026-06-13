@@ -8,7 +8,7 @@ import { formatPrice, getPriceRange } from '@/lib/utils/index'
 import { prefetch } from '@/lib/api'
 import { useViewportPrefetch } from '@/hooks/useViewportPrefetch'
 import { useCart } from '@/hooks/useCart'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import type { ProductCardProps } from '@/lib/types/product'
 
 export function ProductCard({
@@ -21,6 +21,7 @@ export function ProductCard({
   style,
   priority = false,
 }: ProductCardProps) {
+  const t = useT()
   const viewportRef = useViewportPrefetch<HTMLAnchorElement>(`/api/products/${product.id}`)
   const { addItem, openCart } = useCart()
   const { minPrice, maxPrice } = getPriceRange(sizes)
@@ -95,7 +96,7 @@ export function ProductCard({
           </div>
         )}
 
-        {isNew && <Badge className="absolute left-2 top-2">{en.product.new}</Badge>}
+        {isNew && <Badge className="absolute left-2 top-2">{t.product.new}</Badge>}
 
         {/* Quick-add affordance — revealed on hover, only for single-size products.
             Multi-size products skip this overlay; the whole card is a <Link> to the PDP
@@ -113,7 +114,7 @@ export function ProductCard({
           >
             <button
               type="button"
-              aria-label={`${en.store.quickAdd} — ${product.name}`}
+              aria-label={`${t.store.quickAdd} — ${product.name}`}
               onClick={handleQuickAdd}
               className={cn(
                 'w-full min-h-11 px-3 py-2.5',
@@ -123,7 +124,7 @@ export function ProductCard({
                 'transition-colors hover:bg-background cursor-pointer',
               )}
             >
-              {en.store.quickAdd}
+              {t.store.quickAdd}
             </button>
           </div>
         )}
@@ -145,7 +146,7 @@ export function ProductCard({
 
       {/* Out of stock */}
       {activeSizes.length === 0 && (
-        <p className="mt-1 px-0.5 text-xs text-muted-foreground">{en.store.outOfStock}</p>
+        <p className="mt-1 px-0.5 text-xs text-muted-foreground">{t.store.outOfStock}</p>
       )}
 
       {/* Variant color dots */}

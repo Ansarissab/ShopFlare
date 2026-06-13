@@ -1,16 +1,17 @@
-import { en } from '@/lib/i18n/en'
+import { getT } from '@/lib/i18n/server'
 import type { FaqItem } from '@/lib/seo/jsonld'
 
 interface Props {
   items: FaqItem[]
 }
 
-export function FaqSection({ items }: Props) {
+export async function FaqSection({ items }: Props) {
+  const t = await getT()
   if (!items.length) return null
   return (
     <section aria-labelledby="faq-heading" className="mt-12 border-t border-border pt-10">
       <h2 id="faq-heading" className="text-xl font-bold tracking-tight text-foreground mb-6">
-        {en.seo.faqSectionTitle}
+        {t.seo.faqSectionTitle}
       </h2>
       <dl className="space-y-6">
         {items.map((item, i) => (

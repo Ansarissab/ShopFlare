@@ -12,11 +12,12 @@ import { CartSheet } from '@/components/store/cart/CartSheet'
 import { CategoryNav } from '@/components/store/categories/CategoryNav'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { catalogHref } from '@/lib/nav'
 import type { CategoryNode } from '@/lib/types/category'
 
 export function StorefrontHeader() {
+  const t = useT()
   const { openCart } = useCart()
   const itemCount = useCartItemCount()
   const { config } = useStoreConfig()
@@ -57,7 +58,7 @@ export function StorefrontHeader() {
               href={catalogHref(true)}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:block"
             >
-              {en.store.shopNav}
+              {t.store.shopNav}
             </Link>
           )}
 
@@ -66,7 +67,7 @@ export function StorefrontHeader() {
             href="/track"
             className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:block"
           >
-            {en.store.trackOrder}
+            {t.store.trackOrder}
           </Link>
 
           {/* Cart button */}

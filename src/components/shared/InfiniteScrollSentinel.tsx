@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import type { InfiniteScrollSentinelProps } from '@/lib/types/search'
 
 export function InfiniteScrollSentinel({
@@ -11,6 +11,7 @@ export function InfiniteScrollSentinel({
   totalItems,
   pageSize,
 }: InfiniteScrollSentinelProps) {
+  const t = useT()
   const ref = useRef<HTMLDivElement>(null)
   const onVisibleRef = useRef(onVisible)
   useEffect(() => {
@@ -39,8 +40,8 @@ export function InfiniteScrollSentinel({
 
   return (
     <div ref={ref} className="flex justify-center py-8 text-sm text-muted-foreground">
-      {hasMore && isLoading && <span>{en.store.loadingMore}</span>}
-      {!hasMore && <span>{en.store.allProductsLoaded}</span>}
+      {hasMore && isLoading && <span>{t.store.loadingMore}</span>}
+      {!hasMore && <span>{t.store.allProductsLoaded}</span>}
     </div>
   )
 }

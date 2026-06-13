@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { cn } from '@/lib/utils'
 import { formatPrice, calculateGrandTotal } from '@/lib/utils/index'
 import type { CartSummaryProps } from '@/lib/types/cart'
@@ -22,6 +22,7 @@ export function CartSummary({
   taxInclusive = false,
   onClose,
 }: CartSummaryProps) {
+  const t = useT()
   const router = useRouter()
   const [couponCode, setCouponCode] = useState('')
   const [couponState, setCouponState] = useState<'idle' | 'applied' | 'invalid'>('idle')
@@ -59,10 +60,10 @@ export function CartSummary({
       {/* Coupon */}
       <div className="flex gap-2">
         <Input
-          placeholder={en.cart.couponPlaceholder}
+          placeholder={t.cart.couponPlaceholder}
           value={couponCode}
           onChange={handleCouponChange}
-          aria-label={en.cart.couponPlaceholder}
+          aria-label={t.cart.couponPlaceholder}
           className={cn(
             couponApplied || couponState === 'applied'
               ? 'border-success focus-visible:ring-success/30'
@@ -79,16 +80,16 @@ export function CartSummary({
           onClick={handleApplyCoupon}
           disabled={applying || couponApplied || couponState === 'applied' || !couponCode.trim()}
         >
-          {en.cart.applyCoupon}
+          {t.cart.applyCoupon}
         </Button>
       </div>
 
       {/* Feedback */}
       {(couponApplied || couponState === 'applied') && (
-        <p className="text-xs font-medium text-success">{en.cart.couponApplied}</p>
+        <p className="text-xs font-medium text-success">{t.cart.couponApplied}</p>
       )}
       {couponState === 'invalid' && (
-        <p className="text-xs text-destructive">{en.cart.couponInvalid}</p>
+        <p className="text-xs text-destructive">{t.cart.couponInvalid}</p>
       )}
 
       <Separator />
@@ -96,21 +97,19 @@ export function CartSummary({
       {/* Totals */}
       <div className="flex flex-col gap-1.5 text-sm">
         <div className="flex justify-between">
-          <span className="text-muted-foreground">{en.cart.subtotal}</span>
+          <span className="text-muted-foreground">{t.cart.subtotal}</span>
           <span>{formatPrice(subtotalCents)}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-muted-foreground">{en.cart.shipping}</span>
-          <span>{shippingCents === 0 ? en.cart.shippingFree : formatPrice(shippingCents)}</span>
+          <span className="text-muted-foreground">{t.cart.shipping}</span>
+          <span>{shippingCents === 0 ? t.cart.shippingFree : formatPrice(shippingCents)}</span>
         </div>
         {taxCents > 0 && (
           <div className="flex justify-between">
             <span className="text-muted-foreground">
               {taxInclusive
-                ? en.cart.taxIncluded.replace('{name}', taxName)
-                : en.cart.taxRateLabel
-                    .replace('{name}', taxName)
-                    .replace('{rate}', String(taxRate))}
+                ? t.cart.taxIncluded.replace('{name}', taxName)
+                : t.cart.taxRateLabel.replace('{name}', taxName).replace('{rate}', String(taxRate))}
             </span>
             <span className={taxInclusive ? 'text-xs text-muted-foreground' : ''}>
               {formatPrice(taxCents)}
@@ -119,23 +118,23 @@ export function CartSummary({
         )}
         {discountCents > 0 && (
           <div className="flex justify-between text-success">
-            <span>{en.cart.couponApplied}</span>
+            <span>{t.cart.couponApplied}</span>
             <span>-{formatPrice(discountCents)}</span>
           </div>
         )}
         <Separator />
         <div className="flex justify-between font-semibold">
-          <span>{en.cart.total}</span>
+          <span>{t.cart.total}</span>
           <span>{formatPrice(totalCents)}</span>
         </div>
       </div>
 
       {/* CTAs */}
       <Button size="lg" className="w-full" onClick={handleCheckout}>
-        {en.store.checkout}
+        {t.store.checkout}
       </Button>
       <Button variant="ghost" size="sm" className="w-full" onClick={onClose}>
-        {en.store.continueShopping}
+        {t.store.continueShopping}
       </Button>
     </div>
   )

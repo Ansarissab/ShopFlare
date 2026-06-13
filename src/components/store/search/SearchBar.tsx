@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Search, X } from 'lucide-react'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { SEARCH_DEBOUNCE_MS } from '@/lib/constants'
 import type { SearchBarProps } from '@/lib/types/search'
 
 export function SearchBar({ value, onChange }: SearchBarProps) {
+  const t = useT()
   const [inputValue, setInputValue] = useState(value)
   const onChangeRef = useRef(onChange)
   useEffect(() => {
@@ -35,13 +36,13 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
         type="search"
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
-        placeholder={en.store.searchProducts}
+        placeholder={t.store.searchProducts}
         className="w-full h-10 rounded-lg border border-input bg-background pl-9 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
       />
       {inputValue && (
         <button
           type="button"
-          aria-label={en.store.searchClearHint}
+          aria-label={t.store.searchClearHint}
           onClick={() => setInputValue('')}
           className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
         >
