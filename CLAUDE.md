@@ -68,11 +68,16 @@ If it almost exists, EXTEND it — do not copy-paste. No "shit code", DRY only.
 
 ## Testing & CI
 
-- `pnpm verify` (alias `pnpm run ci`) is the full gate (Rails `bin/ci` style,
-  `scripts/ci.mjs`): typecheck → lint → unit+coverage → integration → build, fail-fast.
-  `--quick` skips integration+build; `--no-build` skips build. Note: bare `pnpm ci` is a
-  reserved pnpm builtin — use `pnpm verify` or `pnpm run ci`. E2E/visual/a11y are separate
-  (`pnpm test:e2e`, need a dev server).
+- `pnpm verify` (alias `pnpm run ci`) is the full gate (`scripts/ci.mjs`), fail-fast:
+  1. typecheck (alone)
+  2. lint + build + unit+coverage (concurrent; build skipped by `--quick`/`--no-build`)
+  3. integration (sequential; skipped by `--quick`)
+  4. smoke — Playwright `@smoke` specs (sequential; skipped by `--quick`)
+  5. e2e — full Playwright suite excl. `@smoke` + `visual:` (sequential; skipped by `--quick`);
+     boots its own dev server on dynamically-scanned free ports — safe alongside `pnpm dev`
+  6. visual — opt-in only via `pnpm verify --visual`; native `pnpm test:visual`; no Docker;
+     baselines are machine-specific (`pnpm test:visual:update` to regenerate)
+  Note: bare `pnpm ci` is a reserved pnpm builtin — use `pnpm verify` or `pnpm run ci`.
 - **Coverage gate = unit project only, 95%** (`pnpm test:coverage` =
   `vitest run --project unit --coverage`). Worker routes run in the miniflare/workerd pool
   where v8 can't instrument them → they're covered **behaviorally** by the integration

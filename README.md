@@ -337,11 +337,48 @@ Two Vitest projects (a workspace), both run by `pnpm test`:
   decrement, **concurrent oversell protection**, coupon validation, cancel + stock restore,
   the review verified-purchase gate, Stripe webhook signature rejection, and admin CRUD.
 
+### `pnpm verify` — full quality gate
+
+`pnpm verify` (alias `pnpm run ci`) runs the whole bar fail-fast. Steps:
+
+| Step | What runs | Skipped by |
+| --- | --- | --- |
+| 1 | **typecheck** — alone, fail-fast | — |
+| 2 | **lint + build + unit+coverage** — concurrent (build is the long-pole; overlapping saves ~70 s) | build: `--quick` / `--no-build` |
+| 3 | **integration** — miniflare/workerd, sequential | `--quick` |
+| 4 | **smoke** — Playwright `@smoke` critical-path specs, sequential | `--quick` |
+| 5 | **e2e** — full Playwright suite excluding `@smoke` and `visual:` specs, sequential | `--quick` |
+| 6 | **visual** — native screenshot regression, opt-in | must pass `--visual` |
+
 ```bash
-pnpm test            # all projects (1368 unit + 168 integration)
-pnpm test:coverage   # unit coverage report (gate: 95%)
-pnpm typecheck && pnpm test && pnpm build
+pnpm verify              # full gate (no visual)
+pnpm verify --quick      # typecheck + lint + unit only (fast dev loop)
+pnpm verify --no-build   # skip the production build
+pnpm verify --visual     # full gate + native visual regression
 ```
+
+**Standalone scripts:**
+
+```bash
+pnpm test:coverage        # unit coverage only (gate: 95%)
+pnpm test:integration     # integration suite only (miniflare/workerd)
+pnpm test:smoke           # @smoke specs only
+pnpm test:e2e             # full e2e suite (boots its own dev server)
+pnpm test:visual          # visual regression against local baselines
+pnpm test:visual:update   # regenerate machine-local baselines
+```
+
+**E2E and smoke** each boot their own Next.js app + wrangler worker on dynamically-scanned
+free ports, so they never collide with a running dev server and can be run while `pnpm dev`
+is active.
+
+**Coverage gate = unit project only, 95%.** Worker routes run in the miniflare/workerd pool
+where v8 can't instrument them; they're covered behaviorally by the integration suite instead.
+See [docs/adr/0008-coverage-gate-unit-only.md](docs/adr/0008-coverage-gate-unit-only.md).
+
+**Visual baselines** are machine-specific and gitignored (`.visual-baselines/`). Run
+`pnpm test:visual:update` once on `main` to generate them, then `pnpm test:visual` to diff
+on a feature branch. No Docker required — visual runs natively.
 
 **GitHub Actions** ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs lint, typecheck
 (app + Worker), tests, and a production build on every push / PR to `main`.

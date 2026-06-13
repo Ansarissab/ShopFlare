@@ -41,9 +41,10 @@ with an explicit `include` scope. Coverage is removed from the integration confi
      (`money`, `version`, `ratelimit`, `access-core`, `email`, `edge-cache`, `http`,
      `fingerprint`, `turnstile`) stay in scope and are unit-tested.
 
-4. **One command for the whole bar.** `pnpm ci` (`scripts/ci.mjs`) runs, fail-fast:
-   typecheck → lint → unit+coverage → integration → build. Flags: `--quick` (skip
-   integration+build), `--no-build`.
+4. **One command for the whole bar.** `pnpm verify` / `pnpm run ci` (`scripts/ci.mjs`)
+   runs fail-fast: typecheck → lint+build+unit+coverage (concurrent) → integration →
+   smoke → e2e → visual (opt-in via `--visual`). Flags: `--quick` (typecheck+lint+unit
+   only), `--no-build` (skip production build).
 
 ## Supersedes
 
