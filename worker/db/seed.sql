@@ -107,6 +107,20 @@ INSERT OR IGNORE INTO reviews (id, order_id, product_id, customer_name, rating, 
   ('demo_review_1', 'demo_order_1', 'demo_tshirt', 'Sample Customer', 5,
    'Great quality and a perfect fit — exactly what I expected. Will order again!', 1);
 
+-- ─── Categories ──────────────────────────────────────────────────────────────
+-- 2 top-level demo categories; products linked via product_categories junction.
+-- INSERT OR IGNORE keeps re-runs idempotent (matches seed.sql convention).
+INSERT OR IGNORE INTO categories (id, name, slug, description, sort_order, active) VALUES
+  ('demo_cat_apparel',     'Apparel',     'apparel',     'T-shirts, caps, and clothing', 0, 1),
+  ('demo_cat_accessories', 'Accessories', 'accessories', 'Bags, mugs, and more',         1, 1);
+
+-- Link products → categories
+INSERT OR IGNORE INTO product_categories (product_id, category_id, sort_order) VALUES
+  ('demo_tshirt', 'demo_cat_apparel',     0),
+  ('demo_cap',    'demo_cat_apparel',     1),
+  ('demo_mug',    'demo_cat_accessories', 0),
+  ('demo_bag',    'demo_cat_accessories', 1);
+
 -- ─── Policy pages ─────────────────────────────────────────────────────────────
 -- Editable from Admin → Pages. INSERT OR IGNORE so admin edits are never clobbered.
 INSERT OR IGNORE INTO pages (slug, title, content, updated_at) VALUES

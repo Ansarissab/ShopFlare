@@ -33,17 +33,33 @@ test.describe('home page', () => {
 
 test.describe('category page metadata', () => {
   test('server renders title, OG tags, and JSON-LD in initial HTML', async ({ page }) => {
-    // Find a category link from the home page
+    // Find a category link by opening the "Browse Categories" dropdown in the header.
+    // CategoryNav renders links inside a DropdownMenuContent portal — they are only
+    // injected into the DOM after the trigger is clicked.
     await page.goto('/')
     await page.waitForLoadState('networkidle')
 
-    const href = await page.evaluate(() => {
-      const a = document.querySelector('a[href^="/category/"]')
-      return a ? a.getAttribute('href') : null
-    })
+    // Check whether the category dropdown trigger exists before clicking it.
+    // StorefrontHeader is a client component that fetches /api/categories — allow
+    // time for the API response + re-render after networkidle.
+    const trigger = page.getByRole('button', { name: 'Browse Categories' })
+    const triggerVisible = await trigger.isVisible({ timeout: 8_000 }).catch(() => false)
+
+    if (!triggerVisible) {
+      test.skip(true, 'No categories — skipping category metadata test')
+      return
+    }
+
+    // Open the dropdown so the portal links are injected into the DOM.
+    await trigger.click()
+
+    // Grab the first category link from the now-open dropdown.
+    const catLink = page.locator('a[href^="/category/"]').first()
+    await catLink.waitFor({ state: 'visible', timeout: 5_000 })
+    const href = await catLink.getAttribute('href')
 
     if (!href) {
-      test.skip(true, 'No categories — skipping category metadata test')
+      test.skip(true, 'No category links found in dropdown — skipping category metadata test')
       return
     }
 
