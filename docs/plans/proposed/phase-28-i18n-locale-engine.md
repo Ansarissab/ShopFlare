@@ -1,8 +1,43 @@
 # Phase 28 — i18n Locale engine + full codemod (FOUNDATION)
 
-Status: Proposed. Planned 2026-06-12 (grill-with-docs). Implements
-[ADR 0015](../../adr/0015-i18n-locale-engine.md). See
-[roadmap](./phases-27-33-roadmap.md).
+Status: Implemented 2026-06-13 (pending `pnpm verify`). Planned 2026-06-12
+(grill-with-docs). Implements [ADR 0015](../../adr/0015-i18n-locale-engine.md).
+See [roadmap](./phases-27-33-roadmap.md).
+
+## What shipped (vs. plan)
+
+Built in 7 waves (engine → routing → storefront codemod → RTL → switcher +
+admin settings → admin localization → finalize). Key decisions made during build:
+
+- **Routing = middleware rewrite + `x-locale` header** (not an `app/[locale]`
+  segment). `/{loc}` prefixes are stripped and rewritten internally; the header
+  carries the active Locale to server components; a `NEXT_LOCALE` cookie persists
+  the switcher choice. Zero file moves; `.md` twins, sitemap, robots untouched.
+  Query strings preserved across the rewrite.
+- **Resolver**: server components `await getT()` (reads the header); client
+  components `useT()` (via `TProvider`, **falls back to English when no provider
+  is mounted** — this keeps ~unwrapped component tests green and admin English in
+  any non-provider context).
+- **fr/ur dictionaries are English placeholders marked TODO** — structurally
+  complete (the `Dictionary = Widen<typeof en>` type + a runtime drift-guard test
+  enforce key parity). Real translations are a follow-up pass; the engine,
+  routing, switcher, and RTL all ship and are testable now.
+- **Admin is also localized** (added after the original storefront-only scope):
+  all 38 admin files migrated to the engine; admin language switcher prefixes
+  `/{loc}/admin`; admin defaults to English and is selected via the switcher.
+
+### Deferred follow-ups (intentional)
+
+- **Urdu admin RTL pass** — admin is migrated for strings (fr works fully) but
+  forced `dir="ltr"`; the ~94-utility physical→logical RTL conversion on admin is
+  a separate phase. Urdu admin shows translated text in an LTR layout for now.
+- **Embla carousel RTL scroll direction** — product image carousel nav buttons
+  use logical insets, but embla's `direction:'rtl'` is not wired (noted in
+  `carousel.tsx`); low impact for image galleries.
+- **Merchant-content translation** (Product/policy/FAQ/announcement) — out of
+  scope here as planned; future Workers-AI phase.
+- **WhatsApp deep-link message text** stays English (outbound content, not UI
+  chrome); revisit with content translation.
 
 **Scope: UI chrome only.** Merchant-content translation (Product text, policies, FAQ,
 announcement bar) is explicitly out of scope — a future phase using Cloudflare Workers AI
