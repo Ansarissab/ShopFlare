@@ -1,11 +1,20 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono, Instrument_Serif, Merriweather, Nunito } from 'next/font/google'
+import {
+  Geist,
+  Geist_Mono,
+  Instrument_Serif,
+  Merriweather,
+  Noto_Nastaliq_Urdu,
+  Nunito,
+} from 'next/font/google'
 import '@/app/globals.css'
 import { ServiceWorkerProvider } from '@/components/pwa/ServiceWorkerProvider'
 import { JsonLd } from '@/components/shared/JsonLd'
 import { organizationJsonLd } from '@/lib/seo/jsonld'
 import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
 import type { StoreConfig } from '@/lib/types/common'
+import { DEFAULT_LOCALE, LOCALES } from '@/lib/constants'
+import { getLocaleHeader } from '@/lib/i18n/server'
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'], display: 'swap' })
 const geistMono = Geist_Mono({
@@ -34,6 +43,14 @@ const merriweather = Merriweather({
 const nunito = Nunito({
   variable: '--font-nunito',
   subsets: ['latin'],
+  display: 'swap',
+  preload: false,
+})
+// Urdu / RTL font — loaded only when the active locale is RTL to avoid bloat on LTR pages.
+const notoNastaliq = Noto_Nastaliq_Urdu({
+  variable: '--font-nastaliq',
+  weight: ['400', '700'],
+  subsets: ['arabic'],
   display: 'swap',
   preload: false,
 })
@@ -118,9 +135,29 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     ...(siteUrl ? { '@id': `${siteUrl}#org` } : {}),
   }
 
-  const fontVars = `${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} ${merriweather.variable} ${nunito.variable}`
+  // Use the EXPLICIT header locale (set by middleware when a /{locale} prefix is present).
+  // Admin routes never carry the header, so they always get lang="en" dir="ltr".
+  const locale = (await getLocaleHeader()) ?? DEFAULT_LOCALE
+  const localeDir = LOCALES[locale].dir
+  const isRtl = localeDir === 'rtl'
+
+  const fontVars = [
+    geistSans.variable,
+    geistMono.variable,
+    instrumentSerif.variable,
+    merriweather.variable,
+    nunito.variable,
+    // Include the Nastaliq variable only for RTL pages so no preload occurs on LTR.
+    ...(isRtl ? [notoNastaliq.variable] : []),
+  ].join(' ')
+
   return (
-    <html lang="en" className={`${fontVars} h-full antialiased`} suppressHydrationWarning>
+    <html
+      lang={locale}
+      dir={localeDir}
+      className={`${fontVars} h-full antialiased`}
+      suppressHydrationWarning
+    >
       <head>
         {/* No-flash theme boot: applies cached theme vars pre-paint */}
         <script dangerouslySetInnerHTML={{ __html: bootScript }} />

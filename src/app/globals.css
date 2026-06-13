@@ -131,6 +131,14 @@
     @apply text-xl;
   }
 
+  /* ─── RTL (Urdu) font ───────────────────────────────────────────────────── */
+  /* Applied when the store wrapper or <html> carries dir="rtl" (e.g. /ur/...).
+     Falls back gracefully to --store-font then Geist Sans when the variable is
+     absent (i.e. on pages that didn't load the font via next/font). */
+  [dir='rtl'] {
+    font-family: var(--font-nastaliq), var(--store-font, var(--font-geist-sans)), system-ui, sans-serif;
+  }
+
   /* ─── Focus ring ─────────────────────────────────────────────────────────── */
   :focus-visible {
     outline: 2px solid var(--accent);

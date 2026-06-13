@@ -8,32 +8,62 @@ import { AppTabBar } from '@/components/store/shell/AppTabBar'
 import { InstallPrompt } from '@/components/pwa/InstallPrompt'
 import { OfflineBanner } from '@/components/pwa/OfflineBanner'
 import { WhatsAppWidget } from '@/components/store/WhatsAppWidget'
+import { TProvider } from '@/lib/i18n/Provider'
+import { getLocaleHeader } from '@/lib/i18n/server'
+import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
+import { DEFAULT_LOCALE, LOCALES } from '@/lib/constants'
+import { isLocale } from '@/lib/i18n'
+import type { StoreConfig } from '@/lib/types/common'
 
 export const metadata: Metadata = {
   manifest: '/manifest.webmanifest',
 }
 
-export default function StoreLayout({ children }: { children: React.ReactNode }) {
+export default async function StoreLayout({ children }: { children: React.ReactNode }) {
+  // Resolve the active locale for the store subtree.
+  // Priority: explicit x-locale header (set by middleware for /{loc}/... paths)
+  //           > merchant defaultLocale from config (for unprefixed paths)
+  //           > 'en'
+  const config = await fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: 300 })
+  const header = await getLocaleHeader()
+  // enabledLocales from the schema is string[] (z.enum resolved to string); narrow with isLocale.
+  const rawEnabled = config?.enabledLocales ?? ['en']
+  const enabled = rawEnabled.filter(isLocale)
+  const rawDefault = config?.defaultLocale
+  const configDefault = rawDefault && isLocale(rawDefault) ? rawDefault : DEFAULT_LOCALE
+  const fallback = enabled.includes(configDefault) ? configDefault : DEFAULT_LOCALE
+  const locale = header && enabled.includes(header) ? header : fallback
+
+  const localeDir = LOCALES[locale].dir
+
   return (
-    <ThemeProvider>
-      {/* Web browser chrome — hidden via CSS when running in standalone mode */}
-      <div data-web-chrome>
-        <StorefrontHeader />
-      </div>
-      {/* Native app chrome — visible only in standalone (AppHeader/AppTabBar self-hide in browser) */}
-      <AppHeader />
-      {/* Suspense boundary so client pages using useSearchParams (home/search,
-          category, tracking, checkout success) can statically prerender a shell. */}
-      <main className="flex-1">
-        <Suspense fallback={null}>{children}</Suspense>
-      </main>
-      <div data-web-chrome>
-        <StorefrontFooter />
-      </div>
-      <AppTabBar />
-      <InstallPrompt />
-      <OfflineBanner />
-      <WhatsAppWidget />
-    </ThemeProvider>
+    <TProvider locale={locale}>
+      {/* dir/lang on the outermost store wrapper so RTL flips even when
+          the root <html> stays "en" (unprefixed + merchant defaultLocale case). */}
+      <ThemeProvider>
+        {/* flex flex-col flex-1 reproduces the body's column context so the
+            inner <main className="flex-1"> still expands (sticky footer). */}
+        <div dir={localeDir} lang={locale} className="flex flex-1 flex-col">
+          {/* Web browser chrome — hidden via CSS when running in standalone mode */}
+          <div data-web-chrome>
+            <StorefrontHeader />
+          </div>
+          {/* Native app chrome — visible only in standalone (AppHeader/AppTabBar self-hide in browser) */}
+          <AppHeader />
+          {/* Suspense boundary so client pages using useSearchParams (home/search,
+              category, tracking, checkout success) can statically prerender a shell. */}
+          <main className="flex-1">
+            <Suspense fallback={null}>{children}</Suspense>
+          </main>
+          <div data-web-chrome>
+            <StorefrontFooter />
+          </div>
+          <AppTabBar />
+          <InstallPrompt />
+          <OfflineBanner />
+          <WhatsAppWidget />
+        </div>
+      </ThemeProvider>
+    </TProvider>
   )
 }

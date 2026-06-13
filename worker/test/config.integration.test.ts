@@ -127,6 +127,35 @@ describe('GET /api/config/store', () => {
   })
 })
 
+describe('GET /api/config/store — i18n locale fields', () => {
+  it('returns default enabledLocales and defaultLocale when unset', async () => {
+    const res = await get('/api/config/store')
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.enabledLocales).toEqual(['en'])
+    expect(body.defaultLocale).toBe('en')
+  })
+
+  it('round-trips enabledLocales and defaultLocale via PUT then GET', async () => {
+    const putRes = await adminPut('/api/admin/config/store', {
+      enabledLocales: ['en', 'fr', 'ur'],
+      defaultLocale: 'fr',
+    })
+    expect(putRes.status).toBe(200)
+    const putBody = (await putRes.json()) as { ok: boolean; updated: string[] }
+    expect(putBody.ok).toBe(true)
+    expect(putBody.updated).toContain('enabledLocales')
+    expect(putBody.updated).toContain('defaultLocale')
+
+    const res = await get('/api/config/store')
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as Record<string, unknown>
+    // enabledLocales is stored comma-joined, re-parsed as array
+    expect(body.enabledLocales).toEqual(['en', 'fr', 'ur'])
+    expect(body.defaultLocale).toBe('fr')
+  })
+})
+
 describe('PUT /api/admin/config/store', () => {
   it('creates new config keys and returns updated list', async () => {
     const res = await adminPut('/api/admin/config/store', {

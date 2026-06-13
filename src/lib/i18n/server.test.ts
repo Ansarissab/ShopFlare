@@ -13,7 +13,7 @@ vi.mock('next/headers', () => ({
 }))
 
 // Import AFTER the mock is registered so the module sees the mock.
-const { getLocale, getT } = await import('./server')
+const { getLocale, getLocaleHeader, getT } = await import('./server')
 
 // ─── getLocale ────────────────────────────────────────────────────────────────
 
@@ -45,6 +45,29 @@ describe('getLocale', () => {
   it('defaults to "en" when header is an unknown locale', async () => {
     localeHeader = 'de'
     await expect(getLocale()).resolves.toBe('en')
+  })
+})
+
+// ─── getLocaleHeader ─────────────────────────────────────────────────────────
+
+describe('getLocaleHeader', () => {
+  beforeEach(() => {
+    localeHeader = null
+  })
+
+  it('returns the locale when x-locale header is a valid locale', async () => {
+    localeHeader = 'fr'
+    await expect(getLocaleHeader()).resolves.toBe('fr')
+  })
+
+  it('returns null when header is absent', async () => {
+    localeHeader = null
+    await expect(getLocaleHeader()).resolves.toBeNull()
+  })
+
+  it('returns null when header is an unknown locale', async () => {
+    localeHeader = 'de'
+    await expect(getLocaleHeader()).resolves.toBeNull()
   })
 })
 

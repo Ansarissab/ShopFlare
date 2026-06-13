@@ -1,17 +1,39 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
-// Mock next/server before importing middleware
-const mockResHeaders: Record<string, string> = {}
-const mockNextFn = vi.fn(() => ({
-  headers: {
+// ─── Mock next/server ────────────────────────────────────────────────────────
+// Track response cookies and headers independently per call.
+type MockResponse = {
+  rewriteUrl?: string
+  type: 'next' | 'rewrite'
+  headers: Record<string, string>
+  cookies: Record<string, { value: string; opts: Record<string, unknown> }>
+}
+
+let lastRes: MockResponse
+
+const makeResObj = (type: 'next' | 'rewrite', rewriteUrl?: string): MockResponse => {
+  const obj: MockResponse = { type, rewriteUrl, headers: {}, cookies: {} }
+  ;(obj as unknown as Record<string, unknown>).headers = {
+    _store: {} as Record<string, string>,
     set: (k: string, v: string) => {
-      mockResHeaders[k] = v
+      ;(obj.headers as unknown as Record<string, Record<string, string>>)['_store'] ??= {}
+      ;(obj.headers as unknown as { _store: Record<string, string> })._store[k] = v
     },
-    get: (k: string) => mockResHeaders[k] ?? null,
-  },
-}))
-const mockRewriteFn = vi.fn((url: URL) => ({ rewriteUrl: url.toString(), type: 'rewrite' }))
+    get: (k: string) =>
+      (obj.headers as unknown as { _store: Record<string, string> })._store?.[k] ?? null,
+  }
+  ;(obj as unknown as Record<string, unknown>).cookies = {
+    set: (k: string, v: string, opts: Record<string, unknown>) => {
+      obj.cookies[k] = { value: v, opts }
+    },
+  }
+  lastRes = obj
+  return obj
+}
+
+const mockNextFn = vi.fn(() => makeResObj('next'))
+const mockRewriteFn = vi.fn((url: URL, _opts?: unknown) => makeResObj('rewrite', url.toString()))
 
 vi.mock('next/server', () => ({
   NextResponse: {
@@ -22,25 +44,122 @@ vi.mock('next/server', () => ({
 
 const { middleware } = await import('./middleware')
 
-function makeReq(pathname: string, accept?: string): Parameters<typeof middleware>[0] {
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+type FakeReq = Parameters<typeof middleware>[0]
+
+function makeReq(pathname: string, accept?: string): FakeReq {
+  const headers: Record<string, string> = {}
+  if (accept) headers['accept'] = accept
+
   return {
     nextUrl: { pathname, origin: 'https://store.example.com' },
     url: `https://store.example.com${pathname}`,
     headers: {
-      get: (k: string) => (k.toLowerCase() === 'accept' && accept ? accept : null),
+      get: (k: string) => headers[k.toLowerCase()] ?? null,
+      // Headers constructor mirror for spread
+      forEach: (cb: (v: string, k: string) => void) =>
+        Object.entries(headers).forEach(([k, v]) => cb(v, k)),
+      entries: () => Object.entries(headers)[Symbol.iterator](),
     },
-  } as unknown as Parameters<typeof middleware>[0]
+  } as unknown as FakeReq
+}
+
+/** Read the 'Link' header from the last response. */
+function getLinkHeader(): string | null {
+  return (
+    (lastRes?.headers as unknown as { get: (k: string) => string | null }).get?.('Link') ?? null
+  )
+}
+
+/** Read a response cookie value. */
+function getCookie(name: string): string | null {
+  return lastRes?.cookies?.[name]?.value ?? null
 }
 
 describe('middleware', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    Object.keys(mockResHeaders).forEach((k) => delete mockResHeaders[k])
+    lastRes = undefined as unknown as MockResponse
   })
 
   afterEach(() => {
     delete process.env.NEXT_PUBLIC_SITE_URL
   })
+
+  // ── Locale prefix routing ────────────────────────────────────────────────────
+
+  describe('locale prefix routing', () => {
+    it('/fr/shop rewrites to /shop with x-locale: fr and sets cookie', () => {
+      middleware(makeReq('/fr/shop'))
+      expect(mockRewriteFn).toHaveBeenCalledOnce()
+      const [url, opts] = mockRewriteFn.mock.calls[0] as [URL, { request: { headers: Headers } }]
+      expect(url.pathname).toBe('/shop')
+      const xLocale = (
+        opts.request.headers as unknown as { get: (k: string) => string | null }
+      ).get('x-locale')
+      expect(xLocale).toBe('fr')
+      expect(getCookie('NEXT_LOCALE')).toBe('fr')
+    })
+
+    it('/ur/product/x rewrites to /product/x with x-locale: ur', () => {
+      middleware(makeReq('/ur/product/x'))
+      expect(mockRewriteFn).toHaveBeenCalledOnce()
+      const [url, opts] = mockRewriteFn.mock.calls[0] as [URL, { request: { headers: Headers } }]
+      expect(url.pathname).toBe('/product/x')
+      const xLocale = (
+        opts.request.headers as unknown as { get: (k: string) => string | null }
+      ).get('x-locale')
+      expect(xLocale).toBe('ur')
+      expect(getCookie('NEXT_LOCALE')).toBe('ur')
+    })
+
+    it('/en/shop rewrites to /shop with x-locale: en', () => {
+      middleware(makeReq('/en/shop'))
+      expect(mockRewriteFn).toHaveBeenCalledOnce()
+      const [url] = mockRewriteFn.mock.calls[0] as [URL]
+      expect(url.pathname).toBe('/shop')
+      expect(getCookie('NEXT_LOCALE')).toBe('en')
+    })
+
+    it('/{locale} root (no trailing path) rewrites to /', () => {
+      middleware(makeReq('/fr'))
+      expect(mockRewriteFn).toHaveBeenCalledOnce()
+      const [url] = mockRewriteFn.mock.calls[0] as [URL]
+      expect(url.pathname).toBe('/')
+    })
+
+    it('unprefixed /shop passes through with NO x-locale header injection', () => {
+      middleware(makeReq('/shop'))
+      expect(mockNextFn).toHaveBeenCalledOnce()
+      expect(mockRewriteFn).not.toHaveBeenCalled()
+      expect(getCookie('NEXT_LOCALE')).toBeNull()
+    })
+  })
+
+  // ── Markdown + locale composition ─────────────────────────────────────────
+
+  describe('locale-prefixed markdown requests', () => {
+    it('/ur/product/x with Accept: text/markdown rewrites to /product/x.md', () => {
+      middleware(makeReq('/ur/product/x', 'text/markdown'))
+      expect(mockRewriteFn).toHaveBeenCalledOnce()
+      const [url, opts] = mockRewriteFn.mock.calls[0] as [URL, { request: { headers: Headers } }]
+      expect(url.pathname).toBe('/product/x.md')
+      const xLocale = (
+        opts.request.headers as unknown as { get: (k: string) => string | null }
+      ).get('x-locale')
+      expect(xLocale).toBe('ur')
+    })
+
+    it('/fr/category/tops with Accept: text/markdown rewrites to /category/tops.md', () => {
+      middleware(makeReq('/fr/category/tops', 'text/markdown'))
+      expect(mockRewriteFn).toHaveBeenCalledOnce()
+      const [url] = mockRewriteFn.mock.calls[0] as [URL]
+      expect(url.pathname).toBe('/category/tops.md')
+    })
+  })
+
+  // ── Non-matching paths ────────────────────────────────────────────────────
 
   describe('non-matching paths', () => {
     it('passes through home page', () => {
@@ -67,12 +186,14 @@ describe('middleware', () => {
     })
   })
 
+  // ── HTML requests (no Accept: text/markdown) ──────────────────────────────
+
   describe('HTML requests (no Accept: text/markdown)', () => {
     it('adds Link header for product page', () => {
       process.env.NEXT_PUBLIC_SITE_URL = 'https://mystore.com'
       middleware(makeReq('/product/cool-shirt'))
       expect(mockNextFn).toHaveBeenCalledOnce()
-      expect(mockResHeaders['Link']).toBe(
+      expect(getLinkHeader()).toBe(
         '<https://mystore.com/product/cool-shirt.md>; rel="alternate"; type="text/markdown"',
       )
     })
@@ -80,7 +201,7 @@ describe('middleware', () => {
     it('adds Link header for category page', () => {
       process.env.NEXT_PUBLIC_SITE_URL = 'https://mystore.com'
       middleware(makeReq('/category/tops'))
-      expect(mockResHeaders['Link']).toBe(
+      expect(getLinkHeader()).toBe(
         '<https://mystore.com/category/tops.md>; rel="alternate"; type="text/markdown"',
       )
     })
@@ -88,14 +209,14 @@ describe('middleware', () => {
     it('adds Link header for policy page', () => {
       process.env.NEXT_PUBLIC_SITE_URL = 'https://mystore.com'
       middleware(makeReq('/policy/shipping'))
-      expect(mockResHeaders['Link']).toBe(
+      expect(getLinkHeader()).toBe(
         '<https://mystore.com/policy/shipping.md>; rel="alternate"; type="text/markdown"',
       )
     })
 
     it('falls back to request origin when NEXT_PUBLIC_SITE_URL is unset', () => {
       middleware(makeReq('/product/test'))
-      expect(mockResHeaders['Link']).toBe(
+      expect(getLinkHeader()).toBe(
         '<https://store.example.com/product/test.md>; rel="alternate"; type="text/markdown"',
       )
     })
@@ -103,9 +224,22 @@ describe('middleware', () => {
     it('does NOT rewrite for generic Accept header', () => {
       middleware(makeReq('/product/shirt', 'text/html,application/xhtml+xml'))
       expect(mockRewriteFn).not.toHaveBeenCalled()
-      expect(mockResHeaders['Link']).toBeTruthy()
+      expect(getLinkHeader()).toBeTruthy()
+    })
+
+    it('/fr/product/slug (HTML) rewrites to /product/slug and includes Link header', () => {
+      process.env.NEXT_PUBLIC_SITE_URL = 'https://mystore.com'
+      middleware(makeReq('/fr/product/cool-shirt'))
+      expect(mockRewriteFn).toHaveBeenCalledOnce()
+      const [url] = mockRewriteFn.mock.calls[0] as [URL]
+      expect(url.pathname).toBe('/product/cool-shirt')
+      expect(getLinkHeader()).toBe(
+        '<https://mystore.com/product/cool-shirt.md>; rel="alternate"; type="text/markdown"',
+      )
     })
   })
+
+  // ── Accept: text/markdown content negotiation ─────────────────────────────
 
   describe('Accept: text/markdown content negotiation', () => {
     it('rewrites product page to .md twin', () => {
@@ -132,7 +266,7 @@ describe('middleware', () => {
       expect(mockRewriteFn).toHaveBeenCalledOnce()
     })
 
-    it('does NOT add Link header for rewrote requests', () => {
+    it('does NOT call NextResponse.next() for markdown rewrites', () => {
       middleware(makeReq('/product/shirt', 'text/markdown'))
       expect(mockNextFn).not.toHaveBeenCalled()
     })
