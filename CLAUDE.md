@@ -78,6 +78,9 @@ If it almost exists, EXTEND it — do not copy-paste. No "shit code", DRY only.
   6. visual — opt-in only via `pnpm verify --visual`; native `pnpm test:visual`; no Docker;
      baselines are machine-specific (`pnpm test:visual:update` to regenerate)
   Note: bare `pnpm ci` is a reserved pnpm builtin — use `pnpm verify` or `pnpm run ci`.
+  Steps cap at ≤3 concurrent tasks / test processes; the heavy test steps (integration,
+  smoke, e2e) run sequentially on purpose — spawning them together oversubscribes CPU and
+  is measured slower (retry storms), not faster. See `docs/adr/0017-ci-step-concurrency-cap.md`.
 - **Coverage gate = unit project only, 95%** (`pnpm test:coverage` =
   `vitest run --project unit --coverage`). Worker routes run in the miniflare/workerd pool
   where v8 can't instrument them → they're covered **behaviorally** by the integration
