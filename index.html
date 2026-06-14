@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ShopFlare — Project Overview</title>
+<style>
+  :root {
+    --ink: #1a1d24;
+    --muted: #5b6472;
+    --line: #e6e8ee;
+    --brand: #e8590c;
+    --brand-soft: #fff4ec;
+    --bg-soft: #f7f8fa;
+  }
+
+  @page {
+    size: A4;
+    margin: 16mm 15mm;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink);
+    font-size: 10.5pt;
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: -0.01em; }
+
+  p { margin: 0 0 8px; }
+
+  a { color: var(--brand); text-decoration: none; }
+
+  /* ---------- Header ---------- */
+  .hero {
+    border-bottom: 3px solid var(--brand);
+    padding-bottom: 14px;
+    margin-bottom: 18px;
+  }
+  .hero .badge {
+    display: inline-block;
+    background: var(--brand-soft);
+    color: var(--brand);
+    font-size: 8pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+  .hero h1 { font-size: 28pt; line-height: 1.05; }
+  .hero h1 .flare { color: var(--brand); }
+  .hero .tagline {
+    color: var(--muted);
+    font-size: 12pt;
+    margin-top: 6px;
+    max-width: 90%;
+  }
+
+  /* ---------- Section ---------- */
+  section { margin-bottom: 16px; }
+  /* force a section to start at the top of the next printed page */
+  .page-break { break-before: page; }
+  .sec-title {
+    font-size: 13pt;
+    margin-bottom: 8px;
+    padding-left: 10px;
+    border-left: 4px solid var(--brand);
+  }
+  /* muted intro line under a section title */
+  .note { color: var(--muted); }
+  .note.tight { margin-bottom: 9px; }
+  .note.flush { margin-top: 10px; margin-bottom: 0; }
+
+  /* ---------- Story callout ---------- */
+  .story {
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .story p:last-child { margin-bottom: 0; }
+  .story .lead { font-weight: 600; color: var(--ink); }
+
+  /* ---------- Two column ---------- */
+  .cols {
+    display: flex;
+    gap: 14px;
+  }
+  .col { flex: 1; }
+
+  /* ---------- Cards ---------- */
+  .card {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+  .card h3 {
+    font-size: 10.5pt;
+    margin-bottom: 6px;
+    color: var(--brand);
+  }
+  .card ul { margin: 0; padding-left: 16px; }
+  .card li { margin-bottom: 3px; }
+
+  /* ---------- Stat strip ---------- */
+  .stats {
+    display: flex;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .stat {
+    flex: 1;
+    background: var(--brand-soft);
+    border-radius: 10px;
+    padding: 12px 10px;
+    text-align: center;
+  }
+  .stat .num { font-size: 18pt; font-weight: 800; color: var(--brand); line-height: 1; }
+  .stat .lbl { font-size: 8pt; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 5px; }
+
+  /* ---------- Tech pills ---------- */
+  .pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill {
+    background: var(--bg-soft);
+    border: 0;
+    border-radius: 6px;
+    padding: 5px 11px;
+    font-size: 8.5pt;
+    color: var(--ink);
+  }
+  .pill b { color: var(--brand); }
+
+  /* ---------- Why free ---------- */
+  .why {
+    background: var(--ink);
+    color: #fff;
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .why h3 { color: #fff; font-size: 11pt; margin-bottom: 6px; }
+  .why p { color: #c9cdd6; margin-bottom: 0; }
+  .why .free { color: #ffb27a; font-weight: 700; }
+
+  /* ---------- Footer ---------- */
+  .footer {
+    margin-top: 18px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+    font-size: 8.5pt;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
+</head>
+<body>
+
+  <div class="hero">
+    <span class="badge">Open Source · $0 Hosting</span>
+    <h1>Shop<span class="flare">Flare</span></h1>
+    <p class="tagline">A free online store that small businesses can run without paying monthly platform fees.</p>
+  </div>
+
+  <section>
+    <div class="story">
+      <p class="lead">Why I built it</p>
+      <p>In early 2024 I started an online store with two partners. We got some sales, but the monthly ad and platform costs kept eating money we did not have yet. When a small $25 bill arrived that we could not pay, the store shut down.</p>
+      <p>That stuck with me. I kept asking: why is there no proper free option for tiny businesses just getting started? Every tool I found had a fee hidden somewhere. So I stopped looking and built one. <b>ShopFlare is for people starting from zero</b>, who want to sell online without platform fees taking a cut before they have even found their feet.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sec-title">What it does</h2>
+    <div class="cols">
+      <div class="col">
+        <div class="card">
+          <h3>For shoppers</h3>
+          <ul>
+            <li>Browse products with colors, sizes and live stock</li>
+            <li>Fast search and a cart that remembers them</li>
+            <li>Pay by card, cash on delivery, bank transfer, WhatsApp, or in person</li>
+            <li>Track and cancel their own orders</li>
+            <li>Leave verified reviews and ratings</li>
+            <li>Get an email when a sold-out item is back</li>
+            <li>Install the store like an app and use it offline</li>
+            <li>Shop in English, French or Urdu (right-to-left)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h3>For the shop owner</h3>
+          <ul>
+            <li>Add products and photos (auto-compressed on upload)</li>
+            <li>Manage orders, statuses and shipping tracking</li>
+            <li>Create discount coupons synced with payments</li>
+            <li>Approve reviews, answer FAQs, write blog posts</li>
+            <li>Built-in cash register for in-person sales</li>
+            <li>Change name, logo, colors, shipping and policies live, no developer needed</li>
+            <li>One-click themes and a built-in analytics dashboard</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-break">
+    <h2 class="sec-title">How it is built</h2>
+    <p class="note tight">Modern, popular tools, picked so the whole thing runs for free and stays easy to look after.</p>
+    <div class="pills">
+      <span class="pill"><b>Next.js</b> 16 + React 19</span>
+      <span class="pill"><b>Tailwind</b> v4 + shadcn/ui</span>
+      <span class="pill"><b>Cloudflare Workers</b> (frontend + API)</span>
+      <span class="pill"><b>D1</b> database</span>
+      <span class="pill"><b>R2</b> image storage</span>
+      <span class="pill"><b>KV</b> cache</span>
+      <span class="pill"><b>Stripe</b> payments</span>
+      <span class="pill"><b>Resend</b> emails</span>
+      <span class="pill"><b>Web Push</b> notifications</span>
+      <span class="pill"><b>Turnstile</b> bot protection</span>
+      <span class="pill"><b>Zod</b> validation</span>
+      <span class="pill"><b>TypeScript</b></span>
+    </div>
+  </section>
+
+  <section>
+    <div class="why">
+      <h3>Why it costs <span class="free">$0</span> to host</h3>
+      <p>Everything runs inside Cloudflare's free tier, so there is no monthly server bill. Payments go through Stripe, which only takes a small cut when a real sale happens, never a flat fee. A small shop can launch, take orders, and pay nothing until it actually starts earning.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sec-title">Built to last</h2>
+    <div class="stats">
+      <div class="stat"><div class="num">1,500+</div><div class="lbl">Automated tests</div></div>
+      <div class="stat"><div class="num">95%</div><div class="lbl">Code coverage gate</div></div>
+      <div class="stat"><div class="num">29</div><div class="lbl">Build phases shipped</div></div>
+      <div class="stat"><div class="num">17</div><div class="lbl">Design decisions documented</div></div>
+    </div>
+    <p class="note flush">Every feature is checked by tests that run on their own before any change goes live. Safety is taken seriously (card details are never stored, the admin area is locked down, and every form is guarded against bots), the store works for blind users and right-to-left languages like Urdu, and the code is kept tidy so it is easy to grow.</p>
+  </section>
+
+  <div class="footer">
+    <span>ShopFlare — a free online store kit for small businesses</span>
+    <span>Built with Next.js &amp; Cloudflare · Open source</span>
+  </div>
+
+</body>
+</html>
