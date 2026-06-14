@@ -3,13 +3,36 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ShopFlare — Project Overview</title>
+
+<title>ShopFlare — A free $0-hosting online store for small businesses</title>
+<meta name="description" content="ShopFlare is a free, open-source online store small businesses can run with $0 hosting and no monthly platform fees. Built on Next.js, React and Cloudflare.">
+<meta name="author" content="Zahid Ensari">
+<meta name="theme-color" content="#e8590c">
+<link rel="canonical" href="https://ansarissab.github.io/ShopFlare/">
+
+<!-- Open Graph (link previews on social + chat + LLMs) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ShopFlare">
+<meta property="og:title" content="ShopFlare — A free $0-hosting online store for small businesses">
+<meta property="og:description" content="Open-source ecommerce small businesses can run with $0 hosting and no monthly platform fees. Built on Next.js, React and Cloudflare.">
+<meta property="og:url" content="https://ansarissab.github.io/ShopFlare/">
+<meta property="og:image" content="https://ansarissab.github.io/ShopFlare/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="ShopFlare — a free online store for small businesses, $0 hosting.">
+
+<!-- Twitter / X card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ShopFlare — A free $0-hosting online store for small businesses">
+<meta name="twitter:description" content="Open-source ecommerce small businesses can run with $0 hosting and no monthly platform fees.">
+<meta name="twitter:image" content="https://ansarissab.github.io/ShopFlare/og-image.png">
 <style>
   :root {
     --ink: #1a1d24;
     --muted: #5b6472;
     --line: #e6e8ee;
-    --brand: #e8590c;
+    --brand: #e8590c;            /* bright — large display only */
+    --brand-ink: #c2410c;        /* darker — passes AA 4.5:1 for small text/links */
     --brand-soft: #fff4ec;
     --bg-soft: #f7f8fa;
   }
@@ -33,7 +56,7 @@
 
   p { margin: 0 0 8px; }
 
-  a { color: var(--brand); text-decoration: none; }
+  a { color: var(--brand-ink); text-decoration: none; }
 
   /* ---------- Header ---------- */
   .hero {
@@ -44,7 +67,7 @@
   .hero .badge {
     display: inline-block;
     background: var(--brand-soft);
-    color: var(--brand);
+    color: var(--brand-ink);
     font-size: 8pt;
     font-weight: 700;
     text-transform: uppercase;
@@ -136,7 +159,7 @@
     font-size: 8.5pt;
     color: var(--ink);
   }
-  .pill b { color: var(--brand); }
+  .pill b { color: var(--brand-ink); }
 
   /* ---------- Why free ---------- */
   .why {
@@ -178,6 +201,40 @@
     .footer { flex-direction: column; gap: 4px; }
   }
 </style>
+
+<!-- Structured data: the project + its author (rich results, AI/LLM indexing) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "ShopFlare",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "description": "A free, open-source online store small businesses can run with $0 hosting and no monthly platform fees. Built on Next.js, React and Cloudflare.",
+      "url": "https://ansarissab.github.io/ShopFlare/",
+      "softwareRequirements": "Cloudflare Workers, D1, R2, KV",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "author": {
+        "@type": "Person",
+        "name": "Zahid Ensari",
+        "url": "https://github.com/Ansarissab",
+        "sameAs": [
+          "https://github.com/Ansarissab",
+          "https://www.linkedin.com/in/zahidensari/"
+        ]
+      }
+    },
+    {
+      "@type": "WebSite",
+      "name": "ShopFlare — Project Overview",
+      "url": "https://ansarissab.github.io/ShopFlare/",
+      "inLanguage": "en"
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
