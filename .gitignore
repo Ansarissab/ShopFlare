@@ -77,3 +77,8 @@ next-env.d.ts
 
 # Maintainer local wrangler override (keeps real resource ids out of git)
 wrangler.local.toml
+.gstack/
+lighthouse_results/
+
+# Local portfolio / job-application source (lives on gh-pages branch, not main)
+/portfolio/
