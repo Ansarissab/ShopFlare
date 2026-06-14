@@ -1,8 +1,18 @@
 # Phase 28 — i18n Locale engine + full codemod (FOUNDATION)
 
-Status: Implemented 2026-06-13 (pending `pnpm verify`). Planned 2026-06-12
-(grill-with-docs). Implements [ADR 0015](../../adr/0015-i18n-locale-engine.md).
-See [roadmap](./phases-27-33-roadmap.md).
+Status: Done 2026-06-13 (`pnpm verify` green; relentless audit + fixes applied).
+Planned 2026-06-12 (grill-with-docs). Implements
+[ADR 0015](../../adr/0015-i18n-locale-engine.md). See
+[roadmap](./phases-27-33-roadmap.md).
+
+> **Resolution-model note (deviation from ADR 0015 §2):** to keep locale
+> resolution consistent across server content, the root `<html>`, and client
+> chrome at $0 (no per-request config fetch in edge middleware), the unprefixed
+> root serves English; other enabled locales are reachable via the `/{loc}`
+> prefix and persist across plain-link navigation via the `NEXT_LOCALE` cookie
+> (read by middleware). True per-merchant default-at-root would require the
+> middleware to know `defaultLocale` (a cached config fetch) — left as a
+> follow-up. `defaultLocale` is retained for future hreflang `x-default`.
 
 ## What shipped (vs. plan)
 
