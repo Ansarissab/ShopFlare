@@ -87,6 +87,15 @@ If it almost exists, EXTEND it — do not copy-paste. No "shit code", DRY only.
   helpers stay in scope (e.g. `worker/lib/admin-session.ts` IS unit-tested).
 - Every fixed UI/UX bug gets a permanent regression test in the right layer (see
   `docs/plans/done/phase-16-comprehensive-testing.md`).
+- **Before claiming done, run the cheap gates yourself and scan the output:**
+  `pnpm run lint` (drive warnings to 0), `pnpm typecheck`, and
+  `pnpm test:unit` / `vitest run --project unit`. Read `warning`, `skipped`,
+  `flaky`, and stderr lines — not just pass/fail. A test that passes while
+  emitting errors (e.g. an async server component rendered in jsdom →
+  "async Client Component") is hollow — fix it. Investigate every skipped/flaky
+  spec and fix it or state why it's acceptable. Only then hand `pnpm verify`
+  (the heavy build+integration+smoke+e2e gate) to the user. Don't relay
+  warnings/skips the cheap gates would have caught.
 
 ## Dynamic-First Rule
 If a value can be stored in D1 and edited via Admin Dashboard → it MUST be.
