@@ -6,7 +6,7 @@ import { Hono } from 'hono'
 import { eq, sql } from 'drizzle-orm'
 import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
-import { assembleProduct, assembleProductList } from 'worker/lib/products'
+import { assembleProduct, assembleProductList, assembleSearchIndex } from 'worker/lib/products'
 import { etagFor } from 'worker/lib/fingerprint'
 import { getDataVersion } from 'worker/lib/version'
 import { edgeCached } from 'worker/lib/edge-cache'
@@ -44,6 +44,40 @@ app.get('/', async (c) => {
     etag,
     cacheControl: CACHE_CONTROL,
     build: async () => ({ products: await assembleProductList(db) }),
+  })
+})
+
+// ─── GET /search-index — compact search payload (MUST precede /:id) ──────────
+//
+// Returns { items: ProductSearchItem[] } for all active products.
+// Cached exactly like GET / — same CACHE_CONTROL + etag strategy.
+// Placed BEFORE /:id so "search-index" is not captured as an id param.
+
+app.get('/search-index', async (c) => {
+  const db = createDb(c.env.DB)
+
+  const [stats, version] = await Promise.all([
+    db
+      .select({
+        count: sql<number>`COUNT(*)`,
+        maxUpdatedAt: sql<string>`MAX(updated_at)`,
+      })
+      .from(schema.products)
+      .where(eq(schema.products.active, true))
+      .get(),
+    getDataVersion(db),
+  ])
+
+  const etag = etagFor({
+    count: stats?.count ?? 0,
+    maxUpdatedAt: stats?.maxUpdatedAt ?? '',
+    version,
+  })
+
+  return edgeCached(c, {
+    etag,
+    cacheControl: CACHE_CONTROL,
+    build: async () => ({ items: await assembleSearchIndex(db) }),
   })
 })
 

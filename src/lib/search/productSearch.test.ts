@@ -1,7 +1,15 @@
 import { describe, it, expect } from 'vitest'
 import type { ProductWithVariants } from '@/lib/types/product'
 import type { CategoryNode } from '@/lib/types/category'
-import { buildProductFuse, collectDescendantIds, filterProducts, paginate } from './productSearch'
+import type { ProductSearchItem } from '@/lib/types/search'
+import {
+  buildProductFuse,
+  buildSearchFuse,
+  collectDescendantIds,
+  filterProducts,
+  filterSearchItems,
+  paginate,
+} from './productSearch'
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
@@ -132,5 +140,152 @@ describe('paginate', () => {
     const { visibleItems, hasMore } = paginate(items, 1, 96)
     expect(visibleItems).toHaveLength(25)
     expect(hasMore).toBe(false)
+  })
+})
+
+// ─── filterSearchItems ────────────────────────────────────────────────────────
+
+function mkSearchItem(
+  id: string,
+  name: string,
+  opts: {
+    description?: string | null
+    categoryIds?: string[]
+    inStock?: boolean
+    variantLabels?: string[]
+    priceCents?: number
+  } = {},
+): ProductSearchItem {
+  return {
+    id,
+    name,
+    description: opts.description ?? null,
+    thumbnailUrl: null,
+    priceCents: opts.priceCents ?? 1000,
+    categoryIds: opts.categoryIds ?? [],
+    inStock: opts.inStock ?? true,
+    variantLabels: opts.variantLabels ?? [],
+  }
+}
+
+describe('filterSearchItems', () => {
+  const tree = [
+    mkNode('men', [mkNode('shirts'), mkNode('pants')]),
+    mkNode('women', [mkNode('dresses')]),
+  ]
+
+  const items: ProductSearchItem[] = [
+    mkSearchItem('1', 'Blue Shirt', {
+      categoryIds: ['shirts'],
+      inStock: true,
+      variantLabels: ['Navy'],
+    }),
+    mkSearchItem('2', 'Red Hat', { categoryIds: ['hats'], inStock: false }),
+    mkSearchItem('3', 'Green Dress', { categoryIds: ['dresses'], inStock: true }),
+    mkSearchItem('4', 'Black Pants', { categoryIds: ['pants'], inStock: true }),
+    mkSearchItem('5', 'Out of Stock Shirt', { categoryIds: ['shirts'], inStock: false }),
+  ]
+
+  const noFilter = { query: '', categoryId: null, inStockOnly: false, categories: tree }
+
+  it('returns all items with no filters applied', () => {
+    expect(filterSearchItems(items, noFilter)).toHaveLength(5)
+  })
+
+  it('fuzzy query matches by name', () => {
+    const result = filterSearchItems(items, { ...noFilter, query: 'shirt' })
+    const ids = result.map((r) => r.id).sort()
+    expect(ids).toEqual(['1', '5'])
+  })
+
+  it('fuzzy query matches by variant label', () => {
+    const result = filterSearchItems(items, { ...noFilter, query: 'navy' })
+    expect(result.map((r) => r.id)).toEqual(['1'])
+  })
+
+  it('inStockOnly filters out out-of-stock items', () => {
+    const result = filterSearchItems(items, { ...noFilter, inStockOnly: true })
+    expect(result.every((r) => r.inStock)).toBe(true)
+    expect(result.map((r) => r.id).sort()).toEqual(['1', '3', '4'])
+  })
+
+  it('categoryId filters by category using descendant ids', () => {
+    // 'men' → includes 'men', 'shirts', 'pants'
+    const result = filterSearchItems(items, { ...noFilter, categoryId: 'men' })
+    const ids = result.map((r) => r.id).sort()
+    expect(ids).toEqual(['1', '4', '5'])
+  })
+
+  it('categoryId (leaf) filters to exact category', () => {
+    const result = filterSearchItems(items, { ...noFilter, categoryId: 'dresses' })
+    expect(result.map((r) => r.id)).toEqual(['3'])
+  })
+
+  it('ANDs query + category + inStockOnly', () => {
+    const result = filterSearchItems(items, {
+      query: 'shirt',
+      categoryId: 'men',
+      inStockOnly: true,
+      categories: tree,
+    })
+    // shirts in 'men' subtree that are in stock: Blue Shirt only
+    expect(result.map((r) => r.id)).toEqual(['1'])
+  })
+
+  it('returns empty array when no items match combined filters', () => {
+    const result = filterSearchItems(items, {
+      query: 'completely nonexistent xyzzy',
+      categoryId: null,
+      inStockOnly: false,
+      categories: tree,
+    })
+    expect(result).toHaveLength(0)
+  })
+
+  it('inStockOnly + category: excludes out-of-stock even within matching category', () => {
+    const result = filterSearchItems(items, {
+      ...noFilter,
+      categoryId: 'shirts',
+      inStockOnly: true,
+    })
+    // shirts: Blue Shirt (inStock) + Out of Stock Shirt (not inStock) → only Blue Shirt
+    expect(result.map((r) => r.id)).toEqual(['1'])
+  })
+
+  it('pre-built fuse opt produces identical results to on-demand index', () => {
+    // When opts.fuse is provided, results must match what would be built on-demand.
+    const fuse = buildSearchFuse(items)
+    const withFuse = filterSearchItems(items, { ...noFilter, query: 'shirt', fuse })
+    const withoutFuse = filterSearchItems(items, { ...noFilter, query: 'shirt' })
+    expect(withFuse.map((r) => r.id).sort()).toEqual(withoutFuse.map((r) => r.id).sort())
+  })
+
+  it('pre-built fuse + category filter: post-filters fuse results to surviving items', () => {
+    // fuse index covers all items; category filter must still narrow the results.
+    const fuse = buildSearchFuse(items)
+    const result = filterSearchItems(items, {
+      query: 'shirt',
+      categoryId: 'shirts',
+      inStockOnly: false,
+      categories: tree,
+      fuse,
+    })
+    // Both shirts are in 'shirts' category; dresses/hats/pants are excluded by category
+    const ids = result.map((r) => r.id).sort()
+    expect(ids).toEqual(['1', '5'])
+  })
+})
+
+// ─── buildSearchFuse ──────────────────────────────────────────────────────────
+
+describe('buildSearchFuse', () => {
+  it('builds a searchable Fuse index over ProductSearchItem[]', () => {
+    const items = [
+      mkSearchItem('a', 'Sneaker', { variantLabels: ['White'] }),
+      mkSearchItem('b', 'Boot'),
+    ]
+    const fuse = buildSearchFuse(items)
+    const results = fuse.search('sneaker')
+    expect(results.map((r) => r.item.id)).toEqual(['a'])
   })
 })

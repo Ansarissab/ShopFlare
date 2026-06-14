@@ -5,6 +5,7 @@ import { eq, inArray, and } from 'drizzle-orm'
 import type { Database } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import type { Product, Variant, ProductImage, SizeOption } from 'worker/db/schema'
+import type { ProductSearchItem } from '@/lib/types/search'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -152,6 +153,167 @@ export async function assembleProductList(
     variants: groupVariants(allVariants, allImages, allSizes, product.id),
     categoryIds: categoryIdsByProduct.get(product.id) ?? [],
   }))
+}
+
+// ─── assembleSearchIndex ──────────────────────────────────────────────────────
+
+/**
+ * Builds a compact search-index payload for all ACTIVE products.
+ * Used by GET /api/products/search-index — one Fuse-searchable row per product.
+ *
+ * Query count: 1 (products) + 1 (variants) + 1 (images, 1 per product) +
+ *              1 (sizes, active only) + 1 (category assignments) = 5 total.
+ * Never N+1 — mirrors assembleProductList's batched approach.
+ */
+export async function assembleSearchIndex(db: Database): Promise<ProductSearchItem[]> {
+  // 1. All active products
+  const activeProducts = await db
+    .select()
+    .from(schema.products)
+    .where(eq(schema.products.active, true))
+    .all()
+
+  if (activeProducts.length === 0) return []
+
+  const productIds = activeProducts.map((p) => p.id)
+
+  // 2. All variants for these products
+  const allVariants = await db
+    .select()
+    .from(schema.variants)
+    .where(inArray(schema.variants.productId, productIds))
+    .all()
+
+  if (allVariants.length === 0) {
+    return activeProducts.map((p) => ({
+      id: p.id,
+      name: p.name,
+      description: p.description || null,
+      thumbnailUrl: null,
+      priceCents: 0,
+      categoryIds: [],
+      inStock: false,
+      variantLabels: [],
+    }))
+  }
+
+  const variantIds = allVariants.map((v) => v.id)
+
+  // 3. Batch: one thumbnail per product — only the lowest-sortOrder image per variant,
+  //    then pick the first across all variants (lowest sortOrder variant first).
+  const allImages = await db
+    .select()
+    .from(schema.productImages)
+    .where(inArray(schema.productImages.variantId, variantIds))
+    .all()
+
+  // 4. Batch: active size options (for priceCents + inStock)
+  const allSizes = await db
+    .select()
+    .from(schema.sizeOptions)
+    .where(inArray(schema.sizeOptions.variantId, variantIds))
+    .all()
+
+  // 5. Batch: category assignments
+  const categoryAssignments = await db
+    .select()
+    .from(schema.productCategories)
+    .where(inArray(schema.productCategories.productId, productIds))
+    .all()
+
+  // ── Build Maps ───────────────────────────────────────────────────────────────
+
+  // variantId → images sorted by sortOrder
+  const imagesByVariant = new Map<string, ProductImage[]>()
+  for (const img of allImages) {
+    const arr = imagesByVariant.get(img.variantId) ?? []
+    arr.push(img)
+    imagesByVariant.set(img.variantId, arr)
+  }
+
+  // variantId → active sizes
+  const sizesByVariant = new Map<string, SizeOption[]>()
+  for (const sz of allSizes) {
+    if (!sz.active) continue
+    const arr = sizesByVariant.get(sz.variantId) ?? []
+    arr.push(sz)
+    sizesByVariant.set(sz.variantId, arr)
+  }
+
+  // productId → categoryId[]
+  const categoryIdsByProduct = new Map<string, string[]>()
+  for (const row of categoryAssignments) {
+    const arr = categoryIdsByProduct.get(row.productId) ?? []
+    arr.push(row.categoryId)
+    categoryIdsByProduct.set(row.productId, arr)
+  }
+
+  // productId → variants sorted by sortOrder
+  const variantsByProduct = new Map<string, Variant[]>()
+  for (const v of allVariants) {
+    const arr = variantsByProduct.get(v.productId) ?? []
+    arr.push(v)
+    variantsByProduct.set(v.productId, arr)
+  }
+
+  // ── Assemble ─────────────────────────────────────────────────────────────────
+
+  return activeProducts.map((product) => {
+    const variants = (variantsByProduct.get(product.id) ?? []).sort(
+      (a, b) => a.sortOrder - b.sortOrder,
+    )
+
+    // Thumbnail: first image of the first (lowest-sortOrder) variant
+    let thumbnailUrl: string | null = null
+    for (const v of variants) {
+      const imgs = (imagesByVariant.get(v.id) ?? []).sort((a, b) => a.sortOrder - b.sortOrder)
+      if (imgs.length > 0) {
+        thumbnailUrl = imgs[0].url
+        break
+      }
+    }
+
+    // inStock + priceCents: aggregate across all variants.
+    // Mirrors getPriceRange semantics: prefer min price among active+in-stock
+    // sizes; fall back to min across all active sizes when every size is
+    // out-of-stock, so priceCents is never 0/empty while a price exists.
+    let inStock = false
+    let minInStockPrice = Infinity
+    let minFallbackPrice = Infinity
+
+    for (const v of variants) {
+      const sizes = sizesByVariant.get(v.id) ?? []
+      for (const sz of sizes) {
+        // sizesByVariant only holds active sizes (filtered in build-maps above)
+        if (sz.stock !== 0) {
+          inStock = true
+          if (sz.priceCents < minInStockPrice) minInStockPrice = sz.priceCents
+        }
+        if (sz.priceCents < minFallbackPrice) minFallbackPrice = sz.priceCents
+      }
+    }
+
+    const priceCents =
+      minInStockPrice !== Infinity
+        ? minInStockPrice
+        : minFallbackPrice !== Infinity
+          ? minFallbackPrice
+          : 0
+
+    // variantLabels: unique, non-empty labels across all variants
+    const variantLabels = [...new Set(variants.map((v) => v.label).filter(Boolean))]
+
+    return {
+      id: product.id,
+      name: product.name,
+      description: product.description || null,
+      thumbnailUrl,
+      priceCents,
+      categoryIds: categoryIdsByProduct.get(product.id) ?? [],
+      inStock,
+      variantLabels,
+    }
+  })
 }
 
 // ─── assembleProduct ─────────────────────────────────────────────────────────
