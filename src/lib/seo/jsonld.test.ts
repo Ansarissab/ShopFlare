@@ -24,6 +24,7 @@ function makeProduct(
       slug: 'test-product',
       active: true,
       stripeProductId: null,
+      faqItems: null,
       createdAt: '',
       updatedAt: '',
     } as unknown as ProductWithVariants['product'],
@@ -72,6 +73,7 @@ function makeProduct(
       } as unknown as ProductWithVariants['variants'][0],
     ],
     categoryIds: [],
+    faqItems: [],
   }
 }
 

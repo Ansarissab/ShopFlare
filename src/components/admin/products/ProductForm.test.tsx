@@ -65,9 +65,11 @@ function makeProduct(
       createdAt: '2026-01-01T00:00:00Z',
       updatedAt: '2026-01-01T00:00:00Z',
       ...overrides,
+      faqItems: overrides?.faqItems ?? null,
     },
     variants: variants ?? [],
     categoryIds: [],
+    faqItems: [],
   }
 }
 
@@ -149,6 +151,7 @@ describe('ProductForm — create mode (no initial)', () => {
       description: '',
       active: true,
       reviewsEnabled: true,
+      faqItems: [],
     })
     expect(apiPut).toHaveBeenCalledWith('/api/admin/products/new-prod/categories', {
       categoryIds: ['cat-1'],
@@ -170,6 +173,7 @@ describe('ProductForm — create mode (no initial)', () => {
         description: 'desc',
         active: false,
         reviewsEnabled: true,
+        faqItems: [],
       }),
     )
   })
@@ -231,6 +235,7 @@ describe('ProductForm — edit mode (with initial)', () => {
       description: 'A cozy hoodie',
       active: true,
       reviewsEnabled: true,
+      faqItems: [],
     })
     expect(apiPut).toHaveBeenCalledWith('/api/admin/products/prod-1/categories', {
       categoryIds: [],

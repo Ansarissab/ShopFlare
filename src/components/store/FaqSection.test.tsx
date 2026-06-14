@@ -8,6 +8,16 @@ vi.mock('@/lib/i18n/server', () => ({
   getT: () => Promise.resolve(en),
 }))
 
+// Render accordion panels always mounted so text content is queryable in jsdom.
+vi.mock('@/components/ui/accordion', () => ({
+  Accordion: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  AccordionItem: ({ children }: { children: React.ReactNode; value: unknown }) => (
+    <div>{children}</div>
+  ),
+  AccordionTrigger: ({ children }: { children: React.ReactNode }) => <button>{children}</button>,
+  AccordionContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}))
+
 afterEach(() => {
   cleanup()
 })
@@ -30,6 +40,12 @@ describe('FaqSection', () => {
     expect(screen.getByRole('heading', { level: 2 })).toBeTruthy()
   })
 
+  it('uses custom heading when provided', async () => {
+    const { FaqSection } = await import('./FaqSection')
+    render(await FaqSection({ items, heading: 'Product FAQs' }))
+    expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('Product FAQs')
+  })
+
   it('renders each question text', async () => {
     const { FaqSection } = await import('./FaqSection')
     render(await FaqSection({ items }))
@@ -37,7 +53,7 @@ describe('FaqSection', () => {
     expect(screen.getByText('Do you ship internationally?')).toBeTruthy()
   })
 
-  it('renders each answer text', async () => {
+  it('renders each answer via RenderHtml', async () => {
     const { FaqSection } = await import('./FaqSection')
     render(await FaqSection({ items }))
     expect(screen.getByText('Returns accepted within 30 days.')).toBeTruthy()

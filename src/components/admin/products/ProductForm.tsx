@@ -11,11 +11,13 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { FormField } from '@/components/common/FormField'
+import { FaqItemsControls } from '@/app/(admin)/admin/settings/FaqItemsControls'
 import { ImageUpload } from '@/components/admin/products/ImageUpload'
 import { ProductCategoryPicker } from '@/components/admin/categories/ProductCategoryPicker'
 import { useT } from '@/lib/i18n/Provider'
 import { apiPost, apiPut, apiDelete, apiGet, ApiError } from '@/lib/api'
 import { updateSizeOptionSchema } from '@/lib/schemas'
+import type { FaqItemData } from '@/lib/schemas/config'
 import { formatPrice } from '@/lib/utils/index'
 import type {
   ProductWithVariants,
@@ -126,6 +128,7 @@ export function ProductForm({ initial }: ProductFormProps) {
   const [description, setDescription] = useState(initial?.product.description ?? '')
   const [active, setActive] = useState(initial?.product.active ?? true)
   const [reviewsEnabled, setReviewsEnabled] = useState(initial?.product.reviewsEnabled ?? true)
+  const [faqItems, setFaqItems] = useState<FaqItemData[]>(initial?.faqItems ?? [])
   const [saving, setSaving] = useState(false)
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
     initial?.categoryIds ?? [],
@@ -165,12 +168,14 @@ export function ProductForm({ initial }: ProductFormProps) {
     try {
       const productId = initial?.product.id
 
+      const faqPayload = faqItems.filter((item) => item.question.trim() && item.answer.trim())
       if (productId) {
         await apiPut(`/api/admin/products/${productId}`, {
           name,
           description,
           active,
           reviewsEnabled,
+          faqItems: faqPayload,
         })
         await apiPut(`/api/admin/products/${productId}/categories`, {
           categoryIds: selectedCategoryIds,
@@ -182,6 +187,7 @@ export function ProductForm({ initial }: ProductFormProps) {
           description,
           active,
           reviewsEnabled,
+          faqItems: faqPayload,
         })
         await apiPut(`/api/admin/products/${created.id}/categories`, {
           categoryIds: selectedCategoryIds,
@@ -429,6 +435,12 @@ export function ProductForm({ initial }: ProductFormProps) {
         <Button onClick={saveProduct} disabled={saving} size="sm">
           {saving ? t.admin.saving : initial ? t.admin.saved : t.admin.createProduct}
         </Button>
+      </div>
+
+      {/* FAQ items */}
+      <div className="rounded-lg border p-5 flex flex-col gap-4">
+        <h2 className="text-sm font-semibold">{t.seo.faqSectionTitle}</h2>
+        <FaqItemsControls value={faqItems} onChange={setFaqItems} />
       </div>
 
       {/* Per-product analytics stats — edit mode only */}

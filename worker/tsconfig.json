@@ -19,7 +19,9 @@
   "include": [
     "**/*.ts",
     "../src/lib/schemas/**/*.ts",
-    "../src/lib/constants/**/*.ts"
+    "../src/lib/constants/**/*.ts",
+    "../src/lib/faq.ts",
+    "../src/lib/seo/jsonld.ts"
   ],
   "exclude": ["node_modules"]
 }

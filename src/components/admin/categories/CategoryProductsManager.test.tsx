@@ -26,11 +26,13 @@ function makeProduct(id: string, name: string, categoryIds: string[] = []): Prod
       active: true,
       reviewsEnabled: true,
       stripeProductId: null,
+      faqItems: null,
       createdAt: '2026-01-01',
       updatedAt: '2026-01-01',
     },
     variants: [],
     categoryIds,
+    faqItems: [],
   }
 }
 

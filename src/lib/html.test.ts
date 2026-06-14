@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { sanitizeHtml, parseFaq } from '@/lib/html'
+import { sanitizeHtml, parseFaq, stripHtml } from '@/lib/html'
 
 describe('sanitizeHtml', () => {
   it('passes through safe block content', () => {
@@ -120,5 +120,35 @@ describe('parseFaq', () => {
     const items = parseFaq(html)
     expect(items).toHaveLength(1)
     expect(items[0].question).toBe('Q?')
+  })
+})
+
+describe('stripHtml', () => {
+  it('strips basic HTML tags', () => {
+    expect(stripHtml('<b>hello</b>')).toBe('hello')
+  })
+
+  it('strips nested tags', () => {
+    expect(stripHtml('<p><strong>bold</strong> text</p>')).toBe('bold text')
+  })
+
+  it('collapses multiple whitespace to single space', () => {
+    expect(stripHtml('<p>foo</p>   <p>bar</p>')).toBe('foo bar')
+  })
+
+  it('handles empty string', () => {
+    expect(stripHtml('')).toBe('')
+  })
+
+  it('passes through string with no tags', () => {
+    expect(stripHtml('plain text here')).toBe('plain text here')
+  })
+
+  it('handles tags-only input (no text content)', () => {
+    expect(stripHtml('<br><hr>')).toBe('')
+  })
+
+  it('trims leading and trailing whitespace', () => {
+    expect(stripHtml('  <p>hello</p>  ')).toBe('hello')
   })
 })

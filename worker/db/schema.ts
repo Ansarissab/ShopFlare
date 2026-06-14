@@ -12,6 +12,7 @@ export const products = sqliteTable('products', {
   active: integer('active', { mode: 'boolean' }).notNull().default(true),
   reviewsEnabled: integer('reviews_enabled', { mode: 'boolean' }).notNull().default(true),
   stripeProductId: text('stripe_product_id'),
+  faqItems: text('faq_items'), // JSON: FaqItem[] (phase 30)
   createdAt: text('created_at')
     .notNull()
     .default(sql`(datetime('now'))`),

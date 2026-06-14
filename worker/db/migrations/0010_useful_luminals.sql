@@ -1,0 +1,1 @@
+ALTER TABLE `products` ADD `faq_items` text;

@@ -2,7 +2,7 @@
 // All composed from lib/schemas primitives — never inline raw z fields.
 import { z } from 'zod/v4'
 import { idField } from './base'
-import { storeConfigSchema } from './config'
+import { storeConfigSchema, faqItemsSchema } from './config'
 import {
   ORDER_STATUSES,
   MIN_COUPON_CODE_LENGTH,
@@ -21,6 +21,7 @@ export const createProductSchema = z.object({
   active: z.boolean().default(true),
   reviewsEnabled: z.boolean().default(true),
   stripeProductId: z.string().optional(),
+  faqItems: faqItemsSchema.optional(),
 })
 
 export const updateProductSchema = createProductSchema.partial()

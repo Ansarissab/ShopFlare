@@ -134,6 +134,7 @@ function makeProducts(): ProductWithVariants[] {
         active: true,
         reviewsEnabled: true,
         stripeProductId: null,
+        faqItems: null,
         createdAt: '',
         updatedAt: '',
       },
@@ -191,6 +192,7 @@ function makeProducts(): ProductWithVariants[] {
           ],
         },
       ],
+      faqItems: [],
     },
   ]
 }

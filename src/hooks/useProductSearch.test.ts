@@ -33,6 +33,7 @@ function makeProduct(id: string, name: string, categoryIds: string[] = []): Prod
       } as unknown as ProductWithVariants['variants'][number],
     ],
     categoryIds,
+    faqItems: [],
   }
 }
 

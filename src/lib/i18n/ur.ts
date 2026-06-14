@@ -172,6 +172,8 @@ export const ur: Dictionary = {
     notFoundBody: 'This product does not exist or may have been removed.',
     backToStore: 'Back to store',
     noImage: 'No image',
+    // FAQ chrome (phase 30)
+    productFaqHeading: 'اکثر پوچھے جانے والے سوالات',
   },
   policies: {
     shipping: 'Shipping Policy',
@@ -585,6 +587,15 @@ export const ur: Dictionary = {
     saveAnnouncement: 'اعلان بار محفوظ کریں',
     announcementSaved: 'اعلان بار محفوظ ہو گیا',
     announcementMaxMessages: 'زیادہ سے زیادہ {max} پیغامات',
+    // FAQ rows editor chrome (phase 30)
+    faqQuestionLabel: 'سوال',
+    faqAnswerLabel: 'جواب',
+    faqAddItem: 'سوال شامل کریں',
+    faqRemoveItem: 'ہٹائیں',
+    faqMoveUp: 'اوپر لے جائیں',
+    faqMoveDown: 'نیچے لے جائیں',
+    faqItemsHelp: 'سوالات اور جوابات شامل کریں جو FAQ سیکشن میں دکھائے جائیں گے۔',
+    faqEmptyState: 'ابھی کوئی سوال نہیں۔ اپنا پہلا سوال شامل کریں۔',
   },
   seo: {
     faqSectionTitle: 'FAQ / Q&A',

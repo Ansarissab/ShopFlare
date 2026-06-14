@@ -167,3 +167,56 @@ describe('Admin settings — locale controls', () => {
     expect(payload.defaultLocale).toBe('en')
   })
 })
+
+// ── FAQ seeding migration tests (Phase 30) ────────────────────────────────────
+
+describe('Admin settings — FAQ items seeding (Phase 30)', () => {
+  it('seeds faqItems from config.faqItems when present', async () => {
+    mockConfig = {
+      ...BASE_CONFIG,
+      faqEnabled: true,
+      faqItems: [{ question: 'Q from config', answer: '<p>A from config</p>' }],
+    }
+    renderPage()
+    // After the useEffect seeds, the FAQ question input should be visible
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Q from config')).toBeTruthy()
+    })
+  })
+
+  it('migrates legacy faqContent to faqItems when faqItems is absent', async () => {
+    mockConfig = {
+      ...BASE_CONFIG,
+      faqEnabled: true,
+      // No faqItems — only legacy faqContent
+      faqContent: '<h3>Legacy question?</h3><p>Legacy answer.</p>',
+    }
+    renderPage()
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Legacy question?')).toBeTruthy()
+    })
+  })
+
+  it('starts with empty FAQ list when both faqItems and faqContent are absent', async () => {
+    mockConfig = { ...BASE_CONFIG, faqEnabled: true }
+    renderPage()
+    // The empty-state text should appear (no items seeded)
+    await waitFor(() => {
+      expect(screen.getByText(en.admin.faqEmptyState)).toBeTruthy()
+    })
+  })
+
+  it('prefers faqItems over faqContent when both are present', async () => {
+    mockConfig = {
+      ...BASE_CONFIG,
+      faqEnabled: true,
+      faqItems: [{ question: 'Structured question', answer: '<p>Structured answer</p>' }],
+      faqContent: '<h3>Legacy question?</h3><p>Legacy answer.</p>',
+    }
+    renderPage()
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Structured question')).toBeTruthy()
+    })
+    expect(screen.queryByDisplayValue('Legacy question?')).toBeNull()
+  })
+})

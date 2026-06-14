@@ -5,10 +5,16 @@ import { Hono } from 'hono'
 import { sql } from 'drizzle-orm'
 import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
-import { announcementMessageSchema, storeConfigSchema } from '@/lib/schemas'
+import {
+  announcementMessageSchema,
+  faqItemSchema,
+  faqItemsSchema,
+  storeConfigSchema,
+} from '@/lib/schemas'
 import type { StoreConfigData } from '@/lib/schemas'
 import type { Bindings } from 'worker/types'
 import { etagFor } from 'worker/lib/fingerprint'
+import { parseFaqHtml } from '@/lib/faq'
 
 const app = new Hono<{ Bindings: Bindings }>()
 
@@ -88,6 +94,26 @@ app.get('/store', async (c) => {
       kv['llmDiscoveryEnabled'] !== undefined ? kv['llmDiscoveryEnabled'] === 'true' : true,
     faqEnabled: kv['faqEnabled'] !== undefined ? kv['faqEnabled'] === 'true' : false,
     faqContent: kv['faqContent'] || undefined,
+    faqItems: (() => {
+      const raw = kv['faqItems']
+      if (raw) {
+        try {
+          const parsed: unknown = JSON.parse(raw)
+          if (!Array.isArray(parsed)) return undefined
+          const valid = parsed.filter((m) => faqItemSchema.safeParse(m).success)
+          return valid.length > 0 ? (valid as StoreConfigData['faqItems']) : undefined
+        } catch {
+          return undefined
+        }
+      }
+      // Read-time migration fallback: derive structured items from legacy faqContent.
+      const legacy = kv['faqContent']
+      if (!legacy) return undefined
+      const derived = parseFaqHtml(legacy)
+      if (derived.length === 0) return undefined
+      const validated = faqItemsSchema.safeParse(derived)
+      return validated.success ? validated.data : undefined
+    })(),
     aiTrainingAllowed:
       kv['aiTrainingAllowed'] !== undefined ? kv['aiTrainingAllowed'] === 'true' : true,
     // i18n — enabledLocales is stored comma-joined ("en,fr,ur"); default to ['en'].

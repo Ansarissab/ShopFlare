@@ -171,6 +171,8 @@ export const en = {
     notFoundBody: 'This product does not exist or may have been removed.',
     backToStore: 'Back to store',
     noImage: 'No image',
+    // FAQ chrome (phase 30)
+    productFaqHeading: 'Frequently asked questions',
   },
   policies: {
     shipping: 'Shipping Policy',
@@ -610,6 +612,15 @@ export const en = {
     saveAnnouncement: 'Save announcement bar',
     announcementSaved: 'Announcement bar saved',
     announcementMaxMessages: 'Maximum {max} messages',
+    // FAQ rows editor chrome (phase 30)
+    faqQuestionLabel: 'Question',
+    faqAnswerLabel: 'Answer',
+    faqAddItem: 'Add FAQ item',
+    faqRemoveItem: 'Remove',
+    faqMoveUp: 'Move up',
+    faqMoveDown: 'Move down',
+    faqItemsHelp: 'Add questions and answers shown in the FAQ accordion.',
+    faqEmptyState: 'No FAQ items yet. Add your first question.',
   },
   // SEO / LLM discovery settings (phase 21)
   seo: {

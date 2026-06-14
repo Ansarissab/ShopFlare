@@ -13,6 +13,8 @@ export type ProductWithVariants = {
   product: Product
   variants: VariantWithDetails[]
   categoryIds: string[]
+  /** Parsed FAQ items (phase 30). Empty array when none stored. */
+  faqItems: { question: string; answer: string }[]
 }
 
 export interface WhatsAppOrderParams {

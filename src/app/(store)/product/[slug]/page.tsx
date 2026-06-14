@@ -8,7 +8,9 @@ import { layout } from '@/lib/styles'
 import { getT } from '@/lib/i18n/server'
 import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
 import { buildPageMetadata } from '@/lib/seo/metadata'
-import { productJsonLd, breadcrumbListJsonLd } from '@/lib/seo/jsonld'
+import { productJsonLd, breadcrumbListJsonLd, faqPageJsonLd } from '@/lib/seo/jsonld'
+import { stripHtml } from '@/lib/html'
+import { FaqSection } from '@/components/store/FaqSection'
 import { isFeatureEnabled } from '@/lib/features'
 import { catalogHref } from '@/lib/nav'
 import type { ProductWithVariants } from '@/lib/types/product'
@@ -103,6 +105,19 @@ export default async function ProductDetailPage({ params }: PageProps) {
         reviewsEnabled={isFeatureEnabled(config, 'reviewsEnabled') && item.product.reviewsEnabled}
         className="mt-10"
       />
+      {(item.faqItems?.length ?? 0) > 0 && (
+        <>
+          <JsonLd
+            data={faqPageJsonLd(
+              (item.faqItems ?? []).map((faq) => ({
+                question: faq.question,
+                answer: stripHtml(faq.answer),
+              })),
+            )}
+          />
+          <FaqSection items={item.faqItems ?? []} heading={t.product.productFaqHeading} />
+        </>
+      )}
     </div>
   )
 }

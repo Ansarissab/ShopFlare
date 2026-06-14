@@ -4,11 +4,8 @@ import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
 import { buildPageMetadata } from '@/lib/seo/metadata'
 import { getT } from '@/lib/i18n/server'
 import { JsonLd } from '@/components/shared/JsonLd'
-import { FaqSection } from '@/components/store/FaqSection'
-import { parseFaq } from '@/lib/html'
-import { faqPageJsonLd, organizationJsonLd } from '@/lib/seo/jsonld'
+import { organizationJsonLd } from '@/lib/seo/jsonld'
 import { isFeatureEnabled } from '@/lib/features'
-import { layout } from '@/lib/styles'
 import type { StoreConfig } from '@/lib/types/common'
 import type { ProductWithVariants } from '@/lib/types/product'
 import type { CategoryNode } from '@/lib/types/category'
@@ -33,9 +30,6 @@ export default async function StorePage() {
     fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: 300 }),
     getT(),
   ])
-
-  const faqItems =
-    isFeatureEnabled(config, 'faqEnabled') && config?.faqContent ? parseFaq(config.faqContent) : []
 
   if (isFeatureEnabled(config, 'landingEnabled')) {
     const [landingRaw, productsRaw] = await Promise.all([
@@ -66,7 +60,6 @@ export default async function StorePage() {
             logoUrl: config?.logoUrl,
           })}
         />
-        {faqItems.length > 0 && <JsonLd data={faqPageJsonLd(faqItems)} />}
         <LandingPage
           landing={landing}
           storeConfig={{
@@ -77,11 +70,6 @@ export default async function StorePage() {
           }}
           t={t}
         />
-        {faqItems.length > 0 && (
-          <div className={layout.page}>
-            <FaqSection items={faqItems} />
-          </div>
-        )}
       </>
     )
   }
@@ -99,16 +87,8 @@ export default async function StorePage() {
   const initialCategories = categoriesRaw?.categories ?? []
 
   return (
-    <>
-      {faqItems.length > 0 && <JsonLd data={faqPageJsonLd(faqItems)} />}
-      <Suspense>
-        <StorePageClient initialProducts={initialProducts} initialCategories={initialCategories} />
-      </Suspense>
-      {faqItems.length > 0 && (
-        <div className={layout.page}>
-          <FaqSection items={faqItems} />
-        </div>
-      )}
-    </>
+    <Suspense>
+      <StorePageClient initialProducts={initialProducts} initialCategories={initialCategories} />
+    </Suspense>
   )
 }

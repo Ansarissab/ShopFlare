@@ -1,26 +1,38 @@
 import { getT } from '@/lib/i18n/server'
+import { RenderHtml } from '@/components/shared/RenderHtml'
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '@/components/ui/accordion'
 import type { FaqItem } from '@/lib/seo/jsonld'
 
 interface Props {
   items: FaqItem[]
+  /** Override heading text; defaults to t.seo.faqSectionTitle */
+  heading?: string
 }
 
-export async function FaqSection({ items }: Props) {
+export async function FaqSection({ items, heading }: Props) {
   const t = await getT()
   if (!items.length) return null
+  const title = heading ?? t.seo.faqSectionTitle
   return (
     <section aria-labelledby="faq-heading" className="mt-12 border-t border-border pt-10">
       <h2 id="faq-heading" className="text-xl font-bold tracking-tight text-foreground mb-6">
-        {t.seo.faqSectionTitle}
+        {title}
       </h2>
-      <dl className="space-y-6">
+      <Accordion multiple>
         {items.map((item, i) => (
-          <div key={i}>
-            <dt className="font-medium text-foreground">{item.question}</dt>
-            <dd className="mt-1 text-sm text-muted-foreground leading-relaxed">{item.answer}</dd>
-          </div>
+          <AccordionItem key={i} value={i}>
+            <AccordionTrigger>{item.question}</AccordionTrigger>
+            <AccordionContent>
+              <RenderHtml html={item.answer} />
+            </AccordionContent>
+          </AccordionItem>
         ))}
-      </dl>
+      </Accordion>
     </section>
   )
 }

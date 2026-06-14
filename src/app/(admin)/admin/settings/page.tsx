@@ -16,7 +16,6 @@ import {
 import { FormField } from '@/components/common/FormField'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
-import { RichText } from '@/components/shared/RichText'
 import { useT } from '@/lib/i18n/Provider'
 import {
   CURRENCIES,
@@ -37,6 +36,9 @@ import { contrastColor } from '@/lib/utils'
 import { useStoreConfig } from '@/hooks/useStoreConfig'
 import { DATA_UPDATED_CHANNEL } from '@/hooks/useApiResource'
 import { AnnouncementControls } from './AnnouncementControls'
+import { FaqItemsControls } from './FaqItemsControls'
+import { parseFaq } from '@/lib/html'
+import type { FaqItemData } from '@/lib/schemas/config'
 
 export default function AdminSettingsPage() {
   const t = useT()
@@ -79,7 +81,7 @@ export default function AdminSettingsPage() {
   const [aiTrainingAllowed, setAiTrainingAllowed] = useState(true)
   const [faqEnabled, setFaqEnabled] = useState(false)
   const [blogEnabled, setBlogEnabled] = useState(false)
-  const [faqContent, setFaqContent] = useState('')
+  const [faqItems, setFaqItems] = useState<FaqItemData[]>([])
 
   // Tax
   const [taxEnabled, setTaxEnabled] = useState(false)
@@ -112,7 +114,15 @@ export default function AdminSettingsPage() {
     setAiTrainingAllowed(config.aiTrainingAllowed ?? true)
     setFaqEnabled(config.faqEnabled ?? false)
     setBlogEnabled(config.blogEnabled ?? false)
-    setFaqContent(config.faqContent ?? '')
+    // Seed structured FAQ items; migrate legacy faqContent blob when no items stored yet
+    const storedItems = config.faqItems ?? []
+    if (storedItems.length > 0) {
+      setFaqItems(storedItems)
+    } else if (config.faqContent) {
+      setFaqItems(parseFaq(config.faqContent))
+    } else {
+      setFaqItems([])
+    }
     setContactEmail(config.contactEmail ?? '')
     setCurrency(config.currency)
     setFlatShipping(String(config.flatShippingRateCents))
@@ -213,7 +223,7 @@ export default function AdminSettingsPage() {
         aiTrainingAllowed,
         faqEnabled,
         blogEnabled,
-        faqContent: faqContent.trim() || undefined,
+        faqItems: faqItems.filter((item) => item.question.trim() && item.answer.trim()),
         contactEmail: contactEmail.trim() || undefined,
         currency,
         flatShippingRateCents: Number(flatShipping),
@@ -834,12 +844,7 @@ export default function AdminSettingsPage() {
           </div>
         </FormField>
 
-        {faqEnabled && (
-          <FormField label={t.seo.faqContentLabel} htmlFor="s-faq-content">
-            <p className="text-xs text-muted-foreground mb-2">{t.seo.faqContentHelp}</p>
-            <RichText value={faqContent} onChange={setFaqContent} />
-          </FormField>
-        )}
+        {faqEnabled && <FaqItemsControls value={faqItems} onChange={setFaqItems} />}
 
         <FormField label={t.admin.enableBlog} htmlFor="s-blog-enabled">
           <div className="flex items-center gap-2">

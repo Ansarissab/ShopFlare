@@ -26,15 +26,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // When the landing page is enabled, `/` is the marketing page and `/shop` is the catalog.
   let landingEnabled = false
+  let faqEnabled = false
   if (workerUrl) {
     try {
       const cfgRes = await fetch(`${workerUrl}/api/config/store`, { next: { revalidate: 3600 } })
       if (cfgRes.ok) {
-        const cfg = (await cfgRes.json()) as { landingEnabled?: boolean }
+        const cfg = (await cfgRes.json()) as {
+          landingEnabled?: boolean
+          faqEnabled?: boolean
+          faqItems?: unknown[]
+        }
         landingEnabled = cfg.landingEnabled ?? false
+        faqEnabled = (cfg.faqEnabled ?? false) && (cfg.faqItems?.length ?? 0) > 0
       }
     } catch {
-      // skip — landingEnabled stays false, /shop won't be included
+      // skip — landingEnabled/faqEnabled stay false, /shop and /faq won't be included
     }
   }
 
@@ -42,6 +48,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: siteUrl || '/', changeFrequency: 'daily', priority: 1 },
     ...(landingEnabled
       ? [{ url: `${siteUrl}/shop`, changeFrequency: 'daily' as const, priority: 0.9 }]
+      : []),
+    ...(faqEnabled
+      ? [{ url: `${siteUrl}/faq`, changeFrequency: 'weekly' as const, priority: 0.5 }]
       : []),
     ...POLICY_SLUGS.map((slug) => ({
       url: `${siteUrl}/policy/${slug}`,

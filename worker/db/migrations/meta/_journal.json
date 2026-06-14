@@ -71,6 +71,13 @@
       "when": 1781275368315,
       "tag": "0009_melodic_polaris",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1781433983024,
+      "tag": "0010_useful_luminals",
+      "breakpoints": true
     }
   ]
 }

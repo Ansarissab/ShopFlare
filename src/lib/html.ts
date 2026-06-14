@@ -1,5 +1,6 @@
 import DOMPurify from 'isomorphic-dompurify'
 import type { FaqItem } from '@/lib/seo/jsonld'
+import { parseFaqHtml } from '@/lib/faq'
 
 // Allowlist mirrors Trix output: block elements, inline formatting, links, images.
 // Strips scripts, event handlers, <style>, data-URIs.
@@ -36,25 +37,19 @@ function enforceAnchorSafety(html: string): string {
 }
 
 // Parses Trix HTML into FAQ Q&A pairs.
+// Delegates to the pure regex parser in @/lib/faq (no DOM deps — safe in workerd).
 // Convention: <h3> or <h4> = question; the following block element(s) = answer.
 // The visible FAQ rendered on the page must match this output exactly (spam guard).
 export function parseFaq(html: string): FaqItem[] {
-  const items: FaqItem[] = []
-  // Split on every h3/h4 opening tag — first segment before any heading is discarded.
-  const segments = html.split(/(?=<h[34][\s>])/i)
-  for (const seg of segments) {
-    const qMatch = seg.match(/^<h[34][^>]*>([\s\S]*?)<\/h[34]>/i)
-    if (!qMatch) continue
-    const question = qMatch[1].replace(/<[^>]+>/g, '').trim()
-    // Answer = everything after the closing heading tag, stripped of HTML.
-    const afterHeading = seg.slice(qMatch[0].length)
-    const answer = afterHeading
-      .replace(/<[^>]+>/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim()
-    if (question && answer) items.push({ question, answer })
-  }
-  return items
+  return parseFaqHtml(html)
+}
+
+/** Strip all HTML tags and collapse whitespace — use for plain-text contexts (e.g. JSON-LD). */
+export function stripHtml(html: string): string {
+  return html
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 export function sanitizeHtml(dirty: string): string {

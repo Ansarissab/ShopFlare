@@ -61,6 +61,7 @@ function makeProduct(
       slug: 'cool-sneakers',
       active: opts.active ?? true,
       stripeProductId: null,
+      faqItems: null,
       createdAt: '2024-01-01',
       updatedAt: '2024-01-02',
     } as unknown as ProductWithVariants['product'],
@@ -84,6 +85,7 @@ function makeProduct(
       } as unknown as ProductWithVariants['variants'][0],
     ],
     categoryIds: [],
+    faqItems: [],
   }
 }
 

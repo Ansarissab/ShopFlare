@@ -6,6 +6,7 @@ import type { Database } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import type { Product, Variant, ProductImage, SizeOption } from 'worker/db/schema'
 import type { ProductSearchItem } from '@/lib/types/search'
+import { faqItemSchema } from '@/lib/schemas'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -18,6 +19,28 @@ export interface ProductWithVariants {
   product: Product
   variants: VariantWithDetails[]
   categoryIds: string[]
+  /** Parsed faqItems (JSON string → array). Empty array when none stored. */
+  faqItems: { question: string; answer: string }[]
+}
+
+// ─── parseFaqItems ────────────────────────────────────────────────────────────
+
+/**
+ * Parses the faq_items JSON text column into a validated array of FAQ items.
+ * Returns [] when the value is absent, null, or fails validation.
+ */
+function parseFaqItems(raw: string | null): { question: string; answer: string }[] {
+  if (!raw) return []
+  try {
+    const parsed: unknown = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter((m) => faqItemSchema.safeParse(m).success) as {
+      question: string
+      answer: string
+    }[]
+  } catch {
+    return []
+  }
 }
 
 // ─── groupVariants ────────────────────────────────────────────────────────────
@@ -112,7 +135,12 @@ export async function assembleProductList(
     .all()
 
   if (allVariants.length === 0) {
-    return activeProducts.map((product) => ({ product, variants: [], categoryIds: [] }))
+    return activeProducts.map((product) => ({
+      product,
+      variants: [],
+      categoryIds: [],
+      faqItems: parseFaqItems(product.faqItems),
+    }))
   }
 
   const variantIds = allVariants.map((v) => v.id)
@@ -152,6 +180,7 @@ export async function assembleProductList(
     product,
     variants: groupVariants(allVariants, allImages, allSizes, product.id),
     categoryIds: categoryIdsByProduct.get(product.id) ?? [],
+    faqItems: parseFaqItems(product.faqItems),
   }))
 }
 
@@ -336,7 +365,9 @@ export async function assembleProduct(
     .where(eq(schema.variants.productId, product.id))
     .all()
 
-  if (variantRows.length === 0) return { product, variants: [], categoryIds: [] }
+  if (variantRows.length === 0) {
+    return { product, variants: [], categoryIds: [], faqItems: parseFaqItems(product.faqItems) }
+  }
 
   const variantIds = variantRows.map((v) => v.id)
 
@@ -363,5 +394,6 @@ export async function assembleProduct(
     product,
     variants: groupVariants(variantRows, imageRows, sizeRows, product.id),
     categoryIds: catRows.map((r) => r.categoryId),
+    faqItems: parseFaqItems(product.faqItems),
   }
 }

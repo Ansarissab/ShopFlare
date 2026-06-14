@@ -41,6 +41,7 @@ function makeProduct(id: string, name: string): ProductWithVariants {
       active: true,
       reviewsEnabled: true,
       stripeProductId: null,
+      faqItems: null,
       createdAt: '2024-01-01 00:00:00',
       updatedAt: '2024-01-01 00:00:00',
     },
@@ -92,6 +93,7 @@ function makeProduct(id: string, name: string): ProductWithVariants {
         ],
       },
     ],
+    faqItems: [],
   }
 }
 

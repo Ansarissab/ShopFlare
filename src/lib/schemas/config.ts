@@ -18,6 +18,19 @@ import {
 } from '@/lib/constants'
 import { emailField, phoneField, hexColorField } from './base'
 
+// ─── FAQ item schema (phase 30) ───────────────────────────────────────────────
+// Shared by store-wide FAQ (store_config.faqItems) and per-product FAQ
+// (products.faqItems). Both scopes use the same item shape.
+
+export const faqItemSchema = z.object({
+  question: z.string().min(1).max(300),
+  answer: z.string().min(1),
+})
+export const faqItemsSchema = z.array(faqItemSchema).max(50)
+
+export type FaqItemData = z.infer<typeof faqItemSchema>
+export type FaqItemsData = z.infer<typeof faqItemsSchema>
+
 export const featureFlagsSchema = z.object({
   whatsappEnabled: z.boolean().optional(),
   reviewsEnabled: z.boolean().optional(),
@@ -116,7 +129,9 @@ export const storeConfigSchema = z
       .min(MIN_PRODUCT_PAGE_SIZE)
       .max(MAX_PRODUCT_PAGE_SIZE)
       .optional(),
+    // deprecated: migrated to faqItems (phase 30)
     faqContent: z.string().optional(),
+    faqItems: faqItemsSchema.optional(),
     aiTrainingAllowed: z.boolean().optional(),
     enabledLocales: z.array(localeCodeSchema).optional(),
     defaultLocale: localeCodeSchema.optional(),

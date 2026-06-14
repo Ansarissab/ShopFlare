@@ -137,6 +137,7 @@ const product: Product = {
   active: true,
   reviewsEnabled: true,
   stripeProductId: null,
+  faqItems: null,
   createdAt: '2024-01-01 00:00:00',
   updatedAt: '2024-01-01 00:00:00',
 }

@@ -33,10 +33,13 @@ app.put('/store', async (c) => {
   const updates = Object.entries(parsed.data).filter(([, v]) => v !== undefined)
 
   // Keys whose values are JSON-serialized objects/arrays (not comma-joined strings).
-  // announcementMessages is an array of objects — String() would yield "[object Object]".
-  const JSON_SERIALIZED_KEYS = new Set(['announcementMessages'])
+  // announcementMessages and faqItems are arrays of objects — String() would yield "[object Object]".
+  const JSON_SERIALIZED_KEYS = new Set(['announcementMessages', 'faqItems'])
 
   for (const [key, value] of updates) {
+    // faqContent is deprecated (phase 30) — ignore it on write; clients should
+    // send faqItems instead. Existing faqContent in D1 is kept for migration fallback.
+    if (key === 'faqContent') continue
     const serialized = JSON_SERIALIZED_KEYS.has(key) ? JSON.stringify(value) : String(value)
     await db
       .insert(schema.storeConfig)

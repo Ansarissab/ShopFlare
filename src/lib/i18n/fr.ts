@@ -172,6 +172,8 @@ export const fr: Dictionary = {
     notFoundBody: 'This product does not exist or may have been removed.',
     backToStore: 'Back to store',
     noImage: 'No image',
+    // FAQ chrome (phase 30)
+    productFaqHeading: 'Questions fréquentes',
   },
   policies: {
     shipping: 'Shipping Policy',
@@ -586,6 +588,15 @@ export const fr: Dictionary = {
     saveAnnouncement: "Enregistrer la bannière d'annonce",
     announcementSaved: "Barre d'annonce enregistrée",
     announcementMaxMessages: '{max} messages maximum',
+    // FAQ rows editor chrome (phase 30)
+    faqQuestionLabel: 'Question',
+    faqAnswerLabel: 'Réponse',
+    faqAddItem: 'Ajouter une question',
+    faqRemoveItem: 'Supprimer',
+    faqMoveUp: 'Déplacer vers le haut',
+    faqMoveDown: 'Déplacer vers le bas',
+    faqItemsHelp: "Ajoutez des questions et réponses affichées dans l'accordéon FAQ.",
+    faqEmptyState: "Aucune question pour l'instant. Ajoutez votre première question.",
   },
   seo: {
     faqSectionTitle: 'FAQ / Q&A',
