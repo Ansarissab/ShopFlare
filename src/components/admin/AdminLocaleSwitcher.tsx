@@ -41,7 +41,8 @@ export function AdminLocaleSwitcher() {
     const newUrl = qs ? `${newPath}?${qs}` : newPath
 
     // Set cookie so middleware picks it up on the next request
-    document.cookie = `NEXT_LOCALE=${target}; path=/; max-age=31536000; samesite=lax`
+    const secure = location.protocol === 'https:' ? 'secure; ' : ''
+    document.cookie = `NEXT_LOCALE=${target}; path=/; max-age=31536000; samesite=lax; ${secure}`
 
     // Hard navigation — localStorage admin token survives a full page reload
     window.location.assign(newUrl)

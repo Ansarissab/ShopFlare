@@ -8,7 +8,7 @@ import { useEffect, useLayoutEffect, useRef, useId } from 'react'
 import { toast } from 'sonner'
 import { compressImage } from '@/lib/image'
 import { apiUpload } from '@/lib/api'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 
 interface RichTextEditorProps {
   value: string
@@ -17,6 +17,7 @@ interface RichTextEditorProps {
 }
 
 export function RichTextEditor({ value, onChange, uploadEndpoint }: RichTextEditorProps) {
+  const t = useT()
   const uid = useId().replace(/:/g, '')
   const inputId = `trix-input-${uid}`
   const editorRef = useRef<TrixEditorElement | null>(null)
@@ -64,7 +65,7 @@ export function RichTextEditor({ value, onChange, uploadEndpoint }: RichTextEdit
           attachment.setAttributes({ url, href: url })
         })
         .catch((err) => {
-          toast.error(err instanceof Error ? err.message : en.errors.networkError)
+          toast.error(err instanceof Error ? err.message : t.errors.networkError)
         })
     }
 
@@ -74,7 +75,7 @@ export function RichTextEditor({ value, onChange, uploadEndpoint }: RichTextEdit
       el.removeEventListener('trix-change', handleChange)
       el.removeEventListener('trix-attachment-add', handleAttachmentAdd)
     }
-  }, [uploadEndpoint])
+  }, [uploadEndpoint, t])
 
   return (
     <div className="trix-wrapper">

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { updateConfigSchema } from './admin'
+import { storeConfigSchema } from './config'
 import {
   MIN_PRODUCT_PAGE_SIZE,
   MAX_PRODUCT_PAGE_SIZE,
@@ -43,5 +44,91 @@ describe('updateConfigSchema · productPageSize', () => {
 
   it('is optional — omitting it still validates', () => {
     expect(updateConfigSchema.safeParse({ storeName: 'Acme' }).success).toBe(true)
+  })
+})
+
+// ─── i18n locale invariants (enforced on updateConfigSchema) ─────────────────
+// Refinements live on updateConfigSchema (not storeConfigSchema) because Zod v4
+// forbids calling .partial() on a refined schema — it would throw at build time.
+
+describe('updateConfigSchema · i18n locale invariants', () => {
+  it('accepts valid enabledLocales that includes en', () => {
+    expect(updateConfigSchema.safeParse({ enabledLocales: ['en'] }).success).toBe(true)
+    expect(updateConfigSchema.safeParse({ enabledLocales: ['en', 'fr', 'ur'] }).success).toBe(true)
+  })
+
+  it('accepts defaultLocale that is in enabledLocales', () => {
+    expect(
+      updateConfigSchema.safeParse({ enabledLocales: ['en', 'fr'], defaultLocale: 'fr' }).success,
+    ).toBe(true)
+  })
+
+  it('rejects enabledLocales without en', () => {
+    const r = updateConfigSchema.safeParse({ enabledLocales: ['fr'] })
+    expect(r.success).toBe(false)
+    if (!r.success) {
+      expect(r.error.issues[0].path).toContain('enabledLocales')
+    }
+  })
+
+  it('rejects defaultLocale not in enabledLocales', () => {
+    const r = updateConfigSchema.safeParse({ enabledLocales: ['en'], defaultLocale: 'ur' })
+    expect(r.success).toBe(false)
+    if (!r.success) {
+      expect(r.error.issues[0].path).toContain('defaultLocale')
+    }
+  })
+
+  it('is lenient when both fields are absent (partial update)', () => {
+    // A partial PUT with neither field must still pass
+    expect(updateConfigSchema.safeParse({ storeName: 'Acme' }).success).toBe(true)
+    expect(updateConfigSchema.safeParse({}).success).toBe(true)
+  })
+
+  it('is lenient when only defaultLocale is absent (locale list update only)', () => {
+    // enabledLocales present with en, defaultLocale absent — valid
+    expect(updateConfigSchema.safeParse({ enabledLocales: ['en', 'fr'] }).success).toBe(true)
+  })
+
+  it('is lenient when only enabledLocales is absent (default locale update only)', () => {
+    // defaultLocale present but enabledLocales absent — cross-check skipped (can't know what's stored)
+    expect(updateConfigSchema.safeParse({ defaultLocale: 'fr' }).success).toBe(true)
+  })
+})
+
+// ─── storeConfigSchema GET-assembly smoke ─────────────────────────────────────
+// The assembled defaults from worker/routes/config.ts must parse clean against
+// storeConfigSchema (no refinements on it — these are the full response fields).
+
+describe('storeConfigSchema · default assembly round-trip', () => {
+  it('accepts the default assembled shape (en floor, en default)', () => {
+    const r = storeConfigSchema.safeParse({
+      storeName: 'ShopFlare',
+      currency: 'PKR',
+      freeShippingThresholdCents: 0,
+      flatShippingRateCents: 0,
+      primaryColor: '#1A1A18',
+      accentColor: '#4A7C6F',
+      radius: 'md',
+      fontFamily: 'sans',
+      colorMode: 'light',
+      density: 'comfortable',
+      heroStyle: 'image-left',
+      taxEnabled: false,
+      taxRate: 0,
+      taxName: 'Tax',
+      taxInclusive: false,
+      taxBasis: 'subtotal',
+      whatsappEnabled: false,
+      reviewsEnabled: true,
+      landingEnabled: false,
+      blogEnabled: false,
+      llmDiscoveryEnabled: true,
+      faqEnabled: false,
+      aiTrainingAllowed: true,
+      enabledLocales: ['en'],
+      defaultLocale: 'en',
+    })
+    expect(r.success).toBe(true)
   })
 })

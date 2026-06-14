@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useT, useLocale } from '@/lib/i18n/Provider'
 import { useStoreConfig } from '@/hooks/useStoreConfig'
-import { LOCALES, SHIPPED_LOCALES, type LocaleCode } from '@/lib/constants'
+import { LOCALES, SHIPPED_LOCALES, DEFAULT_LOCALE, type LocaleCode } from '@/lib/constants'
 
 export function LocaleSwitcher() {
   const t = useT()
@@ -23,11 +23,6 @@ export function LocaleSwitcher() {
   const enabledLocales = rawEnabled.filter((l): l is LocaleCode =>
     SHIPPED_LOCALES.includes(l as LocaleCode),
   )
-  const merchantDefault: LocaleCode = (
-    config?.defaultLocale && SHIPPED_LOCALES.includes(config.defaultLocale as LocaleCode)
-      ? config.defaultLocale
-      : 'en'
-  ) as LocaleCode
 
   // Only render when more than one locale is enabled
   if (enabledLocales.length <= 1) return null
@@ -39,13 +34,16 @@ export function LocaleSwitcher() {
     const localePrefix = new RegExp('^/(' + SHIPPED_LOCALES.join('|') + ')(?=/|$)')
     const barePath = pathname.replace(localePrefix, '') || '/'
 
-    // Default locale is served unprefixed; all others get a /{locale} prefix
-    const newPath = target === merchantDefault ? barePath : `/${target}${barePath}`
+    // DEFAULT_LOCALE is served unprefixed; all others get a /{locale} prefix.
+    // This matches middleware's resolution model (URL prefix determines locale,
+    // and the unprefixed path is always the default locale).
+    const newPath = target === DEFAULT_LOCALE ? barePath : `/${target}${barePath}`
     const qs = searchParams.toString()
     const newUrl = qs ? `${newPath}?${qs}` : newPath
 
-    // Set cookie client-side so the middleware picks it up on the next request
-    document.cookie = `NEXT_LOCALE=${target}; path=/; max-age=31536000; samesite=lax`
+    // Set cookie client-side so middleware picks it up on the next unprefixed request
+    const secure = location.protocol === 'https:' ? 'secure; ' : ''
+    document.cookie = `NEXT_LOCALE=${target}; path=/; max-age=31536000; samesite=lax; ${secure}`
 
     // Hard navigation re-runs middleware + SSR so the dictionary and dir attribute update
     window.location.assign(newUrl)

@@ -134,8 +134,24 @@ export const updatePageSchema = z.object({
 
 // ─── Config admin ─────────────────────────────────────────────────────────────
 
-// Allow partial updates — merchant edits one section at a time
-export const updateConfigSchema = storeConfigSchema.partial()
+// Allow partial updates — merchant edits one section at a time.
+// Refinements go HERE (after .partial()) because Zod v4 forbids .partial() on a
+// refined ZodObject — calling .partial() on a ZodEffects throws at schema-build time.
+// The two invariants are lenient when the field is absent (partial update path)
+// so a single-field PUT still passes.
+export const updateConfigSchema = storeConfigSchema
+  .partial()
+  .refine((d) => !d.enabledLocales || d.enabledLocales.includes('en'), {
+    message: 'English (en) must always be enabled',
+    path: ['enabledLocales'],
+  })
+  .refine(
+    (d) => !d.enabledLocales || !d.defaultLocale || d.enabledLocales.includes(d.defaultLocale),
+    {
+      message: 'defaultLocale must be one of enabledLocales',
+      path: ['defaultLocale'],
+    },
+  )
 
 // ─── Category ──────────────────────────────────────────────────────────────────
 export const createCategorySchema = z.object({

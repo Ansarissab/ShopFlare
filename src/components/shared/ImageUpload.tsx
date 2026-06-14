@@ -13,7 +13,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
-import { en } from '@/lib/i18n/en'
+import { useT } from '@/lib/i18n/Provider'
 import { apiUpload, apiDelete } from '@/lib/api'
 import { compressImage, COMPRESS_CONFIRM_THRESHOLD_BYTES, type CompressResult } from '@/lib/image'
 import { MAX_IMAGE_BYTES } from '@/lib/constants'
@@ -50,6 +50,7 @@ export function ImageUpload<T = unknown>({
   max,
   currentImages = [],
 }: SharedImageUploadProps<T>) {
+  const t = useT()
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [confirmState, setConfirmState] = useState<ConfirmState | null>(null)
@@ -70,7 +71,7 @@ export function ImageUpload<T = unknown>({
   async function doUpload(form: FormData) {
     const uploaded = await apiUpload<T>(endpoint, form)
     onUploaded(uploaded)
-    toast.success(en.admin.imageUploaded)
+    toast.success(t.admin.imageUploaded)
   }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -95,13 +96,13 @@ export function ImageUpload<T = unknown>({
       }
 
       if (result.compressedBytes > MAX_IMAGE_BYTES) {
-        toast.error(en.errors.imageTooLarge)
+        toast.error(t.errors.imageTooLarge)
         return
       }
 
       await doUpload(form)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : en.errors.networkError)
+      toast.error(err instanceof Error ? err.message : t.errors.networkError)
     } finally {
       setUploading(false)
       if (inputRef.current) inputRef.current.value = ''
@@ -115,7 +116,7 @@ export function ImageUpload<T = unknown>({
     try {
       await doUpload(confirmState.form)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : en.errors.networkError)
+      toast.error(err instanceof Error ? err.message : t.errors.networkError)
     } finally {
       setUploading(false)
     }
@@ -134,9 +135,9 @@ export function ImageUpload<T = unknown>({
     try {
       await apiDelete(deleteEndpoint(id))
       onDeleted?.(id)
-      toast.success(en.admin.imageDeleted)
+      toast.success(t.admin.imageDeleted)
     } catch {
-      toast.error(en.errors.networkError)
+      toast.error(t.errors.networkError)
     }
   }
 
@@ -161,7 +162,7 @@ export function ImageUpload<T = unknown>({
                   type="button"
                   onClick={() => handleDelete(img.id)}
                   className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"
-                  aria-label={en.admin.deleteImage}
+                  aria-label={t.admin.deleteImage}
                 >
                   <Trash2 className="size-4 text-white" />
                 </button>
@@ -179,7 +180,7 @@ export function ImageUpload<T = unknown>({
               disabled={uploading}
             >
               <Upload className="size-4" aria-hidden />
-              {uploading ? '…' : en.admin.uploadImage}
+              {uploading ? '…' : t.admin.uploadImage}
             </Button>
           )}
         </div>
@@ -201,8 +202,8 @@ export function ImageUpload<T = unknown>({
       >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>{en.admin.compressTitle}</DialogTitle>
-            <DialogDescription>{en.admin.compressBody}</DialogDescription>
+            <DialogTitle>{t.admin.compressTitle}</DialogTitle>
+            <DialogDescription>{t.admin.compressBody}</DialogDescription>
           </DialogHeader>
 
           {confirmState && (
@@ -220,18 +221,18 @@ export function ImageUpload<T = unknown>({
 
               <div className="text-sm space-y-0.5">
                 <p>
-                  {en.admin.compressSizeLabel
+                  {t.admin.compressSizeLabel
                     .replace('{original}', formatBytes(confirmState.result.originalBytes))
                     .replace('{compressed}', formatBytes(confirmState.result.compressedBytes))}
                 </p>
                 {savedPct > 0 && (
                   <p className="text-muted-foreground">
-                    {en.admin.compressSavedLabel.replace('{pct}', String(savedPct))}
+                    {t.admin.compressSavedLabel.replace('{pct}', String(savedPct))}
                   </p>
                 )}
                 {confirmState.overCap && (
                   <p className="text-destructive text-xs mt-1">
-                    {en.admin.compressTooLarge.replace(
+                    {t.admin.compressTooLarge.replace(
                       '{mb}',
                       String(Math.round(MAX_IMAGE_BYTES / 1024 / 1024)),
                     )}
@@ -243,14 +244,14 @@ export function ImageUpload<T = unknown>({
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={closeDialog}>
-              {en.admin.compressCancel}
+              {t.admin.compressCancel}
             </Button>
             <Button
               type="button"
               onClick={handleConfirmUpload}
               disabled={!confirmState || confirmState.overCap}
             >
-              {en.admin.compressConfirm}
+              {t.admin.compressConfirm}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -91,9 +91,12 @@ app.get('/store', async (c) => {
     aiTrainingAllowed:
       kv['aiTrainingAllowed'] !== undefined ? kv['aiTrainingAllowed'] === 'true' : true,
     // i18n — enabledLocales is stored comma-joined ("en,fr,ur"); default to ['en'].
-    enabledLocales: (kv['enabledLocales']
-      ?.split(',')
-      .filter(Boolean) as StoreConfigData['enabledLocales']) || ['en'],
+    // NOTE: `[] || ['en']` is wrong — an empty array is truthy. Floor on length instead.
+    enabledLocales: (() => {
+      const arr = (kv['enabledLocales']?.split(',').filter(Boolean) ??
+        []) as StoreConfigData['enabledLocales']
+      return arr && arr.length > 0 ? arr : ['en']
+    })(),
     defaultLocale: (kv['defaultLocale'] as StoreConfigData['defaultLocale']) || 'en',
   }
 

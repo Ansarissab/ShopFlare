@@ -279,5 +279,5 @@ export const LOCALES = {
   ur: { code: 'ur', label: 'اردو', dir: 'rtl' },
 } as const
 export type LocaleCode = keyof typeof LOCALES
-export const SHIPPED_LOCALES = Object.keys(LOCALES) as LocaleCode[]
+export const SHIPPED_LOCALES = Object.keys(LOCALES) as readonly LocaleCode[]
 export const DEFAULT_LOCALE: LocaleCode = 'en'

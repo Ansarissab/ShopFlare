@@ -30,7 +30,7 @@ const currencyCodes = Object.keys(CURRENCIES) as [string, ...string[]]
 export const currencyCodeSchema = z.enum(currencyCodes)
 
 // Locale code enum derived from the SHIPPED_LOCALES registry (DRY).
-const localeCodeSchema = z.enum(SHIPPED_LOCALES as [string, ...string[]])
+const localeCodeSchema = z.enum([...SHIPPED_LOCALES] as [string, ...string[]])
 
 // Monetary amounts are always integer cents, never negative.
 const centsField = z.number().int().nonnegative()

@@ -127,7 +127,7 @@ describe('GET /api/config/store', () => {
   })
 })
 
-describe('GET /api/config/store — i18n locale fields', () => {
+describe('GET /api/config/store - i18n locale fields', () => {
   it('returns default enabledLocales and defaultLocale when unset', async () => {
     const res = await get('/api/config/store')
     expect(res.status).toBe(200)
@@ -136,7 +136,7 @@ describe('GET /api/config/store — i18n locale fields', () => {
     expect(body.defaultLocale).toBe('en')
   })
 
-  it('round-trips enabledLocales and defaultLocale via PUT then GET', async () => {
+  it('round-trips enabledLocales and defaultLocale via PUT then GET (order preserved)', async () => {
     const putRes = await adminPut('/api/admin/config/store', {
       enabledLocales: ['en', 'fr', 'ur'],
       defaultLocale: 'fr',
@@ -150,9 +150,24 @@ describe('GET /api/config/store — i18n locale fields', () => {
     const res = await get('/api/config/store')
     expect(res.status).toBe(200)
     const body = (await res.json()) as Record<string, unknown>
-    // enabledLocales is stored comma-joined, re-parsed as array
+    // enabledLocales is stored comma-joined, re-parsed as array — order must be preserved
     expect(body.enabledLocales).toEqual(['en', 'fr', 'ur'])
     expect(body.defaultLocale).toBe('fr')
+  })
+
+  it('rejects PUT with enabledLocales that omits en (400)', async () => {
+    const res = await adminPut('/api/admin/config/store', {
+      enabledLocales: ['fr'],
+    })
+    expect(res.status).toBe(400)
+  })
+
+  it('rejects PUT where defaultLocale is not in enabledLocales (400)', async () => {
+    const res = await adminPut('/api/admin/config/store', {
+      enabledLocales: ['en'],
+      defaultLocale: 'ur',
+    })
+    expect(res.status).toBe(400)
   })
 })
 

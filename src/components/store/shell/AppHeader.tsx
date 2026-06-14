@@ -6,8 +6,10 @@ import { useIsStandalone } from '@/hooks/useDisplayMode'
 import { useCartItemCount, useCart } from '@/hooks/useCart'
 import { useStoreConfig } from '@/hooks/useStoreConfig'
 import { layout, safeArea } from '@/lib/styles'
+import { useT } from '@/lib/i18n/Provider'
 
 export function AppHeader() {
+  const t = useT()
   const isStandalone = useIsStandalone()
   const cartCount = useCartItemCount()
   const openCart = useCart((s) => s.openCart)
@@ -24,7 +26,7 @@ export function AppHeader() {
       <button
         onClick={openCart}
         className="relative flex h-9 w-9 items-center justify-center rounded-lg hover:bg-accent"
-        aria-label="Open cart"
+        aria-label={t.store.openCart}
       >
         <ShoppingCart className="h-5 w-5" />
         {cartCount > 0 && (

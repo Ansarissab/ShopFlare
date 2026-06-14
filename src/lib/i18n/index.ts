@@ -6,7 +6,7 @@ import { DEFAULT_LOCALE, SHIPPED_LOCALES, type LocaleCode } from '@/lib/constant
 const DICTIONARIES: Record<LocaleCode, Dictionary> = { en, fr, ur }
 
 export function isLocale(x: string | null | undefined): x is LocaleCode {
-  return !!x && (SHIPPED_LOCALES as string[]).includes(x)
+  return !!x && (SHIPPED_LOCALES as readonly string[]).includes(x)
 }
 
 export function getDictionary(locale: string | null | undefined): Dictionary {

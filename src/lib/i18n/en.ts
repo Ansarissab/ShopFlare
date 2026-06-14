@@ -49,6 +49,7 @@ export const en = {
     ctaDefaultSubtext: 'Browse our full collection',
     ctaDefaultCta: 'Shop Now',
     languageSwitcherLabel: 'Language',
+    openCart: 'Open cart',
   },
   cart: {
     title: 'Your Cart',
@@ -150,6 +151,7 @@ export const en = {
     notFound: 'Product Not Found',
     notFoundBody: 'This product does not exist or may have been removed.',
     backToStore: 'Back to store',
+    noImage: 'No image',
   },
   policies: {
     shipping: 'Shipping Policy',

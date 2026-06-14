@@ -11,9 +11,11 @@ import {
   type CarouselApi,
 } from '@/components/ui/carousel'
 import { cn } from '@/lib/utils'
+import { useT } from '@/lib/i18n/Provider'
 import type { ImageCarouselProps } from '@/lib/types/product'
 
 export function ImageCarousel({ images, className }: ImageCarouselProps) {
+  const t = useT()
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
 
@@ -39,7 +41,7 @@ export function ImageCarousel({ images, className }: ImageCarouselProps) {
           className,
         )}
       >
-        <span className="text-muted-foreground text-sm">No image</span>
+        <span className="text-muted-foreground text-sm">{t.product.noImage}</span>
       </div>
     )
   }

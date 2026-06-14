@@ -78,7 +78,7 @@ export function StorefrontHeader() {
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Open cart"
+            aria-label={t.store.openCart}
             className="relative"
             onClick={openCart}
           >
