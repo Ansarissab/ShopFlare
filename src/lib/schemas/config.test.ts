@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { updateConfigSchema } from './admin'
-import { storeConfigSchema } from './config'
+import { announcementMessageSchema, storeConfigSchema } from './config'
 import {
   MIN_PRODUCT_PAGE_SIZE,
   MAX_PRODUCT_PAGE_SIZE,
@@ -93,6 +93,55 @@ describe('updateConfigSchema · i18n locale invariants', () => {
   it('is lenient when only enabledLocales is absent (default locale update only)', () => {
     // defaultLocale present but enabledLocales absent — cross-check skipped (can't know what's stored)
     expect(updateConfigSchema.safeParse({ defaultLocale: 'fr' }).success).toBe(true)
+  })
+})
+
+// ─── announcementMessageSchema · link XSS guard ───────────────────────────────
+
+describe('announcementMessageSchema · link XSS guard', () => {
+  it('accepts undefined link (optional)', () => {
+    expect(announcementMessageSchema.safeParse({ text: 'Hello' }).success).toBe(true)
+  })
+
+  it('accepts root-relative path (/shop)', () => {
+    expect(announcementMessageSchema.safeParse({ text: 'Hi', link: '/shop' }).success).toBe(true)
+  })
+
+  it('accepts https URL', () => {
+    expect(
+      announcementMessageSchema.safeParse({ text: 'Hi', link: 'https://example.com/promo' })
+        .success,
+    ).toBe(true)
+  })
+
+  it('accepts http URL', () => {
+    expect(
+      announcementMessageSchema.safeParse({ text: 'Hi', link: 'http://example.com' }).success,
+    ).toBe(true)
+  })
+
+  it('rejects javascript: URI', () => {
+    // eslint-disable-next-line no-script-url
+    const r = announcementMessageSchema.safeParse({ text: 'Hi', link: 'javascript:alert(1)' })
+    expect(r.success).toBe(false)
+  })
+
+  it('rejects data: URI', () => {
+    const r = announcementMessageSchema.safeParse({
+      text: 'Hi',
+      link: 'data:text/html,<script>alert(1)</script>',
+    })
+    expect(r.success).toBe(false)
+  })
+
+  it('rejects vbscript: URI', () => {
+    const r = announcementMessageSchema.safeParse({ text: 'Hi', link: 'vbscript:msgbox(1)' })
+    expect(r.success).toBe(false)
+  })
+
+  it('rejects bare relative path (no leading slash)', () => {
+    const r = announcementMessageSchema.safeParse({ text: 'Hi', link: 'shop/deals' })
+    expect(r.success).toBe(false)
   })
 })
 

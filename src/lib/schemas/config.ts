@@ -13,6 +13,8 @@ import {
   MIN_PRODUCT_PAGE_SIZE,
   MAX_PRODUCT_PAGE_SIZE,
   SHIPPED_LOCALES,
+  ANNOUNCEMENT_TYPES,
+  MAX_ANNOUNCEMENT_MESSAGES,
 } from '@/lib/constants'
 import { emailField, phoneField, hexColorField } from './base'
 
@@ -62,6 +64,34 @@ export const taxConfigSchema = z.object({
 })
 export type TaxConfigData = z.infer<typeof taxConfigSchema>
 
+// ─── Announcement Bar ────────────────────────────────────────────────────────
+
+export const announcementMessageSchema = z.object({
+  text: z.string().min(1).max(200),
+  // Only http(s) URLs and root-relative paths are allowed.
+  // This blocks javascript:, data:, vbscript:, and similar XSS vectors.
+  link: z
+    .string()
+    .max(300)
+    .regex(/^(https?:\/\/|\/)/, 'Link must be an http/https URL or a root-relative path (/…)')
+    .optional(),
+  color: hexColorField.optional(),
+})
+export type AnnouncementMessage = z.infer<typeof announcementMessageSchema>
+
+export const announcementConfigSchema = z.object({
+  announcementEnabled: z.boolean().optional(),
+  announcementType: z.enum([...ANNOUNCEMENT_TYPES] as [string, ...string[]]).optional(),
+  announcementMessages: z
+    .array(announcementMessageSchema)
+    .max(MAX_ANNOUNCEMENT_MESSAGES)
+    .optional(),
+  announcementStart: z.string().optional(),
+  announcementEnd: z.string().optional(),
+  announcementVersion: z.number().int().nonnegative().optional(),
+})
+export type AnnouncementConfigData = z.infer<typeof announcementConfigSchema>
+
 export const storeConfigSchema = z
   .object({
     storeName: z.string().min(1),
@@ -94,5 +124,6 @@ export const storeConfigSchema = z
   .merge(appearanceSchema)
   .merge(taxConfigSchema)
   .merge(featureFlagsSchema)
+  .merge(announcementConfigSchema)
 
 export type StoreConfigData = z.infer<typeof storeConfigSchema>

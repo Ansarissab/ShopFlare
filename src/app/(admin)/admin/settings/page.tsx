@@ -36,6 +36,7 @@ import { apiPut, apiUpload, apiDelete } from '@/lib/api'
 import { contrastColor } from '@/lib/utils'
 import { useStoreConfig } from '@/hooks/useStoreConfig'
 import { DATA_UPDATED_CHANNEL } from '@/hooks/useApiResource'
+import { AnnouncementControls } from './AnnouncementControls'
 
 export default function AdminSettingsPage() {
   const t = useT()
@@ -910,6 +911,9 @@ export default function AdminSettingsPage() {
           </Select>
         </FormField>
       </div>
+
+      {/* Announcement Bar */}
+      <AnnouncementControls config={config} />
 
       {/* Payments & Shipping */}
       <div className="flex flex-col gap-4 rounded-lg border p-5">

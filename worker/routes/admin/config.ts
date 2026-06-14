@@ -32,13 +32,18 @@ app.put('/store', async (c) => {
 
   const updates = Object.entries(parsed.data).filter(([, v]) => v !== undefined)
 
+  // Keys whose values are JSON-serialized objects/arrays (not comma-joined strings).
+  // announcementMessages is an array of objects — String() would yield "[object Object]".
+  const JSON_SERIALIZED_KEYS = new Set(['announcementMessages'])
+
   for (const [key, value] of updates) {
+    const serialized = JSON_SERIALIZED_KEYS.has(key) ? JSON.stringify(value) : String(value)
     await db
       .insert(schema.storeConfig)
-      .values({ key, value: String(value), updatedAt: now })
+      .values({ key, value: serialized, updatedAt: now })
       .onConflictDoUpdate({
         target: schema.storeConfig.key,
-        set: { value: String(value), updatedAt: now },
+        set: { value: serialized, updatedAt: now },
       })
   }
 

@@ -5,7 +5,7 @@ import { Hono } from 'hono'
 import { sql } from 'drizzle-orm'
 import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
-import { storeConfigSchema } from '@/lib/schemas'
+import { announcementMessageSchema, storeConfigSchema } from '@/lib/schemas'
 import type { StoreConfigData } from '@/lib/schemas'
 import type { Bindings } from 'worker/types'
 import { etagFor } from 'worker/lib/fingerprint'
@@ -98,6 +98,28 @@ app.get('/store', async (c) => {
       return arr && arr.length > 0 ? arr : ['en']
     })(),
     defaultLocale: (kv['defaultLocale'] as StoreConfigData['defaultLocale']) || 'en',
+    // Announcement bar — booleans use the same === 'true' pattern as feature flags;
+    // announcementMessages array is JSON-serialized on write, parsed here.
+    announcementEnabled:
+      kv['announcementEnabled'] !== undefined ? kv['announcementEnabled'] === 'true' : undefined,
+    announcementType: (kv['announcementType'] as StoreConfigData['announcementType']) || undefined,
+    announcementMessages: (() => {
+      const raw = kv['announcementMessages']
+      if (!raw) return undefined
+      try {
+        const parsed: unknown = JSON.parse(raw)
+        // Re-validate each message so a corrupt D1 value can't reach clients.
+        if (!Array.isArray(parsed)) return undefined
+        const valid = parsed.filter((m) => announcementMessageSchema.safeParse(m).success)
+        return valid.length > 0 ? (valid as StoreConfigData['announcementMessages']) : undefined
+      } catch {
+        return undefined
+      }
+    })(),
+    announcementStart: kv['announcementStart'] || undefined,
+    announcementEnd: kv['announcementEnd'] || undefined,
+    announcementVersion:
+      kv['announcementVersion'] !== undefined ? Number(kv['announcementVersion']) : undefined,
   }
 
   const validation = storeConfigSchema.safeParse(assembled)

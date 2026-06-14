@@ -184,6 +184,15 @@ export const SW_CACHE_NAMES = {
 
 export const OFFLINE_QUEUE_IDB_KEY = 'offline_queue'
 export const INSTALL_DISMISSED_KEY = 'pwa-install-dismissed'
+export const ANNOUNCEMENT_DISMISS_KEY = 'announcement-dismissed'
+
+// ─── Announcement Bar ────────────────────────────────────────────────────────
+
+export const ANNOUNCEMENT_TYPES = ['single', 'scheduled', 'rotating'] as const
+export type AnnouncementType = (typeof ANNOUNCEMENT_TYPES)[number]
+
+export const ANNOUNCEMENT_ROTATE_MS = 6000
+export const MAX_ANNOUNCEMENT_MESSAGES = 5
 
 // Tab routes for the native bottom nav (standalone mode)
 export const TAB_ROUTES = [
