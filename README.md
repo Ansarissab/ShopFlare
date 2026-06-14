@@ -75,5 +75,5 @@ Every feature is checked by tests that run on their own before anything goes liv
 
 ## Author
 
-Built by **Zahid Ensari**
+Built by **Muhammad Zahid Ansari**
 [GitHub](https://github.com/Ansarissab) · [LinkedIn](https://www.linkedin.com/in/zahidensari/)
