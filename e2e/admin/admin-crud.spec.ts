@@ -115,8 +115,9 @@ test.describe('admin settings page', () => {
     await expect(page.locator('#s-wa')).toBeVisible()
     await expect(page.locator('#s-email')).toBeVisible()
 
-    // Save button
-    await expect(page.getByRole('button', { name: /save/i })).toBeVisible()
+    // Top-level Save button (exact — the announcement section has its own
+    // "Save announcement bar" button that a loose /save/i would also match)
+    await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeVisible()
   })
 
   test('primary color input is present and editable', async ({ page }) => {
