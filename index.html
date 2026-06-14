@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ShopFlare — Project Overview</title>
 <style>
   :root {
@@ -156,6 +157,22 @@
     color: var(--muted);
     display: flex;
     justify-content: space-between;
+  }
+
+  /* ---------- Web (screen) only — print/PDF keeps its A4 layout ---------- */
+  @media screen {
+    body { max-width: 820px; margin: 0 auto; padding: 32px 22px; }
+  }
+
+  /* ---------- Small screens — reuse existing classes, just stack them ---------- */
+  @media screen and (max-width: 600px) {
+    body { font-size: 12px; }
+    .hero h1 { font-size: 32px; }
+    .hero .tagline { font-size: 15px; max-width: 100%; }
+    .cols { flex-direction: column; }       /* two feature columns stack */
+    .stats { flex-wrap: wrap; }             /* 4 stats become a 2×2 grid */
+    .stat { flex: 1 1 40%; }
+    .footer { flex-direction: column; gap: 4px; }
   }
 </style>
 </head>
