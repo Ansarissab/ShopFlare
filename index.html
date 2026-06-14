@@ -68,9 +68,10 @@
   .page-break { break-before: page; }
   .sec-title {
     font-size: 13pt;
-    margin-bottom: 8px;
-    padding-left: 10px;
-    border-left: 4px solid var(--brand);
+    display: inline-block;            /* underline hugs the text width */
+    margin-bottom: 10px;
+    padding-bottom: 4px;
+    border-bottom: 2px solid var(--brand);
   }
   /* muted intro line under a section title */
   .note { color: var(--muted); }
@@ -88,18 +89,18 @@
   .story .lead { font-weight: 600; color: var(--ink); }
 
   /* ---------- Two column ---------- */
+  /* grid: equal-height rows come for free, no height hacks */
   .cols {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 14px;
   }
-  .col { flex: 1; }
 
   /* ---------- Cards ---------- */
   .card {
     border: 1px solid var(--line);
     border-radius: 10px;
     padding: 12px 14px;
-    margin-bottom: 12px;
   }
   .card h3 {
     font-size: 10.5pt;
@@ -158,6 +159,8 @@
     display: flex;
     justify-content: space-between;
   }
+  .footer .links a { margin-left: 16px; font-weight: 600; }
+  .footer .links a:first-child { margin-left: 0; }
 
   /* ---------- Web (screen) only — print/PDF keeps its A4 layout ---------- */
   @media screen {
@@ -169,7 +172,7 @@
     body { font-size: 12px; }
     .hero h1 { font-size: 32px; }
     .hero .tagline { font-size: 15px; max-width: 100%; }
-    .cols { flex-direction: column; }       /* two feature columns stack */
+    .cols { grid-template-columns: 1fr; }   /* two feature columns stack */
     .stats { flex-wrap: wrap; }             /* 4 stats become a 2×2 grid */
     .stat { flex: 1 1 40%; }
     .footer { flex-direction: column; gap: 4px; }
@@ -195,34 +198,30 @@
   <section>
     <h2 class="sec-title">What it does</h2>
     <div class="cols">
-      <div class="col">
-        <div class="card">
-          <h3>For shoppers</h3>
-          <ul>
-            <li>Browse products with colors, sizes and live stock</li>
-            <li>Fast search and a cart that remembers them</li>
-            <li>Pay by card, cash on delivery, bank transfer, WhatsApp, or in person</li>
-            <li>Track and cancel their own orders</li>
-            <li>Leave verified reviews and ratings</li>
-            <li>Get an email when a sold-out item is back</li>
-            <li>Install the store like an app and use it offline</li>
-            <li>Shop in English, French or Urdu (right-to-left)</li>
-          </ul>
-        </div>
+      <div class="card">
+        <h3>For shoppers</h3>
+        <ul>
+          <li>Browse products with colors, sizes and live stock</li>
+          <li>Fast search and a cart that remembers them</li>
+          <li>Pay by card, cash on delivery, bank transfer, WhatsApp, or in person</li>
+          <li>Track and cancel their own orders</li>
+          <li>Leave verified reviews and ratings</li>
+          <li>Get an email when a sold-out item is back</li>
+          <li>Install the store like an app and use it offline</li>
+          <li>Shop in English, French or Urdu (right-to-left)</li>
+        </ul>
       </div>
-      <div class="col">
-        <div class="card">
-          <h3>For the shop owner</h3>
-          <ul>
-            <li>Add products and photos (auto-compressed on upload)</li>
-            <li>Manage orders, statuses and shipping tracking</li>
-            <li>Create discount coupons synced with payments</li>
-            <li>Approve reviews, answer FAQs, write blog posts</li>
-            <li>Built-in cash register for in-person sales</li>
-            <li>Change name, logo, colors, shipping and policies live, no developer needed</li>
-            <li>One-click themes and a built-in analytics dashboard</li>
-          </ul>
-        </div>
+      <div class="card">
+        <h3>For the shop owner</h3>
+        <ul>
+          <li>Add products and photos (auto-compressed on upload)</li>
+          <li>Manage orders, statuses and shipping tracking</li>
+          <li>Create discount coupons synced with payments</li>
+          <li>Approve reviews, answer FAQs, write blog posts</li>
+          <li>Built-in cash register for in-person sales</li>
+          <li>Change name, logo, colors, shipping and policies live, no developer needed</li>
+          <li>One-click themes and a built-in analytics dashboard</li>
+        </ul>
       </div>
     </div>
   </section>
@@ -265,8 +264,11 @@
   </section>
 
   <div class="footer">
-    <span>ShopFlare — a free online store kit for small businesses</span>
-    <span>Built with Next.js &amp; Cloudflare · Open source</span>
+    <span>ShopFlare — a free online store kit for small businesses · Built with Next.js &amp; Cloudflare</span>
+    <span class="links">
+      <a href="https://github.com/Ansarissab">GitHub</a>
+      <a href="https://www.linkedin.com/in/zahidensari/">LinkedIn</a>
+    </span>
   </div>
 
 </body>
