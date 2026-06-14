@@ -8,6 +8,8 @@ import { AppTabBar } from '@/components/store/shell/AppTabBar'
 import { InstallPrompt } from '@/components/pwa/InstallPrompt'
 import { OfflineBanner } from '@/components/pwa/OfflineBanner'
 import { WhatsAppWidget } from '@/components/store/WhatsAppWidget'
+import { AnnouncementBar } from '@/components/store/AnnouncementBar'
+import { SearchProvider } from '@/components/store/search/SearchProvider'
 import { TProvider } from '@/lib/i18n/Provider'
 import { getLocaleHeader } from '@/lib/i18n/server'
 import { DEFAULT_LOCALE, LOCALES } from '@/lib/constants'
@@ -28,28 +30,33 @@ export default async function StoreLayout({ children }: { children: React.ReactN
       {/* dir/lang on the outermost store wrapper so RTL flips even when
           the root <html> stays "en" (unprefixed + merchant defaultLocale case). */}
       <ThemeProvider>
-        {/* flex flex-col flex-1 reproduces the body's column context so the
-            inner <main className="flex-1"> still expands (sticky footer). */}
-        <div dir={localeDir} lang={locale} className="flex flex-1 flex-col">
-          {/* Web browser chrome — hidden via CSS when running in standalone mode */}
-          <div data-web-chrome>
-            <StorefrontHeader />
+        {/* SearchProvider wraps the store chrome so StorefrontHeader's
+            useSearchOverlay() works and the lazy overlay mounts once. */}
+        <SearchProvider>
+          {/* flex flex-col flex-1 reproduces the body's column context so the
+              inner <main className="flex-1"> still expands (sticky footer). */}
+          <div dir={localeDir} lang={locale} className="flex flex-1 flex-col">
+            {/* Web browser chrome — hidden via CSS when running in standalone mode */}
+            <div data-web-chrome>
+              <AnnouncementBar />
+              <StorefrontHeader />
+            </div>
+            {/* Native app chrome — visible only in standalone (AppHeader/AppTabBar self-hide in browser) */}
+            <AppHeader />
+            {/* Suspense boundary so client pages using useSearchParams (home/search,
+                category, tracking, checkout success) can statically prerender a shell. */}
+            <main className="flex-1">
+              <Suspense fallback={null}>{children}</Suspense>
+            </main>
+            <div data-web-chrome>
+              <StorefrontFooter />
+            </div>
+            <AppTabBar />
+            <InstallPrompt />
+            <OfflineBanner />
+            <WhatsAppWidget />
           </div>
-          {/* Native app chrome — visible only in standalone (AppHeader/AppTabBar self-hide in browser) */}
-          <AppHeader />
-          {/* Suspense boundary so client pages using useSearchParams (home/search,
-              category, tracking, checkout success) can statically prerender a shell. */}
-          <main className="flex-1">
-            <Suspense fallback={null}>{children}</Suspense>
-          </main>
-          <div data-web-chrome>
-            <StorefrontFooter />
-          </div>
-          <AppTabBar />
-          <InstallPrompt />
-          <OfflineBanner />
-          <WhatsAppWidget />
-        </div>
+        </SearchProvider>
       </ThemeProvider>
     </TProvider>
   )
