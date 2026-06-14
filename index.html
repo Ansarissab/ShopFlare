@@ -155,7 +155,7 @@
   .card h3 {
     font-size: 10.5pt;
     margin-bottom: 6px;
-    color: var(--brand);
+    color: var(--brand-ink);
   }
   .card ul { margin: 0; padding-left: 16px; }
   .card li { margin-bottom: 3px; }
@@ -266,12 +266,13 @@
 </head>
 <body>
 
-  <div class="hero">
+  <header class="hero">
     <span class="badge">Open Source · $0 Hosting</span>
     <h1>Shop<span class="flare">Flare</span></h1>
     <p class="tagline">A free online store that small businesses can run without paying monthly platform fees.</p>
-  </div>
+  </header>
 
+  <main>
   <section>
     <div class="story">
       <p class="lead">Why I built it</p>
@@ -348,13 +349,15 @@
     <p class="note flush">Every feature is checked by tests that run on their own before any change goes live. Safety is taken seriously (card details are never stored, the admin area is locked down, and every form is guarded against bots), the store works for blind users and right-to-left languages like Urdu, and the code is kept tidy so it is easy to grow.</p>
   </section>
 
-  <div class="footer">
+  </main>
+
+  <footer class="footer">
     <span>ShopFlare — a free online store kit for small businesses · Built with Next.js &amp; Cloudflare</span>
     <span class="links">
       <a href="https://github.com/Ansarissab">GitHub</a>
       <a href="https://www.linkedin.com/in/zahidensari/">LinkedIn</a>
     </span>
-  </div>
+  </footer>
 
 </body>
 </html>
