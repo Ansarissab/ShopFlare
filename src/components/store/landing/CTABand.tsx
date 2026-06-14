@@ -1,9 +1,7 @@
 import Link from 'next/link'
-import { getT } from '@/lib/i18n/server'
 import type { CTABandProps } from '@/lib/types'
 
-export async function CTABand({ section }: CTABandProps) {
-  const t = await getT()
+export function CTABand({ section, t }: CTABandProps) {
   const heading = section.heading || t.store.ctaDefaultHeading
   const subtext = section.subtext || t.store.ctaDefaultSubtext
   const ctaText = section.ctaText || t.store.ctaDefaultCta

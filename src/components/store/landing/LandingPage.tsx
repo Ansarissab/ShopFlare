@@ -7,7 +7,7 @@ import { CTABand } from './CTABand'
 import type { LandingPageProps } from '@/lib/types'
 import { LANDING_SECTION_KEYS } from '@/lib/constants'
 
-export function LandingPage({ landing, storeConfig }: LandingPageProps) {
+export function LandingPage({ landing, storeConfig, t }: LandingPageProps) {
   const { sections, featuredProducts } = landing
 
   return (
@@ -25,16 +25,31 @@ export function LandingPage({ landing, storeConfig }: LandingPageProps) {
                 imageUrl={r2Url(section.imageR2Key)}
                 storeName={storeConfig.storeName}
                 heroStyle={storeConfig.heroStyle}
+                t={t}
               />
             )
           case 'story':
-            return <StorySection key={key} section={section} imageUrl={r2Url(section.imageR2Key)} />
+            return (
+              <StorySection
+                key={key}
+                section={section}
+                imageUrl={r2Url(section.imageR2Key)}
+                t={t}
+              />
+            )
           case 'featured':
-            return <FeaturedProductsStrip key={key} section={section} products={featuredProducts} />
+            return (
+              <FeaturedProductsStrip
+                key={key}
+                section={section}
+                products={featuredProducts}
+                t={t}
+              />
+            )
           case 'reviews':
             return <ReviewsStrip key={key} section={section} />
           case 'cta':
-            return <CTABand key={key} section={section} />
+            return <CTABand key={key} section={section} t={t} />
           default:
             return null
         }

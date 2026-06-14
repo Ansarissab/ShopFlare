@@ -67,9 +67,8 @@ function makeReq(pathname: string, accept?: string): FakeReq {
 
 /** Read the 'Link' header from the last response. */
 function getLinkHeader(): string | null {
-  return (
-    (lastRes?.headers as unknown as { get: (k: string) => string | null }).get?.('Link') ?? null
-  )
+  if (!lastRes) return null
+  return (lastRes.headers as unknown as { get: (k: string) => string | null }).get('Link')
 }
 
 /** Read a response cookie value. */

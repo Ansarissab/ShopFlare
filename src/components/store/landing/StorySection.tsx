@@ -1,13 +1,12 @@
 import Image from 'next/image'
 import { RenderHtml } from '@/components/shared/RenderHtml'
-import { getT } from '@/lib/i18n/server'
 import type { StorySectionProps } from '@/lib/types'
 
-export async function StorySection({
+export function StorySection({
   section,
   imageUrl,
+  t,
 }: StorySectionProps & { imageUrl: string | null }) {
-  const t = await getT()
   const heading = section.heading || t.store.storyDefaultHeading
 
   return (

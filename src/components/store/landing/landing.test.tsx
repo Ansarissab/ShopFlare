@@ -1,16 +1,18 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, cleanup, act } from '@testing-library/react'
-import React, { Suspense } from 'react'
+import { render, screen, cleanup } from '@testing-library/react'
+import React from 'react'
 import { en } from '@/lib/i18n/en'
+import { CTABand } from './CTABand'
+import { HeroSection } from './HeroSection'
+import { StorySection } from './StorySection'
+import { FeaturedProductsStrip } from './FeaturedProductsStrip'
+import { ReviewsStrip } from './ReviewsStrip'
+import { LandingPage } from './LandingPage'
 import type { LandingSection } from '@/lib/types'
 import type { ProductWithVariants } from '@/lib/types/product'
 
 // ── Shared mocks ────────────────────────────────────────────────────────────
-
-vi.mock('@/lib/i18n/server', () => ({
-  getT: () => Promise.resolve(en),
-}))
 
 vi.mock('next/link', async () => {
   const { createElement } = await import('react')
@@ -94,31 +96,32 @@ function makeSection(overrides: Partial<LandingSection> = {}): LandingSection {
 // ── CTABand ──────────────────────────────────────────────────────────────────
 
 describe('CTABand', () => {
-  // Dynamic import to avoid hoisting issues with mocks
-  async function renderCTA(props: Partial<LandingSection> = {}) {
-    const { CTABand } = await import('./CTABand')
-    return render(await CTABand({ section: makeSection({ sectionKey: 'cta', ...props }) }))
-  }
-
-  it('renders default heading when section.heading is null', async () => {
-    await renderCTA()
+  it('renders default heading when section.heading is null', () => {
+    render(CTABand({ section: makeSection({ sectionKey: 'cta' }), t: en }))
     expect(screen.getByText(en.store.ctaDefaultHeading)).toBeTruthy()
   })
 
-  it('renders custom heading', async () => {
-    await renderCTA({ heading: 'Join Our Store' })
+  it('renders custom heading', () => {
+    render(
+      CTABand({ section: makeSection({ sectionKey: 'cta', heading: 'Join Our Store' }), t: en }),
+    )
     expect(screen.getByText('Join Our Store')).toBeTruthy()
   })
 
-  it('renders CTA link with default /shop href', async () => {
-    await renderCTA()
+  it('renders CTA link with default /shop href', () => {
+    render(CTABand({ section: makeSection({ sectionKey: 'cta' }), t: en }))
     const link = screen.getByRole('link')
     expect(link.getAttribute('href')).toBe('/shop')
     expect(link.textContent).toBe(en.store.ctaDefaultCta)
   })
 
-  it('renders CTA link with custom href', async () => {
-    await renderCTA({ ctaHref: '/sale', ctaText: 'Sale Now' })
+  it('renders CTA link with custom href', () => {
+    render(
+      CTABand({
+        section: makeSection({ sectionKey: 'cta', ctaHref: '/sale', ctaText: 'Sale Now' }),
+        t: en,
+      }),
+    )
     const link = screen.getByRole('link')
     expect(link.getAttribute('href')).toBe('/sale')
     expect(link.textContent).toBe('Sale Now')
@@ -128,66 +131,80 @@ describe('CTABand', () => {
 // ── HeroSection ──────────────────────────────────────────────────────────────
 
 describe('HeroSection', () => {
-  async function renderHero(
-    sectionOverrides: Partial<LandingSection> = {},
-    heroStyle = 'image-left',
-    imageUrl: string | null = null,
-  ) {
-    const { HeroSection } = await import('./HeroSection')
-    return render(
-      await HeroSection({
-        section: makeSection(sectionOverrides),
-        heroStyle,
-        imageUrl,
-      }),
-    )
-  }
-
-  it('renders default heading via en.store.heroDefaultHeading', async () => {
-    await renderHero()
+  it('renders default heading via en.store.heroDefaultHeading', () => {
+    render(HeroSection({ section: makeSection(), heroStyle: 'image-left', imageUrl: null, t: en }))
     expect(screen.getByText(en.store.heroDefaultHeading)).toBeTruthy()
   })
 
-  it('renders custom heading', async () => {
-    await renderHero({ heading: 'Welcome to Our Store' })
+  it('renders custom heading', () => {
+    render(
+      HeroSection({
+        section: makeSection({ heading: 'Welcome to Our Store' }),
+        heroStyle: 'image-left',
+        imageUrl: null,
+        t: en,
+      }),
+    )
     expect(screen.getByText('Welcome to Our Store')).toBeTruthy()
   })
 
-  it('sets data-hero-style attribute on section element', async () => {
-    const { container } = await renderHero({}, 'centered')
+  it('sets data-hero-style attribute on section element', () => {
+    const { container } = render(
+      HeroSection({ section: makeSection(), heroStyle: 'centered', imageUrl: null, t: en }),
+    )
     const section = container.querySelector('[data-hero-style="centered"]')
     expect(section).toBeTruthy()
   })
 
-  it('renders image when imageUrl provided', async () => {
-    const { container } = await renderHero({}, 'image-left', '/cdn/hero.avif')
+  it('renders image when imageUrl provided', () => {
+    const { container } = render(
+      HeroSection({
+        section: makeSection(),
+        heroStyle: 'image-left',
+        imageUrl: '/cdn/hero.avif',
+        t: en,
+      }),
+    )
     expect(container.querySelector('img')).toBeTruthy()
   })
 
-  it('does not render image when imageUrl is null', async () => {
-    const { container } = await renderHero({}, 'image-left', null)
+  it('does not render image when imageUrl is null', () => {
+    const { container } = render(
+      HeroSection({ section: makeSection(), heroStyle: 'image-left', imageUrl: null, t: en }),
+    )
     expect(container.querySelector('img')).toBeNull()
   })
 
-  it('renders full-bleed variant (section has min-h class)', async () => {
-    const { container } = await renderHero({}, 'full-bleed')
+  it('renders full-bleed variant (section has min-h class)', () => {
+    const { container } = render(
+      HeroSection({ section: makeSection(), heroStyle: 'full-bleed', imageUrl: null, t: en }),
+    )
     const section = container.querySelector('[data-hero-style="full-bleed"]')
     expect(section?.className).toContain('min-h')
   })
 
-  it('renders split variant', async () => {
-    const { container } = await renderHero({}, 'split')
+  it('renders split variant', () => {
+    const { container } = render(
+      HeroSection({ section: makeSection(), heroStyle: 'split', imageUrl: null, t: en }),
+    )
     expect(container.querySelector('[data-hero-style="split"]')).toBeTruthy()
   })
 
-  it('renders CTA link with default /shop href', async () => {
-    await renderHero()
+  it('renders CTA link with default /shop href', () => {
+    render(HeroSection({ section: makeSection(), heroStyle: 'image-left', imageUrl: null, t: en }))
     const link = screen.getByRole('link')
     expect(link.getAttribute('href')).toBe('/shop')
   })
 
-  it('renders CTA link with custom href', async () => {
-    await renderHero({ ctaHref: '/products' })
+  it('renders CTA link with custom href', () => {
+    render(
+      HeroSection({
+        section: makeSection({ ctaHref: '/products' }),
+        heroStyle: 'image-left',
+        imageUrl: null,
+        t: en,
+      }),
+    )
     expect(screen.getByRole('link').getAttribute('href')).toBe('/products')
   })
 })
@@ -195,46 +212,59 @@ describe('HeroSection', () => {
 // ── StorySection ─────────────────────────────────────────────────────────────
 
 describe('StorySection', () => {
-  async function renderStory(
-    sectionOverrides: Partial<LandingSection> = {},
-    imageUrl: string | null = null,
-  ) {
-    const { StorySection } = await import('./StorySection')
-    return render(
-      await StorySection({
-        section: makeSection({ sectionKey: 'story', ...sectionOverrides }),
-        imageUrl,
-      }),
-    )
-  }
-
-  it('renders default heading', async () => {
-    await renderStory()
+  it('renders default heading', () => {
+    render(StorySection({ section: makeSection({ sectionKey: 'story' }), imageUrl: null, t: en }))
     expect(screen.getByText(en.store.storyDefaultHeading)).toBeTruthy()
   })
 
-  it('renders custom heading', async () => {
-    await renderStory({ heading: 'Our Journey' })
+  it('renders custom heading', () => {
+    render(
+      StorySection({
+        section: makeSection({ sectionKey: 'story', heading: 'Our Journey' }),
+        imageUrl: null,
+        t: en,
+      }),
+    )
     expect(screen.getByText('Our Journey')).toBeTruthy()
   })
 
-  it('renders RenderHtml when bodyHtml is provided', async () => {
-    await renderStory({ bodyHtml: '<p>Founded in 2020</p>' })
+  it('renders RenderHtml when bodyHtml is provided', () => {
+    render(
+      StorySection({
+        section: makeSection({ sectionKey: 'story', bodyHtml: '<p>Founded in 2020</p>' }),
+        imageUrl: null,
+        t: en,
+      }),
+    )
     expect(screen.getByTestId('render-html')).toBeTruthy()
   })
 
-  it('does not render RenderHtml when bodyHtml is null', async () => {
-    await renderStory({ bodyHtml: null })
+  it('does not render RenderHtml when bodyHtml is null', () => {
+    render(
+      StorySection({
+        section: makeSection({ sectionKey: 'story', bodyHtml: null }),
+        imageUrl: null,
+        t: en,
+      }),
+    )
     expect(screen.queryByTestId('render-html')).toBeNull()
   })
 
-  it('renders image when imageUrl is provided', async () => {
-    const { container } = await renderStory({}, '/cdn/story.avif')
+  it('renders image when imageUrl is provided', () => {
+    const { container } = render(
+      StorySection({
+        section: makeSection({ sectionKey: 'story' }),
+        imageUrl: '/cdn/story.avif',
+        t: en,
+      }),
+    )
     expect(container.querySelector('img')).toBeTruthy()
   })
 
-  it('does not render image when imageUrl is null', async () => {
-    const { container } = await renderStory({}, null)
+  it('does not render image when imageUrl is null', () => {
+    const { container } = render(
+      StorySection({ section: makeSection({ sectionKey: 'story' }), imageUrl: null, t: en }),
+    )
     expect(container.querySelector('img')).toBeNull()
   })
 })
@@ -262,36 +292,47 @@ describe('FeaturedProductsStrip', () => {
     variants: [mockVariant],
   } as unknown as ProductWithVariants
 
-  async function renderFeatured(
-    products: ProductWithVariants[] = [],
-    sectionOverrides: Partial<LandingSection> = {},
-  ) {
-    const { FeaturedProductsStrip } = await import('./FeaturedProductsStrip')
-    return render(
-      await FeaturedProductsStrip({
-        section: makeSection({ sectionKey: 'featured', ...sectionOverrides }),
-        products,
-      }),
+  it('returns null when products array is empty', () => {
+    const { container } = render(
+      (FeaturedProductsStrip({
+        section: makeSection({ sectionKey: 'featured' }),
+        products: [],
+        t: en,
+      }) as React.ReactElement) ?? <></>,
     )
-  }
-
-  it('returns null when products array is empty', async () => {
-    const { container } = await renderFeatured([])
     expect(container.querySelector('section')).toBeNull()
   })
 
-  it('renders heading and product cards when products provided', async () => {
-    await renderFeatured([mockProduct])
+  it('renders heading and product cards when products provided', () => {
+    render(
+      FeaturedProductsStrip({
+        section: makeSection({ sectionKey: 'featured' }),
+        products: [mockProduct],
+        t: en,
+      }) as React.ReactElement,
+    )
     expect(screen.getByTestId('product-card-p1')).toBeTruthy()
   })
 
-  it('renders default heading when section.heading is null', async () => {
-    await renderFeatured([mockProduct])
+  it('renders default heading when section.heading is null', () => {
+    render(
+      FeaturedProductsStrip({
+        section: makeSection({ sectionKey: 'featured' }),
+        products: [mockProduct],
+        t: en,
+      }) as React.ReactElement,
+    )
     expect(screen.getByText(en.store.featuredProductsHeading)).toBeTruthy()
   })
 
-  it('renders custom heading', async () => {
-    await renderFeatured([mockProduct], { heading: 'Staff Picks' })
+  it('renders custom heading', () => {
+    render(
+      FeaturedProductsStrip({
+        section: makeSection({ sectionKey: 'featured', heading: 'Staff Picks' }),
+        products: [mockProduct],
+        t: en,
+      }) as React.ReactElement,
+    )
     expect(screen.getByText('Staff Picks')).toBeTruthy()
   })
 })
@@ -299,26 +340,21 @@ describe('FeaturedProductsStrip', () => {
 // ── ReviewsStrip ─────────────────────────────────────────────────────────────
 
 describe('ReviewsStrip', () => {
-  async function renderReviews() {
-    const { ReviewsStrip } = await import('./ReviewsStrip')
-    return render(<ReviewsStrip section={makeSection({ sectionKey: 'reviews' })} />)
-  }
-
-  it('renders null when not loading and no reviews', async () => {
+  it('renders null when not loading and no reviews', () => {
     mockApiData = { reviews: [] }
     mockApiLoading = false
-    const { container } = await renderReviews()
+    const { container } = render(<ReviewsStrip section={makeSection({ sectionKey: 'reviews' })} />)
     expect(container.querySelector('section')).toBeNull()
   })
 
-  it('renders loading skeletons when loading', async () => {
+  it('renders loading skeletons when loading', () => {
     mockApiLoading = true
     mockApiData = null
-    const { container } = await renderReviews()
+    const { container } = render(<ReviewsStrip section={makeSection({ sectionKey: 'reviews' })} />)
     expect(container.querySelector('.animate-pulse')).toBeTruthy()
   })
 
-  it('renders review cards when data arrives', async () => {
+  it('renders review cards when data arrives', () => {
     mockApiData = {
       reviews: [
         {
@@ -331,14 +367,14 @@ describe('ReviewsStrip', () => {
       ],
     }
     mockApiLoading = false
-    await renderReviews()
+    render(<ReviewsStrip section={makeSection({ sectionKey: 'reviews' })} />)
     expect(screen.getByText('Alice')).toBeTruthy()
     expect(screen.getByText('Great!')).toBeTruthy()
   })
 
-  it('renders default heading', async () => {
+  it('renders default heading', () => {
     mockApiLoading = true
-    await renderReviews()
+    render(<ReviewsStrip section={makeSection({ sectionKey: 'reviews' })} />)
     expect(screen.getByText(en.store.reviewsHeading)).toBeTruthy()
   })
 })
@@ -353,36 +389,30 @@ describe('LandingPage', () => {
     ) as Record<string, LandingSection>
   }
 
-  async function renderLanding(
+  function renderLanding(
     sectionOverrides: Partial<Record<string, Partial<LandingSection>>> = {},
     products: ProductWithVariants[] = [],
   ) {
-    const { LandingPage } = await import('./LandingPage')
-    let result: ReturnType<typeof render> | undefined
-    await act(async () => {
-      result = render(
-        <Suspense fallback={null}>
-          <LandingPage
-            landing={{
-              sections: makeAllSections(sectionOverrides) as never,
-              featuredProducts: products,
-            }}
-            storeConfig={{ storeName: 'TestStore' }}
-          />
-        </Suspense>,
-      )
-    })
-    return result!
+    return render(
+      <LandingPage
+        landing={{
+          sections: makeAllSections(sectionOverrides) as never,
+          featuredProducts: products,
+        }}
+        storeConfig={{ storeName: 'TestStore' }}
+        t={en}
+      />,
+    )
   }
 
-  it('renders enabled sections', async () => {
-    const { container } = await renderLanding()
+  it('renders enabled sections', () => {
+    const { container } = renderLanding()
     // All 5 sections enabled by default → at least a <main> with children
     expect(container.querySelector('main')).toBeTruthy()
   })
 
-  it('skips sections where enabled is false', async () => {
-    const { container } = await renderLanding({ hero: { enabled: false }, cta: { enabled: false } })
+  it('skips sections where enabled is false', () => {
+    const { container } = renderLanding({ hero: { enabled: false }, cta: { enabled: false } })
     const sections = container.querySelectorAll('section')
     // featured returns null when no products; reviews returns null when no data
     // story section should still render
@@ -391,8 +421,8 @@ describe('LandingPage', () => {
     expect(container.querySelector('[data-hero-style]')).toBeNull()
   })
 
-  it('renders LandingPage with all sections disabled → empty main', async () => {
-    const { container } = await renderLanding({
+  it('renders LandingPage with all sections disabled → empty main', () => {
+    const { container } = renderLanding({
       hero: { enabled: false },
       story: { enabled: false },
       featured: { enabled: false },

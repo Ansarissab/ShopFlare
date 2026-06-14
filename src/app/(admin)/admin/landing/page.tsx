@@ -73,7 +73,7 @@ export default function AdminLandingPage() {
       })
       .catch(() => toast.error(t.errors.networkError))
       .finally(() => setLoadingLanding(false))
-  }, [])
+  }, [t])
 
   async function handleToggleLanding(enabled: boolean) {
     setLandingOverride(enabled)

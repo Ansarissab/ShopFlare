@@ -1,10 +1,8 @@
 import { ProductCard } from '@/components/store/product/ProductCard'
-import { getT } from '@/lib/i18n/server'
 import type { FeaturedProductsStripProps } from '@/lib/types'
 import type { ProductWithVariants } from '@/lib/types/product'
 
-export async function FeaturedProductsStrip({ section, products }: FeaturedProductsStripProps) {
-  const t = await getT()
+export function FeaturedProductsStrip({ section, products, t }: FeaturedProductsStripProps) {
   const heading = section.heading || t.store.featuredProductsHeading
 
   if (products.length === 0) return null

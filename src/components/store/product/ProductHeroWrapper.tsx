@@ -72,7 +72,7 @@ export function ProductHeroWrapper({ item }: ProductHeroWrapperProps) {
       addItem(buildCartItem(size))
       router.push('/checkout')
     },
-    [buildCartItem, addItem, router],
+    [buildCartItem, addItem, router, t],
   )
 
   const handleWhatsApp = useCallback(
@@ -94,7 +94,7 @@ export function ProductHeroWrapper({ item }: ProductHeroWrapperProps) {
       })
       window.open(url, '_blank', 'noopener,noreferrer')
     },
-    [config, item],
+    [config, item, t],
   )
 
   const handleCOD = useCallback(

@@ -82,7 +82,7 @@ export default function BlogEditorPage({ params }: { params: Promise<{ id: strin
     return () => {
       cancelled = true
     }
-  }, [id, isNew])
+  }, [id, isNew, t])
 
   // ── auto-derive slug from title ──
   function handleTitleChange(value: string) {

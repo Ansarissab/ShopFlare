@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
 import { buildPageMetadata } from '@/lib/seo/metadata'
+import { getT } from '@/lib/i18n/server'
 import { JsonLd } from '@/components/shared/JsonLd'
 import { FaqSection } from '@/components/store/FaqSection'
 import { parseFaq } from '@/lib/html'
@@ -28,7 +29,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function StorePage() {
-  const config = await fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: 300 })
+  const [config, t] = await Promise.all([
+    fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: 300 }),
+    getT(),
+  ])
 
   const faqItems =
     isFeatureEnabled(config, 'faqEnabled') && config?.faqContent ? parseFaq(config.faqContent) : []
@@ -71,6 +75,7 @@ export default async function StorePage() {
             logoUrl: config?.logoUrl,
             heroStyle: config?.heroStyle,
           }}
+          t={t}
         />
         {faqItems.length > 0 && (
           <div className={layout.page}>

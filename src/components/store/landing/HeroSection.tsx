@@ -1,16 +1,15 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import { getT } from '@/lib/i18n/server'
 import type { HeroSectionProps } from '@/lib/types'
 
-export async function HeroSection({
+export function HeroSection({
   section,
   heroStyle = 'image-left',
   imageUrl,
   storeName,
+  t,
 }: HeroSectionProps & { imageUrl: string | null }) {
-  const t = await getT()
   // White-label: when the merchant hasn't written a custom hero heading, fall back
   // to their store name (the brand) before the generic "Welcome to Our Store" copy.
   const heading = section.heading || storeName || t.store.heroDefaultHeading

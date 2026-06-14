@@ -44,7 +44,7 @@ export default function AdminBlogListPage() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [t])
 
   async function handleTogglePublish(post: BlogPost) {
     const isPublished = post.status === 'published'

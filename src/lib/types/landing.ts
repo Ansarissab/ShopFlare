@@ -1,4 +1,5 @@
 import type { LandingSectionKey } from '@/lib/constants'
+import type { Dictionary } from '@/lib/i18n'
 import type { ProductWithVariants } from './product'
 
 export interface LandingSection {
@@ -22,6 +23,7 @@ export interface LandingData {
 export interface LandingPageProps {
   landing: LandingData
   storeConfig: { storeName: string; tagline?: string; logoUrl?: string; heroStyle?: string }
+  t: Dictionary
 }
 
 export interface HeroSectionProps {
@@ -29,15 +31,18 @@ export interface HeroSectionProps {
   heroStyle?: string
   /** Brand fallback for the hero heading when no custom heading is set (white-label). */
   storeName?: string
+  t: Dictionary
 }
 
 export interface StorySectionProps {
   section: LandingSection
+  t: Dictionary
 }
 
 export interface FeaturedProductsStripProps {
   section: LandingSection
   products: ProductWithVariants[]
+  t: Dictionary
 }
 
 export interface ReviewsStripProps {
@@ -46,4 +51,5 @@ export interface ReviewsStripProps {
 
 export interface CTABandProps {
   section: LandingSection
+  t: Dictionary
 }

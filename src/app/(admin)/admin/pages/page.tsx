@@ -40,7 +40,7 @@ export default function AdminPagesPage() {
       .then((res) => setPages(res.pages))
       .catch(() => toast.error(t.errors.networkError))
       .finally(() => setLoading(false))
-  }, [])
+  }, [t])
 
   function startEdit(slug: string) {
     const existing = pages.find((p) => p.slug === slug)
