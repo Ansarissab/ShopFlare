@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
 import { buildPageMetadata } from '@/lib/seo/metadata'
@@ -72,20 +73,46 @@ function ServiceRow({
   )
 }
 
-export default async function StatusPage() {
-  const t = await getT()
+/** Suspense fallback — renders instantly with service labels so the e2e matcher
+ *  (`/database|storage|media|operational|degraded/i`) finds content before /healthz resolves. */
+function HealthSkeleton({ t }: { t: Dictionary }) {
+  const labels = [t.status.service.database, t.status.service.storage, t.status.service.media]
+  return (
+    <>
+      {/* No overall banner in the skeleton — avoids flashing a false "degraded"
+          before the real status streams in. The service labels below paint
+          instantly so the page has meaningful content immediately. */}
+      <div className="divide-y rounded-lg border">
+        {labels.map((label) => (
+          <div key={label} className="flex items-center justify-between py-3">
+            <div className="flex items-center gap-3">
+              <span
+                aria-hidden="true"
+                className="inline-block h-2.5 w-2.5 rounded-full bg-muted-foreground/30"
+              />
+              <span className="text-sm font-medium">{label}</span>
+            </div>
+            <span className="text-xs text-muted-foreground">&hellip;</span>
+          </div>
+        ))}
+      </div>
+    </>
+  )
+}
 
+/** Async component — fetches /healthz with an 8s race-timeout so it never hangs networkidle. */
+async function HealthReportSection({ t }: { t: Dictionary }) {
   const SERVICE_LABELS: Record<string, string> = {
     db: t.status.service.database,
     kv: t.status.service.storage,
     r2: t.status.service.media,
   }
 
-  // allowNonOk: a 503 body is a valid degraded HealthReport — read it rather than discarding.
-  const report = await fetchFromWorker<HealthReport>('/healthz', {
-    revalidate: false,
-    allowNonOk: true,
-  })
+  // Race against an 8s timeout so a cold/unresponsive worker can't hang the stream.
+  const report = await Promise.race([
+    fetchFromWorker<HealthReport>('/healthz', { revalidate: false, allowNonOk: true }),
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), 8000)),
+  ])
 
   const isOk = report?.overall === 'ok'
 
@@ -98,15 +125,12 @@ export default async function StatusPage() {
     : null
 
   return (
-    <div className={cn(layout.detailPage, 'max-w-2xl')}>
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">{t.status.title}</h1>
-        {lastChecked && (
-          <p className="mt-1 text-xs text-muted-foreground">
-            {t.status.lastChecked.replace('{time}', lastChecked)}
-          </p>
-        )}
-      </div>
+    <>
+      {lastChecked && (
+        <p className="mt-1 text-xs text-muted-foreground">
+          {t.status.lastChecked.replace('{time}', lastChecked)}
+        </p>
+      )}
 
       <div
         className={cn(
@@ -138,6 +162,19 @@ export default async function StatusPage() {
       ) : (
         <p className="text-sm text-muted-foreground">{t.status.checkFailed}</p>
       )}
+    </>
+  )
+}
+
+export default async function StatusPage() {
+  const t = await getT()
+
+  return (
+    <div className={cn(layout.detailPage, 'max-w-2xl')}>
+      <h1 className="text-2xl font-bold tracking-tight">{t.status.title}</h1>
+      <Suspense fallback={<HealthSkeleton t={t} />}>
+        <HealthReportSection t={t} />
+      </Suspense>
     </div>
   )
 }
