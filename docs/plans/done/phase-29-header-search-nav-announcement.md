@@ -1,6 +1,6 @@
 # Phase 29 — Header cluster: search overlay + navigation + announcement bar
 
-Status: Proposed. Planned 2026-06-12 (grill-with-docs). Depends on
+Status: Done. Shipped 2026-06-14 (relentless audit + fixes + `pnpm verify` green). Depends on
 [Phase 28](./phase-28-i18n-locale-engine.md) (RTL-aware, strings via dictionaries). See
 [roadmap](./phases-27-33-roadmap.md).
 
