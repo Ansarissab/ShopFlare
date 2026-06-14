@@ -9,6 +9,14 @@ import AdminSettingsPage from './page'
 import type { StoreConfig } from '@/lib/types/common'
 import { en } from '@/lib/i18n/en'
 
+// This suite mounts the FULL settings page (every section, including the heavy
+// Select-based controls) just to exercise the locale checkboxes. A single
+// save-and-assert renders the whole tree several times, so under heavy CI
+// concurrency the default 5s ceiling can be hit even though the test does ~500ms
+// of real work in isolation. Give it explicit headroom — the work is bounded, the
+// timeout only absorbs scheduler contention.
+vi.setConfig({ testTimeout: 20000 })
+
 // ── Heavy deps — mock everything that isn't the locale UI ─────────────────────
 
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
