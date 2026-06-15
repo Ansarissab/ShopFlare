@@ -13,6 +13,7 @@ import { useT } from '@/lib/i18n/Provider'
 import { codOrderSchema, type CodOrder } from '@/lib/schemas'
 import { useCart } from '@/hooks/useCart'
 import { apiPost } from '@/lib/api'
+import { layout } from '@/lib/styles'
 import type { ManualOrderFormProps } from '@/lib/types/checkout'
 
 type FormValues = CodOrder['shippingAddress']
@@ -133,7 +134,7 @@ export function ManualOrderForm({ endpoint, successMethod, submitLabel }: Manual
       </FormField>
 
       {/* City + State row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className={layout.formGrid2g3}>
         <FormField
           label={t.checkout.city}
           htmlFor="ship-city"
@@ -153,7 +154,7 @@ export function ManualOrderForm({ endpoint, successMethod, submitLabel }: Manual
       </div>
 
       {/* Postal Code + Country row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className={layout.formGrid2g3}>
         <FormField label={t.checkout.postalCode} htmlFor="ship-postal" optional>
           <Input id="ship-postal" autoComplete="postal-code" {...register('postalCode')} />
         </FormField>

@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import { RenderHtml } from '@/components/shared/RenderHtml'
+import { layout } from '@/lib/styles'
 import type { StorySectionProps } from '@/lib/types'
 
 export function StorySection({
@@ -10,7 +11,7 @@ export function StorySection({
   const heading = section.heading || t.store.storyDefaultHeading
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" aria-label={heading}>
+    <section className={layout.landingSection} aria-label={heading}>
       <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:gap-12">
         {imageUrl && (
           <div className="relative h-64 w-full overflow-hidden rounded-xl sm:h-80 sm:w-2/5 flex-shrink-0">

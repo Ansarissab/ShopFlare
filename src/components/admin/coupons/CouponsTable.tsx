@@ -106,7 +106,7 @@ export function CouponsTable({ coupons, onEdit, onDeleted }: CouponsTableProps) 
   useRegisterListNav({ next, prev, open })
 
   if (coupons.length === 0) {
-    return <p className="py-12 text-center text-sm text-muted-foreground">{t.admin.noCoupons}</p>
+    return <p className={layout.emptyState}>{t.admin.noCoupons}</p>
   }
 
   return (

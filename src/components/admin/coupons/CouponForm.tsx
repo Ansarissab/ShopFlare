@@ -16,6 +16,7 @@ import { Separator } from '@/components/ui/separator'
 import { FormField } from '@/components/common/FormField'
 import { useT } from '@/lib/i18n/Provider'
 import { apiPost, apiPut } from '@/lib/api'
+import { layout } from '@/lib/styles'
 import type { CouponFormProps, AdminCoupon } from '@/lib/types/admin'
 
 // Convert a stored UTC ISO timestamp to the `datetime-local` input value
@@ -92,7 +93,7 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <h2 className="text-sm font-semibold">{isEdit ? t.admin.editCoupon : t.admin.addCoupon}</h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className={layout.formGrid2g3}>
         <FormField label={t.admin.couponCode} htmlFor="coupon-code">
           <Input
             id="coupon-code"
@@ -140,7 +141,7 @@ export function CouponForm({ coupon, onSaved, onCancel }: CouponFormProps) {
 
       <Separator />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className={layout.formGrid2g3}>
         <FormField
           label={t.admin.minOrderCents}
           htmlFor="coupon-min-order"

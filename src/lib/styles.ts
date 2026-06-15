@@ -28,6 +28,14 @@ export const layout = {
   // Responsive form grids: single-column on mobile, multi-column from sm
   formGrid2: 'grid grid-cols-1 sm:grid-cols-2',
   formGrid3: 'grid grid-cols-1 sm:grid-cols-3',
+  // Two-column form grid with gap-3 (most common admin/checkout combo)
+  formGrid2g3: 'grid grid-cols-1 sm:grid-cols-2 gap-3',
+
+  // Landing page section wrapper (centered, padded, max-w-7xl)
+  landingSection: 'mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8',
+
+  // Empty-state paragraph for admin tables (centered, muted, small)
+  emptyState: 'py-12 text-center text-sm text-muted-foreground',
 
   // Active/selected list row (keyboard j/k navigation highlight)
   activeRow: 'bg-muted ring-1 ring-inset ring-ring',

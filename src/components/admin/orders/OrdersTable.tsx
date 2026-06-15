@@ -37,7 +37,7 @@ export function OrdersTable({ orders }: OrdersTableProps) {
   useRegisterListNav({ next, prev, open })
 
   if (orders.length === 0) {
-    return <p className="py-12 text-center text-sm text-muted-foreground">No orders found.</p>
+    return <p className={layout.emptyState}>No orders found.</p>
   }
 
   return (

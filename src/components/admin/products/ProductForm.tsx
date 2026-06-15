@@ -19,6 +19,7 @@ import { apiPost, apiPut, apiDelete, apiGet, ApiError } from '@/lib/api'
 import { updateSizeOptionSchema } from '@/lib/schemas'
 import type { FaqItemData } from '@/lib/schemas/config'
 import { formatPrice } from '@/lib/utils/index'
+import { layout } from '@/lib/styles'
 import type {
   ProductWithVariants,
   VariantWithDetails,
@@ -512,7 +513,7 @@ export function ProductForm({ initial }: ProductFormProps) {
                     {isExpanded && (
                       <div className="border-t p-4 flex flex-col gap-4">
                         {/* Variant fields */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className={layout.formGrid2g3}>
                           <FormField
                             label={t.admin.variantLabel}
                             htmlFor={`variant-label-${variant.id}`}
