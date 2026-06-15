@@ -23,7 +23,7 @@ re-implemented.
 
 | Concern            | Single source of truth            | Rule                                              |
 | ------------------ | --------------------------------- | ------------------------------------------------- |
-| Layout class combos| `src/lib/styles.ts` (`layout.*`)  | Never repeat `mx-auto max-w-... px-...` inline.   |
+| Layout class combos| `src/lib/styles.ts` (`layout.*`)  | Never repeat a multi-class combo inline.          |
 | Colors             | `globals.css` CSS vars            | Never hardcode hex (WhatsApp brand green is the only documented exception). |
 | Helpers            | `src/lib/utils/index.ts`          | `formatPrice`, `calculateShipping`, `buildProductMaps`, `cn`. One definition each. |
 | **Network I/O**    | `src/lib/api.ts`                  | **All** calls go through `apiGet`/`apiPost`. No raw `fetch()`, no per-file `WORKER_URL`. Custom headers → `{ headers }` option. |
@@ -36,6 +36,18 @@ re-implemented.
 | **Image upload**    | `src/components/shared/ImageUpload.tsx` | All admin image uploads go through this shared component (confirm dialog, hard-block, delete). Never duplicate upload logic per-caller. |
 | **Rich text**      | `src/components/shared/RichText.tsx` | Single Trix wrapper. Never instantiate `trix` directly. |
 | **SEO metadata**   | `src/lib/seo/metadata.ts` + `src/lib/seo/jsonld.ts` | All JSON-LD builders and `buildPageMetadata` live here. Server pages emit via `<JsonLd>`. |
+
+Shared primitives to reuse (extend, don't re-type):
+
+- `layout.*` (`src/lib/styles.ts`): `formGrid2`, `formGrid2g3`, `landingSection`,
+  `emptyState`, `activeRow` (keyboard j/k row highlight), plus the page wrappers.
+- Helpers (`src/lib/utils/index.ts`): `shortDay` (ISO → short day label) alongside
+  `formatPrice` / `calculateShipping` / `cn`.
+- `CHART_TOOLTIP_STYLE` (`src/lib/constants/chart.ts`): the one Recharts tooltip
+  `contentStyle` for all admin charts.
+- Keyboard shortcuts: engine + bindings are data in `src/lib/constants/shortcuts.ts`;
+  the j/k list-nav primitive is `useListNavigation` + `ListNavContext` (register, do
+  not re-implement per list).
 
 ## 3. Global Type Definitions
 
@@ -101,6 +113,12 @@ removed — do not reintroduce them.
   `createOrder` — order creation is defined once.
 - Bindings type and the `parseBody`/`createDb` patterns are consistent across
   routes — copy the shape from `worker/routes/orders.ts`.
+- **Never redeclare a constant/type/helper that already lives in `@/lib`.** The
+  worker tsconfig maps `@/* → ../src/*`, so worker code re-exports from the shared
+  source (e.g. `worker/lib/analytics.ts` re-exports the RFM constants from
+  `@/lib/constants`; routes import `ALLOWED_IMAGE_TYPES`/`MAX_IMAGE_BYTES`,
+  `slugify`, `parseTags`, `calculateShipping`, the `PaymentMethod` type). Forking a
+  value frontend↔backend silently drifts — re-export instead.
 
 ## The test
 
