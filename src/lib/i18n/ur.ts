@@ -617,6 +617,41 @@ export const ur: Dictionary = {
     llmDiscoveryLabel: 'Enable LLM discovery',
     llmDiscoveryHelp:
       'Shows your store in /llms.txt and allows AI answer bots to index your content.',
+    marketingSectionTitle: 'تجزیہ اور ٹریکنگ',
+    verificationSectionTitle: 'سرچ انجن تصدیق',
+    googleSiteVerificationLabel: 'گوگل سرچ کنسول تصدیق',
+    googleSiteVerificationHelp:
+      'سائٹ کی ملکیت ثابت کرنے کے لیے گوگل سرچ کنسول HTML میٹا ٹیگ کی content ویلیو یہاں درج کریں۔',
+    bingSiteVerificationLabel: 'بنگ ویب ماسٹر ٹولز تصدیق',
+    bingSiteVerificationHelp:
+      'سائٹ کی ملکیت ثابت کرنے کے لیے بنگ ویب ماسٹر HTML میٹا ٹیگ کی content ویلیو یہاں درج کریں۔',
+    customHeadTagsLabel: 'کسٹم ہیڈ ٹیگز',
+    customHeadTagsHelp:
+      'اپنے اسٹور کے ہیڈ میں <meta> یا <link> ٹیگز شامل کریں۔ ہر لائن میں ایک ٹیگ۔ اسکرپٹس کی اجازت نہیں۔',
+    ga4MeasurementIdLabel: 'GA4 میژرمنٹ ID',
+    ga4MeasurementIdHelp:
+      'آپ کا گوگل اینالٹکس 4 ID، مثلاً G-XXXXXXXXXX۔ GA4 بند کرنے کے لیے خالی چھوڑیں۔',
+    googleAdsIdLabel: 'گوگل ایڈز کنورژن ID',
+    googleAdsIdHelp:
+      'آپ کا گوگل ایڈز ID، مثلاً AW-XXXXXXXXXX۔ کنورژن ٹریکنگ بند کرنے کے لیے خالی چھوڑیں۔',
+    metaPixelIdLabel: 'میٹا پکسل ID',
+    metaPixelIdHelp: 'آپ کا عددی میٹا (فیس بک) پکسل ID۔ میٹا ٹریکنگ بند کرنے کے لیے خالی چھوڑیں۔',
+    indexNowKeyLabel: 'IndexNow کی',
+    indexNowKeyHelp: 'آپ کی IndexNow API کی۔ کی فائل خود بخود مطلوبہ راستے پر سرو کی جائے گی۔',
+    cookieConsentEnabledLabel: 'کوکی رضامندی بینر دکھائیں',
+    cookieConsentEnabledHelp:
+      'تجزیہ اور مارکیٹنگ کوکیز فعال کرنے سے پہلے وزیٹرز کو رضامندی بینر دکھائیں۔',
+    indexNowGenerate: 'بنائیں',
+    googleSiteVerificationPlaceholder: 'google-site-verification کی content ویلیو',
+    bingSiteVerificationPlaceholder: 'msvalidate.01 کی content ویلیو',
+    customHeadTagsPlaceholder: '<meta name="..." content="..." />\n<link rel="..." href="..." />',
+  },
+  consent: {
+    message:
+      'یہ سائٹ تجزیہ اور مارکیٹنگ کے لیے کوکیز استعمال کرتی ہے۔ آپ غیر ضروری کوکیز قبول یا رد کر سکتے ہیں۔',
+    accept: 'قبول کریں',
+    decline: 'رد کریں',
+    privacyLink: 'رازداری کی پالیسی',
   },
   blog: {
     pageTitle: 'Blog',

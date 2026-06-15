@@ -629,7 +629,7 @@ export const en = {
       empty: 'No results',
     },
   },
-  // SEO / LLM discovery settings (phase 21)
+  // SEO / LLM discovery settings (phase 21) + Marketing (phase 32)
   seo: {
     faqSectionTitle: 'FAQ / Q&A',
     faqEnabledLabel: 'Show FAQ section on store',
@@ -644,6 +644,44 @@ export const en = {
     llmDiscoveryLabel: 'Enable LLM discovery',
     llmDiscoveryHelp:
       'Shows your store in /llms.txt and allows AI answer bots to index your content.',
+    // Marketing section (phase 32)
+    marketingSectionTitle: 'Analytics & Tracking',
+    verificationSectionTitle: 'Search Engine Verification',
+    googleSiteVerificationLabel: 'Google Search Console verification',
+    googleSiteVerificationHelp:
+      'Paste the content value from your Google Search Console HTML meta tag to verify site ownership.',
+    bingSiteVerificationLabel: 'Bing Webmaster Tools verification',
+    bingSiteVerificationHelp:
+      'Paste the content value from your Bing Webmaster HTML meta tag to verify site ownership.',
+    customHeadTagsLabel: 'Custom head tags',
+    customHeadTagsHelp:
+      'Add <meta> or <link> tags to your store head. One tag per line. Scripts are not allowed.',
+    ga4MeasurementIdLabel: 'GA4 Measurement ID',
+    ga4MeasurementIdHelp:
+      'Your Google Analytics 4 ID, e.g. G-XXXXXXXXXX. Leave empty to disable GA4.',
+    googleAdsIdLabel: 'Google Ads conversion ID',
+    googleAdsIdHelp:
+      'Your Google Ads ID, e.g. AW-XXXXXXXXXX. Leave empty to disable conversion tracking.',
+    metaPixelIdLabel: 'Meta Pixel ID',
+    metaPixelIdHelp: 'Your numeric Meta (Facebook) Pixel ID. Leave empty to disable Meta tracking.',
+    indexNowKeyLabel: 'IndexNow key',
+    indexNowKeyHelp:
+      'Your IndexNow API key. The key file will be served automatically at the required path.',
+    cookieConsentEnabledLabel: 'Show cookie consent banner',
+    cookieConsentEnabledHelp:
+      'Display a consent banner to visitors before enabling analytics and marketing cookies.',
+    indexNowGenerate: 'Generate',
+    googleSiteVerificationPlaceholder: 'google-site-verification content value',
+    bingSiteVerificationPlaceholder: 'msvalidate.01 content value',
+    customHeadTagsPlaceholder: '<meta name="..." content="..." />\n<link rel="..." href="..." />',
+  },
+  // Cookie consent banner (phase 32)
+  consent: {
+    message:
+      'This site uses cookies for analytics and marketing. You can accept or decline non-essential cookies.',
+    accept: 'Accept',
+    decline: 'Decline',
+    privacyLink: 'Privacy policy',
   },
   // Blog storefront (phase 23)
   blog: {

@@ -618,6 +618,43 @@ export const fr: Dictionary = {
     llmDiscoveryLabel: 'Enable LLM discovery',
     llmDiscoveryHelp:
       'Shows your store in /llms.txt and allows AI answer bots to index your content.',
+    marketingSectionTitle: 'Analyse et suivi',
+    verificationSectionTitle: 'Vérification par les moteurs de recherche',
+    googleSiteVerificationLabel: 'Vérification Google Search Console',
+    googleSiteVerificationHelp:
+      'Collez la valeur du contenu de la balise méta HTML Google Search Console pour vérifier la propriété du site.',
+    bingSiteVerificationLabel: 'Vérification Bing Webmaster Tools',
+    bingSiteVerificationHelp:
+      'Collez la valeur du contenu de la balise méta HTML Bing Webmaster pour vérifier la propriété du site.',
+    customHeadTagsLabel: 'Balises head personnalisées',
+    customHeadTagsHelp:
+      "Ajoutez des balises <meta> ou <link> dans l'en-tête de votre boutique. Une balise par ligne. Les scripts ne sont pas autorisés.",
+    ga4MeasurementIdLabel: 'ID de mesure GA4',
+    ga4MeasurementIdHelp:
+      'Votre identifiant Google Analytics 4, ex. G-XXXXXXXXXX. Laissez vide pour désactiver GA4.',
+    googleAdsIdLabel: 'ID de conversion Google Ads',
+    googleAdsIdHelp:
+      'Votre identifiant Google Ads, ex. AW-XXXXXXXXXX. Laissez vide pour désactiver le suivi des conversions.',
+    metaPixelIdLabel: 'ID du pixel Meta',
+    metaPixelIdHelp:
+      'Votre identifiant numérique du pixel Meta (Facebook). Laissez vide pour désactiver le suivi Meta.',
+    indexNowKeyLabel: 'Clé IndexNow',
+    indexNowKeyHelp:
+      'Votre clé API IndexNow. Le fichier de clé sera servi automatiquement au chemin requis.',
+    cookieConsentEnabledLabel: 'Afficher la bannière de consentement aux cookies',
+    cookieConsentEnabledHelp:
+      "Affiche une bannière de consentement aux visiteurs avant d'activer les cookies d'analyse et de marketing.",
+    indexNowGenerate: 'Générer',
+    googleSiteVerificationPlaceholder: 'valeur du contenu google-site-verification',
+    bingSiteVerificationPlaceholder: 'valeur du contenu msvalidate.01',
+    customHeadTagsPlaceholder: '<meta name="..." content="..." />\n<link rel="..." href="..." />',
+  },
+  consent: {
+    message:
+      "Ce site utilise des cookies à des fins d'analyse et de marketing. Vous pouvez accepter ou refuser les cookies non essentiels.",
+    accept: 'Accepter',
+    decline: 'Refuser',
+    privacyLink: 'Politique de confidentialité',
   },
   blog: {
     pageTitle: 'Blog',
