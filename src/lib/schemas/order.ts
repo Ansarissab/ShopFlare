@@ -31,6 +31,13 @@ export const createCheckoutSessionSchema = z.object({
   couponCode: couponField,
 })
 
+// Coupon lookup — deliberately loose: looks up any user-typed code, not creation.
+// code constraint is min(1)/max(64) only (no regex) so typos still return "not found".
+export const couponLookupSchema = z.object({
+  code: z.string().min(1).max(64),
+  subtotalCents: z.number().int().nonnegative(),
+})
+
 // Cancel request — contact required for ownership verification
 export const cancelOrderSchema = z.object({
   contact: z.string().min(1).max(254),

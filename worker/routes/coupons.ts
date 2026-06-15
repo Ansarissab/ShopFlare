@@ -1,23 +1,16 @@
 import { Hono } from 'hono'
 import { eq } from 'drizzle-orm'
-import { z } from 'zod/v4'
 import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import { parseBody } from 'worker/lib/http'
 import { evaluateCoupon } from 'worker/lib/orders'
 import { rateLimit } from 'worker/lib/ratelimit'
+import { couponLookupSchema } from '@/lib/schemas/order'
 import { DEFAULT_CURRENCY } from '@/lib/constants'
 import type { CurrencyCode } from '@/lib/constants'
 import type { Bindings } from 'worker/types'
 
 const app = new Hono<{ Bindings: Bindings }>()
-
-// ─── Validation schema ────────────────────────────────────────────────────────
-
-const validateCouponSchema = z.object({
-  code: z.string().min(1).max(64),
-  subtotalCents: z.number().int().nonnegative(),
-})
 
 // ─── POST /validate ───────────────────────────────────────────────────────────
 /**
@@ -49,7 +42,7 @@ app.post('/validate', async (c) => {
   const [body, errResp] = await parseBody(c)
   if (errResp) return errResp
 
-  const parsed = validateCouponSchema.safeParse(body)
+  const parsed = couponLookupSchema.safeParse(body)
   if (!parsed.success) {
     return c.json({ error: 'Validation failed', issues: parsed.error.issues }, 400)
   }

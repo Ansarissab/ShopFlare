@@ -1,7 +1,7 @@
 // Admin-only schemas — product CRUD, variant/size management, order admin ops.
 // All composed from lib/schemas primitives — never inline raw z fields.
 import { z } from 'zod/v4'
-import { idField } from './base'
+import { idField, orderItemSchema } from './base'
 import { storeConfigSchema, faqItemsSchema } from './config'
 import {
   ORDER_STATUSES,
@@ -71,14 +71,7 @@ export const updateTrackingSchema = z.object({
 // POS (point-of-sale) in-person order — admin-only. Prices/snapshots are
 // resolved server-side from sizeOptionId, so the client sends only id + qty.
 export const posOrderSchema = z.object({
-  items: z
-    .array(
-      z.object({
-        sizeOptionId: idField,
-        quantity: z.number().int().positive().max(999),
-      }),
-    )
-    .min(1),
+  items: z.array(orderItemSchema).min(1),
   customerPhone: z.string().optional(),
 })
 
