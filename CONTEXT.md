@@ -184,3 +184,11 @@ A machine endpoint (`/healthz`) that probes D1, KV, and R2 and returns an overal
 ## Status Page
 
 A public page reporting the Store's current operational health, backed by the Health Check. Paired with an external monitor for uptime history and alerting.
+
+## Keyboard Shortcuts
+
+Universal, always-on key bindings active on both the storefront and the Admin Dashboard. Not Merchant-configurable; not gated by a Feature Flag; not stored in D1. Storefront: `/` opens the search Overlay, `c` opens the cart, `?` opens the cheat-sheet overlay, `Esc` closes. Admin: `g o/p/c/a` navigate to orders/products/coupons/analytics, `c` creates in the current list context, `/` focuses search, `j`/`k` navigate table rows, `Enter` opens the selected row, `?` opens the cheat-sheet, `Esc` closes. Typing in inputs/textareas/contenteditable is always unaffected; Esc always works even in inputs.
+
+## Cheat-sheet Overlay
+
+A modal overlay (`?` shortcut on any page) listing all active keyboard shortcuts for the current surface (storefront or admin). Localized (strings via i18n dictionaries), RTL-aware, and respects `prefers-reduced-motion`.

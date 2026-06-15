@@ -11,7 +11,7 @@
 > **Deploy button deploys the API worker only.** For a full store (both workers +
 > migrations + Stripe webhook auto-setup), fork the repo and run `pnpm setup`.
 
-🧪 **1368** unit tests &nbsp;·&nbsp; 🔗 **168** integration tests &nbsp;·&nbsp; 📊 **95%** coverage
+🧪 **1785** unit tests &nbsp;·&nbsp; 🔗 **168** integration tests &nbsp;·&nbsp; 📊 **95%** coverage
 
 A free, open-source, self-hosted online store. Fork it, run the setup wizard, start selling.
 No monthly platform fees — it runs entirely on Cloudflare's free tier and Stripe's
@@ -60,6 +60,7 @@ Replaces Shopify Basic ($29/month) for stores that don't need the heavyweight pl
 - **SEO / GEO / AEO**: server-rendered metadata + JSON-LD on every page (Product, Category, Organization, BreadcrumbList, FAQPage, Article); sitemap with `lastModified`; toggleable LLM discovery (`/llms.txt`, Markdown `.md` twins, AI-bot policy in `robots.txt`)
 - **Blog**: toggleable merchant blog at `/blog` — Trix rich text editor, cover images (R2), tags, draft/published workflow, RSS feed at `/blog/rss.xml`, Article structured data, included in sitemap
 - **Status / uptime**: machine `GET /healthz` (D1/KV/R2 probed independently, 200 ok / 503 degraded), public `/status` SSR live snapshot, and Better Stack free-tier monitor for uptime history + alerts
+- **Keyboard shortcuts** — `/` search, `c` cart, `?` cheat-sheet, `Esc` close; localized + RTL-aware, respects reduced-motion
 
 **Admin dashboard** (app-level password login → Bearer session token)
 - Product / variant / size CRUD with R2 image upload (client-compressed; large images auto-optimized with a before/after confirm step)
@@ -70,6 +71,7 @@ Replaces Shopify Basic ($29/month) for stores that don't need the heavyweight pl
 - **POS** (in-person cash register mode)
 - Store settings: name, tagline, logo, currency, shipping, contact, **products per page** — all editable, **no redeploy**
 - **Style Presets**: 6 named looks (Midnight, Emerald, Sunset, Ocean, Elegant, Playful), each setting colors, font, radius, density, and hero layout in one click via the CSS-variable theme engine
+- **Keyboard shortcuts** — `g`-prefixed "go to" navigation (orders/products/coupons/analytics), `c` create, `j`/`k` row navigation, `/` search, `?` cheat-sheet
 
 **Dynamic-first:** anything a non-developer needs to change lives in D1 and is editable from the
 admin dashboard. Code redeploys are only for actual code changes.
@@ -145,7 +147,8 @@ src/
     html.ts           sanitizeHtml (DOMPurify) — sanitize merchant HTML before render
     image.ts          compressImage — single compression config for all upload paths
     seo/              jsonld builders + buildPageMetadata (used in generateMetadata)
-    constants/        ORDER_STATUSES, CURRENCIES, PAYMENT_METHODS, FEATURE_FLAGS, limits
+    constants/        ORDER_STATUSES, CURRENCIES, PAYMENT_METHODS, FEATURE_FLAGS, limits, shortcuts
+    keyboard/         dispatcher.ts — pure sequence matcher + input-field guard
     i18n/en.ts        ALL UI strings (never hardcode in components)
     schemas/          Zod v4 schemas, shared client + Worker
     types/store.ts    composite + component prop types
