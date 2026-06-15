@@ -96,20 +96,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     try {
       const res = await fetch(`${workerUrl}/api/products`, { next: { revalidate: 3600 } })
       if (res.ok) {
-        const products = (await res.json()) as Array<{
-          slug?: string
-          id: string
-          updatedAt?: string
-        }>
-        productRoutes = products
-          .filter((p) => p.slug)
-          .map((p) => ({
-            url: `${siteUrl}/product/${p.slug}`,
-            changeFrequency: 'weekly' as const,
-            priority: 0.8,
-            alternates: { languages: alternates(`/product/${p.slug}`) },
-            ...(p.updatedAt ? { lastModified: new Date(p.updatedAt) } : {}),
-          }))
+        // /api/products returns { products: ProductWithVariants[] }. Products have
+        // no slug column — they're identified by id, and the /product/[slug] route
+        // resolves by id (matching the IndexNow ping path).
+        const data = (await res.json()) as {
+          products?: Array<{ product: { id: string; updatedAt?: string } }>
+        }
+        productRoutes = (data.products ?? []).map(({ product }) => ({
+          url: `${siteUrl}/product/${product.id}`,
+          changeFrequency: 'weekly' as const,
+          priority: 0.8,
+          alternates: { languages: alternates(`/product/${product.id}`) },
+          ...(product.updatedAt ? { lastModified: new Date(product.updatedAt) } : {}),
+        }))
       }
     } catch {
       // worker unavailable at build time — only static routes included
