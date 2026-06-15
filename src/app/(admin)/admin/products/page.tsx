@@ -7,16 +7,13 @@ import { buttonVariants } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
+import { layout } from '@/lib/styles'
 import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { useT } from '@/lib/i18n/Provider'
 import { useApiResource } from '@/hooks/useApiResource'
 import { useListNavigation } from '@/hooks/useListNavigation'
 import { useRegisterListNav } from '@/components/admin/shared/ListNavContext'
-import type { ProductWithVariants } from '@/lib/types/product'
-
-interface ProductsResponse {
-  products: ProductWithVariants[]
-}
+import type { ProductsResponse } from '@/lib/types/admin'
 
 export default function AdminProductsPage() {
   const t = useT()
@@ -63,7 +60,7 @@ export default function AdminProductsPage() {
                 key={product.id}
                 className={cn(
                   'flex items-center justify-between rounded-lg border bg-card px-4 py-3',
-                  isActive(index) && 'bg-muted ring-1 ring-inset ring-ring',
+                  isActive(index) && layout.activeRow,
                 )}
               >
                 <div className="flex flex-col gap-0.5">

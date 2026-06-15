@@ -24,12 +24,8 @@ import { isFeatureEnabled } from '@/lib/features'
 import { apiPost } from '@/lib/api'
 import { useApiResource } from '@/hooks/useApiResource'
 import { useStoreConfig } from '@/hooks/useStoreConfig'
-import type { ProductWithVariants, VariantWithDetails, SizeOption } from '@/lib/types/product'
-import type { POSSaleItem } from '@/lib/types/admin'
-
-interface ProductsResponse {
-  products: ProductWithVariants[]
-}
+import type { VariantWithDetails, SizeOption } from '@/lib/types/product'
+import type { POSSaleItem, ProductsResponse } from '@/lib/types/admin'
 
 export function POSScreen() {
   const t = useT()

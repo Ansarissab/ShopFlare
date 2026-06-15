@@ -1,6 +1,7 @@
 import type { OrderItem, Coupon, Review } from 'worker/db/schema'
 import type { OrderStatus } from '@/lib/constants'
 import type * as React from 'react'
+import type { ProductWithVariants } from '@/lib/types/product'
 
 export type { OrderItem, Coupon, Review }
 export type AdminCoupon = Coupon
@@ -53,6 +54,10 @@ export interface AdminOrdersResponse {
   total: number
   page: number
   limit: number
+}
+
+export interface ProductsResponse {
+  products: ProductWithVariants[]
 }
 
 export interface AdminProductListItem {

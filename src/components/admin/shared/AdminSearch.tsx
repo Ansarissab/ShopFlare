@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Search } from 'lucide-react'
 import { useT } from '@/lib/i18n/Provider'
 import { apiGet } from '@/lib/api'
-import type { ProductWithVariants } from '@/lib/types/product'
-import type { AdminOrdersResponse } from '@/lib/types/admin'
+import type { AdminOrdersResponse, ProductsResponse } from '@/lib/types/admin'
 
 // ─── Local types ─────────────────────────────────────────────────────────────
 
@@ -16,10 +15,6 @@ interface SearchResult {
   sub?: string
   href: string
   group: 'products' | 'orders'
-}
-
-interface ProductsResponse {
-  products: ProductWithVariants[]
 }
 
 // ─── AdminSearch ──────────────────────────────────────────────────────────────

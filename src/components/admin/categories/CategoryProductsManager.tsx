@@ -8,14 +8,11 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useT } from '@/lib/i18n/Provider'
 import { apiGet, apiPut } from '@/lib/api'
 import type { ProductWithVariants } from '@/lib/types/product'
+import type { ProductsResponse } from '@/lib/types/admin'
 
 interface CategoryProductsManagerProps {
   categoryId: string
   initialProducts: ProductWithVariants[]
-}
-
-interface ProductsResponse {
-  products: ProductWithVariants[]
 }
 
 export function CategoryProductsManager({
