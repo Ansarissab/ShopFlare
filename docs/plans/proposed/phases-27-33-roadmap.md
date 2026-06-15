@@ -14,7 +14,7 @@ Verification, Cookie Consent, Announcement Bar), [ADR 0015](../../adr/0015-i18n-
 | 3 | Header cluster: search + nav + announcement bar | [phase-29](./phase-29-header-search-nav-announcement.md) |
 | 4 | FAQ: structured, /faq, per-product, accordion | [phase-30](./phase-30-faq-structured.md) |
 | 5 | Keyboard shortcuts (Fizzy-style) ✅ done | [phase-31](../done/phase-31-keyboard-shortcuts.md) |
-| 6 | Marketing & SEO (consent-gated) | [phase-32](./phase-32-marketing-seo.md) |
+| 6 | Marketing & SEO (consent-gated) ✅ done | [phase-32](../done/phase-32-marketing-seo.md) |
 | 7 | Final page-speed gate (all Locales) | [phase-33](./phase-33-final-page-speed-gate.md) |
 
 ## Why this order

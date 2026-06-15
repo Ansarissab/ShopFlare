@@ -1,6 +1,7 @@
 # Phase 32 — Marketing & SEO (full stack, consent-gated)
 
-Status: Proposed. Planned 2026-06-12 (grill-with-docs). Implements
+Status: Done. Shipped 2026-06-15 (Opus-orchestrated, Sonnet execution, 3-reviewer
+adversarial audit). Planned 2026-06-12 (grill-with-docs). Implements
 [ADR 0016](../../adr/0016-consent-gated-marketing-tags.md). Depends on
 [Phase 28](./phase-28-i18n-locale-engine.md) (Locales must exist for hreflang). See
 [roadmap](./phases-27-33-roadmap.md).
