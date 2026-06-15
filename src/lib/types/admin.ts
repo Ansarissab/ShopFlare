@@ -130,11 +130,14 @@ export interface AdminReviewsResponse {
 export interface AdminReviewRowProps {
   review: AdminReview
   onChanged: () => void
+  active?: boolean
 }
 
 export interface ReviewTableProps {
   reviews: AdminReview[]
   onChanged: () => void
+  baseIndex?: number
+  isActive?: (index: number) => boolean
 }
 
 export interface NotifyRequest {
@@ -153,6 +156,7 @@ export interface NotifyRequestsResponse {
 
 export interface NotifyRequestRowProps {
   request: NotifyRequest
+  active?: boolean
 }
 
 export interface StorePage {

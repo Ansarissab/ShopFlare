@@ -3,6 +3,9 @@
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react'
 import { AdminSidebar, MobileAdminNav } from '@/components/admin/shared/AdminSidebar'
+import { ListNavProvider } from '@/components/admin/shared/ListNavContext'
+import AdminShortcuts from '@/components/admin/shared/AdminShortcuts'
+import AdminSearch from '@/components/admin/shared/AdminSearch'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { getAdminToken } from '@/lib/api'
 
@@ -49,17 +52,24 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
   return (
     <TooltipProvider delay={200}>
-      <div className="flex h-screen overflow-hidden">
-        <AdminSidebar />
-        <div className="flex flex-1 flex-col overflow-auto">
-          {/* Mobile-only top bar with hamburger — hidden on md+ where the sidebar shows */}
-          <header className="flex h-14 items-center gap-3 border-b px-4 md:hidden">
-            <MobileAdminNav />
-            <span className="text-sm font-semibold tracking-tight">Admin</span>
-          </header>
-          <main className="flex-1 p-4 sm:p-6">{children}</main>
+      <ListNavProvider>
+        <div className="flex h-screen overflow-hidden">
+          <AdminSidebar />
+          <div className="flex flex-1 flex-col overflow-auto">
+            {/* Mobile-only top bar with hamburger — hidden on md+ where the sidebar shows */}
+            <header className="flex h-14 items-center gap-3 border-b px-4 md:hidden">
+              <MobileAdminNav />
+              <span className="text-sm font-semibold tracking-tight">Admin</span>
+            </header>
+            {/* Desktop top bar — hidden on mobile where the sidebar collapses */}
+            <header className="hidden h-14 items-center gap-3 border-b px-4 md:flex">
+              <AdminSearch />
+            </header>
+            <main className="flex-1 p-4 sm:p-6">{children}</main>
+          </div>
         </div>
-      </div>
+        <AdminShortcuts />
+      </ListNavProvider>
     </TooltipProvider>
   )
 }

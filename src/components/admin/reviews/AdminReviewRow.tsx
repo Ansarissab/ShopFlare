@@ -9,9 +9,10 @@ import { ReviewStars } from '@/components/store/product/ReviewStars'
 import { apiPatch, apiDelete } from '@/lib/api'
 import { formatDate } from '@/lib/utils/index'
 import { useT } from '@/lib/i18n/Provider'
+import { cn } from '@/lib/utils'
 import type { AdminReviewRowProps } from '@/lib/types/admin'
 
-export function AdminReviewRow({ review, onChanged }: AdminReviewRowProps) {
+export function AdminReviewRow({ review, onChanged, active }: AdminReviewRowProps) {
   const t = useT()
   const [busy, setBusy] = useState(false)
 
@@ -56,7 +57,12 @@ export function AdminReviewRow({ review, onChanged }: AdminReviewRowProps) {
   }
 
   return (
-    <tr className="border-b last:border-0 hover:bg-muted/30 transition-colors align-top">
+    <tr
+      className={cn(
+        'border-b last:border-0 hover:bg-muted/30 transition-colors align-top',
+        active && 'bg-muted ring-1 ring-inset ring-ring',
+      )}
+    >
       <td className="px-4 py-3">
         <Badge variant={review.approved ? 'default' : 'secondary'}>
           {review.approved ? t.admin.approvedReviews : t.admin.pendingReviews}

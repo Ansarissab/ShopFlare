@@ -8,11 +8,14 @@ import { HelpTip } from '@/components/common/HelpTip'
 import { useT } from '@/lib/i18n/Provider'
 import { apiDelete } from '@/lib/api'
 import { formatDate } from '@/lib/utils/index'
+import { cn } from '@/lib/utils'
+import { useListNavigation } from '@/hooks/useListNavigation'
+import { useRegisterListNav } from '@/components/admin/shared/ListNavContext'
 import type { CouponRowProps, CouponsTableProps } from '@/lib/types/admin'
 
 // ─── CouponRow ───────────────────────────────────────────────────────────────
 
-function CouponRow({ coupon, onEdit, onDeleted }: CouponRowProps) {
+function CouponRow({ coupon, onEdit, onDeleted, active }: CouponRowProps & { active?: boolean }) {
   const t = useT()
   async function handleDelete() {
     if (!confirm(t.admin.deleteCouponConfirm)) return
@@ -28,7 +31,12 @@ function CouponRow({ coupon, onEdit, onDeleted }: CouponRowProps) {
   const valueLabel = coupon.type === 'percentage' ? `${coupon.value}%` : `${coupon.value}¢`
 
   return (
-    <tr className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+    <tr
+      className={cn(
+        'border-b last:border-0 hover:bg-muted/30 transition-colors',
+        active && 'bg-muted ring-1 ring-inset ring-ring',
+      )}
+    >
       <td className="px-4 py-3 font-mono text-xs font-semibold">{coupon.code}</td>
       <td className="hidden sm:table-cell px-4 py-3 text-sm">
         <span className="capitalize">
@@ -89,6 +97,13 @@ function CouponRow({ coupon, onEdit, onDeleted }: CouponRowProps) {
 
 export function CouponsTable({ coupons, onEdit, onDeleted }: CouponsTableProps) {
   const t = useT()
+
+  const { next, prev, open, isActive } = useListNavigation({
+    items: coupons,
+    onOpen: (coupon) => onEdit(coupon),
+  })
+  useRegisterListNav({ next, prev, open })
+
   if (coupons.length === 0) {
     return <p className="py-12 text-center text-sm text-muted-foreground">{t.admin.noCoupons}</p>
   }
@@ -129,8 +144,14 @@ export function CouponsTable({ coupons, onEdit, onDeleted }: CouponsTableProps) 
           </tr>
         </thead>
         <tbody>
-          {coupons.map((coupon) => (
-            <CouponRow key={coupon.id} coupon={coupon} onEdit={onEdit} onDeleted={onDeleted} />
+          {coupons.map((coupon, index) => (
+            <CouponRow
+              key={coupon.id}
+              coupon={coupon}
+              onEdit={onEdit}
+              onDeleted={onDeleted}
+              active={isActive(index)}
+            />
           ))}
         </tbody>
       </table>

@@ -1,12 +1,13 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, cleanup, waitFor, act } from '@testing-library/react'
 import { CouponsTable } from './CouponsTable'
 import { en } from '@/lib/i18n/en'
 import { formatDate } from '@/lib/utils/index'
 import { apiDelete } from '@/lib/api'
 import { toast } from 'sonner'
 import type { AdminCoupon } from '@/lib/types/admin'
+import type { ListNavController } from '@/lib/types/shortcuts'
 
 vi.mock('@/lib/api', () => ({
   apiDelete: vi.fn(() => Promise.resolve({})),
@@ -14,6 +15,14 @@ vi.mock('@/lib/api', () => ({
 
 vi.mock('sonner', () => ({
   toast: Object.assign(vi.fn(), { success: vi.fn(), error: vi.fn() }),
+}))
+
+// Capture the registered controller so tests can call it directly
+let capturedController: ListNavController | null = null
+vi.mock('@/components/admin/shared/ListNavContext', () => ({
+  useRegisterListNav: (ctrl: ListNavController) => {
+    capturedController = ctrl
+  },
 }))
 
 function makeCoupon(overrides: Partial<AdminCoupon> = {}): AdminCoupon {
@@ -39,6 +48,7 @@ function makeCoupon(overrides: Partial<AdminCoupon> = {}): AdminCoupon {
 afterEach(() => {
   cleanup()
   vi.clearAllMocks()
+  capturedController = null
 })
 
 describe('CouponsTable', () => {
@@ -214,5 +224,38 @@ describe('CouponsTable', () => {
     )
     expect(screen.getByText('AAA')).toBeTruthy()
     expect(screen.getByText('BBB')).toBeTruthy()
+  })
+
+  it('registers a list-nav controller', () => {
+    render(<CouponsTable coupons={[makeCoupon()]} onEdit={vi.fn()} onDeleted={vi.fn()} />)
+    expect(capturedController).not.toBeNull()
+    expect(typeof capturedController?.next).toBe('function')
+    expect(typeof capturedController?.prev).toBe('function')
+    expect(typeof capturedController?.open).toBe('function')
+  })
+
+  it('next() advances the active row and applies highlight class', () => {
+    const { container } = render(
+      <CouponsTable coupons={[makeCoupon()]} onEdit={vi.fn()} onDeleted={vi.fn()} />,
+    )
+    const rows = container.querySelectorAll('tbody tr')
+    expect(rows[0].className).not.toContain('ring-1')
+    act(() => {
+      capturedController?.next()
+    })
+    expect(rows[0].className).toContain('ring-1')
+  })
+
+  it('open() calls onEdit with the active coupon', () => {
+    const onEdit = vi.fn()
+    const coupon = makeCoupon({ id: 'cpn-open', code: 'OPENME' })
+    render(<CouponsTable coupons={[coupon]} onEdit={onEdit} onDeleted={vi.fn()} />)
+    act(() => {
+      capturedController?.next()
+    })
+    act(() => {
+      capturedController?.open()
+    })
+    expect(onEdit).toHaveBeenCalledWith(coupon)
   })
 })

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Plus, ExternalLink } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -9,6 +10,8 @@ import { cn } from '@/lib/utils'
 import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { useT } from '@/lib/i18n/Provider'
 import { useApiResource } from '@/hooks/useApiResource'
+import { useListNavigation } from '@/hooks/useListNavigation'
+import { useRegisterListNav } from '@/components/admin/shared/ListNavContext'
 import type { ProductWithVariants } from '@/lib/types/product'
 
 interface ProductsResponse {
@@ -17,7 +20,15 @@ interface ProductsResponse {
 
 export default function AdminProductsPage() {
   const t = useT()
+  const router = useRouter()
   const { data, loading } = useApiResource<ProductsResponse>('/api/admin/products')
+
+  const items = data?.products ?? []
+  const { next, prev, open, isActive } = useListNavigation({
+    items,
+    onOpen: (item) => router.push(`/admin/products/${item.product.id}`),
+  })
+  useRegisterListNav({ next, prev, open })
 
   return (
     <div className="flex flex-col gap-5">
@@ -47,10 +58,13 @@ export default function AdminProductsPage() {
               </Link>
             </div>
           ) : (
-            data.products.map(({ product, variants }) => (
+            data.products.map(({ product, variants }, index) => (
               <div
                 key={product.id}
-                className="flex items-center justify-between rounded-lg border bg-card px-4 py-3"
+                className={cn(
+                  'flex items-center justify-between rounded-lg border bg-card px-4 py-3',
+                  isActive(index) && 'bg-muted ring-1 ring-inset ring-ring',
+                )}
               >
                 <div className="flex flex-col gap-0.5">
                   <div className="flex items-center gap-2">

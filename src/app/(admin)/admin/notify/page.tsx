@@ -4,11 +4,20 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { NotifyRequestRow } from '@/components/admin/notify/NotifyRequestRow'
 import { useApiResource } from '@/hooks/useApiResource'
 import { useT } from '@/lib/i18n/Provider'
+import { useListNavigation } from '@/hooks/useListNavigation'
+import { useRegisterListNav } from '@/components/admin/shared/ListNavContext'
 import type { NotifyRequestsResponse } from '@/lib/types/admin'
 
 export default function AdminNotifyPage() {
   const t = useT()
   const { data, loading, error } = useApiResource<NotifyRequestsResponse>('/api/admin/notify')
+
+  const requests = data?.requests ?? []
+  const { next, prev, open, isActive } = useListNavigation({
+    items: requests,
+    onOpen: () => {},
+  })
+  useRegisterListNav({ next, prev, open })
 
   return (
     <div className="flex flex-col gap-5">
@@ -26,8 +35,12 @@ export default function AdminNotifyPage() {
         <p className="text-sm text-muted-foreground">{t.admin.notifyNoRequests}</p>
       ) : (
         <div className="flex flex-col gap-2">
-          {data.requests.map((request) => (
-            <NotifyRequestRow key={request.sizeOptionId} request={request} />
+          {requests.map((request, index) => (
+            <NotifyRequestRow
+              key={request.sizeOptionId}
+              request={request}
+              active={isActive(index)}
+            />
           ))}
         </div>
       )}

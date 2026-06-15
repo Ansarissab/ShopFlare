@@ -48,4 +48,27 @@ describe('NotifyRequestRow', () => {
     render(<NotifyRequestRow request={makeRequest()} />)
     expect(screen.getByText(new RegExp(en.admin.notifyRequestedAt))).toBeTruthy()
   })
+
+  describe('active highlight', () => {
+    it('applies highlight classes when active=true', () => {
+      const { container } = render(<NotifyRequestRow request={makeRequest()} active={true} />)
+      const div = container.firstElementChild!
+      expect(div.className).toContain('bg-muted')
+      expect(div.className).toContain('ring-1')
+      expect(div.className).toContain('ring-inset')
+      expect(div.className).toContain('ring-ring')
+    })
+
+    it('does not apply highlight classes when active=false', () => {
+      const { container } = render(<NotifyRequestRow request={makeRequest()} active={false} />)
+      const div = container.firstElementChild!
+      expect(div.className).not.toContain('ring-1')
+    })
+
+    it('does not apply highlight classes when active is omitted', () => {
+      const { container } = render(<NotifyRequestRow request={makeRequest()} />)
+      const div = container.firstElementChild!
+      expect(div.className).not.toContain('ring-1')
+    })
+  })
 })

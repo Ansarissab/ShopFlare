@@ -11,7 +11,10 @@ import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { useT } from '@/lib/i18n/Provider'
 import { apiGet, apiPut } from '@/lib/api'
 import { formatDate } from '@/lib/utils/index'
+import { cn } from '@/lib/utils'
 import { POLICY_SLUGS } from '@/lib/constants'
+import { useListNavigation } from '@/hooks/useListNavigation'
+import { useRegisterListNav } from '@/components/admin/shared/ListNavContext'
 import type { AdminPagesResponse, StorePage } from '@/lib/types/admin'
 
 interface EditState {
@@ -34,6 +37,13 @@ export default function AdminPagesPage() {
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState<string | null>(null)
   const [editState, setEditState] = useState<EditState>({ title: '', content: '', saving: false })
+
+  const slugItems = POLICY_SLUGS as readonly string[]
+  const { next, prev, open, isActive } = useListNavigation({
+    items: slugItems,
+    onOpen: (slug) => startEdit(slug),
+  })
+  useRegisterListNav({ next, prev, open })
 
   useEffect(() => {
     apiGet<AdminPagesResponse>('/api/admin/pages')
@@ -101,12 +111,18 @@ export default function AdminPagesPage() {
     <div className="flex flex-col gap-6 max-w-2xl">
       <AdminPageHeader title={t.admin.policyPages} />
 
-      {POLICY_SLUGS.map((slug) => {
+      {POLICY_SLUGS.map((slug, index) => {
         const saved = pages.find((p) => p.slug === slug)
         const isEditing = editing === slug
 
         return (
-          <div key={slug} className="rounded-lg border p-5 flex flex-col gap-4">
+          <div
+            key={slug}
+            className={cn(
+              'rounded-lg border p-5 flex flex-col gap-4',
+              isActive(index) && 'bg-muted ring-1 ring-inset ring-ring',
+            )}
+          >
             <div className="flex items-center justify-between">
               <div className="flex flex-col gap-0.5">
                 <span className="text-sm font-semibold">{POLICY_LABELS[slug]}</span>

@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 import type { NotifyRequestRowProps } from '@/lib/types/admin'
 import { formatDate } from '@/lib/utils/index'
 
-export function NotifyRequestRow({ request }: NotifyRequestRowProps) {
+export function NotifyRequestRow({ request, active }: NotifyRequestRowProps) {
   const t = useT()
   const { productName, variantLabel, size, waiting, lastRequestedAt, inStock } = request
 
@@ -18,7 +18,13 @@ export function NotifyRequestRow({ request }: NotifyRequestRowProps) {
   )
 
   return (
-    <div className={cn(layout.mobileStack, 'rounded-md border px-4 py-3 text-sm')}>
+    <div
+      className={cn(
+        layout.mobileStack,
+        'rounded-md border px-4 py-3 text-sm',
+        active && 'bg-muted ring-1 ring-inset ring-ring',
+      )}
+    >
       {/* Left: product / variant / size info */}
       <div className="flex flex-col gap-0.5 min-w-0">
         <span className="font-medium truncate">{productName}</span>

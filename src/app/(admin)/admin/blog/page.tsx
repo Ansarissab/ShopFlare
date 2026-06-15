@@ -18,6 +18,9 @@ import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { useT } from '@/lib/i18n/Provider'
 import { apiGet, apiPost, apiDelete } from '@/lib/api'
 import { formatDate } from '@/lib/utils/index'
+import { cn } from '@/lib/utils'
+import { useListNavigation } from '@/hooks/useListNavigation'
+import { useRegisterListNav } from '@/components/admin/shared/ListNavContext'
 import type { BlogPost } from '@/lib/types/blog'
 
 export default function AdminBlogListPage() {
@@ -28,6 +31,12 @@ export default function AdminBlogListPage() {
   const [deleteTarget, setDeleteTarget] = useState<BlogPost | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [toggling, setToggling] = useState<string | null>(null)
+
+  const { next, prev, open, isActive } = useListNavigation({
+    items: posts,
+    onOpen: (post) => router.push(`/admin/blog/${post.id}`),
+  })
+  useRegisterListNav({ next, prev, open })
 
   useEffect(() => {
     let cancelled = false
@@ -114,10 +123,13 @@ export default function AdminBlogListPage() {
         </p>
       ) : (
         <div className="flex flex-col gap-2">
-          {posts.map((post) => (
+          {posts.map((post, index) => (
             <div
               key={post.id}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-md border bg-card px-4 py-3"
+              className={cn(
+                'flex flex-wrap items-center justify-between gap-3 rounded-md border bg-card px-4 py-3',
+                isActive(index) && 'bg-muted ring-1 ring-inset ring-ring',
+              )}
             >
               <div className="flex min-w-0 flex-col gap-0.5">
                 <span className="truncate font-medium text-sm">{post.title}</span>

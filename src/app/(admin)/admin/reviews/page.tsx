@@ -6,11 +6,13 @@ import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { AdminReviewRow } from '@/components/admin/reviews/AdminReviewRow'
 import { useApiResource } from '@/hooks/useApiResource'
 import { useT } from '@/lib/i18n/Provider'
+import { useListNavigation } from '@/hooks/useListNavigation'
+import { useRegisterListNav } from '@/components/admin/shared/ListNavContext'
 import type { AdminReviewsResponse, ReviewTableProps } from '@/lib/types/admin'
 
 // ─── Inner table ──────────────────────────────────────────────────────────────
 
-function ReviewTable({ reviews, onChanged }: ReviewTableProps) {
+function ReviewTable({ reviews, onChanged, baseIndex = 0, isActive }: ReviewTableProps) {
   const t = useT()
   return (
     <div className="overflow-x-auto rounded-lg border">
@@ -39,8 +41,13 @@ function ReviewTable({ reviews, onChanged }: ReviewTableProps) {
           </tr>
         </thead>
         <tbody>
-          {reviews.map((review) => (
-            <AdminReviewRow key={review.id} review={review} onChanged={onChanged} />
+          {reviews.map((review, i) => (
+            <AdminReviewRow
+              key={review.id}
+              review={review}
+              onChanged={onChanged}
+              active={isActive?.(baseIndex + i)}
+            />
           ))}
         </tbody>
       </table>
@@ -64,6 +71,14 @@ export default function AdminReviewsPage() {
   const pending = data?.reviews.filter((r) => !r.approved) ?? []
   const approved = data?.reviews.filter((r) => r.approved) ?? []
 
+  // Nav over all reviews: pending first, then approved (mirrors render order)
+  const allReviews = [...pending, ...approved]
+  const { next, prev, open, isActive } = useListNavigation({
+    items: allReviews,
+    onOpen: () => {},
+  })
+  useRegisterListNav({ next, prev, open })
+
   return (
     <div className="flex flex-col gap-6">
       <AdminPageHeader title={t.admin.reviewModeration} />
@@ -85,14 +100,24 @@ export default function AdminReviewsPage() {
           {pending.length > 0 && (
             <div className="flex flex-col gap-2">
               <h2 className="text-base font-semibold">{t.admin.pendingReviews}</h2>
-              <ReviewTable reviews={pending} onChanged={handleChanged} />
+              <ReviewTable
+                reviews={pending}
+                onChanged={handleChanged}
+                baseIndex={0}
+                isActive={isActive}
+              />
             </div>
           )}
 
           {approved.length > 0 && (
             <div className="flex flex-col gap-2">
               <h2 className="text-base font-semibold">{t.admin.approvedReviews}</h2>
-              <ReviewTable reviews={approved} onChanged={handleChanged} />
+              <ReviewTable
+                reviews={approved}
+                onChanged={handleChanged}
+                baseIndex={pending.length}
+                isActive={isActive}
+              />
             </div>
           )}
         </>

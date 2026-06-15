@@ -1,22 +1,37 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { ChevronUp, ChevronDown, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useT } from '@/lib/i18n/Provider'
 import { cn } from '@/lib/utils'
+import { useListNavigation } from '@/hooks/useListNavigation'
+import { useRegisterListNav } from '@/components/admin/shared/ListNavContext'
 import type { CategoryTreeProps, CategoryNode } from '@/lib/types/category'
 import type { Category } from '@/lib/types/category'
+
+/** Depth-first flatten of all nodes in the tree (matches render order). */
+function flattenNodes(nodes: CategoryNode[]): CategoryNode[] {
+  const result: CategoryNode[] = []
+  for (const node of nodes) {
+    result.push(node)
+    if (node.children.length > 0) result.push(...flattenNodes(node.children))
+  }
+  return result
+}
 
 function CategoryRow({
   node,
   depth,
+  activeNodeId,
   onReorder,
   onEdit,
   onDelete,
 }: {
   node: CategoryNode
   depth: number
+  activeNodeId: string | null
   onReorder: CategoryTreeProps['onReorder']
   onEdit: CategoryTreeProps['onEdit']
   onDelete: CategoryTreeProps['onDelete']
@@ -28,6 +43,7 @@ function CategoryRow({
         className={cn(
           'flex items-center justify-between rounded-md border bg-card px-3 py-2.5',
           !node.active && 'opacity-60',
+          activeNodeId === node.id && 'bg-muted ring-1 ring-inset ring-ring',
         )}
         style={{ marginLeft: depth * 20 }}
       >
@@ -94,6 +110,7 @@ function CategoryRow({
           key={child.id}
           node={child}
           depth={depth + 1}
+          activeNodeId={activeNodeId}
           onReorder={onReorder}
           onEdit={onEdit}
           onDelete={onDelete}
@@ -105,6 +122,20 @@ function CategoryRow({
 
 export function CategoryTree({ categories, onReorder, onEdit, onDelete }: CategoryTreeProps) {
   const t = useT()
+  const router = useRouter()
+
+  // Flatten tree depth-first — same order as rendered — so j/k index matches visual order.
+  const flatNodes = flattenNodes(categories)
+
+  const { activeIndex, next, prev, open } = useListNavigation({
+    items: flatNodes,
+    onOpen: (node) => router.push(`/admin/categories/${node.id}`),
+  })
+  useRegisterListNav({ next, prev, open })
+
+  const activeNodeId =
+    activeIndex >= 0 && activeIndex < flatNodes.length ? flatNodes[activeIndex].id : null
+
   if (categories.length === 0) {
     return (
       <div className="py-16 text-center text-sm text-muted-foreground">{t.admin.noCategories}</div>
@@ -118,6 +149,7 @@ export function CategoryTree({ categories, onReorder, onEdit, onDelete }: Catego
           key={node.id}
           node={node}
           depth={0}
+          activeNodeId={activeNodeId}
           onReorder={onReorder}
           onEdit={onEdit}
           onDelete={onDelete}

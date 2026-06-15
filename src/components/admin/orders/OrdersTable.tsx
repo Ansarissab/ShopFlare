@@ -1,10 +1,14 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { HelpTip } from '@/components/common/HelpTip'
 import { formatPrice, formatDate } from '@/lib/utils/index'
 import { useT } from '@/lib/i18n/Provider'
+import { cn } from '@/lib/utils'
+import { useListNavigation } from '@/hooks/useListNavigation'
+import { useRegisterListNav } from '@/components/admin/shared/ListNavContext'
 import type { AdminOrder } from '@/lib/types/admin'
 
 const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
@@ -22,6 +26,15 @@ interface OrdersTableProps {
 
 export function OrdersTable({ orders }: OrdersTableProps) {
   const t = useT()
+  const router = useRouter()
+
+  const { next, prev, open, isActive } = useListNavigation({
+    items: orders,
+    onOpen: (order) => router.push(`/admin/orders/${order.id}`),
+  })
+
+  useRegisterListNav({ next, prev, open })
+
   if (orders.length === 0) {
     return <p className="py-12 text-center text-sm text-muted-foreground">No orders found.</p>
   }
@@ -52,10 +65,13 @@ export function OrdersTable({ orders }: OrdersTableProps) {
           </tr>
         </thead>
         <tbody>
-          {orders.map((order) => (
+          {orders.map((order, index) => (
             <tr
               key={order.id}
-              className="border-b last:border-0 hover:bg-muted/30 transition-colors"
+              className={cn(
+                'border-b last:border-0 hover:bg-muted/30 transition-colors',
+                isActive(index) && 'bg-muted ring-1 ring-inset ring-ring',
+              )}
             >
               <td className="px-4 py-3 font-mono text-xs">
                 <Link href={`/admin/orders/${order.id}`} className="text-primary hover:underline">

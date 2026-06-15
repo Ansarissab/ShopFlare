@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, cleanup } from '@testing-library/react'
+import { render, screen, cleanup, act } from '@testing-library/react'
 import { OrdersTable } from './OrdersTable'
 import { en } from '@/lib/i18n/en'
 import { formatPrice, formatDate } from '@/lib/utils/index'
 import type { AdminOrder } from '@/lib/types/admin'
+import type { ListNavController } from '@/lib/types/shortcuts'
 
 vi.mock('next/link', async () => {
   const { createElement } = await import('react')
@@ -14,9 +15,23 @@ vi.mock('next/link', async () => {
   }
 })
 
+const mockPush = vi.fn()
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: mockPush }),
+}))
+
+// Capture the registered controller so tests can call it directly
+let capturedController: ListNavController | null = null
+vi.mock('@/components/admin/shared/ListNavContext', () => ({
+  useRegisterListNav: (ctrl: ListNavController) => {
+    capturedController = ctrl
+  },
+}))
+
 afterEach(() => {
   cleanup()
   vi.clearAllMocks()
+  capturedController = null
 })
 
 function makeOrder(overrides: Partial<AdminOrder> = {}): AdminOrder {
@@ -112,5 +127,32 @@ describe('OrdersTable', () => {
     )
     expect(screen.getByRole('link', { name: 'SF-1' })).toBeTruthy()
     expect(screen.getByRole('link', { name: 'SF-2' })).toBeTruthy()
+  })
+
+  it('onOpen callback navigates to the order detail page', () => {
+    const order = makeOrder({ id: 'ord-42', orderNumber: 'SF-1042' })
+    render(<OrdersTable orders={[order]} />)
+    // The registered controller's open() calls onOpen with the active item.
+    // Move to the first item then open it.
+    act(() => {
+      capturedController?.next()
+    })
+    act(() => {
+      capturedController?.open()
+    })
+    expect(mockPush).toHaveBeenCalledWith('/admin/orders/ord-42')
+  })
+
+  it('isActive highlights the active row', () => {
+    const order = makeOrder({ id: 'ord-hi', orderNumber: 'SF-99' })
+    const { container } = render(<OrdersTable orders={[order]} />)
+    // Before activation — no highlight class
+    const rows = container.querySelectorAll('tbody tr')
+    expect(rows[0].className).not.toContain('ring-1')
+    // Activate the first row
+    act(() => {
+      capturedController?.next()
+    })
+    expect(rows[0].className).toContain('ring-1')
   })
 })

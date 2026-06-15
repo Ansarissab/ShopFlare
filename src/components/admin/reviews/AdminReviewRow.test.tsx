@@ -133,4 +133,45 @@ describe('AdminReviewRow', () => {
     fireEvent.click(screen.getByLabelText(en.admin.deleteReview))
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith(en.errors.networkError))
   })
+
+  describe('active highlight', () => {
+    it('applies highlight classes when active=true', () => {
+      const { container } = render(
+        <table>
+          <tbody>
+            <AdminReviewRow review={makeReview()} onChanged={vi.fn()} active={true} />
+          </tbody>
+        </table>,
+      )
+      const tr = container.querySelector('tbody tr')!
+      expect(tr.className).toContain('bg-muted')
+      expect(tr.className).toContain('ring-1')
+      expect(tr.className).toContain('ring-inset')
+      expect(tr.className).toContain('ring-ring')
+    })
+
+    it('does not apply highlight classes when active=false', () => {
+      const { container } = render(
+        <table>
+          <tbody>
+            <AdminReviewRow review={makeReview()} onChanged={vi.fn()} active={false} />
+          </tbody>
+        </table>,
+      )
+      const tr = container.querySelector('tbody tr')!
+      expect(tr.className).not.toContain('ring-1')
+    })
+
+    it('does not apply highlight classes when active is omitted', () => {
+      const { container } = render(
+        <table>
+          <tbody>
+            <AdminReviewRow review={makeReview()} onChanged={vi.fn()} />
+          </tbody>
+        </table>,
+      )
+      const tr = container.querySelector('tbody tr')!
+      expect(tr.className).not.toContain('ring-1')
+    })
+  })
 })

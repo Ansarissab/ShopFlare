@@ -1,9 +1,23 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, fireEvent, cleanup } from '@testing-library/react'
+import { render, screen, fireEvent, cleanup, act } from '@testing-library/react'
 import { CategoryTree } from './CategoryTree'
 import { en } from '@/lib/i18n/en'
 import type { CategoryNode } from '@/lib/types/category'
+import type { ListNavController } from '@/lib/types/shortcuts'
+
+const mockPush = vi.fn()
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: mockPush }),
+}))
+
+// Capture the registered controller so tests can call it directly
+let capturedController: ListNavController | null = null
+vi.mock('@/components/admin/shared/ListNavContext', () => ({
+  useRegisterListNav: (ctrl: ListNavController) => {
+    capturedController = ctrl
+  },
+}))
 
 function makeNode(over: Partial<CategoryNode> = {}): CategoryNode {
   return {
@@ -27,6 +41,7 @@ function makeNode(over: Partial<CategoryNode> = {}): CategoryNode {
 afterEach(() => {
   cleanup()
   vi.clearAllMocks()
+  capturedController = null
 })
 
 describe('CategoryTree', () => {
@@ -118,5 +133,75 @@ describe('CategoryTree', () => {
     expect(screen.getByText('Parent')).toBeTruthy()
     expect(screen.getByText('Child')).toBeTruthy()
     expect(screen.getByText('Grandchild')).toBeTruthy()
+  })
+
+  it('registers a list-nav controller', () => {
+    render(
+      <CategoryTree
+        categories={[makeNode()]}
+        onReorder={vi.fn()}
+        onEdit={vi.fn()}
+        onDelete={vi.fn()}
+      />,
+    )
+    expect(capturedController).not.toBeNull()
+    expect(typeof capturedController?.next).toBe('function')
+    expect(typeof capturedController?.prev).toBe('function')
+    expect(typeof capturedController?.open).toBe('function')
+  })
+
+  it('next() applies the active highlight to the first node', () => {
+    const node = makeNode({ id: 'nav1', name: 'Nav Node' })
+    const { container } = render(
+      <CategoryTree categories={[node]} onReorder={vi.fn()} onEdit={vi.fn()} onDelete={vi.fn()} />,
+    )
+    // The node div is inside the flex container — find by text proximity
+    const nodeDiv = container.querySelector('[style]') // depth=0 has marginLeft:0
+    expect(nodeDiv?.className).not.toContain('ring-1')
+    act(() => {
+      capturedController?.next()
+    })
+    expect(nodeDiv?.className).toContain('ring-1')
+  })
+
+  it('open() navigates to the category detail page', () => {
+    const node = makeNode({ id: 'cat-42', name: 'Open Me' })
+    render(
+      <CategoryTree categories={[node]} onReorder={vi.fn()} onEdit={vi.fn()} onDelete={vi.fn()} />,
+    )
+    act(() => {
+      capturedController?.next()
+    })
+    act(() => {
+      capturedController?.open()
+    })
+    expect(mockPush).toHaveBeenCalledWith('/admin/categories/cat-42')
+  })
+
+  it('j/k traverses flattened tree depth-first (parent then child)', () => {
+    const tree = makeNode({
+      id: 'root',
+      name: 'Root',
+      children: [makeNode({ id: 'leaf', name: 'Leaf', parentId: 'root' })],
+    })
+    render(
+      <CategoryTree categories={[tree]} onReorder={vi.fn()} onEdit={vi.fn()} onDelete={vi.fn()} />,
+    )
+    // First next() → root is active; second next() → leaf is active
+    act(() => {
+      capturedController?.next()
+    })
+    act(() => {
+      capturedController?.open()
+    })
+    expect(mockPush).toHaveBeenLastCalledWith('/admin/categories/root')
+
+    act(() => {
+      capturedController?.next()
+    })
+    act(() => {
+      capturedController?.open()
+    })
+    expect(mockPush).toHaveBeenLastCalledWith('/admin/categories/leaf')
   })
 })
