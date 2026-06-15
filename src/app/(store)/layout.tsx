@@ -10,6 +10,7 @@ import { OfflineBanner } from '@/components/pwa/OfflineBanner'
 import { WhatsAppWidget } from '@/components/store/WhatsAppWidget'
 import { AnnouncementBar } from '@/components/store/AnnouncementBar'
 import { SearchProvider } from '@/components/store/search/SearchProvider'
+import { StoreShortcuts } from '@/components/store/StoreShortcuts'
 import { TProvider } from '@/lib/i18n/Provider'
 import { getLocaleHeader } from '@/lib/i18n/server'
 import { DEFAULT_LOCALE, LOCALES } from '@/lib/constants'
@@ -33,6 +34,8 @@ export default async function StoreLayout({ children }: { children: React.ReactN
         {/* SearchProvider wraps the store chrome so StorefrontHeader's
             useSearchOverlay() works and the lazy overlay mounts once. */}
         <SearchProvider>
+          {/* Keyboard shortcut engine — headless, must be inside SearchProvider */}
+          <StoreShortcuts />
           {/* flex flex-col flex-1 reproduces the body's column context so the
               inner <main className="flex-1"> still expands (sticky footer). */}
           <div dir={localeDir} lang={locale} className="flex flex-1 flex-col">
