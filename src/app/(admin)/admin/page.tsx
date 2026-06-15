@@ -21,7 +21,8 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { useT } from '@/lib/i18n/Provider'
-import { formatPrice } from '@/lib/utils/index'
+import { formatPrice, shortDay } from '@/lib/utils/index'
+import { CHART_TOOLTIP_STYLE } from '@/lib/constants/chart'
 import { useApiResource } from '@/hooks/useApiResource'
 import type { AdminOrdersResponse } from '@/lib/types/admin'
 import type { Dictionary } from '@/lib/i18n/index'
@@ -45,11 +46,6 @@ function getLast14Days(): string[] {
     days.push(d.toISOString().slice(0, 10))
   }
   return days
-}
-
-function shortDay(iso: string): string {
-  const d = new Date(iso + 'T00:00:00')
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
 // ─── Data computation ─────────────────────────────────────────────────────────
@@ -240,12 +236,7 @@ export default function AdminDashboardPage() {
                   />
                   <Tooltip
                     formatter={(val) => [formatPrice(Number(val) * 100), 'Revenue']}
-                    contentStyle={{
-                      fontSize: 12,
-                      border: '1px solid #e4e4e7',
-                      borderRadius: 8,
-                      boxShadow: '0 1px 4px rgba(0,0,0,.06)',
-                    }}
+                    contentStyle={CHART_TOOLTIP_STYLE}
                     labelStyle={{ fontWeight: 600, marginBottom: 2 }}
                   />
                   <Area
@@ -282,12 +273,7 @@ export default function AdminDashboardPage() {
                     </Pie>
                     <Tooltip
                       formatter={(val, name) => [val, name]}
-                      contentStyle={{
-                        fontSize: 12,
-                        border: '1px solid #e4e4e7',
-                        borderRadius: 8,
-                        boxShadow: '0 1px 4px rgba(0,0,0,.06)',
-                      }}
+                      contentStyle={CHART_TOOLTIP_STYLE}
                     />
                     <Legend
                       iconType="circle"

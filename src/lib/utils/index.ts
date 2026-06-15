@@ -95,6 +95,12 @@ export function slugify(input: string): string {
     .slice(0, 80)
 }
 
+/** Formats an ISO date string as short month + day, e.g. "Jun 14". */
+export function shortDay(iso: string): string {
+  const d = new Date(iso + 'T00:00:00')
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
 // SQLite datetime('now') returns 'YYYY-MM-DD HH:MM:SS' — space separator, no T,
 // no Z. Safari rejects this as invalid; Chrome/Firefox are lenient. Normalize to
 // strict ISO 8601 UTC before constructing a Date so all browsers agree.

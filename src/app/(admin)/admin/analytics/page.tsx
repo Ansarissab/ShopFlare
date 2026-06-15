@@ -23,7 +23,8 @@ import { ProductsTab } from '@/components/admin/analytics/ProductsTab'
 import { CustomersTab } from '@/components/admin/analytics/CustomersTab'
 import { FunnelTab } from '@/components/admin/analytics/FunnelTab'
 import { useT } from '@/lib/i18n/Provider'
-import { formatPrice } from '@/lib/utils/index'
+import { formatPrice, shortDay } from '@/lib/utils/index'
+import { CHART_TOOLTIP_STYLE } from '@/lib/constants/chart'
 import { apiGet } from '@/lib/api'
 import type { AnalyticsResponse } from '@/lib/types/analytics'
 import type { AnalyticsPeriod } from '@/lib/constants'
@@ -40,19 +41,7 @@ const PAYMENT_LABELS: Record<string, string> = {
 
 const METHOD_COLORS = ['#1A1A18', '#4A7C6F', '#f59e0b', '#22c55e', '#ef4444']
 
-const TOOLTIP_STYLE = {
-  fontSize: 12,
-  border: '1px solid #e4e4e7',
-  borderRadius: 8,
-  boxShadow: '0 1px 4px rgba(0,0,0,.06)',
-}
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function shortDay(iso: string): string {
-  const d = new Date(iso + 'T00:00:00')
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-}
 
 function avgOrderCents(summary: AnalyticsResponse['summary']): number {
   const active = summary.totalOrders - summary.cancelledOrders
@@ -178,7 +167,7 @@ function OverviewTab({ period }: { period: AnalyticsPeriod }) {
                       ? [formatPrice(Number(val)), 'Revenue']
                       : [Number(val), 'Orders']
                   }
-                  contentStyle={TOOLTIP_STYLE}
+                  contentStyle={CHART_TOOLTIP_STYLE}
                   labelStyle={{ fontWeight: 600, marginBottom: 2 }}
                 />
                 <Area
@@ -222,7 +211,7 @@ function OverviewTab({ period }: { period: AnalyticsPeriod }) {
                 </Pie>
                 <Tooltip
                   formatter={(val, name) => [Number(val), String(name)]}
-                  contentStyle={TOOLTIP_STYLE}
+                  contentStyle={CHART_TOOLTIP_STYLE}
                 />
                 <Legend
                   iconType="circle"
