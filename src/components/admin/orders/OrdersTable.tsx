@@ -7,6 +7,7 @@ import { HelpTip } from '@/components/common/HelpTip'
 import { formatPrice, formatDate } from '@/lib/utils/index'
 import { useT } from '@/lib/i18n/Provider'
 import { cn } from '@/lib/utils'
+import { layout } from '@/lib/styles'
 import { useListNavigation } from '@/hooks/useListNavigation'
 import { useRegisterListNav } from '@/components/admin/shared/ListNavContext'
 import type { AdminOrder } from '@/lib/types/admin'
@@ -70,7 +71,7 @@ export function OrdersTable({ orders }: OrdersTableProps) {
               key={order.id}
               className={cn(
                 'border-b last:border-0 hover:bg-muted/30 transition-colors',
-                isActive(index) && 'bg-muted ring-1 ring-inset ring-ring',
+                isActive(index) && layout.activeRow,
               )}
             >
               <td className="px-4 py-3 font-mono text-xs">

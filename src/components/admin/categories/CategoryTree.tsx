@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useT } from '@/lib/i18n/Provider'
 import { cn } from '@/lib/utils'
+import { layout } from '@/lib/styles'
 import { useListNavigation } from '@/hooks/useListNavigation'
 import { useRegisterListNav } from '@/components/admin/shared/ListNavContext'
 import type { CategoryTreeProps, CategoryNode } from '@/lib/types/category'
@@ -43,7 +44,7 @@ function CategoryRow({
         className={cn(
           'flex items-center justify-between rounded-md border bg-card px-3 py-2.5',
           !node.active && 'opacity-60',
-          activeNodeId === node.id && 'bg-muted ring-1 ring-inset ring-ring',
+          activeNodeId === node.id && layout.activeRow,
         )}
         style={{ marginLeft: depth * 20 }}
       >

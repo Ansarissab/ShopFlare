@@ -28,6 +28,9 @@ export const layout = {
   // Responsive form grids: single-column on mobile, multi-column from sm
   formGrid2: 'grid grid-cols-1 sm:grid-cols-2',
   formGrid3: 'grid grid-cols-1 sm:grid-cols-3',
+
+  // Active/selected list row (keyboard j/k navigation highlight)
+  activeRow: 'bg-muted ring-1 ring-inset ring-ring',
 } as const
 
 // PWA-specific safe-area utilities (combine with Tailwind via cn())

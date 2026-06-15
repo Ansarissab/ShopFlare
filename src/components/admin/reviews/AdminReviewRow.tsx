@@ -10,6 +10,7 @@ import { apiPatch, apiDelete } from '@/lib/api'
 import { formatDate } from '@/lib/utils/index'
 import { useT } from '@/lib/i18n/Provider'
 import { cn } from '@/lib/utils'
+import { layout } from '@/lib/styles'
 import type { AdminReviewRowProps } from '@/lib/types/admin'
 
 export function AdminReviewRow({ review, onChanged, active }: AdminReviewRowProps) {
@@ -60,7 +61,7 @@ export function AdminReviewRow({ review, onChanged, active }: AdminReviewRowProp
     <tr
       className={cn(
         'border-b last:border-0 hover:bg-muted/30 transition-colors align-top',
-        active && 'bg-muted ring-1 ring-inset ring-ring',
+        active && layout.activeRow,
       )}
     >
       <td className="px-4 py-3">

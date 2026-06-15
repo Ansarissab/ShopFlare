@@ -12,6 +12,7 @@ import { useT } from '@/lib/i18n/Provider'
 import { apiGet, apiPut } from '@/lib/api'
 import { formatDate } from '@/lib/utils/index'
 import { cn } from '@/lib/utils'
+import { layout } from '@/lib/styles'
 import { POLICY_SLUGS } from '@/lib/constants'
 import { useListNavigation } from '@/hooks/useListNavigation'
 import { useRegisterListNav } from '@/components/admin/shared/ListNavContext'
@@ -120,7 +121,7 @@ export default function AdminPagesPage() {
             key={slug}
             className={cn(
               'rounded-lg border p-5 flex flex-col gap-4',
-              isActive(index) && 'bg-muted ring-1 ring-inset ring-ring',
+              isActive(index) && layout.activeRow,
             )}
           >
             <div className="flex items-center justify-between">

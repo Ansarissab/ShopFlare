@@ -22,7 +22,7 @@ export function NotifyRequestRow({ request, active }: NotifyRequestRowProps) {
       className={cn(
         layout.mobileStack,
         'rounded-md border px-4 py-3 text-sm',
-        active && 'bg-muted ring-1 ring-inset ring-ring',
+        active && layout.activeRow,
       )}
     >
       {/* Left: product / variant / size info */}

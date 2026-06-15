@@ -19,6 +19,7 @@ import { useT } from '@/lib/i18n/Provider'
 import { apiGet, apiPost, apiDelete } from '@/lib/api'
 import { formatDate } from '@/lib/utils/index'
 import { cn } from '@/lib/utils'
+import { layout } from '@/lib/styles'
 import { useListNavigation } from '@/hooks/useListNavigation'
 import { useRegisterListNav } from '@/components/admin/shared/ListNavContext'
 import type { BlogPost } from '@/lib/types/blog'
@@ -128,7 +129,7 @@ export default function AdminBlogListPage() {
               key={post.id}
               className={cn(
                 'flex flex-wrap items-center justify-between gap-3 rounded-md border bg-card px-4 py-3',
-                isActive(index) && 'bg-muted ring-1 ring-inset ring-ring',
+                isActive(index) && layout.activeRow,
               )}
             >
               <div className="flex min-w-0 flex-col gap-0.5">
