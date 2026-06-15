@@ -10,18 +10,10 @@ import { isFeatureEnabled } from 'worker/lib/features'
 import { etagFor } from 'worker/lib/fingerprint'
 import { getDataVersion } from 'worker/lib/version'
 import { edgeCached } from 'worker/lib/edge-cache'
+import { parseTags } from 'worker/lib/blog'
 import type { Bindings } from 'worker/types'
 
 const PAGE_SIZE = 12
-
-function parseTags(raw: string): string[] {
-  try {
-    const parsed = JSON.parse(raw)
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
-  }
-}
 
 async function getBlogEnabled(db: ReturnType<typeof createDb>): Promise<boolean> {
   const configRows = await db.select().from(schema.storeConfig).all()

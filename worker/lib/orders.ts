@@ -6,8 +6,8 @@ import { nanoid, customAlphabet } from 'nanoid'
 import type { Database } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import { DEFAULT_CURRENCY } from '@/lib/constants'
-import type { CurrencyCode } from '@/lib/constants'
-import { calculateTax, calculateGrandTotal } from '@/lib/utils/index'
+import type { CurrencyCode, PaymentMethod } from '@/lib/constants'
+import { calculateTax, calculateGrandTotal, calculateShipping } from '@/lib/utils/index'
 import { formatCents } from './money'
 import { rowsChanged } from 'worker/lib/d1'
 
@@ -69,7 +69,7 @@ async function getOrderConfig(db: Database): Promise<OrderConfig> {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type PaymentMethod = (typeof schema.orders.$inferInsert)['paymentMethod']
+export type { PaymentMethod } from '@/lib/constants'
 
 export interface CreateOrderItem {
   /** sizeOption PK — used to look up price + snapshot data */
@@ -416,7 +416,7 @@ export async function createOrder(
 
   // ── 2b. Shipping — mirrors client's calculateShipping logic ───────────────
   // Free if threshold is set AND subtotal (before discount) meets/exceeds it.
-  const shippingCents = thresholdCents > 0 && subtotalCents >= thresholdCents ? 0 : flatRateCents
+  const shippingCents = calculateShipping(subtotalCents, flatRateCents, thresholdCents)
 
   const taxCents = taxEnabled
     ? calculateTax({ subtotalCents, shippingCents, discountCents, taxRate, taxInclusive, taxBasis })

@@ -19,9 +19,8 @@ import { parseBody } from 'worker/lib/http'
 import { bumpDataVersion } from 'worker/lib/version'
 import { sanitizeHtml } from 'worker/lib/sanitize'
 import type { AdminEnv } from 'worker/lib/access'
-
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'] as const
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024
+import { ALLOWED_IMAGE_TYPES, MAX_IMAGE_BYTES } from '@/lib/constants'
+import { parseTags } from 'worker/lib/blog'
 
 function slugify(title: string): string {
   return title
@@ -31,15 +30,6 @@ function slugify(title: string): string {
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .slice(0, 120)
-}
-
-function parseTags(raw: string): string[] {
-  try {
-    const parsed = JSON.parse(raw)
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
-  }
 }
 
 const app = new Hono<AdminEnv>()

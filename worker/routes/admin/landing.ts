@@ -15,11 +15,8 @@ import { parseBody } from 'worker/lib/http'
 import { sanitizeHtml } from 'worker/lib/sanitize'
 import { bumpDataVersion } from 'worker/lib/version'
 import type { AdminEnv } from 'worker/lib/access'
-import { LANDING_SECTION_KEYS } from '@/lib/constants'
+import { LANDING_SECTION_KEYS, ALLOWED_IMAGE_TYPES, MAX_IMAGE_BYTES } from '@/lib/constants'
 import type { LandingSectionKey } from '@/lib/constants'
-
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'] as const
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024
 
 const app = new Hono<AdminEnv>()
 
