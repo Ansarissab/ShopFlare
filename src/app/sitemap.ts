@@ -1,5 +1,7 @@
 import type { MetadataRoute } from 'next'
-import { POLICY_SLUGS } from '@/lib/constants'
+import { POLICY_SLUGS, DEFAULT_LOCALE } from '@/lib/constants'
+import type { LocaleCode } from '@/lib/constants'
+import { buildLocaleAlternates } from '@/lib/seo/hreflang'
 
 export const revalidate = 3600
 
@@ -27,6 +29,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // When the landing page is enabled, `/` is the marketing page and `/shop` is the catalog.
   let landingEnabled = false
   let faqEnabled = false
+  let enabledLocales: LocaleCode[] = [DEFAULT_LOCALE]
   if (workerUrl) {
     try {
       const cfgRes = await fetch(`${workerUrl}/api/config/store`, { next: { revalidate: 3600 } })
@@ -35,27 +38,55 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           landingEnabled?: boolean
           faqEnabled?: boolean
           faqItems?: unknown[]
+          enabledLocales?: LocaleCode[]
         }
         landingEnabled = cfg.landingEnabled ?? false
         faqEnabled = (cfg.faqEnabled ?? false) && (cfg.faqItems?.length ?? 0) > 0
+        if (cfg.enabledLocales && cfg.enabledLocales.length > 0) {
+          enabledLocales = cfg.enabledLocales
+        }
       }
     } catch {
       // skip — landingEnabled/faqEnabled stay false, /shop and /faq won't be included
     }
   }
 
+  // Helper: build the alternates object for a given path.
+  const alternates = (path: string) =>
+    buildLocaleAlternates(path, enabledLocales, siteUrl).languages
+
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: siteUrl || '/', changeFrequency: 'daily', priority: 1 },
+    {
+      url: siteUrl || '/',
+      changeFrequency: 'daily',
+      priority: 1,
+      alternates: { languages: alternates('/') },
+    },
     ...(landingEnabled
-      ? [{ url: `${siteUrl}/shop`, changeFrequency: 'daily' as const, priority: 0.9 }]
+      ? [
+          {
+            url: `${siteUrl}/shop`,
+            changeFrequency: 'daily' as const,
+            priority: 0.9,
+            alternates: { languages: alternates('/shop') },
+          },
+        ]
       : []),
     ...(faqEnabled
-      ? [{ url: `${siteUrl}/faq`, changeFrequency: 'weekly' as const, priority: 0.5 }]
+      ? [
+          {
+            url: `${siteUrl}/faq`,
+            changeFrequency: 'weekly' as const,
+            priority: 0.5,
+            alternates: { languages: alternates('/faq') },
+          },
+        ]
       : []),
     ...POLICY_SLUGS.map((slug) => ({
       url: `${siteUrl}/policy/${slug}`,
       changeFrequency: 'monthly' as const,
       priority: 0.3,
+      alternates: { languages: alternates(`/policy/${slug}`) },
       ...(policyUpdates[slug] ? { lastModified: new Date(policyUpdates[slug]) } : {}),
     })),
   ]
@@ -76,6 +107,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             url: `${siteUrl}/product/${p.slug}`,
             changeFrequency: 'weekly' as const,
             priority: 0.8,
+            alternates: { languages: alternates(`/product/${p.slug}`) },
             ...(p.updatedAt ? { lastModified: new Date(p.updatedAt) } : {}),
           }))
       }
@@ -103,6 +135,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           url: `${siteUrl}/category/${slug}`,
           changeFrequency: 'weekly' as const,
           priority: 0.6,
+          alternates: { languages: alternates(`/category/${slug}`) },
         }))
       }
     } catch {
@@ -117,11 +150,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       if (res.ok) {
         const data = (await res.json()) as { posts: Array<{ slug: string; publishedAt?: string }> }
         blogRoutes = [
-          { url: `${siteUrl}/blog`, changeFrequency: 'weekly' as const, priority: 0.7 },
+          {
+            url: `${siteUrl}/blog`,
+            changeFrequency: 'weekly' as const,
+            priority: 0.7,
+            alternates: { languages: alternates('/blog') },
+          },
           ...data.posts.map((p) => ({
             url: `${siteUrl}/blog/${p.slug}`,
             changeFrequency: 'weekly' as const,
             priority: 0.5,
+            alternates: { languages: alternates(`/blog/${p.slug}`) },
             ...(p.publishedAt ? { lastModified: new Date(p.publishedAt) } : {}),
           })),
         ]

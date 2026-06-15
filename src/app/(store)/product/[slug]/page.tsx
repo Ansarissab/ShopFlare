@@ -40,6 +40,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     imageUrl: firstImage,
     storeName: config?.storeName,
     mdUrl: `${siteUrl}/product/${slug}.md`,
+    ...(config?.enabledLocales && config.enabledLocales.length > 0
+      ? {
+          localeAlternates: {
+            path: `/product/${slug}`,
+            enabledLocales: config.enabledLocales,
+            baseUrl: siteUrl,
+          },
+        }
+      : {}),
   })
 }
 

@@ -22,6 +22,9 @@ export async function generateMetadata(): Promise<Metadata> {
     description: config?.tagline ?? undefined,
     canonical: `${siteUrl}/`,
     storeName: config?.storeName,
+    ...(config?.enabledLocales && config.enabledLocales.length > 0
+      ? { localeAlternates: { path: '/', enabledLocales: config.enabledLocales, baseUrl: siteUrl } }
+      : {}),
   })
 }
 
