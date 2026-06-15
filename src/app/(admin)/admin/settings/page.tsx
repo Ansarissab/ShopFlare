@@ -37,6 +37,7 @@ import { useStoreConfig } from '@/hooks/useStoreConfig'
 import { DATA_UPDATED_CHANNEL } from '@/hooks/useApiResource'
 import { AnnouncementControls } from './AnnouncementControls'
 import { FaqItemsControls } from './FaqItemsControls'
+import { MarketingControls } from './MarketingControls'
 import { parseFaq } from '@/lib/html'
 import type { FaqItemData } from '@/lib/schemas/config'
 
@@ -83,6 +84,16 @@ export default function AdminSettingsPage() {
   const [blogEnabled, setBlogEnabled] = useState(false)
   const [faqItems, setFaqItems] = useState<FaqItemData[]>([])
 
+  // Marketing / SEO phase 32
+  const [googleSiteVerification, setGoogleSiteVerification] = useState('')
+  const [bingSiteVerification, setBingSiteVerification] = useState('')
+  const [customHeadTags, setCustomHeadTags] = useState('')
+  const [ga4MeasurementId, setGa4MeasurementId] = useState('')
+  const [googleAdsId, setGoogleAdsId] = useState('')
+  const [metaPixelId, setMetaPixelId] = useState('')
+  const [cookieConsentEnabled, setCookieConsentEnabled] = useState(true)
+  const [indexNowKey, setIndexNowKey] = useState('')
+
   // Tax
   const [taxEnabled, setTaxEnabled] = useState(false)
   const [taxRateInput, setTaxRateInput] = useState('0')
@@ -123,6 +134,14 @@ export default function AdminSettingsPage() {
     } else {
       setFaqItems([])
     }
+    setGoogleSiteVerification(config.googleSiteVerification ?? '')
+    setBingSiteVerification(config.bingSiteVerification ?? '')
+    setCustomHeadTags(config.customHeadTags ?? '')
+    setGa4MeasurementId(config.ga4MeasurementId ?? '')
+    setGoogleAdsId(config.googleAdsId ?? '')
+    setMetaPixelId(config.metaPixelId ?? '')
+    setCookieConsentEnabled(config.cookieConsentEnabled ?? true)
+    setIndexNowKey(config.indexNowKey ?? '')
     setContactEmail(config.contactEmail ?? '')
     setCurrency(config.currency)
     setFlatShipping(String(config.flatShippingRateCents))
@@ -224,6 +243,14 @@ export default function AdminSettingsPage() {
         faqEnabled,
         blogEnabled,
         faqItems: faqItems.filter((item) => item.question.trim() && item.answer.trim()),
+        googleSiteVerification: googleSiteVerification.trim() || undefined,
+        bingSiteVerification: bingSiteVerification.trim() || undefined,
+        customHeadTags: customHeadTags.trim() || undefined,
+        ga4MeasurementId: ga4MeasurementId.trim() || undefined,
+        googleAdsId: googleAdsId.trim() || undefined,
+        metaPixelId: metaPixelId.trim() || undefined,
+        cookieConsentEnabled,
+        indexNowKey: indexNowKey.trim() || undefined,
         contactEmail: contactEmail.trim() || undefined,
         currency,
         flatShippingRateCents: Number(flatShipping),
@@ -859,6 +886,33 @@ export default function AdminSettingsPage() {
         </FormField>
         <p className="text-sm text-muted-foreground -mt-2">{t.admin.enableBlogHint}</p>
       </div>
+
+      {/* Marketing / SEO — phase 32 */}
+      <MarketingControls
+        values={{
+          googleSiteVerification,
+          bingSiteVerification,
+          customHeadTags,
+          ga4MeasurementId,
+          googleAdsId,
+          metaPixelId,
+          cookieConsentEnabled,
+          indexNowKey,
+        }}
+        onChange={(key, value) => {
+          const setters: Record<string, (v: never) => void> = {
+            googleSiteVerification: setGoogleSiteVerification,
+            bingSiteVerification: setBingSiteVerification,
+            customHeadTags: setCustomHeadTags,
+            ga4MeasurementId: setGa4MeasurementId,
+            googleAdsId: setGoogleAdsId,
+            metaPixelId: setMetaPixelId,
+            cookieConsentEnabled: setCookieConsentEnabled,
+            indexNowKey: setIndexNowKey,
+          }
+          setters[key]?.(value as never)
+        }}
+      />
 
       {/* Languages */}
       <div className="flex flex-col gap-4 rounded-lg border p-5">
