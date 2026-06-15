@@ -290,3 +290,6 @@ export const LOCALES = {
 export type LocaleCode = keyof typeof LOCALES
 export const SHIPPED_LOCALES = Object.keys(LOCALES) as readonly LocaleCode[]
 export const DEFAULT_LOCALE: LocaleCode = 'en'
+
+// ─── Keyboard shortcuts ───────────────────────────────────────────────────────
+export { STORE_SHORTCUTS, ADMIN_SHORTCUTS, ADMIN_CREATE_ROUTES } from './shortcuts'

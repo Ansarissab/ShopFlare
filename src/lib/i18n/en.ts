@@ -621,6 +621,13 @@ export const en = {
     faqMoveDown: 'Move down',
     faqItemsHelp: 'Add questions and answers shown in the FAQ accordion.',
     faqEmptyState: 'No FAQ items yet. Add your first question.',
+    // global admin search (phase 31)
+    search: {
+      placeholder: 'Search products & orders…',
+      products: 'Products',
+      orders: 'Orders',
+      empty: 'No results',
+    },
   },
   // SEO / LLM discovery settings (phase 21)
   seo: {
@@ -880,6 +887,25 @@ export const en = {
     // back-in-stock push
     restockPushTitle: '{productName} is back in stock!',
     restockPushBody: 'The {size} you wanted is now available.',
+  },
+  shortcuts: {
+    title: 'Keyboard shortcuts',
+    hint: 'Press ? for shortcuts',
+    search: 'Search',
+    cart: 'Open cart',
+    help: 'Show this help',
+    close: 'Close',
+    goOrders: 'Go to orders',
+    goProducts: 'Go to products',
+    goCoupons: 'Go to coupons',
+    goAnalytics: 'Go to analytics',
+    create: 'Create new',
+    listNext: 'Next item',
+    listPrev: 'Previous item',
+    listOpen: 'Open selected',
+    storeGroup: 'Storefront',
+    adminGroup: 'Admin',
+    sequenceHint: 'then',
   },
   // Status page — /status SSR page (Phase 25)
   status: {
