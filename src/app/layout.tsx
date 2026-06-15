@@ -1,3 +1,4 @@
+import type * as React from 'react'
 import type { Metadata } from 'next'
 import {
   Geist,
@@ -15,6 +16,10 @@ import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
 import type { StoreConfig } from '@/lib/types/common'
 import { DEFAULT_LOCALE, LOCALES } from '@/lib/constants'
 import { getLocaleHeader } from '@/lib/i18n/server'
+import { sanitizeHeadTags } from '@/lib/seo/headTags'
+import { ConsentProvider } from '@/lib/consent/ConsentProvider'
+import { MarketingScripts } from '@/components/marketing/MarketingScripts'
+import { CookieConsent } from '@/components/consent/CookieConsent'
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'], display: 'swap' })
 const geistMono = Geist_Mono({
@@ -67,7 +72,16 @@ export async function generateMetadata(): Promise<Metadata> {
       tagline?: string
       logoUrl?: string
       faviconUrl?: string
+      googleSiteVerification?: string
+      bingSiteVerification?: string
     }
+
+    // Site verification — omit empties so no blank tags render.
+    const verificationOther: Record<string, string> = {}
+    if (config.bingSiteVerification) {
+      verificationOther['msvalidate.01'] = config.bingSiteVerification
+    }
+
     return {
       title: {
         default: config.storeName ?? 'ShopFlare',
@@ -82,6 +96,10 @@ export async function generateMetadata(): Promise<Metadata> {
         type: 'website',
       },
       twitter: { card: 'summary', title: config.storeName ?? 'ShopFlare' },
+      verification: {
+        google: config.googleSiteVerification || undefined,
+        ...(Object.keys(verificationOther).length > 0 ? { other: verificationOther } : {}),
+      },
     }
   } catch {
     return {
@@ -121,6 +139,36 @@ const bootScript = [
 
 const workerOrigin = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
 
+// ─── Custom head tag injection ─────────────────────────────────────────────────
+// Parses a sanitizeHeadTags() output (guaranteed to contain only <meta> and
+// <link> tags with safe attributes) into React elements. dangerouslySetInnerHTML
+// is not used here — each tag is rendered as a proper React void element so
+// Next.js App Router can hoist them correctly into <head> at SSR time.
+// The sanitizeHeadTags() call upstream is always the XSS gate.
+function inlineHeadTags(sanitized: string): React.ReactNode {
+  if (!sanitized) return null
+  // TAG_RE matches each <meta ...> or <link ...> tag from sanitizeHeadTags output.
+  const TAG_RE = /<(meta|link)((?:\s+[^>]*)?)>/gi
+  // ATTR_RE is non-global — re-applied per tag string, no lastIndex bleed.
+  const ATTR_RE = /([a-zA-Z][a-zA-Z0-9-]*)="([^"]*)"/g
+  const nodes: React.ReactElement[] = []
+  let tagMatch: RegExpExecArray | null
+  let i = 0
+  while ((tagMatch = TAG_RE.exec(sanitized)) !== null) {
+    const tag = tagMatch[1].toLowerCase() as 'meta' | 'link'
+    const attrStr = tagMatch[2] ?? ''
+    const props: Record<string, string> = {}
+    // Reset lastIndex before each new attrStr so the global /g regex starts fresh.
+    ATTR_RE.lastIndex = 0
+    let attrMatch: RegExpExecArray | null
+    while ((attrMatch = ATTR_RE.exec(attrStr)) !== null) {
+      props[attrMatch[1]] = attrMatch[2]
+    }
+    nodes.push(tag === 'meta' ? <meta key={i++} {...props} /> : <link key={i++} {...props} />)
+  }
+  return nodes.length > 0 ? <>{nodes}</> : null
+}
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
   const config = await fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: 300 })
@@ -151,6 +199,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     ...(isRtl ? [notoNastaliq.variable] : []),
   ].join(' ')
 
+  // Sanitize admin-supplied head tags — always pass through the gate, never raw.
+  const customHead = sanitizeHeadTags(config?.customHeadTags ?? '')
+
+  // hasTags: at least one marketing ID is configured (drives banner + scripts).
+  const hasTags = Boolean(config?.ga4MeasurementId || config?.googleAdsId || config?.metaPixelId)
+
   return (
     <html
       lang={locale}
@@ -163,6 +217,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script dangerouslySetInnerHTML={{ __html: bootScript }} />
         {/* Organization JSON-LD — sitewide entity anchor for structured data */}
         <JsonLd data={org} />
+        {/* Sanitized merchant-supplied custom head tags (meta/link only; scripts stripped).
+            sanitizeHeadTags() is the real XSS gate; only <meta> and <link> survive.
+            Rendered as individual React elements via inlineHeadTags() so they become
+            live <head> children. Never inject config.customHeadTags raw. */}
+        {inlineHeadTags(customHead)}
         {/* Preconnect to worker/CDN origin (logo, product images, API) */}
         {workerOrigin && <link rel="preconnect" href={workerOrigin} />}
         {workerOrigin && <link rel="dns-prefetch" href={workerOrigin} />}
@@ -178,7 +237,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       {/* suppressHydrationWarning: browser extensions inject attrs before React hydrates */}
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
-        <ServiceWorkerProvider>{children}</ServiceWorkerProvider>
+        <ConsentProvider>
+          <ServiceWorkerProvider>{children}</ServiceWorkerProvider>
+          <MarketingScripts
+            ga4Id={config?.ga4MeasurementId ?? ''}
+            googleAdsId={config?.googleAdsId ?? ''}
+            metaPixelId={config?.metaPixelId ?? ''}
+            cookieConsentEnabled={config?.cookieConsentEnabled ?? true}
+          />
+          <CookieConsent enabled={config?.cookieConsentEnabled ?? true} hasTags={hasTags} />
+        </ConsentProvider>
       </body>
     </html>
   )
