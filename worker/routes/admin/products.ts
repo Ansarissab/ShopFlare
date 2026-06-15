@@ -23,6 +23,7 @@ import { MAX_IMAGES_PER_VARIANT, MAX_IMAGE_BYTES, ALLOWED_IMAGE_TYPES } from '@/
 import type { AdminEnv } from 'worker/lib/access'
 import { dispatchRestockAlerts } from 'worker/lib/notify'
 import { bumpDataVersion } from 'worker/lib/version'
+import { pingIndexNow } from 'worker/lib/indexnow'
 
 const app = new Hono<AdminEnv>()
 
@@ -79,6 +80,7 @@ app.post('/', async (c) => {
     db.select().from(schema.products).where(eq(schema.products.id, id)).get(),
     bumpDataVersion(db),
   ])
+  c.executionCtx.waitUntil(pingIndexNow(db, c.env, [`/product/${id}`]))
   return c.json(product, 201)
 })
 
@@ -120,6 +122,7 @@ app.put('/:id', async (c) => {
     db.select().from(schema.products).where(eq(schema.products.id, id)).get(),
     bumpDataVersion(db),
   ])
+  c.executionCtx.waitUntil(pingIndexNow(db, c.env, [`/product/${id}`]))
   return c.json(updated)
 })
 
@@ -142,6 +145,7 @@ app.delete('/:id', async (c) => {
     .where(eq(schema.products.id, id))
 
   await bumpDataVersion(db)
+  c.executionCtx.waitUntil(pingIndexNow(db, c.env, [`/product/${id}`]))
   return c.json({ ok: true })
 })
 
