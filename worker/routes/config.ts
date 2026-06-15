@@ -146,6 +146,15 @@ app.get('/store', async (c) => {
     announcementEnd: kv['announcementEnd'] || undefined,
     announcementVersion:
       kv['announcementVersion'] !== undefined ? Number(kv['announcementVersion']) : undefined,
+    // Marketing / SEO fields (phase 32). Strings default to ''; boolean defaults true.
+    googleSiteVerification: kv['googleSiteVerification'] ?? '',
+    bingSiteVerification: kv['bingSiteVerification'] ?? '',
+    customHeadTags: kv['customHeadTags'] ?? '',
+    ga4MeasurementId: kv['ga4MeasurementId'] ?? '',
+    googleAdsId: kv['googleAdsId'] ?? '',
+    metaPixelId: kv['metaPixelId'] ?? '',
+    cookieConsentEnabled: kv['cookieConsentEnabled'] !== 'false',
+    indexNowKey: kv['indexNowKey'] ?? '',
   }
 
   const validation = storeConfigSchema.safeParse(assembled)

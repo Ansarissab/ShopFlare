@@ -291,5 +291,44 @@ export type LocaleCode = keyof typeof LOCALES
 export const SHIPPED_LOCALES = Object.keys(LOCALES) as readonly LocaleCode[]
 export const DEFAULT_LOCALE: LocaleCode = 'en'
 
+// ─── Marketing / SEO ─────────────────────────────────────────────────────────
+
+/** Cookie name that stores the visitor's consent choice (analytics/marketing). */
+export const CONSENT_COOKIE_NAME = 'sf_consent'
+
+/**
+ * Consent schema version. Bumping this number invalidates any stored consent
+ * cookie so visitors are re-prompted after a material policy change.
+ */
+export const CONSENT_VERSION = 1
+
+/** Path the frontend worker serves the IndexNow key file from. */
+export const INDEXNOW_KEY_PATH = '/indexnow-key.txt'
+
+/** IndexNow submission endpoint. */
+export const INDEXNOW_ENDPOINT = 'https://api.indexnow.org/indexnow'
+
+/**
+ * HTML tag names allowed in admin-supplied custom head tags.
+ * Referenced by sanitizeHeadTags (src/lib/seo/headTags.ts) — kept here for DRY.
+ */
+export const ALLOWED_HEAD_TAG_NAMES = ['meta', 'link'] as const
+
+/**
+ * <link rel> token values that must be entirely dropped by sanitizeHeadTags.
+ * External stylesheet/module loading is a clickjacking/data-exfil surface.
+ * Allowed rels (canonical, alternate, icon, preconnect, dns-prefetch, me, manifest)
+ * are NOT in this set and pass through.
+ */
+export const DENY_LINK_REL = new Set(['stylesheet', 'import'])
+
+// ─── Marketing ID patterns ────────────────────────────────────────────────────
+// Single source of truth for marketing platform ID formats.
+// Used by: lib/schemas/config.ts (validation) + components/marketing/MarketingScripts.tsx (sink guard).
+// Note: these match a NON-EMPTY valid ID; schemas additionally allow empty string.
+export const GA4_ID_RE = /^G-[A-Z0-9]+$/
+export const GOOGLE_ADS_ID_RE = /^AW-[A-Z0-9]+$/
+export const META_PIXEL_ID_RE = /^[0-9]+$/
+
 // ─── Keyboard shortcuts ───────────────────────────────────────────────────────
 export { STORE_SHORTCUTS, ADMIN_SHORTCUTS, ADMIN_CREATE_ROUTES } from './shortcuts'

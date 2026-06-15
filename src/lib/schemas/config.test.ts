@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { updateConfigSchema } from './admin'
-import { announcementMessageSchema, storeConfigSchema } from './config'
+import { announcementMessageSchema, storeConfigSchema, marketingSchema } from './config'
 import {
   MIN_PRODUCT_PAGE_SIZE,
   MAX_PRODUCT_PAGE_SIZE,
@@ -145,6 +145,107 @@ describe('announcementMessageSchema · link XSS guard', () => {
   })
 })
 
+// ─── marketingSchema ─────────────────────────────────────────────────────────
+
+describe('marketingSchema · GA4 Measurement ID', () => {
+  it('accepts a valid GA4 ID', () => {
+    expect(marketingSchema.safeParse({ ga4MeasurementId: 'G-ABC123' }).success).toBe(true)
+  })
+
+  it('accepts an empty GA4 ID (disabled)', () => {
+    expect(marketingSchema.safeParse({ ga4MeasurementId: '' }).success).toBe(true)
+  })
+
+  it('rejects a malformed GA4 ID', () => {
+    expect(marketingSchema.safeParse({ ga4MeasurementId: 'UA-12345' }).success).toBe(false)
+    expect(marketingSchema.safeParse({ ga4MeasurementId: 'G-' }).success).toBe(false)
+    expect(marketingSchema.safeParse({ ga4MeasurementId: 'G-abc' }).success).toBe(false)
+  })
+})
+
+describe('marketingSchema · Google Ads ID', () => {
+  it('accepts a valid Ads ID', () => {
+    expect(marketingSchema.safeParse({ googleAdsId: 'AW-1234567890' }).success).toBe(true)
+  })
+
+  it('accepts an empty Ads ID (disabled)', () => {
+    expect(marketingSchema.safeParse({ googleAdsId: '' }).success).toBe(true)
+  })
+
+  it('rejects a malformed Ads ID', () => {
+    expect(marketingSchema.safeParse({ googleAdsId: 'AW-' }).success).toBe(false)
+    expect(marketingSchema.safeParse({ googleAdsId: 'UA-12345' }).success).toBe(false)
+  })
+})
+
+describe('marketingSchema · Meta Pixel ID', () => {
+  it('accepts a numeric Pixel ID', () => {
+    expect(marketingSchema.safeParse({ metaPixelId: '1234567890' }).success).toBe(true)
+  })
+
+  it('accepts an empty Pixel ID (disabled)', () => {
+    expect(marketingSchema.safeParse({ metaPixelId: '' }).success).toBe(true)
+  })
+
+  it('rejects a non-numeric Pixel ID', () => {
+    expect(marketingSchema.safeParse({ metaPixelId: 'abc123' }).success).toBe(false)
+    expect(marketingSchema.safeParse({ metaPixelId: 'PX-123' }).success).toBe(false)
+  })
+})
+
+describe('marketingSchema · defaults', () => {
+  it('defaults cookieConsentEnabled to true', () => {
+    const r = marketingSchema.safeParse({})
+    expect(r.success).toBe(true)
+    if (r.success) expect(r.data.cookieConsentEnabled).toBe(true)
+  })
+
+  it('defaults string fields to empty string', () => {
+    const r = marketingSchema.safeParse({})
+    expect(r.success).toBe(true)
+    if (r.success) {
+      expect(r.data.googleSiteVerification).toBe('')
+      expect(r.data.bingSiteVerification).toBe('')
+      expect(r.data.customHeadTags).toBe('')
+      expect(r.data.ga4MeasurementId).toBe('')
+      expect(r.data.googleAdsId).toBe('')
+      expect(r.data.metaPixelId).toBe('')
+      expect(r.data.indexNowKey).toBe('')
+    }
+  })
+})
+
+describe('updateConfigSchema · customHeadTags XSS guard', () => {
+  it('rejects customHeadTags containing <script', () => {
+    const r = updateConfigSchema.safeParse({
+      customHeadTags: '<script>alert(1)</script>',
+    })
+    expect(r.success).toBe(false)
+    if (!r.success) {
+      expect(r.error.issues.some((i) => i.path.includes('customHeadTags'))).toBe(true)
+    }
+  })
+
+  it('rejects customHeadTags containing on*= event handler', () => {
+    const r = updateConfigSchema.safeParse({
+      customHeadTags: '<meta name="x" onerror="alert(1)">',
+    })
+    expect(r.success).toBe(false)
+  })
+
+  it('accepts valid customHeadTags (meta/link only)', () => {
+    const r = updateConfigSchema.safeParse({
+      customHeadTags:
+        '<meta name="description" content="ok">\n<link rel="canonical" href="https://example.com/">',
+    })
+    expect(r.success).toBe(true)
+  })
+
+  it('accepts empty customHeadTags', () => {
+    expect(updateConfigSchema.safeParse({ customHeadTags: '' }).success).toBe(true)
+  })
+})
+
 // ─── storeConfigSchema GET-assembly smoke ─────────────────────────────────────
 // The assembled defaults from worker/routes/config.ts must parse clean against
 // storeConfigSchema (no refinements on it — these are the full response fields).
@@ -177,6 +278,15 @@ describe('storeConfigSchema · default assembly round-trip', () => {
       aiTrainingAllowed: true,
       enabledLocales: ['en'],
       defaultLocale: 'en',
+      // Marketing fields (phase 32) — defaults emitted by worker/routes/config.ts
+      googleSiteVerification: '',
+      bingSiteVerification: '',
+      customHeadTags: '',
+      ga4MeasurementId: '',
+      googleAdsId: '',
+      metaPixelId: '',
+      cookieConsentEnabled: true,
+      indexNowKey: '',
     })
     expect(r.success).toBe(true)
   })

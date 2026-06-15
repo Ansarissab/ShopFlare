@@ -15,7 +15,11 @@ import {
   SHIPPED_LOCALES,
   ANNOUNCEMENT_TYPES,
   MAX_ANNOUNCEMENT_MESSAGES,
+  GA4_ID_RE,
+  GOOGLE_ADS_ID_RE,
+  META_PIXEL_ID_RE,
 } from '@/lib/constants'
+
 import { emailField, phoneField, hexColorField } from './base'
 
 // ─── FAQ item schema (phase 30) ───────────────────────────────────────────────
@@ -105,6 +109,44 @@ export const announcementConfigSchema = z.object({
 })
 export type AnnouncementConfigData = z.infer<typeof announcementConfigSchema>
 
+// ─── Marketing ───────────────────────────────────────────────────────────────
+// customHeadTags: the refine is an early-feedback gate for admin forms (reject
+// obvious script injection). The real render-time gate is sanitizeHeadTags()
+// in src/lib/seo/headTags.ts — always call that in layout.tsx.
+//
+// Architecture note: marketingSchema is the raw ZodObject so it can be .merge()'d
+// onto storeConfigSchema. The customHeadTags XSS refine lives on storeConfigSchema
+// itself (after merge) following the same pattern as the locale invariants on
+// updateConfigSchema in admin.ts.
+
+export const marketingSchema = z.object({
+  googleSiteVerification: z.string().max(200).default(''),
+  bingSiteVerification: z.string().max(200).default(''),
+  customHeadTags: z.string().max(4000).default(''),
+  ga4MeasurementId: z
+    .string()
+    .max(32)
+    .refine((v) => v === '' || GA4_ID_RE.test(v), 'Must be a GA4 ID like G-XXXX')
+    .default(''),
+  googleAdsId: z
+    .string()
+    .max(32)
+    .refine((v) => v === '' || GOOGLE_ADS_ID_RE.test(v), 'Must be a Google Ads ID like AW-XXXX')
+    .default(''),
+  metaPixelId: z
+    .string()
+    .max(32)
+    .refine((v) => v === '' || META_PIXEL_ID_RE.test(v), 'Meta Pixel ID is numeric')
+    .default(''),
+  cookieConsentEnabled: z.boolean().default(true),
+  indexNowKey: z
+    .string()
+    .regex(/^[a-zA-Z0-9-]{0,128}$/, 'IndexNow key is hex/alphanumeric')
+    .default(''),
+})
+
+export type MarketingConfig = z.infer<typeof marketingSchema>
+
 export const storeConfigSchema = z
   .object({
     storeName: z.string().min(1),
@@ -140,5 +182,6 @@ export const storeConfigSchema = z
   .merge(taxConfigSchema)
   .merge(featureFlagsSchema)
   .merge(announcementConfigSchema)
+  .merge(marketingSchema)
 
 export type StoreConfigData = z.infer<typeof storeConfigSchema>

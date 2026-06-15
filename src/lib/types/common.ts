@@ -2,6 +2,15 @@ import type * as React from 'react'
 import type { CurrencyCode } from '@/lib/constants'
 import type { StoreConfigData } from '@/lib/schemas'
 
+/**
+ * Visitor's cookie-consent value.
+ * - null  — not yet resolved (SSR / pre-hydration). Marketing scripts must NOT
+ *           fire until this resolves to true.
+ * - true  — visitor accepted cookies for the current CONSENT_VERSION.
+ * - false — visitor declined.
+ */
+export type ConsentValue = boolean | null
+
 export type StoreConfig = Omit<StoreConfigData, 'currency'> & {
   currency: CurrencyCode
 }

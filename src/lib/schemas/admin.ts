@@ -146,6 +146,17 @@ export const updateConfigSchema = storeConfigSchema
       path: ['defaultLocale'],
     },
   )
+  // Early-feedback XSS guard for admin-supplied custom head tags.
+  // The real render-time gate is sanitizeHeadTags() in src/lib/seo/headTags.ts.
+  .refine(
+    (d) =>
+      !d.customHeadTags ||
+      (!/<script/i.test(d.customHeadTags) && !/\bon[a-z]+\s*=/i.test(d.customHeadTags)),
+    {
+      message: 'customHeadTags must not contain <script or event handlers (on*=)',
+      path: ['customHeadTags'],
+    },
+  )
 
 // ─── Category ──────────────────────────────────────────────────────────────────
 export const createCategorySchema = z.object({
