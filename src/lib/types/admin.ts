@@ -49,6 +49,15 @@ export interface AdminOrderDetail {
   shippingAddress: Record<string, string> | null
 }
 
+export interface OrderLineItemProps {
+  imageUrl?: string | null
+  productName: string
+  variantLabel: string
+  size: string
+  quantity: number
+  priceCents: number
+}
+
 export interface AdminOrdersResponse {
   orders: AdminOrder[]
   total: number
