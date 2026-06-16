@@ -58,6 +58,13 @@ export function staggerDelay(index: number): string {
   return `${Math.min(index * 60, MAX_STAGGER_MS)}ms`
 }
 
+// ─── Price / money ────────────────────────────────────────────────────────────
+// Rule 6: any number representing money → monospaced + tabular digits (no digit jitter).
+// Compose with your own text-size / font-weight / color classes via cn().
+export const price = {
+  mono: 'font-mono tabular-nums',
+} as const
+
 // PWA-specific safe-area utilities (combine with Tailwind via cn())
 export const safeArea = {
   top: 'pt-[var(--safe-top)]',

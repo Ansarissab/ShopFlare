@@ -9,8 +9,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useApiResource } from '@/hooks/useApiResource'
 import { useT } from '@/lib/i18n/Provider'
 import { filterSearchItems, buildSearchFuse } from '@/lib/search/productSearch'
+import { cn } from '@/lib/utils'
 import { formatPrice } from '@/lib/utils/index'
 import { SEARCH_DEBOUNCE_MS } from '@/lib/constants'
+import { price as priceStyle } from '@/lib/styles'
 import type {
   GlobalSearchOverlayProps,
   SearchIndexResponse,
@@ -244,7 +246,7 @@ function SearchResultRow({ item, onClick }: SearchResultRowProps) {
 
         {/* Price */}
         {item.priceCents > 0 && (
-          <p className="shrink-0 font-mono text-sm font-medium text-foreground tabular-nums">
+          <p className={cn('shrink-0 text-sm font-medium text-foreground', priceStyle.mono)}>
             {formatPrice(item.priceCents)}
           </p>
         )}

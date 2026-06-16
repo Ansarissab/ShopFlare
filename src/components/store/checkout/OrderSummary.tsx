@@ -8,6 +8,8 @@ import {
   calculateTax,
   calculateGrandTotal,
 } from '@/lib/utils/index'
+import { cn } from '@/lib/utils'
+import { price as priceStyle } from '@/lib/styles'
 import { useCart, useCartSubtotalCents } from '@/hooks/useCart'
 import { useStoreConfig } from '@/hooks/useStoreConfig'
 import { OrderLineItem } from '@/components/common/OrderLineItem'
@@ -64,11 +66,13 @@ export function OrderSummary() {
       <div className="flex flex-col gap-1.5 text-sm">
         <div className="flex justify-between">
           <span className="text-muted-foreground">{t.cart.subtotal}</span>
-          <span>{formatPrice(subtotalCents)}</span>
+          <span className={priceStyle.mono}>{formatPrice(subtotalCents)}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-muted-foreground">{t.cart.shipping}</span>
-          <span>{shippingCents === 0 ? t.cart.shippingFree : formatPrice(shippingCents)}</span>
+          <span className={priceStyle.mono}>
+            {shippingCents === 0 ? t.cart.shippingFree : formatPrice(shippingCents)}
+          </span>
         </div>
         {taxEnabled && taxCents > 0 && (
           <div className="flex justify-between">
@@ -77,7 +81,9 @@ export function OrderSummary() {
                 ? t.cart.taxIncluded.replace('{name}', taxName)
                 : t.cart.taxRateLabel.replace('{name}', taxName).replace('{rate}', String(taxRate))}
             </span>
-            <span className={taxInclusive ? 'text-xs text-muted-foreground' : ''}>
+            <span
+              className={cn(priceStyle.mono, taxInclusive ? 'text-xs text-muted-foreground' : '')}
+            >
               {formatPrice(taxCents)}
             </span>
           </div>
@@ -85,13 +91,13 @@ export function OrderSummary() {
         {discountCents > 0 && (
           <div className="flex justify-between text-success">
             <span>{t.cart.couponApplied}</span>
-            <span>-{formatPrice(discountCents)}</span>
+            <span className={priceStyle.mono}>-{formatPrice(discountCents)}</span>
           </div>
         )}
         <Separator />
         <div className="flex justify-between font-semibold">
           <span>{t.cart.total}</span>
-          <span>{formatPrice(totalCents)}</span>
+          <span className={priceStyle.mono}>{formatPrice(totalCents)}</span>
         </div>
       </div>
     </div>

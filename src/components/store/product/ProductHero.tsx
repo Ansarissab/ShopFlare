@@ -5,6 +5,7 @@ import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { formatPrice, getPriceRange } from '@/lib/utils/index'
+import { price as priceStyle } from '@/lib/styles'
 import { useT } from '@/lib/i18n/Provider'
 import { ImageCarousel } from '@/components/store/product/ImageCarousel'
 import { VariantSelector } from '@/components/store/product/VariantSelector'
@@ -93,7 +94,7 @@ export function ProductHero({
 
         {/* Price — Geist Mono, prominent */}
         {priceLabel && (
-          <p className="font-mono text-2xl font-medium text-foreground tabular-nums">
+          <p className={cn('text-2xl font-medium text-foreground', priceStyle.mono)}>
             {priceLabel}
           </p>
         )}
