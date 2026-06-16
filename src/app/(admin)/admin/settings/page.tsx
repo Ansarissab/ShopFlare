@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
 import { FormField } from '@/components/common/FormField'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
@@ -633,12 +634,10 @@ export default function AdminSettingsPage() {
           help={t.tooltips.settings.taxEnabled}
         >
           <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
+            <Checkbox
               id="t-enabled"
               checked={taxEnabled}
-              onChange={(e) => setTaxEnabled(e.target.checked)}
-              className="h-4 w-4 cursor-pointer rounded border"
+              onCheckedChange={(val) => setTaxEnabled(val === true)}
             />
             <span className="text-xs text-muted-foreground">{t.admin.taxEnabledHint}</span>
           </div>
@@ -705,12 +704,10 @@ export default function AdminSettingsPage() {
                 help={t.tooltips.settings.taxInclusive}
               >
                 <div className="flex items-center gap-2 pt-1">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     id="t-inclusive"
                     checked={taxInclusive}
-                    onChange={(e) => setTaxInclusive(e.target.checked)}
-                    className="h-4 w-4 cursor-pointer rounded border"
+                    onCheckedChange={(val) => setTaxInclusive(val === true)}
                   />
                 </div>
               </FormField>
@@ -772,7 +769,7 @@ export default function AdminSettingsPage() {
 
       {/* Identity */}
       <div className="flex flex-col gap-4 rounded-lg border p-5">
-        <h2 className="text-sm font-semibold">Identity</h2>
+        <h2 className="text-sm font-semibold">{t.admin.sectionIdentity}</h2>
         <FormField label={t.admin.storeName} htmlFor="s-name">
           <Input id="s-name" value={storeName} onChange={(e) => setStoreName(e.target.value)} />
         </FormField>
@@ -783,7 +780,7 @@ export default function AdminSettingsPage() {
 
       {/* Contact */}
       <div className="flex flex-col gap-4 rounded-lg border p-5">
-        <h2 className="text-sm font-semibold">Contact</h2>
+        <h2 className="text-sm font-semibold">{t.admin.sectionContact}</h2>
         <FormField label={t.admin.whatsappNumber} htmlFor="s-wa">
           <Input
             id="s-wa"
@@ -795,24 +792,20 @@ export default function AdminSettingsPage() {
         </FormField>
         <FormField label={t.admin.enableWhatsApp} htmlFor="s-wa-enabled">
           <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
+            <Checkbox
               id="s-wa-enabled"
               checked={whatsappEnabled}
-              onChange={(e) => setWhatsappEnabled(e.target.checked)}
-              className="h-4 w-4 cursor-pointer rounded border"
+              onCheckedChange={(val) => setWhatsappEnabled(val === true)}
             />
             <span className="text-xs text-muted-foreground">{t.admin.enableWhatsAppHint}</span>
           </div>
         </FormField>
         <FormField label={t.admin.enableReviews} htmlFor="s-reviews-enabled">
           <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
+            <Checkbox
               id="s-reviews-enabled"
               checked={reviewsEnabled}
-              onChange={(e) => setReviewsEnabled(e.target.checked)}
-              className="h-4 w-4 cursor-pointer rounded border"
+              onCheckedChange={(val) => setReviewsEnabled(val === true)}
             />
             <span className="text-xs text-muted-foreground">{t.admin.enableReviewsHint}</span>
           </div>
@@ -830,17 +823,15 @@ export default function AdminSettingsPage() {
       {/* SEO / LLM Discovery */}
       <div className="flex flex-col gap-4 rounded-lg border p-5">
         <div className="flex flex-col gap-1">
-          <h2 className="text-sm font-semibold">SEO / LLM Discovery</h2>
+          <h2 className="text-sm font-semibold">{t.admin.sectionSeoLlm}</h2>
         </div>
 
         <FormField label={t.seo.llmDiscoveryLabel} htmlFor="s-llm-discovery">
           <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
+            <Checkbox
               id="s-llm-discovery"
               checked={llmDiscoveryEnabled}
-              onChange={(e) => setLlmDiscoveryEnabled(e.target.checked)}
-              className="h-4 w-4 cursor-pointer rounded border"
+              onCheckedChange={(val) => setLlmDiscoveryEnabled(val === true)}
             />
             <span className="text-xs text-muted-foreground">{t.seo.llmDiscoveryHelp}</span>
           </div>
@@ -848,12 +839,10 @@ export default function AdminSettingsPage() {
 
         <FormField label={t.seo.aiTrainingLabel} htmlFor="s-ai-training">
           <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
+            <Checkbox
               id="s-ai-training"
               checked={aiTrainingAllowed}
-              onChange={(e) => setAiTrainingAllowed(e.target.checked)}
-              className="h-4 w-4 cursor-pointer rounded border"
+              onCheckedChange={(val) => setAiTrainingAllowed(val === true)}
             />
             <span className="text-xs text-muted-foreground">{t.seo.aiTrainingHelp}</span>
           </div>
@@ -861,12 +850,10 @@ export default function AdminSettingsPage() {
 
         <FormField label={t.seo.faqEnabledLabel} htmlFor="s-faq-enabled">
           <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
+            <Checkbox
               id="s-faq-enabled"
               checked={faqEnabled}
-              onChange={(e) => setFaqEnabled(e.target.checked)}
-              className="h-4 w-4 cursor-pointer rounded border"
+              onCheckedChange={(val) => setFaqEnabled(val === true)}
             />
           </div>
         </FormField>
@@ -875,12 +862,10 @@ export default function AdminSettingsPage() {
 
         <FormField label={t.admin.enableBlog} htmlFor="s-blog-enabled">
           <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
+            <Checkbox
               id="s-blog-enabled"
               checked={blogEnabled}
-              onChange={(e) => setBlogEnabled(e.target.checked)}
-              className="h-4 w-4 rounded border-border"
+              onCheckedChange={(val) => setBlogEnabled(val === true)}
             />
           </div>
         </FormField>
@@ -928,13 +913,12 @@ export default function AdminSettingsPage() {
               const checked = isEn || enabledLocales.includes(loc)
               return (
                 <label key={loc} className="flex items-center gap-2 text-sm cursor-pointer">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={checked}
                     disabled={isEn}
-                    onChange={(e) => {
+                    onCheckedChange={(val) => {
                       if (isEn) return
-                      if (e.target.checked) {
+                      if (val === true) {
                         setEnabledLocales((prev) => [...prev, loc])
                       } else {
                         const next = enabledLocales.filter((l) => l !== loc)
@@ -943,7 +927,6 @@ export default function AdminSettingsPage() {
                         if (defaultLocale === loc) setDefaultLocale('en')
                       }
                     }}
-                    className="h-4 w-4 cursor-pointer rounded border disabled:opacity-50"
                   />
                   {LOCALES[loc].label}
                 </label>
@@ -976,7 +959,7 @@ export default function AdminSettingsPage() {
 
       {/* Payments & Shipping */}
       <div className="flex flex-col gap-4 rounded-lg border p-5">
-        <h2 className="text-sm font-semibold">Payments &amp; Shipping</h2>
+        <h2 className="text-sm font-semibold">{t.admin.sectionPaymentsShipping}</h2>
         <FormField
           label={t.admin.currency}
           htmlFor="s-currency"
