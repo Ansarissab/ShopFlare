@@ -50,6 +50,9 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   turbopack: {},
+  // Allow cross-origin dev requests from any Tailscale tunnel host (HTTPS
+  // page-speed testing over the tailnet). Wildcard covers every *.ts.net node.
+  allowedDevOrigins: ['*.ts.net'],
   images: {
     unoptimized: true,
     remotePatterns: [{ protocol: 'https', hostname: '**' }],
