@@ -1,6 +1,8 @@
 # Phase 34 — Magnetic design pass (interactive · modern · anti-slop)
 
-Status: Proposed. Planned 2026-06-12. Standalone track (not part of the 27–33 batch). Builds
+Status: Done 2026-06-16 (branch `design/magnetic`, full `pnpm verify` green, not pushed). Before/after:
+after-state screenshots captured locally; the `pre-phase-34` tag preserves the before-state.
+Planned 2026-06-12. Standalone track (not part of the 27–33 batch). Builds
 directly on the shipped premium-editorial system (see [DESIGN.md](../../../DESIGN.md)): Instrument
 Serif + Geist, warm-paper neutrals + oxidized-copper accent, editorial image-forward product cards,
 product-page dossier, poster landing hero, WCAG-AA, full gate green.
