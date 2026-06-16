@@ -740,7 +740,8 @@ export const ur: Dictionary = {
       subtext: 'Short supporting text shown beneath the heading.',
       bodyHtml: 'Rich-text body — written in the editor below.',
       ctaText: 'Button label.',
-      ctaHref: 'Where the button links. Use a path like /shop or a full URL.',
+      ctaHref:
+        'Where the button links. Use /shop for the full catalog, /category/<slug> for a specific category (e.g. /category/accessories), or a full URL.',
       imageR2Key: 'Section image.',
     },
   },
