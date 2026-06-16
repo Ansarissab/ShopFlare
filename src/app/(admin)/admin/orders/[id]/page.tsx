@@ -101,7 +101,7 @@ export default function AdminOrderDetailPage() {
         >
           <ArrowLeft className="size-4" />
         </Link>
-        <h1 className="text-xl font-bold tracking-tight">
+        <h1 className="text-xl font-semibold tracking-tight">
           {t.admin.orderDetail} — {order.orderNumber}
         </h1>
         <Badge variant="secondary" className="capitalize ml-auto">

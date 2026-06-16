@@ -54,28 +54,35 @@ function ProductStatsPanel({ productId }: { productId: string }) {
         </div>
       ) : stats ? (
         <>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div className="rounded-lg border p-3">
-              <p className="text-xs text-muted-foreground">{t.admin.analyticsUnitsSold}</p>
-              <p className="text-base font-semibold">{stats.unitsSold.toLocaleString()}</p>
+          {/* Flat stat strip — no nested cards (DESIGN Rule 5) */}
+          <dl className="grid grid-cols-2 divide-x divide-y sm:grid-cols-4 sm:divide-y-0 border rounded-lg overflow-hidden">
+            <div className="flex flex-col gap-0.5 px-4 py-3">
+              <dt className="text-xs text-muted-foreground">{t.admin.analyticsUnitsSold}</dt>
+              <dd className="text-base font-semibold font-geist-mono">
+                {stats.unitsSold.toLocaleString()}
+              </dd>
             </div>
-            <div className="rounded-lg border p-3">
-              <p className="text-xs text-muted-foreground">{t.admin.analyticsOrders}</p>
-              <p className="text-base font-semibold">{stats.orders.toLocaleString()}</p>
+            <div className="flex flex-col gap-0.5 px-4 py-3">
+              <dt className="text-xs text-muted-foreground">{t.admin.analyticsOrders}</dt>
+              <dd className="text-base font-semibold font-geist-mono">
+                {stats.orders.toLocaleString()}
+              </dd>
             </div>
-            <div className="rounded-lg border p-3">
-              <p className="text-xs text-muted-foreground">{t.admin.totalRevenue}</p>
-              <p className="text-base font-semibold">{formatPrice(stats.revenueCents)}</p>
+            <div className="flex flex-col gap-0.5 px-4 py-3">
+              <dt className="text-xs text-muted-foreground">{t.admin.totalRevenue}</dt>
+              <dd className="text-base font-semibold font-geist-mono">
+                {formatPrice(stats.revenueCents)}
+              </dd>
             </div>
-            <div className="rounded-lg border p-3">
-              <p className="text-xs text-muted-foreground">{t.admin.analyticsLastSold}</p>
-              <p className="text-base font-semibold">
+            <div className="flex flex-col gap-0.5 px-4 py-3">
+              <dt className="text-xs text-muted-foreground">{t.admin.analyticsLastSold}</dt>
+              <dd className="text-base font-semibold">
                 {stats.lastSoldAt
                   ? new Date(stats.lastSoldAt).toLocaleDateString()
                   : t.admin.analyticsNeverSold}
-              </p>
+              </dd>
             </div>
-          </div>
+          </dl>
 
           {stats.affinityPartners.length > 0 && (
             <div className="flex flex-col gap-2">

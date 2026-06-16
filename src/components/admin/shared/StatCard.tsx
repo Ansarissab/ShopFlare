@@ -1,9 +1,10 @@
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { HelpTip } from '@/components/common/HelpTip'
+import { cn } from '@/lib/utils'
 import type { AdminStatCardProps } from '@/lib/types/admin'
 
-export function StatCard({ label, value, sub, href, help }: AdminStatCardProps) {
+export function StatCard({ label, value, sub, href, help, mono }: AdminStatCardProps) {
   // A help icon is a button; nesting it inside the card-wide <Link> (href cards)
   // would be invalid HTML, so only render the tooltip on non-link cards.
   const content = (
@@ -15,7 +16,14 @@ export function StatCard({ label, value, sub, href, help }: AdminStatCardProps) 
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-2xl sm:text-3xl font-bold tracking-tight">{value}</p>
+        <p
+          className={cn(
+            'text-2xl sm:text-3xl font-semibold tracking-tight',
+            mono && 'font-geist-mono',
+          )}
+        >
+          {value}
+        </p>
         {sub && <p className="mt-0.5 text-xs text-muted-foreground">{sub}</p>}
       </CardContent>
     </Card>

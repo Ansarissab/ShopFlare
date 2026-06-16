@@ -880,7 +880,7 @@ export default function AdminSettingsPage() {
               id="s-blog-enabled"
               checked={blogEnabled}
               onChange={(e) => setBlogEnabled(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300"
+              className="h-4 w-4 rounded border-border"
             />
           </div>
         </FormField>

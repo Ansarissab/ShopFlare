@@ -100,6 +100,8 @@ export interface AdminStatCardProps {
   href?: string
   /** Optional explanatory tooltip shown beside the label via HelpTip. */
   help?: string
+  /** Render the value in monospace (default true for numeric/money values). */
+  mono?: boolean
 }
 
 export interface CouponsResponse {
