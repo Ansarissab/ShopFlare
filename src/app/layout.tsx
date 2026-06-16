@@ -17,6 +17,7 @@ import type { StoreConfig } from '@/lib/types/common'
 import { DEFAULT_LOCALE, LOCALES } from '@/lib/constants'
 import { getLocaleHeader } from '@/lib/i18n/server'
 import { sanitizeHeadTags } from '@/lib/seo/headTags'
+import { resolveSiteUrl } from '@/lib/seo/site-url'
 import { ConsentProvider } from '@/lib/consent/ConsentProvider'
 import { MarketingScripts } from '@/components/marketing/MarketingScripts'
 import { CookieConsent } from '@/components/consent/CookieConsent'
@@ -63,6 +64,11 @@ const notoNastaliq = Noto_Nastaliq_Urdu({
 // Dynamic store metadata — cached 5 min, fails gracefully when worker is unavailable.
 export async function generateMetadata(): Promise<Metadata> {
   const workerUrl = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
+  // Resolve absolute site origin so metadataBase is always an absolute URL,
+  // which causes Next.js to auto-absolutize all relative canonical/alternate hrefs.
+  const siteUrl = await resolveSiteUrl()
+  const metadataBase = siteUrl ? new URL(siteUrl) : undefined
+
   try {
     if (!workerUrl) throw new Error('no worker url')
     const res = await fetch(`${workerUrl}/api/config/store`, { next: { revalidate: 300 } })
@@ -83,6 +89,7 @@ export async function generateMetadata(): Promise<Metadata> {
     }
 
     return {
+      ...(metadataBase ? { metadataBase } : {}),
       title: {
         default: config.storeName ?? 'ShopFlare',
         template: `%s — ${config.storeName ?? 'ShopFlare'}`,
@@ -103,6 +110,7 @@ export async function generateMetadata(): Promise<Metadata> {
     }
   } catch {
     return {
+      ...(metadataBase ? { metadataBase } : {}),
       title: { default: 'ShopFlare', template: '%s — ShopFlare' },
       description: 'White-label ecommerce store',
     }
@@ -225,8 +233,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {/* Preconnect to worker/CDN origin (logo, product images, API) */}
         {workerOrigin && <link rel="preconnect" href={workerOrigin} />}
         {workerOrigin && <link rel="dns-prefetch" href={workerOrigin} />}
-        <link rel="preconnect" href="https://js.stripe.com" />
-        <link rel="preconnect" href="https://challenges.cloudflare.com" />
         {/* PWA viewport and Apple Web App meta */}
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="apple-mobile-web-app-capable" content="yes" />

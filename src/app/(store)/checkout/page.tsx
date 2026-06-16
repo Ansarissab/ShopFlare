@@ -30,20 +30,25 @@ export default function CheckoutPage() {
   if (!hydrated || items.length === 0) return null
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8 md:py-12">
-      <h1 className="mb-8 text-2xl font-bold tracking-tight">{t.checkout.title}</h1>
+    <>
+      {/* Preconnect to Stripe + Turnstile — loaded only on checkout, not sitewide */}
+      <link rel="preconnect" href="https://js.stripe.com" />
+      <link rel="preconnect" href="https://challenges.cloudflare.com" />
+      <main className="mx-auto max-w-5xl px-4 py-8 md:py-12">
+        <h1 className="mb-8 text-2xl font-bold tracking-tight">{t.checkout.title}</h1>
 
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-[1fr_360px]">
-        {/* Left: method selector + active form */}
-        <section>
-          <CheckoutMethodSelector />
-        </section>
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-[1fr_360px]">
+          {/* Left: method selector + active form */}
+          <section>
+            <CheckoutMethodSelector />
+          </section>
 
-        {/* Right: order summary */}
-        <aside className="order-first md:order-last">
-          <OrderSummary />
-        </aside>
-      </div>
-    </main>
+          {/* Right: order summary */}
+          <aside className="order-first md:order-last">
+            <OrderSummary />
+          </aside>
+        </div>
+      </main>
+    </>
   )
 }

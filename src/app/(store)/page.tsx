@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
 import { buildPageMetadata } from '@/lib/seo/metadata'
+import { resolveSiteUrl } from '@/lib/seo/site-url'
 import { getT } from '@/lib/i18n/server'
 import { JsonLd } from '@/components/shared/JsonLd'
 import { organizationJsonLd } from '@/lib/seo/jsonld'
@@ -13,10 +14,11 @@ import type { LandingData } from '@/lib/types'
 import StorePageClient from './StorePageClient'
 import { LandingPage } from '@/components/store/landing/LandingPage'
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
-
 export async function generateMetadata(): Promise<Metadata> {
-  const config = await fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: 300 })
+  const [config, siteUrl] = await Promise.all([
+    fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: 300 }),
+    resolveSiteUrl(),
+  ])
   return buildPageMetadata({
     title: config?.tagline ?? config?.storeName ?? 'Store',
     description: config?.tagline ?? undefined,
@@ -29,9 +31,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function StorePage() {
-  const [config, t] = await Promise.all([
+  const [config, t, siteUrl] = await Promise.all([
     fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: 300 }),
     getT(),
+    resolveSiteUrl(),
   ])
 
   if (isFeatureEnabled(config, 'landingEnabled')) {
@@ -89,9 +92,23 @@ export default async function StorePage() {
   const initialProducts = productsRaw?.products ?? []
   const initialCategories = categoriesRaw?.categories ?? []
 
+  // LCP preload: hint the browser to fetch the first product card image early.
+  // Mirrors ProductCard's firstImage selection (lowest sortOrder across all variant images).
+  // images.unoptimized=true means next/image with priority won't emit a <link rel=preload>
+  // automatically, so we inject it manually from the RSC. Guard: skip if no products/images.
+  // images live on variants (mirror ProductGrid: variants.flatMap(v => v.images))
+  const firstProductImages = initialProducts[0]?.variants.flatMap((v) => v.images) ?? []
+  const lcpImageUrl =
+    firstProductImages.length > 0
+      ? firstProductImages.slice().sort((a, b) => a.sortOrder - b.sortOrder)[0]?.url
+      : undefined
+
   return (
-    <Suspense>
-      <StorePageClient initialProducts={initialProducts} initialCategories={initialCategories} />
-    </Suspense>
+    <>
+      {lcpImageUrl && <link rel="preload" as="image" href={lcpImageUrl} fetchPriority="high" />}
+      <Suspense>
+        <StorePageClient initialProducts={initialProducts} initialCategories={initialCategories} />
+      </Suspense>
+    </>
   )
 }
