@@ -2,6 +2,7 @@
 
 import { ReviewStars } from '@/components/store/product/ReviewStars'
 import { useApiResource } from '@/hooks/useApiResource'
+import { useReveal } from '@/hooks/useReveal'
 import { useT } from '@/lib/i18n/Provider'
 import { formatDate } from '@/lib/utils/index'
 import type { ReviewsStripProps } from '@/lib/types'
@@ -20,12 +21,13 @@ export function ReviewsStrip({ section }: ReviewsStripProps) {
   const t = useT()
   const heading = section.heading || t.store.reviewsHeading
   const { data, loading } = useApiResource<StoreReviewsResponse>('/api/reviews/store')
+  const ref = useReveal<HTMLElement>()
 
   const reviews = data?.reviews ?? []
   if (!loading && reviews.length === 0) return null
 
   return (
-    <section className="bg-muted/40 py-16" aria-label={heading}>
+    <section ref={ref} className="bg-muted/40 py-16" aria-label={heading}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <h2 className="mb-8 text-3xl font-bold">{heading}</h2>
         {loading ? (

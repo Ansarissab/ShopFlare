@@ -69,6 +69,10 @@ vi.mock('@/hooks/useApiResource', () => ({
   useApiResource: () => ({ data: mockApiData, loading: mockApiLoading }),
 }))
 
+vi.mock('@/hooks/useReveal', () => ({
+  useReveal: () => ({ current: null }),
+}))
+
 afterEach(() => {
   cleanup()
   vi.clearAllMocks()
