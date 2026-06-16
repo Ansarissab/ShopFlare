@@ -70,15 +70,17 @@ INSERT OR IGNORE INTO size_options (id, variant_id, size, sku, price_cents, stoc
   ('demo_sz_cap_os','demo_var_cap_navy',     'One Size', 'CAP-OS', 1800, 30, 1);
 
 -- ─── Product images (external placeholders; swap for real R2 uploads in admin) ─
+-- DEMO ONLY: URLs use picsum WebP to keep PageSpeed green (~60-70% smaller than JPEG).
+-- Production uses real R2 uploads served as AVIF/WebP via the ImageUpload pipeline.
 INSERT OR IGNORE INTO product_images (id, variant_id, url, r2_key, sort_order) VALUES
-  ('demo_img_tsb', 'demo_var_tshirt_black', 'https://picsum.photos/seed/shopflare-tshirt-black/800/800', 'demo/tshirt-black.jpg', 0),
-  ('demo_img_tsb_2', 'demo_var_tshirt_black', 'https://picsum.photos/seed/sf-tsb-front/800/800', 'demo/tshirt-black-2.jpg', 1),
-  ('demo_img_tsb_3', 'demo_var_tshirt_black', 'https://picsum.photos/seed/sf-tsb-detail/800/800', 'demo/tshirt-black-3.jpg', 2),
-  ('demo_img_tsw', 'demo_var_tshirt_white', 'https://picsum.photos/seed/shopflare-tshirt-white/800/800', 'demo/tshirt-white.jpg', 0),
-  ('demo_img_tsw_2', 'demo_var_tshirt_white', 'https://picsum.photos/seed/sf-tsw-side/800/800', 'demo/tshirt-white-2.jpg', 1),
-  ('demo_img_tsw_3', 'demo_var_tshirt_white', 'https://picsum.photos/seed/sf-tsw-back/800/800', 'demo/tshirt-white-3.jpg', 2),
-  ('demo_img_mug', 'demo_var_mug_white',    'https://picsum.photos/seed/shopflare-mug/800/800',          'demo/mug.jpg',          0),
-  ('demo_img_cap', 'demo_var_cap_navy',     'https://picsum.photos/seed/shopflare-cap/800/800',          'demo/cap.jpg',          0);
+  ('demo_img_tsb', 'demo_var_tshirt_black', 'https://picsum.photos/seed/shopflare-tshirt-black/800/800.webp', 'demo/tshirt-black.jpg', 0),
+  ('demo_img_tsb_2', 'demo_var_tshirt_black', 'https://picsum.photos/seed/sf-tsb-front/800/800.webp', 'demo/tshirt-black-2.jpg', 1),
+  ('demo_img_tsb_3', 'demo_var_tshirt_black', 'https://picsum.photos/seed/sf-tsb-detail/800/800.webp', 'demo/tshirt-black-3.jpg', 2),
+  ('demo_img_tsw', 'demo_var_tshirt_white', 'https://picsum.photos/seed/shopflare-tshirt-white/800/800.webp', 'demo/tshirt-white.jpg', 0),
+  ('demo_img_tsw_2', 'demo_var_tshirt_white', 'https://picsum.photos/seed/sf-tsw-side/800/800.webp', 'demo/tshirt-white-2.jpg', 1),
+  ('demo_img_tsw_3', 'demo_var_tshirt_white', 'https://picsum.photos/seed/sf-tsw-back/800/800.webp', 'demo/tshirt-white-3.jpg', 2),
+  ('demo_img_mug', 'demo_var_mug_white',    'https://picsum.photos/seed/shopflare-mug/800/800.webp',          'demo/mug.jpg',          0),
+  ('demo_img_cap', 'demo_var_cap_navy',     'https://picsum.photos/seed/shopflare-cap/800/800.webp',          'demo/cap.jpg',          0);
 
 -- ─── Coupons ─────────────────────────────────────────────────────────────────
 -- NOTE: these are D1-only demo coupons (no Stripe promotion-code link), so they
@@ -100,7 +102,7 @@ INSERT OR IGNORE INTO order_items
   (id, order_id, size_option_id, product_id, variant_id, quantity, price_cents, snapshot)
 VALUES
   ('demo_order_1_item_1', 'demo_order_1', 'demo_sz_tsb_m', 'demo_tshirt', 'demo_var_tshirt_black',
-   2, 2500, '{"productName":"Classic Cotton T-Shirt","variantLabel":"Black","size":"M","sku":"TSB-M","imageUrl":"https://picsum.photos/seed/shopflare-tshirt-black/800/800"}');
+   2, 2500, '{"productName":"Classic Cotton T-Shirt","variantLabel":"Black","size":"M","sku":"TSB-M","imageUrl":"https://picsum.photos/seed/shopflare-tshirt-black/800/800.webp"}');
 
 -- ─── Sample approved review (verified purchase against the order above) ───────
 INSERT OR IGNORE INTO reviews (id, order_id, product_id, customer_name, rating, body, approved) VALUES
@@ -208,10 +210,10 @@ INSERT OR IGNORE INTO size_options (id, variant_id, size, sku, price_cents, stoc
   ('demo_sz_bag_bls_os', 'demo_var_bag_blush', 'One Size', 'BAG-BLS-OS', 4500,  8, 1);
 
 INSERT OR IGNORE INTO product_images (id, variant_id, url, r2_key, sort_order) VALUES
-  ('demo_img_bag_blk_1', 'demo_var_bag_black', 'https://picsum.photos/seed/sf-bag-blk-1/800/800', 'demo/bag-black-1.jpg', 0),
-  ('demo_img_bag_blk_2', 'demo_var_bag_black', 'https://picsum.photos/seed/sf-bag-blk-2/800/800', 'demo/bag-black-2.jpg', 1),
-  ('demo_img_bag_blk_3', 'demo_var_bag_black', 'https://picsum.photos/seed/sf-bag-blk-3/800/800', 'demo/bag-black-3.jpg', 2),
-  ('demo_img_bag_bls_1', 'demo_var_bag_blush', 'https://picsum.photos/seed/sf-bag-bls-1/800/800', 'demo/bag-blush-1.jpg', 0),
-  ('demo_img_bag_bls_2', 'demo_var_bag_blush', 'https://picsum.photos/seed/sf-bag-bls-2/800/800', 'demo/bag-blush-2.jpg', 1),
-  ('demo_img_bag_bls_3', 'demo_var_bag_blush', 'https://picsum.photos/seed/sf-bag-bls-3/800/800', 'demo/bag-blush-3.jpg', 2);
+  ('demo_img_bag_blk_1', 'demo_var_bag_black', 'https://picsum.photos/seed/sf-bag-blk-1/800/800.webp', 'demo/bag-black-1.jpg', 0),
+  ('demo_img_bag_blk_2', 'demo_var_bag_black', 'https://picsum.photos/seed/sf-bag-blk-2/800/800.webp', 'demo/bag-black-2.jpg', 1),
+  ('demo_img_bag_blk_3', 'demo_var_bag_black', 'https://picsum.photos/seed/sf-bag-blk-3/800/800.webp', 'demo/bag-black-3.jpg', 2),
+  ('demo_img_bag_bls_1', 'demo_var_bag_blush', 'https://picsum.photos/seed/sf-bag-bls-1/800/800.webp', 'demo/bag-blush-1.jpg', 0),
+  ('demo_img_bag_bls_2', 'demo_var_bag_blush', 'https://picsum.photos/seed/sf-bag-bls-2/800/800.webp', 'demo/bag-blush-2.jpg', 1),
+  ('demo_img_bag_bls_3', 'demo_var_bag_blush', 'https://picsum.photos/seed/sf-bag-bls-3/800/800.webp', 'demo/bag-blush-3.jpg', 2);
 
