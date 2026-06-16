@@ -24,6 +24,10 @@ export const fr: Dictionary = {
     discount: '{percent}% off',
     comingSoon: 'Coming Soon',
     comingSoonBody: 'Check back soon for new products.',
+    comingSoonSubtext: 'We are preparing something great.',
+    categoryEmptyHeading: 'Nothing here yet',
+    categoryEmptySubtext: 'Try a different category or browse all products.',
+    searchNoResultsHeading: 'No results found',
     notifySuccess: "You'll be notified when it's back in stock!",
     trackOrder: 'Track Order',
     allProducts: 'All Products',
@@ -64,6 +68,11 @@ export const fr: Dictionary = {
     categoriesNav: 'Catégories',
     dismissAnnouncement: "Ignorer l'annonce",
     announcementBar: 'Annonce',
+    freeShippingQualified: 'Free Shipping!',
+    storyImageAlt: 'Our story',
+    productImageAlt: '{productName} — image {n}',
+    productThumbnailAlt: '{productName} thumbnail {n}',
+    notifyMeDescription: "We'll let you know when {variant} / {size} is back in stock.",
   },
   search: {
     title: 'Rechercher des produits',
@@ -123,6 +132,9 @@ export const fr: Dictionary = {
       'Place your order, then transfer the total to our bank account using your order number as the reference. We confirm your order once the payment arrives.',
     calculatedAtDelivery: 'Calculated at delivery',
     securityCheckFailed: 'Security check failed. Please refresh and try again.',
+    processingOrder: 'Traitement…',
+    whatsappPanelNote:
+      'La commande WhatsApp est disponible directement sur chaque page produit. Visitez le produit souhaité et appuyez sur « {action} » pour envoyer votre commande.',
   },
   bankTransfer: {
     heading: 'Bank Transfer Instructions',

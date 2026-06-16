@@ -24,6 +24,10 @@ export const ur: Dictionary = {
     discount: '{percent}% off',
     comingSoon: 'Coming Soon',
     comingSoonBody: 'Check back soon for new products.',
+    comingSoonSubtext: 'We are preparing something great.',
+    categoryEmptyHeading: 'Nothing here yet',
+    categoryEmptySubtext: 'Try a different category or browse all products.',
+    searchNoResultsHeading: 'No results found',
     notifySuccess: "You'll be notified when it's back in stock!",
     trackOrder: 'Track Order',
     allProducts: 'All Products',
@@ -64,6 +68,11 @@ export const ur: Dictionary = {
     categoriesNav: 'زمرہ جات',
     dismissAnnouncement: 'اعلان کو نظر انداز کریں',
     announcementBar: 'اعلان',
+    freeShippingQualified: 'Free Shipping!',
+    storyImageAlt: 'Our story',
+    productImageAlt: '{productName} — image {n}',
+    productThumbnailAlt: '{productName} thumbnail {n}',
+    notifyMeDescription: "We'll let you know when {variant} / {size} is back in stock.",
   },
   search: {
     title: 'مصنوعات تلاش کریں',
@@ -123,6 +132,9 @@ export const ur: Dictionary = {
       'Place your order, then transfer the total to our bank account using your order number as the reference. We confirm your order once the payment arrives.',
     calculatedAtDelivery: 'Calculated at delivery',
     securityCheckFailed: 'Security check failed. Please refresh and try again.',
+    processingOrder: 'پروسیسنگ…',
+    whatsappPanelNote:
+      'واٹس ایپ آرڈر براہ راست ہر پروڈکٹ صفحے پر دستیاب ہے۔ مطلوبہ پروڈکٹ پر جائیں اور آرڈر بھیجنے کے لیے «{action}» تھپتھپائیں۔',
   },
   bankTransfer: {
     heading: 'Bank Transfer Instructions',

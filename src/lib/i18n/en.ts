@@ -20,6 +20,10 @@ export const en = {
     discount: '{percent}% off',
     comingSoon: 'Coming Soon',
     comingSoonBody: 'Check back soon for new products.',
+    comingSoonSubtext: 'We are preparing something great.',
+    categoryEmptyHeading: 'Nothing here yet',
+    categoryEmptySubtext: 'Try a different category or browse all products.',
+    searchNoResultsHeading: 'No results found',
     notifySuccess: "You'll be notified when it's back in stock!",
     trackOrder: 'Track Order',
     allProducts: 'All Products',
@@ -61,6 +65,11 @@ export const en = {
     categoriesNav: 'Categories',
     dismissAnnouncement: 'Dismiss announcement',
     announcementBar: 'Announcement',
+    freeShippingQualified: 'Free Shipping!',
+    storyImageAlt: 'Our story',
+    productImageAlt: '{productName} — image {n}',
+    productThumbnailAlt: '{productName} thumbnail {n}',
+    notifyMeDescription: "We'll let you know when {variant} / {size} is back in stock.",
   },
   search: {
     title: 'Search products',
@@ -120,6 +129,9 @@ export const en = {
       'Place your order, then transfer the total to our bank account using your order number as the reference. We confirm your order once the payment arrives.',
     calculatedAtDelivery: 'Calculated at delivery',
     securityCheckFailed: 'Security check failed. Please refresh and try again.',
+    processingOrder: 'Processing…',
+    whatsappPanelNote:
+      'WhatsApp ordering is available directly on each product page. Visit the product you want and tap “{action}” to send your order.',
   },
   // Reusable bank-transfer copy — shared by the checkout success page, the order
   // tracking page, and the confirmation email (worker imports `en`). DRY.
