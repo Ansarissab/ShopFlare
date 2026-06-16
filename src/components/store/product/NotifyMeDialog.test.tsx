@@ -46,7 +46,11 @@ describe('NotifyMeDialog', () => {
     render(<NotifyMeDialog {...baseProps()} />)
     // notifyMe text appears in both title and the submit button
     expect(screen.getAllByText(en.store.notifyMe).length).toBeGreaterThan(0)
-    expect(screen.getByText('Blue / M')).toBeTruthy()
+    expect(
+      screen.getByText(
+        en.store.notifyMeDescription.replace('{variant}', 'Blue').replace('{size}', 'M'),
+      ),
+    ).toBeTruthy()
     expect(screen.getByLabelText(en.checkout.email)).toBeTruthy()
     expect(screen.getByLabelText(en.checkout.phone)).toBeTruthy()
   })

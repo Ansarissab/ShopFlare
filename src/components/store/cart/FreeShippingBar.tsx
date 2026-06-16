@@ -20,7 +20,7 @@ export function FreeShippingBar({ subtotalCents, thresholdCents }: FreeShippingB
           'rounded-md bg-success/10 px-3 py-2 text-center text-xs font-medium text-success',
         )}
       >
-        {t.store.freeShipping}!
+        {t.store.freeShippingQualified}
       </div>
     )
   }

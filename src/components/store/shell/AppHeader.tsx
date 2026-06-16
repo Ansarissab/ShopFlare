@@ -27,7 +27,7 @@ export function AppHeader() {
       <span className="font-semibold text-sm truncate">{config?.storeName ?? 'Store'}</span>
       <button
         onClick={openCart}
-        className="relative flex h-9 w-9 items-center justify-center rounded-lg hover:bg-accent"
+        className="relative flex h-9 w-9 items-center justify-center rounded-lg hover:bg-muted"
         aria-label={t.store.openCart}
       >
         <ShoppingCart className={cn('h-5 w-5', isPulsing && 'cart-added-pulse')} />

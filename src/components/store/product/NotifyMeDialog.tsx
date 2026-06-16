@@ -63,11 +63,7 @@ export function NotifyMeDialog({
         <DialogHeader>
           <DialogTitle>{t.store.notifyMe}</DialogTitle>
           <DialogDescription>
-            {"We'll let you know when "}
-            <strong>
-              {variantLabel} / {size}
-            </strong>
-            {' is back in stock.'}
+            {t.store.notifyMeDescription.replace('{variant}', variantLabel).replace('{size}', size)}
           </DialogDescription>
         </DialogHeader>
 

@@ -58,45 +58,49 @@ afterEach(() => {
 })
 
 describe('ImageCarousel', () => {
+  const PRODUCT = 'Test Jacket'
+
   it('renders the empty-state placeholder when there are no images', () => {
-    render(<ImageCarousel images={[]} />)
+    render(<ImageCarousel images={[]} productName={PRODUCT} />)
     expect(screen.getByText('No image')).toBeTruthy()
   })
 
   it('applies className to the empty state', () => {
-    const { container } = render(<ImageCarousel images={[]} className="empty-cls" />)
+    const { container } = render(
+      <ImageCarousel images={[]} productName={PRODUCT} className="empty-cls" />,
+    )
     expect((container.firstChild as HTMLElement).className).toContain('empty-cls')
   })
 
   it('renders one image and no nav/thumbnails for a single image', () => {
-    render(<ImageCarousel images={[makeImage('a')]} />)
-    expect(screen.getByAltText('Product image 1')).toBeTruthy()
+    render(<ImageCarousel images={[makeImage('a')]} productName={PRODUCT} />)
+    expect(screen.getByAltText(`${PRODUCT} — image 1`)).toBeTruthy()
     expect(screen.queryByTestId('prev')).toBeNull()
     expect(screen.queryByTestId('next')).toBeNull()
     // No thumbnail buttons
-    expect(screen.queryByAltText('Thumbnail 1')).toBeNull()
+    expect(screen.queryByAltText(`${PRODUCT} thumbnail 1`)).toBeNull()
   })
 
   it('renders nav buttons and a thumbnail strip for multiple images', () => {
-    render(<ImageCarousel images={[makeImage('a'), makeImage('b')]} />)
+    render(<ImageCarousel images={[makeImage('a'), makeImage('b')]} productName={PRODUCT} />)
     expect(screen.getByTestId('prev')).toBeTruthy()
     expect(screen.getByTestId('next')).toBeTruthy()
-    expect(screen.getByAltText('Thumbnail 1')).toBeTruthy()
-    expect(screen.getByAltText('Thumbnail 2')).toBeTruthy()
+    expect(screen.getByAltText(`${PRODUCT} thumbnail 1`)).toBeTruthy()
+    expect(screen.getByAltText(`${PRODUCT} thumbnail 2`)).toBeTruthy()
   })
 
   it('clicking a thumbnail calls api.scrollTo with its index (after api is set)', () => {
-    render(<ImageCarousel images={[makeImage('a'), makeImage('b')]} />)
+    render(<ImageCarousel images={[makeImage('a'), makeImage('b')]} productName={PRODUCT} />)
     // Drive the effect by providing an api object
     const api = { on, off, scrollTo, selectedScrollSnap }
     act(() => capturedSetApi?.(api))
-    const thumb2 = screen.getByAltText('Thumbnail 2').closest('button')!
+    const thumb2 = screen.getByAltText(`${PRODUCT} thumbnail 2`).closest('button')!
     fireEvent.click(thumb2)
     expect(scrollTo).toHaveBeenCalledWith(1)
   })
 
   it('subscribes to select/reInit and updates current via selectedScrollSnap', () => {
-    render(<ImageCarousel images={[makeImage('a'), makeImage('b')]} />)
+    render(<ImageCarousel images={[makeImage('a'), makeImage('b')]} productName={PRODUCT} />)
     const api = { on, off, scrollTo, selectedScrollSnap }
     act(() => capturedSetApi?.(api))
     // on() was called for 'select' and 'reInit'
@@ -107,12 +111,12 @@ describe('ImageCarousel', () => {
     const selectHandler = on.mock.calls.find((c) => c[0] === 'select')![1] as () => void
     act(() => selectHandler())
     // selectedScrollSnap returns 1, so thumb index 1 should carry border-primary
-    const thumb2 = screen.getByAltText('Thumbnail 2').closest('button')!
+    const thumb2 = screen.getByAltText(`${PRODUCT} thumbnail 2`).closest('button')!
     expect(thumb2.className).toContain('border-primary')
   })
 
   it('does nothing in the effect when api is undefined', () => {
-    render(<ImageCarousel images={[makeImage('a'), makeImage('b')]} />)
+    render(<ImageCarousel images={[makeImage('a'), makeImage('b')]} productName={PRODUCT} />)
     // setApi never called with a real api → on() not invoked
     expect(on).not.toHaveBeenCalled()
   })

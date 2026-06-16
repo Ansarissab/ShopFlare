@@ -75,7 +75,7 @@ export function ProductHero({
       className={cn('grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-16 md:items-start', className)}
     >
       {/* Left: Image gallery — full-width, color in view */}
-      <ImageCarousel images={currentImages} />
+      <ImageCarousel images={currentImages} productName={product.name} />
 
       {/* Right: sticky purchase panel — commerce stack, always reachable */}
       <div className="md:sticky md:top-24 flex flex-col gap-5">

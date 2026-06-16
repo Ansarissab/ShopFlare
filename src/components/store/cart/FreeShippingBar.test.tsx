@@ -23,12 +23,12 @@ describe('FreeShippingBar', () => {
 
   it('shows free shipping message when threshold is met', () => {
     render(<FreeShippingBar subtotalCents={2000} thresholdCents={2000} flatRateCents={300} />)
-    expect(screen.getByText(new RegExp(`${en.store.freeShipping}!`))).toBeTruthy()
+    expect(screen.getByText(en.store.freeShippingQualified)).toBeTruthy()
   })
 
   it('shows free shipping message when subtotal exceeds threshold', () => {
     render(<FreeShippingBar subtotalCents={3000} thresholdCents={2000} flatRateCents={300} />)
-    expect(screen.getByText(new RegExp(`${en.store.freeShipping}!`))).toBeTruthy()
+    expect(screen.getByText(en.store.freeShippingQualified)).toBeTruthy()
   })
 
   it('progress bar is present below threshold', () => {

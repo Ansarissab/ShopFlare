@@ -30,6 +30,7 @@ export interface WhatsAppOrderParams {
 
 export interface ImageCarouselProps {
   images: ProductImage[]
+  productName: string
   className?: string
 }
 

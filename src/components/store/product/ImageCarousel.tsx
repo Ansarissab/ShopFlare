@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils'
 import { useT } from '@/lib/i18n/Provider'
 import type { ImageCarouselProps } from '@/lib/types/product'
 
-export function ImageCarousel({ images, className }: ImageCarouselProps) {
+export function ImageCarousel({ images, productName, className }: ImageCarouselProps) {
   const t = useT()
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
@@ -56,7 +56,9 @@ export function ImageCarousel({ images, className }: ImageCarouselProps) {
               <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted">
                 <Image
                   src={img.url}
-                  alt={`Product image ${idx + 1}`}
+                  alt={t.store.productImageAlt
+                    .replace('{productName}', productName)
+                    .replace('{n}', String(idx + 1))}
                   fill
                   sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-cover"
@@ -91,7 +93,9 @@ export function ImageCarousel({ images, className }: ImageCarouselProps) {
             >
               <Image
                 src={img.url}
-                alt={`Thumbnail ${idx + 1}`}
+                alt={t.store.productThumbnailAlt
+                  .replace('{productName}', productName)
+                  .replace('{n}', String(idx + 1))}
                 fill
                 sizes="64px"
                 className="object-cover"
