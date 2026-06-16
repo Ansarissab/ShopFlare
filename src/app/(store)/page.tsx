@@ -92,23 +92,15 @@ export default async function StorePage() {
   const initialProducts = productsRaw?.products ?? []
   const initialCategories = categoriesRaw?.categories ?? []
 
-  // LCP preload: hint the browser to fetch the first product card image early.
-  // Mirrors ProductCard's firstImage selection (lowest sortOrder across all variant images).
-  // images.unoptimized=true means next/image with priority won't emit a <link rel=preload>
-  // automatically, so we inject it manually from the RSC. Guard: skip if no products/images.
-  // images live on variants (mirror ProductGrid: variants.flatMap(v => v.images))
-  const firstProductImages = initialProducts[0]?.variants.flatMap((v) => v.images) ?? []
-  const lcpImageUrl =
-    firstProductImages.length > 0
-      ? firstProductImages.slice().sort((a, b) => a.sortOrder - b.sortOrder)[0]?.url
-      : undefined
-
+  // LCP image preload is handled by next/image `priority` on the first product
+  // cards (ProductGrid sets priority for index < PRIORITY_CARD_COUNT) — Next 16
+  // emits <link rel="preload" as="image" fetchpriority="high"> for each of them,
+  // including the actual first card. No manual <link> here: a hand-rolled preload
+  // derived from initialProducts[0] risked targeting a different product than the
+  // grid's first card (server fetch vs the client grid's order).
   return (
-    <>
-      {lcpImageUrl && <link rel="preload" as="image" href={lcpImageUrl} fetchPriority="high" />}
-      <Suspense>
-        <StorePageClient initialProducts={initialProducts} initialCategories={initialCategories} />
-      </Suspense>
-    </>
+    <Suspense>
+      <StorePageClient initialProducts={initialProducts} initialCategories={initialCategories} />
+    </Suspense>
   )
 }
