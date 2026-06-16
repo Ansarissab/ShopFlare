@@ -226,6 +226,8 @@ export const en = {
     editProduct: 'Edit Product',
     deleteProduct: 'Delete Product',
     deleteProductConfirm: 'Delete this product? This cannot be undone.',
+    deleteVariantConfirm: 'Delete this variant? This cannot be undone.',
+    basicInfo: 'Basic Info',
     totalOrders: 'Total Orders',
     totalRevenue: 'Total Revenue',
     pendingOrders: 'Pending Orders',
@@ -247,6 +249,10 @@ export const en = {
     statusUpdated: 'Status updated',
     trackingAdded: 'Tracking number saved',
     orderDetail: 'Order Detail',
+    orderNotFound: 'Order not found.',
+    backToOrders: 'Back to orders',
+    orderItems: 'Items',
+    orderDiscount: 'Discount',
     shippingAddress: 'Shipping Address',
     // products
     productName: 'Product Name',
@@ -630,6 +636,11 @@ export const en = {
     saveAnnouncement: 'Save announcement bar',
     announcementSaved: 'Announcement bar saved',
     announcementMaxMessages: 'Maximum {max} messages',
+    // settings section headings (phase 34)
+    sectionIdentity: 'Identity',
+    sectionContact: 'Contact',
+    sectionSeoLlm: 'SEO / LLM Discovery',
+    sectionPaymentsShipping: 'Payments & Shipping',
     // FAQ rows editor chrome (phase 30)
     faqQuestionLabel: 'Question',
     faqAnswerLabel: 'Answer',
