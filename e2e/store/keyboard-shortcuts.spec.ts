@@ -60,31 +60,29 @@ test.describe('store keyboard shortcuts', () => {
     await expect(dialog).not.toBeVisible({ timeout: 5_000 })
   })
 
-  test('typing / in a focused text input does NOT open the search overlay', async ({ page }) => {
-    // Find the storefront search bar input (placeholder "Search products…")
-    const searchBarInput = page.getByPlaceholder('Search products…')
-    const inputVisible = await searchBarInput.isVisible({ timeout: 5_000 }).catch(() => false)
-
-    if (!inputVisible) {
-      test.skip(true, 'Store search bar input not visible on this page — skipping guard test')
-      return
-    }
-
-    // Focus the input then type `/ ` — must NOT open the GlobalSearchOverlay
-    await searchBarInput.click()
-    await page.keyboard.type('/')
-
-    // The storefront search bar input should now contain `/`
-    await expect(searchBarInput).toHaveValue('/')
-
-    // No overlay dialog should appear (allow a brief settle period)
+  test('typing shortcut keys in a focused text input does NOT trigger shortcuts', async ({
+    page,
+  }) => {
+    // Phase 29 removed the inline catalog SearchBar; the always-available text
+    // input is the GlobalSearchOverlay's search field. Open it, focus the input,
+    // then type shortcut chars — they must land in the input, not fire shortcuts.
+    await page.keyboard.press('/')
     const dialog = page.getByRole('dialog')
-    const opened = await dialog.isVisible({ timeout: 1_000 }).catch(() => false)
-    expect(opened).toBe(false)
+    await expect(dialog).toBeVisible({ timeout: 5_000 })
 
-    // Also verify `c` inside the input doesn't open the cart
-    await page.keyboard.type('c')
-    const cartOpened = await dialog.isVisible({ timeout: 1_000 }).catch(() => false)
-    expect(cartOpened).toBe(false)
+    const input = dialog.locator('input[type="search"]')
+    await input.click()
+    await input.fill('')
+
+    // Type `c` (cart shortcut) and `?` (help shortcut) INSIDE the focused input.
+    await page.keyboard.type('c?')
+
+    // Chars went into the input — no extra dialog/cart/help opened.
+    await expect(input).toHaveValue('c?')
+    // Still exactly one dialog (the search overlay), no cart/help stacked on top.
+    await expect(page.getByRole('dialog')).toHaveCount(1)
+
+    await page.keyboard.press('Escape')
+    await expect(dialog).not.toBeVisible({ timeout: 5_000 })
   })
 })
