@@ -159,8 +159,6 @@ export async function getCategoryBySlug(
     if (parent) breadcrumb.push(parent)
   }
 
-  breadcrumb.push(category)
-
   return { category, breadcrumb }
 }
 

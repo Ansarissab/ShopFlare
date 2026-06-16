@@ -311,7 +311,8 @@ describe('/api/categories public routes', () => {
       breadcrumb: Array<{ id: string }>
     }
     expect(category.id).toBe(child.id)
-    expect(breadcrumb.map((b) => b.id)).toEqual([parent.id, child.id])
+    // breadcrumb contains ancestors only — the current category is NOT included
+    expect(breadcrumb.map((b) => b.id)).toEqual([parent.id])
   })
 
   it('/api/categories/:slug includes descendant products (parent shows child products)', async () => {
