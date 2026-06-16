@@ -115,7 +115,10 @@ describe('CheckoutMethodSelector', () => {
   it('switches to the whatsapp method and shows guidance copy', () => {
     render(<CheckoutMethodSelector />)
     fireEvent.click(screen.getByText(en.store.orderOnWhatsApp))
-    expect(screen.getByText(/WhatsApp ordering is available/)).toBeTruthy()
+    // The panel renders the i18n whatsappPanelNote with {action} replaced by the
+    // store.orderOnWhatsApp label; assert a stable substring from the note.
+    const expected = en.checkout.whatsappPanelNote.replace('{action}', en.store.orderOnWhatsApp)
+    expect(screen.getByText(expected)).toBeTruthy()
   })
 
   it('switches to the bank method and renders the bank ManualOrderForm', () => {
@@ -210,5 +213,66 @@ describe('CheckoutMethodSelector', () => {
     fireEvent.click(btn) // disabled → no-op
     expect(mockApiPost).not.toHaveBeenCalled()
     expect(toast.error).not.toHaveBeenCalled()
+  })
+
+  it('stripe button shows processing label and aria-busy=true while loading', async () => {
+    let resolveSession: (v: { url: string }) => void = () => {}
+    mockApiPost.mockImplementationOnce(
+      () =>
+        new Promise((res) => {
+          resolveSession = res
+        }),
+    )
+    const original = window.location
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      writable: true,
+      value: { ...original, href: '' },
+    })
+    render(<CheckoutMethodSelector />)
+    fireEvent.click(screen.getByText(en.checkout.payWithCard))
+    fireEvent.click(screen.getByTestId('ts-verify'))
+    fireEvent.click(screen.getByRole('button', { name: en.checkout.payWithCard }))
+
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: en.checkout.processingOrder })).toBeTruthy(),
+    )
+    const btn = screen.getByRole('button', {
+      name: en.checkout.processingOrder,
+    }) as HTMLButtonElement
+    expect(btn.getAttribute('aria-busy')).toBe('true')
+    expect(btn.disabled).toBe(true)
+
+    resolveSession({ url: 'https://stripe.test/done' })
+    await waitFor(() => expect(window.location.href).toBe('https://stripe.test/done'))
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      writable: true,
+      value: original,
+    })
+  })
+
+  it('ArrowDown moves focus to the next radio method', () => {
+    render(<CheckoutMethodSelector />)
+    // COD is the default selected (tabindex=0). Arrow down from COD → WhatsApp (last).
+    // Find the COD radio button.
+    const codBtn = screen.getByRole('radio', { name: new RegExp(en.store.cashOnDelivery) })
+    fireEvent.keyDown(codBtn, { key: 'ArrowDown' })
+    // WhatsApp is the next radio after COD in the default (no bank) method list.
+    const whatsappBtn = screen.getByRole('radio', { name: new RegExp(en.store.orderOnWhatsApp) })
+    expect(whatsappBtn.getAttribute('aria-checked')).toBe('true')
+    expect(whatsappBtn.getAttribute('tabindex')).toBe('0')
+    expect(codBtn.getAttribute('tabindex')).toBe('-1')
+  })
+
+  it('Home/End keys move focus to the first/last radio', () => {
+    render(<CheckoutMethodSelector />)
+    const codBtn = screen.getByRole('radio', { name: new RegExp(en.store.cashOnDelivery) })
+    fireEvent.keyDown(codBtn, { key: 'End' })
+    const whatsappBtn = screen.getByRole('radio', { name: new RegExp(en.store.orderOnWhatsApp) })
+    expect(whatsappBtn.getAttribute('aria-checked')).toBe('true')
+    fireEvent.keyDown(whatsappBtn, { key: 'Home' })
+    const cardBtn = screen.getByRole('radio', { name: new RegExp(en.checkout.payWithCard) })
+    expect(cardBtn.getAttribute('aria-checked')).toBe('true')
   })
 })

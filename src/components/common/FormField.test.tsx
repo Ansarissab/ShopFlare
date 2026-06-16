@@ -66,6 +66,28 @@ describe('FormField', () => {
     expect(err.className).toContain('text-destructive')
   })
 
+  it('gives the error paragraph an id and wires aria-describedby on the child input', () => {
+    render(
+      <FormField label="Email" htmlFor="email" error="Required field">
+        <input id="email" />
+      </FormField>,
+    )
+    const errEl = screen.getByText('Required field')
+    expect(errEl.id).toBe('email-error')
+    const input = screen.getByRole('textbox')
+    expect(input.getAttribute('aria-describedby')).toBe('email-error')
+  })
+
+  it('does not set aria-describedby when there is no error', () => {
+    render(
+      <FormField label="Email" htmlFor="email">
+        <input id="email" />
+      </FormField>,
+    )
+    const input = screen.getByRole('textbox')
+    expect(input.getAttribute('aria-describedby')).toBeNull()
+  })
+
   it('does not render an error paragraph when error is absent', () => {
     render(
       <FormField label="Email" htmlFor="email">

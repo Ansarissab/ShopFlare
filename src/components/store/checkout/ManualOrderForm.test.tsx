@@ -258,8 +258,8 @@ describe('ManualOrderForm', () => {
     expect(btn.disabled).toBe(false)
   })
 
-  it('shows the loading label while the order request is in flight (isSubmitting branch)', async () => {
-    // Hold apiPost open so isSubmitting stays true and the button shows the '...' label.
+  it('shows the loading spinner while the order request is in flight (isSubmitting branch)', async () => {
+    // Hold apiPost open so isSubmitting stays true and the button shows the spinner.
     let resolvePost: (v: { orderId: string; orderNumber: string }) => void = () => {}
     mockApiPost.mockImplementationOnce(
       () =>
@@ -272,10 +272,16 @@ describe('ManualOrderForm', () => {
     fireEvent.click(screen.getByTestId('ts-verify'))
     fireEvent.click(screen.getByRole('button', { name: en.checkout.placeOrder }))
 
-    // While the promise is pending the button switches to the loading label '...'.
-    await waitFor(() => expect(screen.getByRole('button', { name: '...' })).toBeTruthy())
-    const btn = screen.getByRole('button', { name: '...' }) as HTMLButtonElement
+    // While the promise is pending the button switches to the processing label and
+    // is disabled, with aria-busy set.
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: en.checkout.processingOrder })).toBeTruthy(),
+    )
+    const btn = screen.getByRole('button', {
+      name: en.checkout.processingOrder,
+    }) as HTMLButtonElement
     expect(btn.disabled).toBe(true)
+    expect(btn.getAttribute('aria-busy')).toBe('true')
 
     // Resolve so the submit completes and routing fires (avoids dangling promise).
     resolvePost({ orderId: 'o1', orderNumber: 'SF-9' })
