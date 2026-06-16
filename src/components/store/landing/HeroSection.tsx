@@ -40,7 +40,7 @@ export function HeroSection({
               priority
             />
           )}
-          <div className="relative z-10 max-w-2xl text-white">
+          <div className="relative z-10 max-w-2xl text-primary-foreground">
             <h1 className="text-4xl sm:text-5xl">{heading}</h1>
             {subtext && <p className="mt-4 text-lg opacity-90">{subtext}</p>}
             <Link

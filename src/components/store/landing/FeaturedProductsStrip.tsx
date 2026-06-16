@@ -10,7 +10,7 @@ export function FeaturedProductsStrip({ section, products, t }: FeaturedProducts
 
   return (
     <section className={layout.landingSection} aria-label={heading}>
-      <h2 className="mb-8 text-3xl font-bold">{heading}</h2>
+      <h2 className="mb-8 text-3xl">{heading}</h2>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {products.map((item: ProductWithVariants, index: number) => (
           <ProductCard

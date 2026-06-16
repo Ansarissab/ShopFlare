@@ -12,9 +12,9 @@ export function CTABand({ section, t }: CTABandProps) {
   const ref = useReveal<HTMLElement>()
 
   return (
-    <section ref={ref} className="bg-primary py-16 text-center" aria-label={heading}>
+    <section ref={ref} className="bg-primary py-16" aria-label={heading}>
       <div className="mx-auto max-w-2xl px-4">
-        <h2 className="text-3xl font-bold text-primary-foreground">{heading}</h2>
+        <h2 className="text-3xl text-primary-foreground">{heading}</h2>
         {subtext && <p className="mt-4 text-primary-foreground/80 text-lg">{subtext}</p>}
         <Link
           href={ctaHref}

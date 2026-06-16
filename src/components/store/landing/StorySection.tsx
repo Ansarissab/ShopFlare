@@ -23,7 +23,7 @@ export function StorySection({
           </div>
         )}
         <div className="flex-1">
-          <h2 className="text-3xl font-bold">{heading}</h2>
+          <h2 className="text-3xl">{heading}</h2>
           {section.bodyHtml && (
             <div className="mt-4 prose prose-neutral dark:prose-invert max-w-none">
               <RenderHtml html={section.bodyHtml} />
