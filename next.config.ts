@@ -50,6 +50,13 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   turbopack: {},
+  // NOTE: we intentionally do NOT use experimental.optimizeCss. Next implements
+  // it via require('critters') (deprecated); the maintained fork (beasties) would
+  // have to be aliased to that name, and either way the inlining runs as an SSR
+  // post-process PER REQUEST — on CF Workers (workerd) that adds per-request CPU
+  // and uses Node fs APIs that aren't reliable in the sandbox. The render-blocking
+  // CSS bundle is ~21 KiB and loads fast on the real edge; the multi-second
+  // "savings" Lighthouse shows came from the Tailscale tunnel latency, not the app.
   // Allow cross-origin dev requests from any Tailscale tunnel host (HTTPS
   // page-speed testing over the tailnet). Wildcard covers every *.ts.net node.
   allowedDevOrigins: ['*.ts.net'],
