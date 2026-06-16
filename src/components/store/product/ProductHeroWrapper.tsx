@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { ProductHero } from '@/components/store/product/ProductHero'
@@ -15,12 +15,24 @@ import { apiPost } from '@/lib/api'
 import type { CartItem } from '@/hooks/useCart'
 import type { SizeOption, ProductHeroWrapperProps } from '@/lib/types/product'
 
+/** Duration the "Added" confirmation state is shown (ms). Must match DESIGN.md spec. */
+const ADDED_DURATION_MS = 1500
+
 export function ProductHeroWrapper({ item }: ProductHeroWrapperProps) {
   const t = useT()
   const { addItem, openCart } = useCart()
   const { config } = useStoreConfig()
   const router = useRouter()
   const [isAddingToCart, setIsAddingToCart] = useState(false)
+  const [isAdded, setIsAdded] = useState(false)
+  const addedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Clean up the revert timer on unmount to avoid act() / setState-after-unmount warnings
+  useEffect(() => {
+    return () => {
+      if (addedTimerRef.current !== null) clearTimeout(addedTimerRef.current)
+    }
+  }, [])
 
   const { sizesByVariant, imagesByVariant } = buildProductMaps(item.variants)
 
@@ -51,6 +63,13 @@ export function ProductHeroWrapper({ item }: ProductHeroWrapperProps) {
       addItem(buildCartItem(size))
       openCart()
       setIsAddingToCart(false)
+      // Show confirmation state; clear any pending revert before setting a new one
+      if (addedTimerRef.current !== null) clearTimeout(addedTimerRef.current)
+      setIsAdded(true)
+      addedTimerRef.current = setTimeout(() => {
+        setIsAdded(false)
+        addedTimerRef.current = null
+      }, ADDED_DURATION_MS)
     },
     [buildCartItem, addItem, openCart],
   )
@@ -115,6 +134,7 @@ export function ProductHeroWrapper({ item }: ProductHeroWrapperProps) {
       imagesByVariant={imagesByVariant}
       currency={config?.currency ?? DEFAULT_CURRENCY}
       isAddingToCart={isAddingToCart}
+      isAdded={isAdded}
       showWhatsApp={showWhatsApp}
       onAddToCart={handleAddToCart}
       onBuyNow={handleBuyNow}

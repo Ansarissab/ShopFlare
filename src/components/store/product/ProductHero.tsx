@@ -31,6 +31,7 @@ export function ProductHero({
   onWhatsApp,
   onCOD,
   isAddingToCart = false,
+  isAdded = false,
   className,
 }: ProductHeroProps) {
   const t = useT()
@@ -130,6 +131,7 @@ export function ProductHero({
           selectedSize={selectedSize}
           allSizesOOS={allSizesOOS}
           isAddingToCart={isAddingToCart}
+          isAdded={isAdded}
           showWhatsApp={showWhatsApp}
           onAddToCart={() => selectedSize && onAddToCart(selectedSize)}
           onBuyNow={() => selectedSize && onBuyNow(selectedSize)}

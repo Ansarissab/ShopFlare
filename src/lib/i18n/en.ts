@@ -1,6 +1,7 @@
 export const en = {
   store: {
     addToCart: 'Add to Cart',
+    addedToCart: 'Added',
     buyNow: 'Buy Now',
     orderOnWhatsApp: 'Order on WhatsApp',
     cashOnDelivery: 'Cash on Delivery',

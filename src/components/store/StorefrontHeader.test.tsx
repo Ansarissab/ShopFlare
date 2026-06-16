@@ -25,7 +25,10 @@ vi.mock('next/image', async () => {
 const openCart = vi.fn()
 let mockItemCount = 0
 vi.mock('@/hooks/useCart', () => ({
-  useCart: () => ({ openCart }),
+  useCart: (selector?: (s: { openCart: () => void; lastAddedAt: number }) => unknown) => {
+    const state = { openCart, lastAddedAt: 0 }
+    return selector ? selector(state) : state
+  },
   useCartItemCount: () => mockItemCount,
 }))
 
