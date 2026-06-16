@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ProductGrid } from '@/components/store/product/ProductGrid'
-import { SearchBar } from '@/components/store/search/SearchBar'
 import { InfiniteScrollSentinel } from '@/components/shared/InfiniteScrollSentinel'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
@@ -33,12 +32,13 @@ export function CategoryProductSection({
   const searchParams = useSearchParams()
   const [query, setQuery] = useState(() => searchParams?.get('q') ?? initialQuery)
 
+  // URL → state: GlobalSearchOverlay sets ?q= on the URL; pull it into local
+  // state so the product grid re-filters.
   useEffect(() => {
-    const currentQ = searchParams?.get('q') ?? ''
-    if (currentQ === query) return
-    const url = query ? `/category/${slug}?q=${encodeURIComponent(query)}` : `/category/${slug}`
-    router.replace(url, { scroll: false })
-  }, [query, router, searchParams, slug])
+    const urlQ = searchParams?.get('q') ?? ''
+    if (urlQ !== query) setQuery(urlQ)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
 
   const { visibleItems, hasMore, loadMore, isLoadingMore, totalFiltered } = useProductSearch({
     items: products,
@@ -51,13 +51,12 @@ export function CategoryProductSection({
   if (visibleItems.length === 0) {
     return query ? (
       <div className={cn(layout.centeredState, 'min-h-[30vh]')}>
-        <SearchBar value={query} onChange={setQuery} />
         <p className="text-muted-foreground mt-4">
           {t.store.searchNoResults} &quot;{query}&quot;
         </p>
         <button
           type="button"
-          onClick={() => setQuery('')}
+          onClick={() => router.replace(`/category/${slug}`, { scroll: false })}
           className="mt-2 text-sm text-primary underline-offset-4 hover:underline"
         >
           {t.store.searchClearHint}
@@ -72,9 +71,6 @@ export function CategoryProductSection({
 
   return (
     <>
-      <div className="mb-6">
-        <SearchBar value={query} onChange={setQuery} />
-      </div>
       <ProductGrid items={visibleItems} storeConfig={{ flatRateCents, thresholdCents }} />
       <InfiniteScrollSentinel
         onVisible={loadMore}

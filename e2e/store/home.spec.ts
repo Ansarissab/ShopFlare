@@ -14,10 +14,13 @@ test.describe('home page', () => {
     await expect(grid.or(comingSoon)).toBeVisible({ timeout: 10_000 })
   })
 
-  test('search input is visible', async ({ page }) => {
-    // SearchBar renders a plain <input type="search"> with placeholder "Search products…"
-    const searchInput = page.getByPlaceholder('Search products…')
-    await expect(searchInput).toBeVisible()
+  test('header search opens the global search overlay', async ({ page }) => {
+    // Phase 29: the inline SearchBar was removed. Search is now the header icon
+    // button (aria-label "Search") which opens the lazy GlobalSearchOverlay
+    // containing the search <input> (placeholder "Search products...").
+    await page.getByRole('button', { name: 'Search' }).first().click()
+    const overlayInput = page.getByPlaceholder('Search products')
+    await expect(overlayInput).toBeVisible()
   })
 
   test('category nav is visible when categories exist', async ({ page }) => {

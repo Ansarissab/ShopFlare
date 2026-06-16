@@ -34,11 +34,11 @@ export function StorefrontHeader() {
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b bg-background">
-        <div className={cn(layout.bar, 'h-16 justify-between')}>
+        <div className={cn(layout.bar, 'h-16 justify-between gap-4')}>
           {/* Store name / logo */}
           <Link
             href="/"
-            className="text-lg font-semibold tracking-tight text-foreground hover:opacity-80 transition-opacity"
+            className="shrink-0 text-lg font-semibold tracking-tight text-foreground hover:opacity-80 transition-opacity"
           >
             {config?.logoUrl ? (
               <span className="relative block h-6 w-24 sm:h-8 sm:w-32">

@@ -6,7 +6,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ProductHeroWrapper } from '@/components/store/product/ProductHeroWrapper'
 import { ProductGrid } from '@/components/store/product/ProductGrid'
 import { CategoryFilter } from '@/components/store/categories/CategoryFilter'
-import { SearchBar } from '@/components/store/search/SearchBar'
 import { InfiniteScrollSentinel } from '@/components/shared/InfiniteScrollSentinel'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
@@ -87,16 +86,28 @@ export function Catalog({ basePath = '/', initialProducts, initialCategories }: 
   )
   const [query, setQuery] = useState(() => searchParams?.get('q') ?? '')
 
+  // URL → state: when GlobalSearchOverlay (or a direct URL) sets ?q=, pull it
+  // into local state so the product grid re-filters.
   useEffect(() => {
-    const currentQ = searchParams?.get('q') ?? ''
+    const urlQ = searchParams?.get('q') ?? ''
+    if (urlQ !== query) setQuery(urlQ)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
+
+  // State → URL: keep the URL in sync when category filter changes (query URL
+  // is owned by GlobalSearchOverlay; category has no other URL writer).
+  useEffect(() => {
     const currentCat = searchParams?.get('category') ?? null
-    if (currentQ === query && currentCat === activeCategory) return
-    const params = new URLSearchParams()
-    if (query) params.set('q', query)
-    if (activeCategory) params.set('category', activeCategory)
+    if (currentCat === activeCategory) return
+    const params = new URLSearchParams(searchParams?.toString() ?? '')
+    if (activeCategory) {
+      params.set('category', activeCategory)
+    } else {
+      params.delete('category')
+    }
     const paramStr = params.toString()
     router.replace(paramStr ? `${basePath}?${paramStr}` : basePath, { scroll: false })
-  }, [query, activeCategory, router, searchParams, basePath])
+  }, [activeCategory, router, searchParams, basePath])
 
   const items = data?.products ?? []
   const allCategories = catData?.categories ?? []
@@ -146,9 +157,6 @@ export function Catalog({ basePath = '/', initialProducts, initialCategories }: 
   return (
     <div className={layout.page}>
       <h1 className="sr-only">{t.store.allProducts}</h1>
-      <div className="mb-4">
-        <SearchBar value={query} onChange={setQuery} />
-      </div>
 
       {topLevel.length > 0 && (
         <div className="mb-6">
@@ -168,7 +176,12 @@ export function Catalog({ basePath = '/', initialProducts, initialCategories }: 
             </p>
             <button
               type="button"
-              onClick={() => setQuery('')}
+              onClick={() => {
+                const params = new URLSearchParams(searchParams?.toString() ?? '')
+                params.delete('q')
+                const paramStr = params.toString()
+                router.replace(paramStr ? `${basePath}?${paramStr}` : basePath, { scroll: false })
+              }}
               className="mt-2 text-sm text-primary underline-offset-4 hover:underline"
             >
               {t.store.searchClearHint}

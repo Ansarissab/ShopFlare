@@ -5,7 +5,7 @@
 // initial bundle. Wave 2 wraps the store layout in <SearchProvider> and the
 // header's search button calls openSearch().
 
-import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useState, Suspense, type ReactNode } from 'react'
 import dynamic from 'next/dynamic'
 import type { GlobalSearchOverlayProps } from '@/lib/types/search'
 
@@ -50,7 +50,11 @@ export function SearchProvider({ children }: { children: ReactNode }) {
       {/* Only mount after first open — keeps the chunk + fetch off the critical
           path. Once mounted it stays in the DOM so focus/state survive
           open/close cycles without re-mounting. */}
-      {hasOpened && <LazyOverlay open={open} onOpenChange={setOpen} />}
+      {hasOpened && (
+        <Suspense fallback={null}>
+          <LazyOverlay open={open} onOpenChange={setOpen} />
+        </Suspense>
+      )}
     </SearchOverlayContext.Provider>
   )
 }
