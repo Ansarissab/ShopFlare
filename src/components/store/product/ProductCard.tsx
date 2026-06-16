@@ -86,8 +86,8 @@ export function ProductCard({
               'object-cover',
               // Zoom on hover — transform only, never "all". Gated by prefers-reduced-motion
               // via the Tailwind motion-safe: variant.
-              'motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-out',
-              'motion-safe:group-hover:scale-[1.03]',
+              'motion-safe:transition-[transform,filter] motion-safe:duration-300 motion-safe:ease-out',
+              'motion-safe:group-hover:scale-[1.03] motion-safe:group-hover:grayscale',
             )}
           />
         ) : (
@@ -121,7 +121,7 @@ export function ProductCard({
                 'text-xs font-medium tracking-wide',
                 'bg-background/90 backdrop-blur-[2px]',
                 'text-foreground border-t border-border/60',
-                'transition-colors hover:bg-background cursor-pointer',
+                'transition-colors hover:bg-background cursor-pointer motion-safe:active:scale-95',
               )}
             >
               {t.store.quickAdd}
