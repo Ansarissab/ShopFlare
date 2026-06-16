@@ -150,3 +150,57 @@ authentic to Urdu readers) — a deliberate speed-over-authenticity trade.
 
 Every enabled Locale meets mobile ≥ 95 (LCP < 2.5s, TBT < 200ms, CLS < 0.1) or carries a
 logged exception; `pnpm verify` green.
+
+---
+
+## Session log — 2026-06-16 (local prod-build measurement)
+
+Ran a local prod serve (`next build && next start` on `:3000` + `wrangler dev` API on
+`:8787`, seeded D1) and Lighthouse mobile (warm) on `/`, `/ur`, `/product/demo_tshirt`.
+
+### Confirmed / shipped this session
+
+- **AC-1 — already satisfied (no refactor needed).** The prod build serves the product grid
+  in the initial SSR HTML: no `BAILOUT_TO_CLIENT_SIDE_RENDERING`, all product `<img>` present
+  with `fetchPriority="high"` server-side. The `useSearchParams` call in `Catalog` is wrapped
+  by `<Suspense>` (store layout + page) so it never bails the route. The planned RSC split is
+  unnecessary.
+- **Accessibility 95 → 100 (site-wide).** Lighthouse `button-name` failed on every storefront
+  page: the PWA install banner's icon-only dismiss button (`InstallPrompt.tsx`, a `fixed`
+  overlay) had no accessible name. Added `aria-label` from i18n (`pwa.installDismissLabel`,
+  added to en/fr/ur) + a regression test. Verified PASS on `/` and `/product` after rebuild.
+- **CSP "violation" on the product page = non-issue.** Lighthouse `inspector-issues` logged a
+  CSP bucket with an empty `subItems` (a DevTools/extension artifact). App CSP already covers
+  picsum, Stripe, Turnstile, and the worker origin. No change.
+- **Static portfolio page (`portfolio/shopflare-overview.html`, the github.io overview, NOT the
+  app)** — the old PageSpeed PDF (Accessibility 88) was this page. Fixed `.card h3` contrast
+  (`--brand-ink` #c2410c ≈3.5:1 → `--ink` #1a1d24 ≈16:1); `<main>` landmark already present.
+- **browserslist** — added explicit modern floors (Chrome ≥92 / FF ≥90 / Safari ≥15.4 /
+  Edge ≥92) to `package.json` as hygiene (AC-6 intent). Note: this does NOT remove the
+  Next.js framework polyfill below.
+- Cheap gates green: lint 0 warnings, tsgo typecheck clean, 1920 unit tests pass (incl. the
+  new a11y test), no skipped/flaky/unexplained stderr.
+
+### Logged exception — AC-3 (legacy JS polyfill)
+
+`legacy-javascript-insight` still fires (~13.6 KiB) for `Array.prototype.at/flat/flatMap`,
+`Object.fromEntries`, `Object.hasOwn`, `String.prototype.trimStart/trimEnd`. **Source:
+`next/dist/build/polyfills/polyfill-module.js`** — Next.js 16 injects this chunk
+unconditionally on every route and does **not** read `browserslist` for it. Not removable by
+config; only a fragile post-install patch of framework internals could strip it. **Accepted as
+a Next.js 16 framework tax.** Re-evaluate when Next raises its own polyfill baseline.
+
+### Still owned by deploy (cannot be validated locally — measure on the edge)
+
+Local Lighthouse is non-representative here (4× CPU emulation inflates TBT; external
+`picsum.photos` seed images inflate LCP and reflow CLS). Observed local scores swung run-to-run
+(home 43→70, product 68→54, product CLS 0→0.192) — noise, not a gate signal, exactly as
+documented in `docs/perf/phase-27-budget.md`. The following remain to be validated on the
+deployed `*.workers.dev` app per Locale, with real R2 images:
+
+- **AC-2** mobile Lighthouse ≥ 95 on `/`, `/product/<id>`, `/shop`, and every enabled Locale
+  (`/`, `/ur`, …).
+- **AC-4** real R2 product images sized ≤ 1× display (kills the picsum oversize/external-origin
+  LCP penalty entirely).
+- **AC-5** CLS < 0.1 on the product gallery once images load fast from R2 (the local 0.192 was
+  slow-picsum reflow; first run measured 0).
