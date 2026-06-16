@@ -118,6 +118,7 @@ export function InstallPrompt() {
               <Button
                 size="sm"
                 variant="ghost"
+                aria-label={t.pwa.installDismissLabel}
                 onClick={handleDismiss}
                 className="w-full sm:w-auto"
               >

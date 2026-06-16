@@ -897,6 +897,7 @@ export const en = {
     installBody: 'Install this app for a faster experience.',
     installAction: 'Install',
     installDismiss: 'Not now',
+    installDismissLabel: 'Dismiss install prompt',
     installIosTitle: 'Add to Home Screen',
     installIosStep1: 'Tap the Share button',
     installIosStep2: 'Select "Add to Home Screen"',

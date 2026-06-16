@@ -89,15 +89,21 @@ describe('InstallPrompt', () => {
     expect(localStorage.getItem(INSTALL_DISMISSED_KEY)).toBeNull()
   })
 
+  it('dismiss button has an accessible name (a11y regression)', () => {
+    render(<InstallPrompt />)
+    act(() => {
+      window.dispatchEvent(makeBeforeInstallEvent())
+    })
+    // The icon-only dismiss button must have an aria-label so Lighthouse button-name passes.
+    expect(screen.getByRole('button', { name: en.pwa.installDismissLabel })).toBeTruthy()
+  })
+
   it('dismiss button persists the dismissed flag and hides the banner', () => {
     render(<InstallPrompt />)
     act(() => {
       window.dispatchEvent(makeBeforeInstallEvent())
     })
-    const dismissBtn = screen
-      .getByText(en.pwa.installTitle)
-      .closest('div')
-      ?.parentElement?.querySelectorAll('button')[1] as HTMLButtonElement
+    const dismissBtn = screen.getByRole('button', { name: en.pwa.installDismissLabel })
     fireEvent.click(dismissBtn)
     expect(localStorage.getItem(INSTALL_DISMISSED_KEY)).toBe('1')
     expect(screen.queryByText(en.pwa.installTitle)).toBeNull()
@@ -170,10 +176,7 @@ describe('InstallPrompt', () => {
     act(() => {
       window.dispatchEvent(makeBeforeInstallEvent())
     })
-    const dismissBtn = screen
-      .getByText(en.pwa.installTitle)
-      .closest('div')
-      ?.parentElement?.querySelectorAll('button')[1] as HTMLButtonElement
+    const dismissBtn = screen.getByRole('button', { name: en.pwa.installDismissLabel })
     // Click must not throw even though setItem throws inside markDismissed.
     expect(() => fireEvent.click(dismissBtn)).not.toThrow()
     expect(screen.queryByText(en.pwa.installTitle)).toBeNull()
