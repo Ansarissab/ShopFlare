@@ -100,6 +100,29 @@ if (process.env.PW_WORKER_PORT) {
 }
 
 console.log(`[e2e] app port: ${port}  worker port: ${workerPort}`)
+
+// Tear down the dev stack Playwright's `webServer` leaves behind. That webServer
+// runs `concurrently -k "next dev" "wrangler dev"`, but `wrangler dev` does NOT
+// reliably forward termination to its `workerd` child — so workerd orphans on
+// every run. In `pnpm verify` the smoke step then the e2e step each leak one,
+// which starves the machine (CPU/RAM) and makes later e2e tests time out (the
+// suite passes in isolation but fails inside verify). Kill by port AND by the
+// repo-scoped workerd signature (workerd's argv carries no port) so each run
+// leaves nothing behind. Safe: verify runs integration (its own workerd) before
+// smoke/e2e, so no other repo workerd is alive at teardown time.
+let cleanedUp = false
+function cleanup() {
+  if (cleanedUp) return
+  cleanedUp = true
+  const repo = process.cwd()
+  const cmds = [
+    `lsof -ti tcp:${port} 2>/dev/null | xargs -r kill -9`,
+    `lsof -ti tcp:${workerPort} 2>/dev/null | xargs -r kill -9`,
+    `pkill -f "${repo}.*workerd serve" 2>/dev/null`,
+  ]
+  for (const c of cmds) spawnSync('bash', ['-c', c], { stdio: 'ignore' })
+}
+
 const child = spawn('./node_modules/.bin/playwright', ['test', ...process.argv.slice(2)], {
   stdio: 'inherit',
   env: {
@@ -111,4 +134,18 @@ const child = spawn('./node_modules/.bin/playwright', ['test', ...process.argv.s
     NEXT_PUBLIC_WORKER_URL: `http://localhost:${workerPort}`,
   },
 })
-child.on('exit', (code) => process.exit(code ?? 1))
+child.on('exit', (code) => {
+  cleanup()
+  process.exit(code ?? 1)
+})
+for (const sig of ['SIGINT', 'SIGTERM']) {
+  process.on(sig, () => {
+    try {
+      child.kill(sig)
+    } catch {
+      /* already gone */
+    }
+    cleanup()
+    process.exit(1)
+  })
+}
