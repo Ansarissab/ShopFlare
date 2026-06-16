@@ -1,7 +1,7 @@
 // Shared product-assembly helpers — build ProductWithVariants composites
 // from D1 for use by GET /products and GET /products/:id.
 
-import { eq, inArray, and } from 'drizzle-orm'
+import { eq, inArray, and, asc, sql } from 'drizzle-orm'
 import type { Database } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import type { Product, Variant, ProductImage, SizeOption } from 'worker/db/schema'
@@ -117,11 +117,18 @@ export async function assembleProductList(
   const whereClause =
     activeFilter && idFilter ? and(activeFilter, idFilter) : (activeFilter ?? idFilter)
 
+  // ORDER BY created_at ASC keeps products in creation order across requests.
+  // rowid ASC is the tiebreak for rows inserted within the same second (e.g. the
+  // demo seed, which runs in one transaction). Together they produce a fully
+  // stable, deterministic order that matches the current de-facto display order
+  // (insertion order) — no visible catalog change for end users.
   const activeProducts = await (
     whereClause
       ? db.select().from(schema.products).where(whereClause)
       : db.select().from(schema.products)
-  ).all()
+  )
+    .orderBy(asc(schema.products.createdAt), asc(sql`rowid`))
+    .all()
 
   if (activeProducts.length === 0) return []
 
@@ -195,11 +202,12 @@ export async function assembleProductList(
  * Never N+1 — mirrors assembleProductList's batched approach.
  */
 export async function assembleSearchIndex(db: Database): Promise<ProductSearchItem[]> {
-  // 1. All active products
+  // 1. All active products — same stable order as assembleProductList
   const activeProducts = await db
     .select()
     .from(schema.products)
     .where(eq(schema.products.active, true))
+    .orderBy(asc(schema.products.createdAt), asc(sql`rowid`))
     .all()
 
   if (activeProducts.length === 0) return []
