@@ -85,8 +85,10 @@ export function CartSheet({ flatRateCents = 0, thresholdCents = 0 }: CartSheetPr
           </div>
         ) : (
           <>
-            {/* Item list */}
-            <ScrollArea className="flex-1 px-4">
+            {/* Item list — min-h-0 lets flex-1 constrain the height so the inner
+                viewport actually scrolls (without it, flex min-height:auto makes
+                the list grow to fit every item and the summary gets pushed off). */}
+            <ScrollArea className="flex-1 min-h-0 px-4">
               <div className="divide-y divide-border">
                 {items.map((item) => (
                   <CartItem key={item.sizeOptionId} item={item} />
