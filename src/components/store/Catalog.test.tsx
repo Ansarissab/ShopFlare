@@ -369,4 +369,49 @@ describe('Catalog — hasMore branch (pagination)', () => {
     expect(screen.getByText(/showing/i)).toBeTruthy()
     expect(screen.getByTestId('product-grid')).toBeTruthy()
   })
+
+  it('shows "showing {count}" (no "of") when hasMore is false (all products fit on one page)', () => {
+    // 3 products, pageSize=24 → hasMore=false → showingProducts (not showingProductsOf)
+    const products = [makeProduct('h1'), makeProduct('h2'), makeProduct('h3')]
+    mockProductsState = { data: { products }, loading: false, error: null }
+    render(<Catalog basePath="/" />)
+    expect(screen.getByTestId('product-grid')).toBeTruthy()
+    // hasMore=false branch: uses t.store.showingProducts (single-count string)
+    expect(screen.getByText(/showing/i)).toBeTruthy()
+  })
+})
+
+describe('Catalog — coming-soon empty state', () => {
+  it('renders comingSoonBody and comingSoonSubtext paragraphs when products is empty', () => {
+    mockProductsState = { data: { products: [] }, loading: false, error: null }
+    render(<Catalog basePath="/" />)
+    // Both <p> elements under the coming-soon branch must be present
+    expect(screen.getByText(/check back soon/i)).toBeTruthy()
+    expect(screen.getByText(/preparing something great/i)).toBeTruthy()
+  })
+})
+
+describe('Catalog — search no-results heading', () => {
+  it('renders searchNoResultsHeading h2 when query has no matches', () => {
+    const products = [makeProduct('n1'), makeProduct('n2')]
+    mockProductsState = { data: { products }, loading: false, error: null }
+    mockSearchParamsMap['q'] = 'zzznomatch'
+    render(<Catalog basePath="/" />)
+    // searchNoResultsHeading branch: h2 text
+    expect(screen.getByText(/no results found/i)).toBeTruthy()
+  })
+})
+
+describe('Catalog — category-empty heading + subtext', () => {
+  it('renders categoryEmptyHeading and categoryEmptySubtext when category filter yields nothing', () => {
+    const products = [makeProduct('ce1')]
+    mockProductsState = { data: { products }, loading: false, error: null }
+    const cat = makeCategory('cat-empty2', 'empty-cat')
+    mockCatsState = { data: { categories: [cat] }, loading: false, error: null }
+    mockSearchParamsMap['category'] = 'empty-cat'
+    render(<Catalog basePath="/" />)
+    // categoryEmptyHeading + categoryEmptySubtext both rendered
+    expect(screen.getByText(/nothing here yet/i)).toBeTruthy()
+    expect(screen.getByText(/try a different category/i)).toBeTruthy()
+  })
 })

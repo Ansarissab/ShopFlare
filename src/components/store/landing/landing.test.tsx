@@ -211,6 +211,143 @@ describe('HeroSection', () => {
     )
     expect(screen.getByRole('link').getAttribute('href')).toBe('/products')
   })
+
+  it('renders storeName as mono watermark in image-left layout when provided', () => {
+    // Exercises the `{storeName && <span>...</span>}` branch (image-left only).
+    // storeName also becomes the heading fallback so 'ShopFlare' appears twice —
+    // once in the <span> watermark and once in the <h1>. Assert the <span> specifically.
+    const { container } = render(
+      HeroSection({
+        section: makeSection(),
+        heroStyle: 'image-left',
+        imageUrl: null,
+        storeName: 'ShopFlare',
+        t: en,
+      }),
+    )
+    // The watermark is a <span> with the mono/uppercase class
+    const watermark = container.querySelector('span.font-mono')
+    expect(watermark).toBeTruthy()
+    expect(watermark?.textContent).toBe('ShopFlare')
+  })
+
+  it('does not render storeName watermark when storeName is absent', () => {
+    // storeName=undefined → {storeName && ...} = false branch
+    render(
+      HeroSection({
+        section: makeSection(),
+        heroStyle: 'image-left',
+        imageUrl: null,
+        storeName: undefined,
+        t: en,
+      }),
+    )
+    // No extra text element for store name (only the heading + CTA link)
+    expect(screen.queryByText('ShopFlare')).toBeNull()
+  })
+
+  it('renders subtext paragraph in image-left layout when provided', () => {
+    // Exercises the `{subtext && <p>...</p>}` branch in the image-left (poster) layout
+    render(
+      HeroSection({
+        section: makeSection({ subtext: 'Our curated collection' }),
+        heroStyle: 'image-left',
+        imageUrl: null,
+        t: en,
+      }),
+    )
+    expect(screen.getByText('Our curated collection')).toBeTruthy()
+  })
+
+  it('renders subtext paragraph in full-bleed layout when provided', () => {
+    // Exercises `{subtext && <p>...</p>}` in the full-bleed branch
+    render(
+      HeroSection({
+        section: makeSection({ subtext: 'Sale on now' }),
+        heroStyle: 'full-bleed',
+        imageUrl: null,
+        t: en,
+      }),
+    )
+    expect(screen.getByText('Sale on now')).toBeTruthy()
+  })
+
+  it('renders subtext paragraph in centered layout when provided', () => {
+    render(
+      HeroSection({
+        section: makeSection({ subtext: 'Discover more' }),
+        heroStyle: 'centered',
+        imageUrl: null,
+        t: en,
+      }),
+    )
+    expect(screen.getByText('Discover more')).toBeTruthy()
+  })
+
+  it('renders subtext paragraph in split layout when provided', () => {
+    render(
+      HeroSection({
+        section: makeSection({ subtext: 'Shop the look' }),
+        heroStyle: 'split',
+        imageUrl: null,
+        t: en,
+      }),
+    )
+    expect(screen.getByText('Shop the look')).toBeTruthy()
+  })
+
+  it('falls back to storeName as heading when section.heading is null but storeName is set', () => {
+    // Exercises `section.heading || storeName || t.store.heroDefaultHeading` — storeName branch
+    render(
+      HeroSection({
+        section: makeSection({ heading: null }),
+        heroStyle: 'image-left',
+        imageUrl: null,
+        storeName: 'BrandName',
+        t: en,
+      }),
+    )
+    expect(screen.getByRole('heading', { level: 1 })).toBeTruthy()
+  })
+
+  it('renders image in centered layout when imageUrl is provided', () => {
+    // Exercises imageUrl branch inside the centered conditional
+    const { container } = render(
+      HeroSection({
+        section: makeSection(),
+        heroStyle: 'centered',
+        imageUrl: '/cdn/centered.jpg',
+        t: en,
+      }),
+    )
+    expect(container.querySelector('img')).toBeTruthy()
+  })
+
+  it('renders image in split layout when imageUrl is provided', () => {
+    // Exercises imageUrl branch inside the split conditional
+    const { container } = render(
+      HeroSection({
+        section: makeSection(),
+        heroStyle: 'split',
+        imageUrl: '/cdn/split.jpg',
+        t: en,
+      }),
+    )
+    expect(container.querySelector('img')).toBeTruthy()
+  })
+
+  it('renders image in full-bleed layout when imageUrl is provided', () => {
+    // Exercises imageUrl branch inside the full-bleed conditional
+    const { container } = render(
+      HeroSection({
+        section: makeSection(),
+        heroStyle: 'full-bleed',
+        imageUrl: '/cdn/full.jpg',
+        t: en,
+      }),
+    )
+    expect(container.querySelector('img')).toBeTruthy()
+  })
 })
 
 // ── StorySection ─────────────────────────────────────────────────────────────

@@ -275,4 +275,38 @@ describe('CheckoutMethodSelector', () => {
     const cardBtn = screen.getByRole('radio', { name: new RegExp(en.checkout.payWithCard) })
     expect(cardBtn.getAttribute('aria-checked')).toBe('true')
   })
+
+  it('ArrowUp wraps around from first radio to last', () => {
+    render(<CheckoutMethodSelector />)
+    // Default: COD is active (index 1 in [card, cod, whatsapp]).
+    // First, move to card (index 0).
+    const codBtn = screen.getByRole('radio', { name: new RegExp(en.store.cashOnDelivery) })
+    fireEvent.keyDown(codBtn, { key: 'ArrowUp' })
+    const cardBtn = screen.getByRole('radio', { name: new RegExp(en.checkout.payWithCard) })
+    expect(cardBtn.getAttribute('aria-checked')).toBe('true')
+    // Now ArrowUp from card (index 0) → wraps to last (whatsapp, index 2)
+    fireEvent.keyDown(cardBtn, { key: 'ArrowUp' })
+    const whatsappBtn = screen.getByRole('radio', { name: new RegExp(en.store.orderOnWhatsApp) })
+    expect(whatsappBtn.getAttribute('aria-checked')).toBe('true')
+  })
+
+  it('ArrowLeft moves focus to the previous radio', () => {
+    render(<CheckoutMethodSelector />)
+    // COD is active (index 1). ArrowLeft → card (index 0).
+    const codBtn = screen.getByRole('radio', { name: new RegExp(en.store.cashOnDelivery) })
+    fireEvent.keyDown(codBtn, { key: 'ArrowLeft' })
+    const cardBtn = screen.getByRole('radio', { name: new RegExp(en.checkout.payWithCard) })
+    expect(cardBtn.getAttribute('aria-checked')).toBe('true')
+  })
+
+  it('non-navigation keys do not change active method or call preventDefault', () => {
+    render(<CheckoutMethodSelector />)
+    const codBtn = screen.getByRole('radio', { name: new RegExp(en.store.cashOnDelivery) })
+    // Firing a non-nav key — it should be a no-op (nextIdx stays null → no setActive)
+    fireEvent.keyDown(codBtn, { key: 'Tab' })
+    // COD should still be active
+    expect(codBtn.getAttribute('aria-checked')).toBe('true')
+    const cardBtn = screen.getByRole('radio', { name: new RegExp(en.checkout.payWithCard) })
+    expect(cardBtn.getAttribute('aria-checked')).toBe('false')
+  })
 })

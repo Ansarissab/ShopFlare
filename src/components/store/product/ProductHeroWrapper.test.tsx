@@ -257,4 +257,61 @@ describe('ProductHeroWrapper', () => {
       vi.useRealTimers()
     }
   })
+
+  it('clears the pending revert timer when onAddToCart is called a second time rapidly', () => {
+    // This exercises the `if (addedTimerRef.current !== null) clearTimeout(...)` branch.
+    vi.useFakeTimers()
+    try {
+      render(<ProductHeroWrapper item={item} />)
+      // First add — starts timer
+      act(() => {
+        heroProps!.onAddToCart(sizeA)
+      })
+      expect(heroProps!.isAdded).toBe(true)
+      // Advance partially (not enough to revert)
+      act(() => {
+        vi.advanceTimersByTime(800)
+      })
+      // Second add while timer is still pending — clears old timer, starts new one
+      act(() => {
+        heroProps!.onAddToCart(sizeNoStripe)
+      })
+      expect(heroProps!.isAdded).toBe(true)
+      // Advance another 800ms (1600ms total from first add, 800ms from second add)
+      // The first timer would have fired at 1500ms but was cleared; still in "added" state
+      act(() => {
+        vi.advanceTimersByTime(800)
+      })
+      expect(heroProps!.isAdded).toBe(true)
+      // Advance the remaining time for the second timer to fire
+      act(() => {
+        vi.advanceTimersByTime(700)
+      })
+      expect(heroProps!.isAdded).toBe(false)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('cleans up the revert timer on unmount (unmount with pending timer)', () => {
+    // Exercises the useEffect cleanup: `if (addedTimerRef.current !== null) clearTimeout(...)`
+    vi.useFakeTimers()
+    const { unmount } = render(<ProductHeroWrapper item={item} />)
+    try {
+      act(() => {
+        heroProps!.onAddToCart(sizeA)
+      })
+      expect(heroProps!.isAdded).toBe(true)
+      // Unmount while timer is still pending — should not throw or produce act() warnings
+      act(() => {
+        unmount()
+      })
+      // Advance past the timer duration — no setState-after-unmount should occur
+      act(() => {
+        vi.advanceTimersByTime(2000)
+      })
+    } finally {
+      vi.useRealTimers()
+    }
+  })
 })

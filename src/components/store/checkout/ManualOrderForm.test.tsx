@@ -258,6 +258,23 @@ describe('ManualOrderForm', () => {
     expect(btn.disabled).toBe(false)
   })
 
+  it('includes both phone and email in the success URL hint when phone takes precedence (?? right branch never fires)', async () => {
+    // `contactHint = shippingAddress.phone ?? shippingAddress.email`
+    // When phone is defined (non-null), it is used; email is ignored.
+    // This verifies the left side of the ?? wins and the right (email) branch is not taken.
+    render(<ManualOrderForm {...baseProps} />)
+    fillValidAddress() // sets phone=+923001234567, email=buyer@example.com
+    fireEvent.click(screen.getByTestId('ts-verify'))
+    fireEvent.click(screen.getByRole('button', { name: en.checkout.placeOrder }))
+
+    await waitFor(() => expect(push).toHaveBeenCalled())
+    const url = push.mock.calls[0][0] as string
+    // Phone wins → encoded phone is present
+    expect(url).toContain(`&c=${encodeURIComponent('+923001234567')}`)
+    // Email is NOT the hint (phone took precedence)
+    expect(url).not.toContain(encodeURIComponent('buyer@example.com'))
+  })
+
   it('shows the loading spinner while the order request is in flight (isSubmitting branch)', async () => {
     // Hold apiPost open so isSubmitting stays true and the button shows the spinner.
     let resolvePost: (v: { orderId: string; orderNumber: string }) => void = () => {}
