@@ -168,7 +168,7 @@ export function HeroSection({
             <div className="hero-poster-item" style={{ transitionDelay: staggerDelay(3) }}>
               <Link
                 href={ctaHref}
-                className="inline-flex items-center rounded-md bg-primary px-7 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent min-h-[44px]"
+                className="inline-flex items-center rounded-md bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent min-h-[44px]"
               >
                 {ctaText}
               </Link>
