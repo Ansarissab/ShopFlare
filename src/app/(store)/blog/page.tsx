@@ -55,7 +55,7 @@ export default async function BlogIndexPage() {
       <JsonLd data={breadcrumb} />
 
       <div className="mx-auto w-full max-w-5xl px-4 py-10">
-        <h1 className="text-3xl font-bold tracking-tight mb-8">{t.blog.pageTitle}</h1>
+        <h1 className="text-3xl tracking-tight mb-8">{t.blog.pageTitle}</h1>
 
         {posts.length === 0 ? (
           <p className="text-muted-foreground text-center py-16">{t.blog.noPosts}</p>
@@ -83,15 +83,20 @@ export default async function BlogIndexPage() {
                     </div>
                   )}
                   <div className="flex flex-col gap-2 p-4">
-                    <h2 className="font-semibold text-base leading-snug group-hover:underline line-clamp-2">
+                    <h2 className="text-lg leading-snug tracking-tight group-hover:underline line-clamp-2">
                       {post.title}
                     </h2>
                     {post.excerpt && (
-                      <p className="text-sm text-muted-foreground line-clamp-3">{post.excerpt}</p>
+                      <p className="text-sm leading-relaxed text-muted-foreground line-clamp-3">
+                        {post.excerpt}
+                      </p>
                     )}
-                    <div className="flex items-center justify-between mt-auto pt-2">
+                    <div className="flex items-center justify-between mt-auto pt-3">
                       {post.publishedAt && (
-                        <time dateTime={post.publishedAt} className="text-xs text-muted-foreground">
+                        <time
+                          dateTime={post.publishedAt}
+                          className="text-xs text-muted-foreground/80"
+                        >
                           {t.blog.publishedOn.replace(
                             '{date}',
                             new Date(post.publishedAt).toLocaleDateString('en-US', {
@@ -102,12 +107,12 @@ export default async function BlogIndexPage() {
                           )}
                         </time>
                       )}
-                      <span className="text-xs font-medium text-primary ms-auto">
+                      <span className="text-sm font-medium text-primary ms-auto">
                         {t.blog.readMore} →
                       </span>
                     </div>
                     {post.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-1">
+                      <div className="flex flex-wrap gap-1 mt-2">
                         {post.tags.map((tag) => (
                           <span
                             key={tag}
