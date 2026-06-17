@@ -354,6 +354,12 @@ export const en = {
     couponUpdated: 'Coupon updated',
     couponDeleted: 'Coupon deleted',
     noCoupons: 'No coupons yet.',
+    // coupon list filter
+    couponFilterLabel: 'Filter by status',
+    couponFilterAll: 'All coupons',
+    couponFilterActive: 'Active',
+    couponFilterInactive: 'Inactive',
+    couponFilterExpired: 'Expired',
     // reviews moderation (Agent P)
     reviewModeration: 'Review Moderation',
     pendingReviews: 'Pending',

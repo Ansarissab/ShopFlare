@@ -349,6 +349,12 @@ export const ur: Dictionary = {
     couponUpdated: 'Coupon updated',
     couponDeleted: 'Coupon deleted',
     noCoupons: 'No coupons yet.',
+    // coupon list filter
+    couponFilterLabel: 'Filter by status',
+    couponFilterAll: 'All coupons',
+    couponFilterActive: 'Active',
+    couponFilterInactive: 'Inactive',
+    couponFilterExpired: 'Expired',
     reviewModeration: 'Review Moderation',
     pendingReviews: 'Pending',
     approvedReviews: 'Approved',
