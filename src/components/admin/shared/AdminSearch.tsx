@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Search } from 'lucide-react'
 import { useT } from '@/lib/i18n/Provider'
 import { apiGet } from '@/lib/api'
+import { SEARCH_DEBOUNCE_MS } from '@/lib/constants'
 import type { AdminOrdersResponse, ProductsResponse } from '@/lib/types/admin'
 
 // ─── Local types ─────────────────────────────────────────────────────────────
@@ -32,10 +33,10 @@ export default function AdminSearch() {
   const [open, setOpen] = useState(false)
   const [highlighted, setHighlighted] = useState(0)
 
-  // ─── 200ms debounce ────────────────────────────────────────────────────────
+  // ─── debounce ──────────────────────────────────────────────────────────────
 
   useEffect(() => {
-    const id = setTimeout(() => setDebouncedQuery(query), 200)
+    const id = setTimeout(() => setDebouncedQuery(query), SEARCH_DEBOUNCE_MS)
     return () => clearTimeout(id)
   }, [query])
 
