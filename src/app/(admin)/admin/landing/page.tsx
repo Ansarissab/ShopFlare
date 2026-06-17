@@ -16,13 +16,8 @@ import { useStoreConfig } from '@/hooks/useStoreConfig'
 import { DATA_UPDATED_CHANNEL } from '@/hooks/useApiResource'
 import { LANDING_SECTION_KEYS } from '@/lib/constants'
 import type { LandingSectionKey } from '@/lib/constants'
-import type { LandingSection } from '@/lib/types'
+import type { LandingSection, AdminLandingResponse } from '@/lib/types'
 import type { ProductWithVariants } from '@/lib/types/product'
-
-interface AdminLandingResponse {
-  sections: Record<LandingSectionKey, LandingSection>
-  featuredProductIds: string[]
-}
 
 interface ImageUploadResult {
   r2Key: string

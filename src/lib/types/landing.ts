@@ -53,3 +53,18 @@ export interface CTABandProps {
   section: LandingSection
   t: Dictionary
 }
+
+export interface AdminLandingResponse {
+  sections: Record<LandingSectionKey, LandingSection>
+  featuredProductIds: string[]
+}
+
+export interface StoreReviewsResponse {
+  reviews: Array<{
+    id: string
+    customerName: string
+    rating: number
+    body: string | null
+    createdAt: string
+  }>
+}

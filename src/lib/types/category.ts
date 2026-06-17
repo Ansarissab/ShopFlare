@@ -54,3 +54,34 @@ export interface ProductCategoryPickerProps {
   selectedIds: string[]
   onChange: (ids: string[]) => void
 }
+
+export interface CatalogProps {
+  /** Base path for URL sync — '/' when landing is OFF, '/shop' when ON. */
+  basePath?: string
+  /**
+   * SSR-seeded product list from the RSC page. When provided the catalog renders
+   * the real grid on first paint (no skeleton) and still revalidates via the hook.
+   */
+  initialProducts?: ProductWithVariants[]
+  /**
+   * SSR-seeded category list from the RSC page. Prevents a server/client hydration
+   * mismatch: without it the server renders with no categories (the hook can't
+   * fire effects during SSR) while the client may see cached category data on its
+   * first render, producing a different DOM structure.
+   */
+  initialCategories?: CategoryNode[]
+}
+
+export interface CategoryProductSectionProps {
+  slug: string
+  products: ProductWithVariants[]
+  pageSize: number
+  flatRateCents: number
+  thresholdCents: number
+  initialQuery?: string
+}
+
+export interface CategoryProductsManagerProps {
+  categoryId: string
+  initialProducts: ProductWithVariants[]
+}

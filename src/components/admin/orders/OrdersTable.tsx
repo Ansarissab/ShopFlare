@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils'
 import { layout } from '@/lib/styles'
 import { useListNavigation } from '@/hooks/useListNavigation'
 import { useRegisterListNav } from '@/components/admin/shared/ListNavContext'
-import type { AdminOrder } from '@/lib/types/admin'
+import type { OrdersTableProps } from '@/lib/types/admin'
 
 const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   pending: 'outline',
@@ -19,10 +19,6 @@ const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'o
   shipped: 'default',
   delivered: 'default',
   cancelled: 'destructive',
-}
-
-interface OrdersTableProps {
-  orders: AdminOrder[]
 }
 
 export function OrdersTable({ orders }: OrdersTableProps) {

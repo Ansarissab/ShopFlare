@@ -185,3 +185,31 @@ export interface StorePage {
 export interface AdminPagesResponse {
   pages: StorePage[]
 }
+
+export interface OrdersTableProps {
+  orders: AdminOrder[]
+}
+
+export interface ProductFormProps {
+  initial?: ProductWithVariants
+}
+
+export interface DashboardStats {
+  total: number
+  pending: number
+  cancelled: number
+  delivered: number
+  revenueCents: number
+  avgOrderCents: number
+  lowStock: number
+  revenueByDay: { label: string; revenue: number }[]
+  statusBreakdown: { name: string; value: number; color: string }[]
+  recentOrders: {
+    id: string
+    orderNumber: string
+    customerName: string
+    totalCents: number
+    status: string
+    createdAt: string
+  }[]
+}

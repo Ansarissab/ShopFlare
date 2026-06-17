@@ -25,7 +25,7 @@ import { formatPrice, shortDay } from '@/lib/utils/index'
 import { CHART_TOOLTIP_STYLE } from '@/lib/constants/chart'
 import { useApiResource } from '@/hooks/useApiResource'
 import { useChartTheme } from '@/hooks/useChartTheme'
-import type { AdminOrdersResponse } from '@/lib/types/admin'
+import type { AdminOrdersResponse, DashboardStats } from '@/lib/types/admin'
 import type { Dictionary } from '@/lib/i18n/index'
 
 // ─── Chart helpers ────────────────────────────────────────────────────────────
@@ -56,26 +56,6 @@ function getLast14Days(): string[] {
 }
 
 // ─── Data computation ─────────────────────────────────────────────────────────
-
-interface DashboardStats {
-  total: number
-  pending: number
-  cancelled: number
-  delivered: number
-  revenueCents: number
-  avgOrderCents: number
-  lowStock: number
-  revenueByDay: { label: string; revenue: number }[]
-  statusBreakdown: { name: string; value: number; color: string }[]
-  recentOrders: {
-    id: string
-    orderNumber: string
-    customerName: string
-    totalCents: number
-    status: string
-    createdAt: string
-  }[]
-}
 
 function computeStats(data: AdminOrdersResponse | null, t: Dictionary): DashboardStats {
   if (!data) {

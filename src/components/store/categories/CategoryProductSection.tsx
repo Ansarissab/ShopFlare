@@ -8,16 +8,7 @@ import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
 import { useT } from '@/lib/i18n/Provider'
 import { useProductSearch } from '@/hooks/useProductSearch'
-import type { ProductWithVariants } from '@/lib/types/product'
-
-interface CategoryProductSectionProps {
-  slug: string
-  products: ProductWithVariants[]
-  pageSize: number
-  flatRateCents: number
-  thresholdCents: number
-  initialQuery?: string
-}
+import type { CategoryProductSectionProps } from '@/lib/types/category'
 
 export function CategoryProductSection({
   slug,

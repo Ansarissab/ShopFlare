@@ -12,27 +12,10 @@ import { cn } from '@/lib/utils'
 import { useT } from '@/lib/i18n/Provider'
 import { DEFAULT_PRODUCT_PAGE_SIZE } from '@/lib/constants'
 import type { ProductWithVariants } from '@/lib/types/product'
-import type { CategoryNode } from '@/lib/types/category'
+import type { CategoryNode, CatalogProps } from '@/lib/types/category'
 import { useApiResource } from '@/hooks/useApiResource'
 import { useStoreConfig } from '@/hooks/useStoreConfig'
 import { useProductSearch } from '@/hooks/useProductSearch'
-
-interface CatalogProps {
-  /** Base path for URL sync — '/' when landing is OFF, '/shop' when ON. */
-  basePath?: string
-  /**
-   * SSR-seeded product list from the RSC page. When provided the catalog renders
-   * the real grid on first paint (no skeleton) and still revalidates via the hook.
-   */
-  initialProducts?: ProductWithVariants[]
-  /**
-   * SSR-seeded category list from the RSC page. Prevents a server/client hydration
-   * mismatch: without it the server renders with no categories (the hook can't
-   * fire effects during SSR) while the client may see cached category data on its
-   * first render, producing a different DOM structure.
-   */
-  initialCategories?: CategoryNode[]
-}
 
 function ProductListingSkeleton() {
   return (

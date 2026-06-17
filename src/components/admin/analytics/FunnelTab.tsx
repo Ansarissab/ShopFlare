@@ -7,12 +7,8 @@ import { HelpTip } from '@/components/common/HelpTip'
 import { useT } from '@/lib/i18n/Provider'
 import { apiGet } from '@/lib/api'
 import { formatPrice } from '@/lib/utils/index'
-import type { AnalyticsFunnelResponse } from '@/lib/types/analytics'
+import type { AnalyticsFunnelResponse, FunnelTabProps } from '@/lib/types/analytics'
 import type { Dictionary } from '@/lib/i18n/index'
-
-interface FunnelTabProps {
-  period: string
-}
 
 // Maps API stage keys to i18n labels for layer-2 stages.
 // NOTE: was module-scope referencing en.; converted to accept t as parameter.

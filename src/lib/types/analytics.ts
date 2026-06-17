@@ -156,3 +156,7 @@ export interface AnalyticsFunnelResponse {
   layer2Stages: AnalyticsFunnelStage[]
   sampleRate: number
 }
+
+export interface FunnelTabProps {
+  period: string
+}

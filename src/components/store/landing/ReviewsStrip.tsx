@@ -5,17 +5,7 @@ import { useApiResource } from '@/hooks/useApiResource'
 import { useReveal } from '@/hooks/useReveal'
 import { useT } from '@/lib/i18n/Provider'
 import { formatDate } from '@/lib/utils/index'
-import type { ReviewsStripProps } from '@/lib/types'
-
-interface StoreReviewsResponse {
-  reviews: Array<{
-    id: string
-    customerName: string
-    rating: number
-    body: string | null
-    createdAt: string
-  }>
-}
+import type { ReviewsStripProps, StoreReviewsResponse } from '@/lib/types'
 
 export function ReviewsStrip({ section }: ReviewsStripProps) {
   const t = useT()

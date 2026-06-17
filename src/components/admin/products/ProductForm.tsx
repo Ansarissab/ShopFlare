@@ -30,12 +30,8 @@ import { updateSizeOptionSchema } from '@/lib/schemas'
 import type { FaqItemData } from '@/lib/schemas/config'
 import { formatPrice } from '@/lib/utils/index'
 import { layout } from '@/lib/styles'
-import type {
-  ProductWithVariants,
-  VariantWithDetails,
-  SizeOption,
-  ProductImage,
-} from '@/lib/types/product'
+import type { VariantWithDetails, SizeOption, ProductImage } from '@/lib/types/product'
+import type { ProductFormProps } from '@/lib/types/admin'
 import type { AnalyticsProductDetail } from '@/lib/types/analytics'
 
 // ─── Per-product stats panel (edit mode only) ─────────────────────────────────
@@ -121,10 +117,6 @@ function ProductStatsPanel({ productId }: { productId: string }) {
 }
 
 // ─── ProductForm ───────────────────────────────────────────────────────────────
-
-interface ProductFormProps {
-  initial?: ProductWithVariants
-}
 
 type LocalVariant = Omit<VariantWithDetails, 'id' | 'productId'> & {
   id: string

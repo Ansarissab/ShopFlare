@@ -158,3 +158,8 @@ export interface ReviewFormProps {
   productName: string
   onSubmitted: () => void
 }
+
+export interface ProductGridProps {
+  items: ProductWithVariants[]
+  storeConfig?: { flatRateCents: number; thresholdCents: number }
+}

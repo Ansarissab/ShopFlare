@@ -9,11 +9,7 @@ import { useT } from '@/lib/i18n/Provider'
 import { apiGet, apiPut } from '@/lib/api'
 import type { ProductWithVariants } from '@/lib/types/product'
 import type { ProductsResponse } from '@/lib/types/admin'
-
-interface CategoryProductsManagerProps {
-  categoryId: string
-  initialProducts: ProductWithVariants[]
-}
+import type { CategoryProductsManagerProps } from '@/lib/types/category'
 
 export function CategoryProductsManager({
   categoryId,
