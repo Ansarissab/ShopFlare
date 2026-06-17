@@ -3,6 +3,7 @@ import { POLICY_SLUGS, DEFAULT_LOCALE } from '@/lib/constants'
 import type { LocaleCode } from '@/lib/constants'
 import { buildLocaleAlternates } from '@/lib/seo/hreflang'
 import { serverWorkerUrl } from '@/lib/server/worker-origin'
+import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
 
 export const revalidate = 3600
 
@@ -13,17 +14,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Fetch per-page updatedAt timestamps to populate lastModified on policy routes
   const policyUpdates: Record<string, string> = {}
-  if (workerUrl) {
-    try {
-      const pagesRes = await fetch(`${workerUrl}/api/pages`, { next: { revalidate: 3600 } })
-      if (pagesRes.ok) {
-        const pages = (await pagesRes.json()) as Array<{ slug: string; updatedAt?: string }>
-        for (const p of pages) {
-          if (p.updatedAt) policyUpdates[p.slug] = p.updatedAt
-        }
-      }
-    } catch {
-      // skip — policy routes will have no lastModified
+  const pages = await fetchFromWorker<Array<{ slug: string; updatedAt?: string }>>('/api/pages', {
+    revalidate: 3600,
+  })
+  if (pages) {
+    for (const p of pages) {
+      if (p.updatedAt) policyUpdates[p.slug] = p.updatedAt
     }
   }
 
@@ -31,24 +27,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let landingEnabled = false
   let faqEnabled = false
   let enabledLocales: LocaleCode[] = [DEFAULT_LOCALE]
-  if (workerUrl) {
-    try {
-      const cfgRes = await fetch(`${workerUrl}/api/config/store`, { next: { revalidate: 3600 } })
-      if (cfgRes.ok) {
-        const cfg = (await cfgRes.json()) as {
-          landingEnabled?: boolean
-          faqEnabled?: boolean
-          faqItems?: unknown[]
-          enabledLocales?: LocaleCode[]
-        }
-        landingEnabled = cfg.landingEnabled ?? false
-        faqEnabled = (cfg.faqEnabled ?? false) && (cfg.faqItems?.length ?? 0) > 0
-        if (cfg.enabledLocales && cfg.enabledLocales.length > 0) {
-          enabledLocales = cfg.enabledLocales
-        }
-      }
-    } catch {
-      // skip — landingEnabled/faqEnabled stay false, /shop and /faq won't be included
+  const cfg = await fetchFromWorker<{
+    landingEnabled?: boolean
+    faqEnabled?: boolean
+    faqItems?: unknown[]
+    enabledLocales?: LocaleCode[]
+  }>('/api/config/store', { revalidate: 3600 })
+  if (cfg) {
+    landingEnabled = cfg.landingEnabled ?? false
+    faqEnabled = (cfg.faqEnabled ?? false) && (cfg.faqItems?.length ?? 0) > 0
+    if (cfg.enabledLocales && cfg.enabledLocales.length > 0) {
+      enabledLocales = cfg.enabledLocales
     }
   }
 
@@ -93,81 +82,63 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]
 
   let productRoutes: MetadataRoute.Sitemap = []
-  if (workerUrl) {
-    try {
-      const res = await fetch(`${workerUrl}/api/products`, { next: { revalidate: 3600 } })
-      if (res.ok) {
-        // /api/products returns { products: ProductWithVariants[] }. Products have
-        // no slug column — they're identified by id, and the /product/[slug] route
-        // resolves by id (matching the IndexNow ping path).
-        const data = (await res.json()) as {
-          products?: Array<{ product: { id: string; updatedAt?: string } }>
-        }
-        productRoutes = (data.products ?? []).map(({ product }) => ({
-          url: `${siteUrl}/product/${product.id}`,
-          changeFrequency: 'weekly' as const,
-          priority: 0.8,
-          alternates: { languages: alternates(`/product/${product.id}`) },
-          ...(product.updatedAt ? { lastModified: new Date(product.updatedAt) } : {}),
-        }))
-      }
-    } catch {
-      // worker unavailable at build time — only static routes included
-    }
+  // /api/products returns { products: ProductWithVariants[] }. Products have
+  // no slug column — they're identified by id, and the /product/[slug] route
+  // resolves by id (matching the IndexNow ping path).
+  const productsData = await fetchFromWorker<{
+    products?: Array<{ product: { id: string; updatedAt?: string } }>
+  }>('/api/products', { revalidate: 3600 })
+  if (productsData) {
+    productRoutes = (productsData.products ?? []).map(({ product }) => ({
+      url: `${siteUrl}/product/${product.id}`,
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+      alternates: { languages: alternates(`/product/${product.id}`) },
+      ...(product.updatedAt ? { lastModified: new Date(product.updatedAt) } : {}),
+    }))
   }
 
   let categoryRoutes: MetadataRoute.Sitemap = []
-  if (workerUrl) {
-    try {
-      const res = await fetch(`${workerUrl}/api/categories`, { next: { revalidate: 3600 } })
-      if (res.ok) {
-        const data = (await res.json()) as {
-          categories: Array<{ slug: string; children?: Array<{ slug: string }> }>
-        }
-        const allSlugs: string[] = []
-        for (const cat of data.categories) {
-          allSlugs.push(cat.slug)
-          for (const child of cat.children ?? []) {
-            allSlugs.push(child.slug)
-          }
-        }
-        categoryRoutes = allSlugs.map((slug) => ({
-          url: `${siteUrl}/category/${slug}`,
-          changeFrequency: 'weekly' as const,
-          priority: 0.6,
-          alternates: { languages: alternates(`/category/${slug}`) },
-        }))
+  const categoriesData = await fetchFromWorker<{
+    categories: Array<{ slug: string; children?: Array<{ slug: string }> }>
+  }>('/api/categories', { revalidate: 3600 })
+  if (categoriesData) {
+    const allSlugs: string[] = []
+    for (const cat of categoriesData.categories) {
+      allSlugs.push(cat.slug)
+      for (const child of cat.children ?? []) {
+        allSlugs.push(child.slug)
       }
-    } catch {
-      // worker unavailable at build time — category routes skipped
     }
+    categoryRoutes = allSlugs.map((slug) => ({
+      url: `${siteUrl}/category/${slug}`,
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+      alternates: { languages: alternates(`/category/${slug}`) },
+    }))
   }
 
   let blogRoutes: MetadataRoute.Sitemap = []
-  if (workerUrl) {
-    try {
-      const res = await fetch(`${workerUrl}/api/blog`, { next: { revalidate: 3600 } })
-      if (res.ok) {
-        const data = (await res.json()) as { posts: Array<{ slug: string; publishedAt?: string }> }
-        blogRoutes = [
-          {
-            url: `${siteUrl}/blog`,
-            changeFrequency: 'weekly' as const,
-            priority: 0.7,
-            alternates: { languages: alternates('/blog') },
-          },
-          ...data.posts.map((p) => ({
-            url: `${siteUrl}/blog/${p.slug}`,
-            changeFrequency: 'weekly' as const,
-            priority: 0.5,
-            alternates: { languages: alternates(`/blog/${p.slug}`) },
-            ...(p.publishedAt ? { lastModified: new Date(p.publishedAt) } : {}),
-          })),
-        ]
-      }
-    } catch {
-      // worker unavailable at build time — blog routes skipped
-    }
+  const blogData = await fetchFromWorker<{ posts: Array<{ slug: string; publishedAt?: string }> }>(
+    '/api/blog',
+    { revalidate: 3600 },
+  )
+  if (blogData) {
+    blogRoutes = [
+      {
+        url: `${siteUrl}/blog`,
+        changeFrequency: 'weekly' as const,
+        priority: 0.7,
+        alternates: { languages: alternates('/blog') },
+      },
+      ...blogData.posts.map((p) => ({
+        url: `${siteUrl}/blog/${p.slug}`,
+        changeFrequency: 'weekly' as const,
+        priority: 0.5,
+        alternates: { languages: alternates(`/blog/${p.slug}`) },
+        ...(p.publishedAt ? { lastModified: new Date(p.publishedAt) } : {}),
+      })),
+    ]
   }
   return [...staticRoutes, ...productRoutes, ...categoryRoutes, ...blogRoutes]
 }

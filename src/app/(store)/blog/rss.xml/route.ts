@@ -1,22 +1,9 @@
 import { serverWorkerUrl } from '@/lib/server/worker-origin'
+import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
+import type { BlogListResponse } from '@/lib/types/blog'
+import type { StoreConfig } from '@/lib/types/common'
 
 export const dynamic = 'force-dynamic'
-
-interface BlogPostSummary {
-  slug: string
-  title: string
-  excerpt: string
-  publishedAt: string
-}
-
-interface BlogListResponse {
-  posts: BlogPostSummary[]
-  nextCursor: string | null
-}
-
-interface StoreConfig {
-  storeName: string
-}
 
 function xmlEscape(str: string): string {
   return str
@@ -36,29 +23,14 @@ export async function GET(): Promise<Response> {
   }
 
   // Fetch blog posts
-  let posts: BlogPostSummary[] = []
-  try {
-    const res = await fetch(`${workerUrl}/api/blog`)
-    if (!res.ok) {
-      return new Response(null, { status: 404 })
-    }
-    const data = (await res.json()) as BlogListResponse
-    posts = data.posts ?? []
-  } catch {
-    return new Response(null, { status: 404 })
-  }
+  const data = await fetchFromWorker<BlogListResponse>('/api/blog', { revalidate: false })
+  if (!data) return new Response(null, { status: 404 })
+  const posts = data.posts ?? []
 
   // Fetch store name
   let storeName = 'Store'
-  try {
-    const cfgRes = await fetch(`${workerUrl}/api/config/store`)
-    if (cfgRes.ok) {
-      const cfg = (await cfgRes.json()) as StoreConfig
-      if (cfg.storeName) storeName = cfg.storeName
-    }
-  } catch {
-    // fall back to default
-  }
+  const cfg = await fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: false })
+  if (cfg?.storeName) storeName = cfg.storeName
 
   const lastBuildDate = new Date().toUTCString()
 

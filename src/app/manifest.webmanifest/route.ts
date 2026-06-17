@@ -1,47 +1,36 @@
 // ISR Web App Manifest for the storefront.
 // Fetches store config so name/colors/icons reflect merchant branding.
 // revalidate=300: CF Pages edge caches for 5 min, avoiding per-request invocations.
-import { serverWorkerUrl } from '@/lib/server/worker-origin'
+import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
+import type { StoreConfig } from '@/lib/types/common'
 
 export const revalidate = 300
 
-const WORKER_URL = serverWorkerUrl()
 const FALLBACK_NAME = 'ShopFlare'
 const FALLBACK_THEME = '#1A1A18'
 const FALLBACK_BG = '#141412'
 
-type StoreConfig = {
-  storeName?: string
-  tagline?: string
-  logoUrl?: string
-  primaryColor?: string
-  backgroundColor?: string
-}
-
-async function getConfig(): Promise<StoreConfig> {
-  try {
-    if (!WORKER_URL) return {}
-    const res = await fetch(`${WORKER_URL}/api/config/store`, {
-      next: { revalidate: 300 },
-    })
-    if (!res.ok) return {}
-    return (await res.json()) as StoreConfig
-  } catch {
-    return {}
-  }
-}
-
 export async function GET() {
-  const config = await getConfig()
+  const config = await fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: 300 })
 
-  const name = config.storeName ?? FALLBACK_NAME
+  const name = config?.storeName ?? FALLBACK_NAME
   const shortName = name.length > 12 ? name.slice(0, 12) : name
-  const themeColor = config.primaryColor ?? FALLBACK_THEME
-  const bgColor = config.backgroundColor ?? FALLBACK_BG
+  const themeColor = config?.primaryColor ?? FALLBACK_THEME
+  const bgColor = FALLBACK_BG
 
   const icons = [
-    { src: config.logoUrl ?? '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-    { src: config.logoUrl ?? '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+    {
+      src: config?.logoUrl ?? '/icon-192.png',
+      sizes: '192x192',
+      type: 'image/png',
+      purpose: 'any',
+    },
+    {
+      src: config?.logoUrl ?? '/icon-512.png',
+      sizes: '512x512',
+      type: 'image/png',
+      purpose: 'any',
+    },
     { src: '/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
     { src: '/icon-monochrome-192.png', sizes: '192x192', type: 'image/png', purpose: 'monochrome' },
   ]
@@ -50,7 +39,7 @@ export async function GET() {
     id: '/',
     name,
     short_name: shortName,
-    description: config.tagline ?? 'Your online store',
+    description: config?.tagline ?? 'Your online store',
     start_url: '/?source=pwa',
     scope: '/',
     display: 'standalone',
