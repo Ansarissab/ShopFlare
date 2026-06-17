@@ -21,16 +21,7 @@ import { sanitizeHtml } from 'worker/lib/sanitize'
 import type { AdminEnv } from 'worker/lib/access'
 import { ALLOWED_IMAGE_TYPES, MAX_IMAGE_BYTES } from '@/lib/constants'
 import { parseTags } from 'worker/lib/blog'
-
-function slugify(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .slice(0, 120)
-}
+import { slugify } from '@/lib/utils/index'
 
 const app = new Hono<AdminEnv>()
 
