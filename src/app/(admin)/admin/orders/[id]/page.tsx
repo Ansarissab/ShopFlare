@@ -4,9 +4,9 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { ArrowLeft } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
+import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Input } from '@/components/ui/input'
@@ -18,7 +18,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { OrderLineItem } from '@/components/common/OrderLineItem'
-import { cn } from '@/lib/utils'
 import { useT } from '@/lib/i18n/Provider'
 import { formatPrice } from '@/lib/utils/index'
 import { ORDER_STATUSES } from '@/lib/constants'
@@ -124,20 +123,16 @@ export default function AdminOrderDetailPage() {
 
   return (
     <div className="flex flex-col gap-6 max-w-3xl">
-      <div className="flex items-center gap-3">
-        <Link
-          href="/admin/orders"
-          className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}
-        >
-          <ArrowLeft className="size-4" />
-        </Link>
-        <h1 className="text-xl font-semibold tracking-tight">
-          {t.admin.orderDetail} — {order.orderNumber}
-        </h1>
-        <Badge variant="secondary" className="capitalize ml-auto">
-          {t.orderStatusLabels[displayStatus as keyof typeof t.orderStatusLabels] ?? displayStatus}
-        </Badge>
-      </div>
+      <AdminPageHeader
+        title={`${t.admin.orderDetail} — ${order.orderNumber}`}
+        backHref="/admin/orders"
+        actions={
+          <Badge variant="secondary" className="capitalize">
+            {t.orderStatusLabels[displayStatus as keyof typeof t.orderStatusLabels] ??
+              displayStatus}
+          </Badge>
+        }
+      />
 
       {/* Customer info */}
       <div className="rounded-lg border p-4 flex flex-col gap-1 text-sm">
