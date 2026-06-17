@@ -78,6 +78,13 @@
       "when": 1781433983024,
       "tag": "0010_useful_luminals",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1781694023997,
+      "tag": "0011_cuddly_vector",
+      "breakpoints": true
     }
   ]
 }

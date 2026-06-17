@@ -1,7 +1,7 @@
 import { sqliteTable, text, integer, primaryKey, index } from 'drizzle-orm/sqlite-core'
 import type { AnySQLiteColumn } from 'drizzle-orm/sqlite-core'
 import { sql } from 'drizzle-orm'
-import type { LandingSectionKey } from '@/lib/constants'
+import type { LandingSectionKey, LandingTemplate } from '@/lib/constants'
 
 // ─── Products ───────────────────────────────────────────────────────────────
 
@@ -239,26 +239,56 @@ export const notifyMe = sqliteTable('notify_me', {
 
 // ─── Landing Page ────────────────────────────────────────────────────────────
 
-export const landingContent = sqliteTable('landing_content', {
-  sectionKey: text('section_key').$type<LandingSectionKey>().primaryKey(),
-  enabled: integer('enabled', { mode: 'boolean' }).notNull().default(true),
-  heading: text('heading'),
-  subtext: text('subtext'),
-  bodyHtml: text('body_html'),
-  ctaText: text('cta_text'),
-  ctaHref: text('cta_href'),
-  imageR2Key: text('image_r2_key'),
+// A merchant can keep several named landing pages and switch which one is live.
+// Exactly one row has isActive=1 (enforced in the worker on activate).
+export const landingPages = sqliteTable('landing_pages', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  template: text('template').$type<LandingTemplate>().notNull().default('classic'),
+  isActive: integer('is_active', { mode: 'boolean' }).notNull().default(false),
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: text('created_at')
+    .notNull()
+    .default(sql`(datetime('now'))`),
   updatedAt: text('updated_at')
     .notNull()
     .default(sql`(datetime('now'))`),
 })
 
-export const featuredProducts = sqliteTable('featured_products', {
-  productId: text('product_id')
-    .primaryKey()
-    .references(() => products.id, { onDelete: 'cascade' }),
-  sortOrder: integer('sort_order').notNull().default(0),
-})
+export const landingContent = sqliteTable(
+  'landing_content',
+  {
+    landingPageId: text('landing_page_id')
+      .notNull()
+      .references(() => landingPages.id, { onDelete: 'cascade' }),
+    sectionKey: text('section_key').$type<LandingSectionKey>().notNull(),
+    enabled: integer('enabled', { mode: 'boolean' }).notNull().default(true),
+    heading: text('heading'),
+    subtext: text('subtext'),
+    bodyHtml: text('body_html'),
+    ctaText: text('cta_text'),
+    ctaHref: text('cta_href'),
+    imageR2Key: text('image_r2_key'),
+    updatedAt: text('updated_at')
+      .notNull()
+      .default(sql`(datetime('now'))`),
+  },
+  (t) => [primaryKey({ columns: [t.landingPageId, t.sectionKey] })],
+)
+
+export const featuredProducts = sqliteTable(
+  'featured_products',
+  {
+    landingPageId: text('landing_page_id')
+      .notNull()
+      .references(() => landingPages.id, { onDelete: 'cascade' }),
+    productId: text('product_id')
+      .notNull()
+      .references(() => products.id, { onDelete: 'cascade' }),
+    sortOrder: integer('sort_order').notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.landingPageId, t.productId] })],
+)
 
 // ─── Store Config ────────────────────────────────────────────────────────────
 
@@ -382,6 +412,7 @@ export type NewOrder = typeof orders.$inferInsert
 export type OrderItem = typeof orderItems.$inferSelect
 export type Coupon = typeof coupons.$inferSelect
 export type Review = typeof reviews.$inferSelect
+export type LandingPage = typeof landingPages.$inferSelect
 export type LandingContent = typeof landingContent.$inferSelect
 export type FeaturedProduct = typeof featuredProducts.$inferSelect
 export type StoreConfig = typeof storeConfig.$inferSelect
