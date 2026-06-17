@@ -312,7 +312,7 @@ export default function AdminSettingsPage() {
         }
       />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 items-start">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Appearance */}
         <div className="flex flex-col gap-4 rounded-lg border p-5 lg:col-span-2">
           <div className="flex flex-col gap-1">

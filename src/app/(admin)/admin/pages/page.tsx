@@ -100,7 +100,7 @@ export default function AdminPagesPage() {
 
   if (loading) {
     return (
-      <div className="flex flex-col gap-4 max-w-2xl">
+      <div className="flex flex-col gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <Skeleton key={i} className="h-16 w-full rounded-lg" />
         ))}
@@ -109,7 +109,7 @@ export default function AdminPagesPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-2xl">
+    <div className="flex flex-col gap-6">
       <AdminPageHeader title={t.admin.policyPages} />
 
       {POLICY_SLUGS.map((slug, index) => {
