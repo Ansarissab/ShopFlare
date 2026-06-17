@@ -2,11 +2,38 @@
 // Use only in async server components and generateMetadata functions (never in
 // 'use client' code — for client fetches use lib/api.ts).
 
+import { resolveWorkerUrl } from '@/lib/worker-url'
+
+// Resolve the worker origin through the SAME shared guard the client (lib/api.ts)
+// and the CSP (next.config.ts) use, so server-rendered pages can never silently
+// read PRODUCTION data in dev. Without this, a production NEXT_PUBLIC_WORKER_URL
+// left in env makes `next dev` server components fetch prod (e.g. a category that
+// only exists locally 404s), while the client correctly hits localhost.
+// Read each env var as a static member access and resolve lazily so tests can
+// stub NEXT_PUBLIC_WORKER_URL per-call via vi.stubEnv.
+let warnedRemote = false
+function serverWorkerUrl(): string {
+  return resolveWorkerUrl(
+    {
+      NEXT_PUBLIC_WORKER_URL: process.env.NEXT_PUBLIC_WORKER_URL,
+      NODE_ENV: process.env.NODE_ENV,
+      NEXT_PUBLIC_ALLOW_REMOTE_API: process.env.NEXT_PUBLIC_ALLOW_REMOTE_API,
+    },
+    (configured) => {
+      if (warnedRemote) return
+      warnedRemote = true
+      console.warn(
+        `[fetchFromWorker] Ignoring non-local NEXT_PUBLIC_WORKER_URL (${configured}) in development ` +
+          `to keep dev off production. Using http://localhost:8787; set NEXT_PUBLIC_ALLOW_REMOTE_API=1 to override.`,
+      )
+    },
+  )
+}
+
 /** Convert an R2 key to its public CDN URL (server-side only). */
 export function r2Url(key: string | null | undefined): string | null {
   if (!key) return null
-  const workerUrl = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
-  return `${workerUrl}/cdn/${key}`
+  return `${serverWorkerUrl()}/cdn/${key}`
 }
 
 export interface FetchOptions {
@@ -20,8 +47,7 @@ export interface FetchOptions {
 }
 
 export async function fetchFromWorker<T>(path: string, opts: FetchOptions = {}): Promise<T | null> {
-  // Read lazily so tests can stub NEXT_PUBLIC_WORKER_URL per-call via vi.stubEnv.
-  const workerUrl = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
+  const workerUrl = serverWorkerUrl()
   const revalidate = opts.revalidate ?? 60
   const cacheConfig: RequestInit['next'] = revalidate === false ? { revalidate: 0 } : { revalidate }
 
