@@ -2,8 +2,6 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { RenderHtml } from '@/components/shared/RenderHtml'
-import { layout } from '@/lib/styles'
-import { cn } from '@/lib/utils'
 import { formatDate } from '@/lib/utils/index'
 import { getT } from '@/lib/i18n/server'
 import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
@@ -78,7 +76,7 @@ export default async function PolicyPage({ params }: PageProps) {
   const isHtml = page.content?.trimStart().startsWith('<')
 
   return (
-    <div className={cn(layout.detailPage, 'max-w-3xl')}>
+    <div className="flex w-full flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
       <JsonLd data={breadcrumb} />
       <JsonLd data={webPage} />
       <h1 className="text-2xl font-bold tracking-tight">{page.title}</h1>
