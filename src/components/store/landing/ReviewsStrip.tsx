@@ -48,7 +48,9 @@ export function ReviewsStrip({ section }: ReviewsStripProps) {
                   </time>
                 </div>
                 {review.body && (
-                  <p className="text-sm text-muted-foreground leading-relaxed">{review.body}</p>
+                  <p className="line-clamp-4 text-sm text-muted-foreground leading-relaxed">
+                    {review.body}
+                  </p>
                 )}
               </li>
             ))}

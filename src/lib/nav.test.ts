@@ -22,6 +22,11 @@ describe('buildCategoryHref', () => {
   it('works for arbitrary slug values', () => {
     expect(buildCategoryHref('new-arrivals')).toBe('/category/new-arrivals')
   })
+
+  it('percent-encodes slugs with spaces or non-ASCII characters', () => {
+    expect(buildCategoryHref('summer sale')).toBe('/category/summer%20sale')
+    expect(buildCategoryHref('ropa-niños')).toBe('/category/ropa-ni%C3%B1os')
+  })
 })
 
 describe('catalogHref', () => {

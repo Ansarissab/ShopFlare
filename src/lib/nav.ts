@@ -18,7 +18,7 @@ export function catalogHref(landingEnabled?: boolean): string {
  * Example: buildCategoryHref('accessories') → '/category/accessories'
  */
 export function buildCategoryHref(slug: string): string {
-  return `/category/${slug}`
+  return `/category/${encodeURIComponent(slug)}`
 }
 
 // ─── Primary nav link model ────────────────────────────────────────────────────

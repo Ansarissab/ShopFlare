@@ -40,7 +40,12 @@ export function HeroSection({
               priority
             />
           )}
-          <div className="relative z-10 max-w-2xl text-primary-foreground">
+          {/*
+           * text-white is an intentional legibility hardcode here — NOT a DRY violation.
+           * The full-bleed overlay darkens the photo to brightness-50; text-primary-foreground
+           * is merchant-overridable and could be dark, making the text invisible over the image.
+           */}
+          <div className="relative z-10 max-w-2xl text-white">
             <h1 className="text-4xl sm:text-5xl">{heading}</h1>
             {subtext && <p className="mt-4 text-lg opacity-90">{subtext}</p>}
             <Link

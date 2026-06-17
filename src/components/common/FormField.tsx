@@ -28,7 +28,11 @@ export function FormField({ label, htmlFor, optional = false, error, help, child
   // so existing call-sites with no error are unaffected.
   const child =
     error && isValidElement<{ 'aria-describedby'?: string }>(children)
-      ? cloneElement(children, { 'aria-describedby': errorId })
+      ? cloneElement(children, {
+          'aria-describedby': [children.props['aria-describedby'], errorId]
+            .filter(Boolean)
+            .join(' '),
+        })
       : children
 
   return (

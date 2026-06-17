@@ -140,9 +140,7 @@ export function Catalog({ basePath = '/', initialProducts, initialCategories }: 
   if (items.length === 0) {
     return (
       <div className={cn(layout.centeredState, 'max-w-7xl py-24')}>
-        <h1 className="tracking-tight" style={{ fontSize: 'clamp(2rem, 5vw, 3rem)' }}>
-          {t.store.comingSoon}
-        </h1>
+        <h1 className="text-[clamp(2rem,5vw,3rem)] tracking-tight">{t.store.comingSoon}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{t.store.comingSoonBody}</p>
         <p className="text-sm text-muted-foreground">{t.store.comingSoonSubtext}</p>
       </div>

@@ -67,7 +67,9 @@ export function useReveal<T extends HTMLElement = HTMLElement>(
     return () => {
       observer.disconnect()
       // On unmount, restore visibility so a remounted component isn't stuck hidden.
+      // Remove both classes so a reused DOM node re-animates on next mount.
       el.classList.remove('reveal-init')
+      el.classList.remove('reveal-in')
     }
   }, [once, threshold, rootMargin])
 

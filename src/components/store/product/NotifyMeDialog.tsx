@@ -63,7 +63,9 @@ export function NotifyMeDialog({
         <DialogHeader>
           <DialogTitle>{t.store.notifyMe}</DialogTitle>
           <DialogDescription>
-            {t.store.notifyMeDescription.replace('{variant}', variantLabel).replace('{size}', size)}
+            {t.store.notifyMeDescription.replace(/\{variant\}|\{size\}/g, (m) =>
+              m === '{variant}' ? variantLabel : size,
+            )}
           </DialogDescription>
         </DialogHeader>
 

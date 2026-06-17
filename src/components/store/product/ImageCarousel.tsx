@@ -56,9 +56,9 @@ export function ImageCarousel({ images, productName, className }: ImageCarouselP
               <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted">
                 <Image
                   src={img.url}
-                  alt={t.store.productImageAlt
-                    .replace('{productName}', productName)
-                    .replace('{n}', String(idx + 1))}
+                  alt={t.store.productImageAlt.replace(/\{productName\}|\{n\}/g, (m) =>
+                    m === '{productName}' ? productName : String(idx + 1),
+                  )}
                   fill
                   sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-cover"
@@ -93,9 +93,9 @@ export function ImageCarousel({ images, productName, className }: ImageCarouselP
             >
               <Image
                 src={img.url}
-                alt={t.store.productThumbnailAlt
-                  .replace('{productName}', productName)
-                  .replace('{n}', String(idx + 1))}
+                alt={t.store.productThumbnailAlt.replace(/\{productName\}|\{n\}/g, (m) =>
+                  m === '{productName}' ? productName : String(idx + 1),
+                )}
                 fill
                 sizes="64px"
                 className="object-cover"
