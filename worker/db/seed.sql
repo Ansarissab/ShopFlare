@@ -217,6 +217,117 @@ INSERT OR IGNORE INTO product_images (id, variant_id, url, r2_key, sort_order) V
   ('demo_img_bag_bls_2', 'demo_var_bag_blush', 'https://picsum.photos/seed/sf-bag-bls-2/640/640.webp', 'demo/bag-blush-2.jpg', 1),
   ('demo_img_bag_bls_3', 'demo_var_bag_blush', 'https://picsum.photos/seed/sf-bag-bls-3/640/640.webp', 'demo/bag-blush-3.jpg', 2);
 
+-- ─── Landing-page variants ───────────────────────────────────────────────────
+-- 3 selectable non-active variants (lp_default stays active).
+-- Activate one via Admin → Landing Pages to preview/live-switch.
+-- INSERT OR IGNORE keeps re-runs safe; lp_default is never touched here.
+
+INSERT OR IGNORE INTO landing_pages (id, name, template, is_active, sort_order, created_at, updated_at) VALUES
+  ('lp_wise',   'Wise Style',   'wise',   0, 1, datetime('now'), datetime('now')),
+  ('lp_stripe', 'Stripe Style', 'stripe', 0, 2, datetime('now'), datetime('now')),
+  ('lp_yc',     'YC Style',     'yc',     0, 3, datetime('now'), datetime('now'));
+
+-- ── lp_wise landing content (wise.com voice: bold, friendly, benefit-led) ──
+INSERT OR IGNORE INTO landing_content
+  (landing_page_id, section_key, enabled, heading, subtext, body_html, cta_text, cta_href, image_r2_key, updated_at)
+VALUES
+  ('lp_wise', 'hero',     1,
+   'Shopping that just works.',
+   'Great products, fair prices, delivered fast. No hidden fees, no confusing options — just exactly what you ordered, at your door.',
+   NULL, 'Start shopping', '/shop', NULL, datetime('now')),
+
+  ('lp_wise', 'story',    1,
+   'Built for people, not algorithms.',
+   NULL,
+   '<p>We started this store because buying good everyday products shouldn''t require three browser tabs and a leap of faith. Every item we carry is something we''d actually use ourselves — chosen for quality, priced honestly, and backed by support that doesn''t vanish after the sale. You deserve a store that''s on your side.</p>',
+   NULL, NULL, NULL, datetime('now')),
+
+  ('lp_wise', 'featured', 1,
+   'Stuff people actually love.',
+   NULL, NULL, NULL, NULL, NULL, datetime('now')),
+
+  ('lp_wise', 'reviews',  1,
+   'Don''t take our word for it.',
+   NULL, NULL, NULL, NULL, NULL, datetime('now')),
+
+  ('lp_wise', 'cta',      1,
+   'Ready to find something you''ll use every day?',
+   'Browse the full collection — no account needed, free shipping on bigger orders.',
+   NULL, 'Shop now', '/shop', NULL, datetime('now'));
+
+-- ── lp_stripe landing content (stripe.com voice: precise, elegant, premium) ─
+INSERT OR IGNORE INTO landing_content
+  (landing_page_id, section_key, enabled, heading, subtext, body_html, cta_text, cta_href, image_r2_key, updated_at)
+VALUES
+  ('lp_stripe', 'hero',     1,
+   'A beautifully simple way to shop.',
+   'Thoughtfully chosen products. Transparent pricing. A checkout experience designed to get out of your way.',
+   NULL, 'Explore the collection', '/shop', NULL, datetime('now')),
+
+  ('lp_stripe', 'story',    1,
+   'Quality you can see. Pricing you can trust.',
+   NULL,
+   '<p>We believe the best retail experience is one you barely notice — products that arrive exactly as described, at a price that makes sense, with nothing unexpected at checkout. We obsess over the details so the experience feels effortless from first click to delivery.</p>',
+   NULL, NULL, NULL, datetime('now')),
+
+  ('lp_stripe', 'featured', 1,
+   'Carefully selected. Rigorously tested.',
+   NULL, NULL, NULL, NULL, NULL, datetime('now')),
+
+  ('lp_stripe', 'reviews',  1,
+   'What our customers say.',
+   NULL, NULL, NULL, NULL, NULL, datetime('now')),
+
+  ('lp_stripe', 'cta',      1,
+   'The right product is a few clicks away.',
+   'Every item ships with our quality guarantee. Free standard delivery on qualifying orders.',
+   NULL, 'View all products', '/shop', NULL, datetime('now'));
+
+-- ── lp_yc landing content (ycombinator voice: minimal, direct, no-nonsense) ─
+INSERT OR IGNORE INTO landing_content
+  (landing_page_id, section_key, enabled, heading, subtext, body_html, cta_text, cta_href, image_r2_key, updated_at)
+VALUES
+  ('lp_yc', 'hero',     1,
+   'Great products. Fair prices. No fuss.',
+   'We sell things that work. You buy. We ship. That''s it.',
+   NULL, 'Browse products', '/shop', NULL, datetime('now')),
+
+  ('lp_yc', 'story',    1,
+   'We keep it simple.',
+   NULL,
+   '<p>No lifestyle branding. No inflated "original" prices crossed out in red. We stock products we believe in, price them honestly, and ship them fast. If something isn''t right, we fix it. That''s the whole model.</p>',
+   NULL, NULL, NULL, datetime('now')),
+
+  ('lp_yc', 'featured', 1,
+   'Top picks.',
+   NULL, NULL, NULL, NULL, NULL, datetime('now')),
+
+  ('lp_yc', 'reviews',  1,
+   'Real reviews from real customers.',
+   NULL, NULL, NULL, NULL, NULL, datetime('now')),
+
+  ('lp_yc', 'cta',      1,
+   'See something you like?',
+   'Free shipping above the threshold. No account required.',
+   NULL, 'Go to shop', '/shop', NULL, datetime('now'));
+
+-- ── Featured products per variant (same catalog, scoped by landing_page_id) ─
+INSERT OR IGNORE INTO featured_products (landing_page_id, product_id, sort_order) VALUES
+  -- lp_wise: tshirt, mug, cap, bag
+  ('lp_wise', 'demo_tshirt', 0),
+  ('lp_wise', 'demo_mug',    1),
+  ('lp_wise', 'demo_cap',    2),
+  ('lp_wise', 'demo_bag',    3),
+  -- lp_stripe: tshirt, bag, mug, cap
+  ('lp_stripe', 'demo_tshirt', 0),
+  ('lp_stripe', 'demo_bag',    1),
+  ('lp_stripe', 'demo_mug',    2),
+  ('lp_stripe', 'demo_cap',    3),
+  -- lp_yc: tshirt, mug, cap (3 items — minimal)
+  ('lp_yc', 'demo_tshirt', 0),
+  ('lp_yc', 'demo_mug',    1),
+  ('lp_yc', 'demo_cap',    2);
+
 -- ─── Demo blog posts (idempotent; delete demo_blog_* rows to remove) ──────────
 -- 4 ready-to-publish posts for a general ecommerce store. Staggered timestamps
 -- give the blog list a realistic date spread (newest → demo_blog_1 at -3 days).
