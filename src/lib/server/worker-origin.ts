@@ -11,8 +11,10 @@ let warnedRemote = false
  * `next dev` can never silently read production data. Trailing slash already
  * stripped by resolveWorkerUrl. Read each env var as a static member access.
  */
+let warnedEmptyProd = false
+
 export function serverWorkerUrl(): string {
-  return resolveWorkerUrl(
+  const url = resolveWorkerUrl(
     {
       NEXT_PUBLIC_WORKER_URL: process.env.NEXT_PUBLIC_WORKER_URL,
       NODE_ENV: process.env.NODE_ENV,
@@ -27,4 +29,18 @@ export function serverWorkerUrl(): string {
       )
     },
   )
+  // Loud, single-shot signal for the silent-404 failure mode: in a deployed
+  // (non-dev) build with no NEXT_PUBLIC_WORKER_URL, resolveWorkerUrl returns ''
+  // and every server fetch falls back to a relative `/api/*` on the Next origin
+  // → 404 → all data pages render their not-found state. Surface it in the worker
+  // logs so this is diagnosable instead of mysterious. (Deploys are also blocked
+  // upfront by scripts/preflight-prod.mjs.)
+  if (!url && process.env.NODE_ENV !== 'development' && !warnedEmptyProd) {
+    warnedEmptyProd = true
+    console.error(
+      '[worker-origin] NEXT_PUBLIC_WORKER_URL is empty in a production build — server-side API ' +
+        'fetches will hit a relative /api path and 404. Set it in .env.production.',
+    )
+  }
+  return url
 }

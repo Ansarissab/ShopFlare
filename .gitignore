@@ -47,6 +47,7 @@ yarn-error.log*
 
 # Cloudflare Workers local secrets
 .dev.vars
+.prod.vars
 
 # vercel
 .vercel
