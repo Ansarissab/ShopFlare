@@ -36,9 +36,12 @@
     "setup": "node scripts/setup/index.mts",
     "worker:dev": "wrangler dev worker/index.ts --var ENVIRONMENT:development",
     "worker:deploy": "wrangler deploy --var ENVIRONMENT:production",
+    "worker:deploy:prod": "wrangler deploy --config wrangler.prod.toml --var ENVIRONMENT:production",
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply shopflare-db0 --local",
     "db:migrate": "wrangler d1 migrations apply shopflare-db0 --remote",
+    "db:migrate:prod": "wrangler d1 migrations apply shopflare-db0 --remote --config wrangler.prod.toml",
+    "db:seed:prod": "wrangler d1 execute shopflare-db0 --remote --config wrangler.prod.toml --file=worker/db/seed.sql",
     "db:seed:local": "wrangler d1 execute shopflare-db0 --local --file=worker/db/seed.sql",
     "db:seed": "wrangler d1 execute shopflare-db0 --remote --file=worker/db/seed.sql",
     "prepare": "git config core.hooksPath .githooks"

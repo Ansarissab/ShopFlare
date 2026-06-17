@@ -82,3 +82,7 @@ lighthouse_results/
 
 # Local portfolio / job-application source (lives on gh-pages branch, not main)
 /portfolio/
+
+/tmp/
+
+wrangler.prod.toml
