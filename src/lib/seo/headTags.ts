@@ -1,9 +1,9 @@
-// Regex-based head-tag sanitizer — workerd-safe (NO DOM, NO DOMPurify).
+// Regex-based head-tag sanitizer — workerd-safe (NO DOM).
 //
 // Why regex: layout.tsx runs during SSR on the Cloudflare Workers runtime
-// (workerd). isomorphic-dompurify requires browser DOM globals (window,
-// document) that are NOT available in workerd. This function is therefore
-// the render-time gate for admin-supplied customHeadTags.
+// (workerd). This function is the render-time gate for admin-supplied
+// customHeadTags; it handles <meta>/<link> allowlisting which js-xss does
+// not cover (head tags have a different allowlist from body content).
 //
 // Strategy: allowlist-only tokenizer over <meta> and <link> matches.
 // Everything else (scripts, styles, iframes, text nodes, comments, event

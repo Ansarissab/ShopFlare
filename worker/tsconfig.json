@@ -21,7 +21,8 @@
     "../src/lib/schemas/**/*.ts",
     "../src/lib/constants/**/*.ts",
     "../src/lib/faq.ts",
-    "../src/lib/seo/jsonld.ts"
+    "../src/lib/seo/jsonld.ts",
+    "../src/lib/sanitize.ts"
   ],
   "exclude": ["node_modules"]
 }

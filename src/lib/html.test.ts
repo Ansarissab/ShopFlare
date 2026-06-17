@@ -8,20 +8,53 @@ describe('sanitizeHtml', () => {
     expect(out).toContain('<strong>')
   })
 
-  it('strips script tags', () => {
+  it('strips script tags and their body', () => {
     const out = sanitizeHtml('<p>ok</p><script>alert(1)</script>')
     expect(out).not.toContain('<script>')
+    expect(out).not.toContain('alert(1)')
     expect(out).toContain('<p>ok</p>')
   })
 
-  it('strips event handlers', () => {
+  it('strips event handlers (onerror)', () => {
+    const out = sanitizeHtml('<img src="x" onerror="alert(1)">')
+    expect(out).not.toContain('onerror')
+  })
+
+  it('strips event handlers (onclick)', () => {
     const out = sanitizeHtml('<p onclick="alert(1)">click</p>')
     expect(out).not.toContain('onclick')
   })
 
-  it('strips <style> tags', () => {
+  it('strips <style> tags and their body', () => {
     const out = sanitizeHtml('<style>body{color:red}</style><p>text</p>')
     expect(out).not.toContain('<style>')
+    expect(out).not.toContain('body{color:red}')
+  })
+
+  it('strips <iframe> tags', () => {
+    const out = sanitizeHtml('<iframe src="https://evil.com"></iframe>')
+    expect(out).not.toContain('<iframe')
+    expect(out).not.toContain('evil.com')
+  })
+
+  it('strips <object> tags', () => {
+    const out = sanitizeHtml('<object data="evil.swf"></object>')
+    expect(out).not.toContain('<object')
+  })
+
+  it('strips <embed> tags', () => {
+    const out = sanitizeHtml('<embed src="evil.swf">')
+    expect(out).not.toContain('<embed')
+  })
+
+  it('blocks javascript: URIs on href', () => {
+    const out = sanitizeHtml('<a href="javascript:alert(1)">click</a>')
+    expect(out).not.toContain('javascript:')
+  })
+
+  it('blocks data: URIs on href', () => {
+    const out = sanitizeHtml('<a href="data:text/html,<script>alert(1)</script>">x</a>')
+    expect(out).not.toContain('data:')
   })
 
   it('forces rel="nofollow noopener" on links', () => {
@@ -40,7 +73,7 @@ describe('sanitizeHtml', () => {
     expect(out).not.toContain('rel="opener"')
   })
 
-  it('allows img with src and alt', () => {
+  it('allows img with https src and alt', () => {
     const out = sanitizeHtml('<img src="https://example.com/img.jpg" alt="test">')
     expect(out).toContain('<img')
     expect(out).toContain('alt="test"')
