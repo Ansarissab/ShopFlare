@@ -6,7 +6,6 @@ import { Plus, Pencil, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
 import {
   Dialog,
   DialogContent,
@@ -15,6 +14,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
+import { AdminListSkeleton } from '@/components/admin/shared/AdminListSkeleton'
 import { useT } from '@/lib/i18n/Provider'
 import { apiGet, apiPost, apiDelete } from '@/lib/api'
 import { formatDate } from '@/lib/utils/index'
@@ -113,11 +113,7 @@ export default function AdminBlogListPage() {
       />
 
       {loading ? (
-        <div className="flex flex-col gap-2">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-16 w-full rounded-md" />
-          ))}
-        </div>
+        <AdminListSkeleton rows={4} itemClassName="h-16 w-full rounded-md" />
       ) : posts.length === 0 ? (
         <p className="py-12 text-center text-sm text-muted-foreground">
           {t.admin.blogEditorNoPosts}

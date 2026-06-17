@@ -4,8 +4,8 @@ import { useState, useCallback } from 'react'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { Skeleton } from '@/components/ui/skeleton'
 import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
+import { AdminListSkeleton } from '@/components/admin/shared/AdminListSkeleton'
 import { CouponsTable } from '@/components/admin/coupons/CouponsTable'
 import { CouponForm } from '@/components/admin/coupons/CouponForm'
 import { useT } from '@/lib/i18n/Provider'
@@ -83,11 +83,7 @@ export default function AdminCouponsPage() {
 
       {/* Table */}
       {loading ? (
-        <div className="flex flex-col gap-2">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full rounded-md" />
-          ))}
-        </div>
+        <AdminListSkeleton rows={4} />
       ) : (
         <CouponsTable coupons={data?.coupons ?? []} onEdit={handleEdit} onDeleted={handleDeleted} />
       )}

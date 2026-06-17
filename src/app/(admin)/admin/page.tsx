@@ -16,6 +16,7 @@ import {
   Legend,
 } from 'recharts'
 import { StatCard } from '@/components/admin/shared/StatCard'
+import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import { buttonVariants } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -133,21 +134,22 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">{t.admin.dashboard}</h1>
-        <div className="flex flex-wrap gap-2">
-          <Link
-            href="/admin/products/new"
-            className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
-          >
-            {t.admin.addProduct}
-          </Link>
-          <Link href="/admin/pos" className={cn(buttonVariants({ size: 'sm' }))}>
-            {t.admin.pos}
-          </Link>
-        </div>
-      </div>
+      <AdminPageHeader
+        title={t.admin.dashboard}
+        actions={
+          <>
+            <Link
+              href="/admin/products/new"
+              className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
+            >
+              {t.admin.addProduct}
+            </Link>
+            <Link href="/admin/pos" className={cn(buttonVariants({ size: 'sm' }))}>
+              {t.admin.pos}
+            </Link>
+          </>
+        }
+      />
 
       {loading ? (
         <div className="flex flex-col gap-6">

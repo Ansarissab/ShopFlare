@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Skeleton } from '@/components/ui/skeleton'
 import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
+import { AdminListSkeleton } from '@/components/admin/shared/AdminListSkeleton'
 import { AdminReviewRow } from '@/components/admin/reviews/AdminReviewRow'
 import { useApiResource } from '@/hooks/useApiResource'
 import { useT } from '@/lib/i18n/Provider'
@@ -83,13 +83,7 @@ export default function AdminReviewsPage() {
     <div className="flex flex-col gap-6">
       <AdminPageHeader title={t.admin.reviewModeration} />
 
-      {loading && (
-        <div className="flex flex-col gap-2">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full rounded-md" />
-          ))}
-        </div>
-      )}
+      {loading && <AdminListSkeleton rows={5} />}
 
       {!loading && data?.reviews.length === 0 && (
         <p className="text-sm text-muted-foreground">{t.admin.noReviewsToModerate}</p>

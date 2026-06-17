@@ -194,6 +194,11 @@ export interface ProductFormProps {
   initial?: ProductWithVariants
 }
 
+export interface AdminListSkeletonProps {
+  rows: number
+  itemClassName?: string
+}
+
 export interface DashboardStats {
   total: number
   pending: number

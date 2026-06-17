@@ -5,9 +5,9 @@ import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { buttonVariants } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
+import { AdminListSkeleton } from '@/components/admin/shared/AdminListSkeleton'
 import { CategoryTree } from '@/components/admin/categories/CategoryTree'
 import { useT } from '@/lib/i18n/Provider'
 import { useApiResource } from '@/hooks/useApiResource'
@@ -76,11 +76,7 @@ export default function AdminCategoriesPage() {
       />
 
       {loading ? (
-        <div className="flex flex-col gap-2">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full rounded-md" />
-          ))}
-        </div>
+        <AdminListSkeleton rows={4} />
       ) : (
         <CategoryTree
           categories={data?.categories ?? []}

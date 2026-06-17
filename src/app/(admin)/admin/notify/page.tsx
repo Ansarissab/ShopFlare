@@ -1,7 +1,8 @@
 'use client'
 
-import { Skeleton } from '@/components/ui/skeleton'
 import { NotifyRequestRow } from '@/components/admin/notify/NotifyRequestRow'
+import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
+import { AdminListSkeleton } from '@/components/admin/shared/AdminListSkeleton'
 import { useApiResource } from '@/hooks/useApiResource'
 import { useT } from '@/lib/i18n/Provider'
 import { useListNavigation } from '@/hooks/useListNavigation'
@@ -21,14 +22,10 @@ export default function AdminNotifyPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="text-2xl font-bold tracking-tight">{t.admin.notifyRequests}</h1>
+      <AdminPageHeader title={t.admin.notifyRequests} />
 
       {loading ? (
-        <div className="flex flex-col gap-2">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-14 w-full rounded-md" />
-          ))}
-        </div>
+        <AdminListSkeleton rows={5} itemClassName="h-14 w-full rounded-md" />
       ) : error ? (
         <p className="text-sm text-destructive">{t.errors.networkError}</p>
       ) : !data || data.requests.length === 0 ? (

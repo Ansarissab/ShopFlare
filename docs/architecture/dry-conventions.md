@@ -48,6 +48,11 @@ Shared primitives to reuse (extend, don't re-type):
 - Keyboard shortcuts: engine + bindings are data in `src/lib/constants/shortcuts.ts`;
   the j/k list-nav primitive is `useListNavigation` + `ListNavContext` (register, do
   not re-implement per list).
+- Admin page chrome (`src/components/admin/shared/`): every admin page title goes
+  through `AdminPageHeader` (sticky bar, optional `actions`/`backHref` slots) — never
+  a raw `<h1>`. List loading states use `AdminListSkeleton` (`rows`, optional
+  `itemClassName`) — never hand-roll a `flex flex-col gap-2` + `Array.from(...).map(<Skeleton/>)`
+  block.
 
 ## 3. Global Type Definitions
 
