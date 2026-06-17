@@ -638,6 +638,7 @@ export const ur: Dictionary = {
     addFirstProduct: 'Add your first product',
     variantCount: '{n} variant',
     variantCountPlural: '{n} variants',
+    productSoldStats: '{units} فروخت · {revenue}',
     viewList: 'List view',
     viewGrid: 'Grid view',
     // orders list (phase 35)

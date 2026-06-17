@@ -65,8 +65,19 @@ export interface AdminOrdersResponse {
   limit: number
 }
 
+/** Lightweight all-time sales stats attached to each product in the admin list. */
+export interface ProductSalesStats {
+  unitsSold: number
+  revenueCents: number
+}
+
+/** A product list entry enriched with optional sales stats (admin list only). */
+export type AdminProductListEntry = ProductWithVariants & {
+  sales?: ProductSalesStats
+}
+
 export interface ProductsResponse {
-  products: ProductWithVariants[]
+  products: AdminProductListEntry[]
 }
 
 export interface AdminProductListItem {
@@ -205,6 +216,7 @@ export interface AdminProductCardProps {
   product: { id: string; name: string; active: boolean }
   variants: VariantWithDetails[]
   isActive: boolean
+  sales?: ProductSalesStats
 }
 
 export interface DashboardStats {

@@ -663,6 +663,7 @@ export const en = {
     addFirstProduct: 'Add your first product',
     variantCount: '{n} variant',
     variantCountPlural: '{n} variants',
+    productSoldStats: '{units} sold · {revenue}',
     viewList: 'List view',
     viewGrid: 'Grid view',
     // orders list (phase 35)

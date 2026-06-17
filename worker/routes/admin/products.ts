@@ -7,7 +7,7 @@ import { eq, and } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
-import { assembleProduct, assembleProductList } from 'worker/lib/products'
+import { assembleProduct, assembleProductList, getProductSalesMap } from 'worker/lib/products'
 import { parseBody } from 'worker/lib/http'
 import {
   createProductSchema,
@@ -32,7 +32,17 @@ const app = new Hono<AdminEnv>()
 app.get('/', async (c) => {
   const db = createDb(c.env.DB)
   const products = await assembleProductList(db, { includeInactive: true })
-  return c.json({ products })
+
+  // Enrich with all-time sales stats — ONE batched aggregate, no N+1.
+  const productIds = products.map((p) => p.product.id)
+  const salesMap = await getProductSalesMap(db, productIds)
+
+  const enriched = products.map((p) => ({
+    ...p,
+    sales: salesMap.get(p.product.id) ?? { unitsSold: 0, revenueCents: 0 },
+  }))
+
+  return c.json({ products: enriched })
 })
 
 // ─── GET /:id — single product (incl. inactive, so it can be re-activated) ───

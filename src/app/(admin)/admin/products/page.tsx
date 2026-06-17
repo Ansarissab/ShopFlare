@@ -9,6 +9,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
+import { formatPrice } from '@/lib/utils/index'
 import { layout } from '@/lib/styles'
 import { AdminPageHeader } from '@/components/admin/shared/AdminPageHeader'
 import AdminSearch from '@/components/admin/shared/AdminSearch'
@@ -22,7 +23,7 @@ const VIEW_STORAGE_KEY = 'admin:products:view'
 
 // ─── ProductCard (grid) ───────────────────────────────────────────────────────
 
-function AdminProductCard({ product, variants, isActive }: AdminProductCardProps) {
+function AdminProductCard({ product, variants, isActive, sales }: AdminProductCardProps) {
   const t = useT()
   const primaryImageUrl = variants
     .flatMap((v) => v.images)
@@ -56,11 +57,20 @@ function AdminProductCard({ product, variants, isActive }: AdminProductCardProps
           </Badge>
         </div>
       </div>
-      <span className="text-xs text-muted-foreground">
-        {variants.length === 1
-          ? t.admin.variantCount.replace('{n}', String(variants.length))
-          : t.admin.variantCountPlural.replace('{n}', String(variants.length))}
-      </span>
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-xs text-muted-foreground">
+          {variants.length === 1
+            ? t.admin.variantCount.replace('{n}', String(variants.length))
+            : t.admin.variantCountPlural.replace('{n}', String(variants.length))}
+        </span>
+        {sales !== undefined && (
+          <span className="text-xs text-muted-foreground tabular-nums">
+            {t.admin.productSoldStats
+              .replace('{units}', String(sales.unitsSold))
+              .replace('{revenue}', formatPrice(sales.revenueCents))}
+          </span>
+        )}
+      </div>
       <div className="flex items-center gap-2">
         <Link
           href={`/product/${product.id}`}
@@ -184,12 +194,13 @@ export default function AdminProductsPage() {
             </div>
           ) : viewMode === 'grid' ? (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {data.products.map(({ product, variants }, index) => (
+              {data.products.map(({ product, variants, sales }, index) => (
                 <AdminProductCard
                   key={product.id}
                   product={product}
                   variants={variants}
                   isActive={isActive(index)}
+                  sales={sales}
                 />
               ))}
             </div>

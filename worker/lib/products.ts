@@ -1,11 +1,12 @@
 // Shared product-assembly helpers — build ProductWithVariants composites
 // from D1 for use by GET /products and GET /products/:id.
 
-import { eq, inArray, and, asc, sql } from 'drizzle-orm'
+import { eq, inArray, and, asc, sql, ne } from 'drizzle-orm'
 import type { Database } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import type { Product, Variant, ProductImage, SizeOption } from 'worker/db/schema'
 import type { ProductSearchItem } from '@/lib/types/search'
+import type { ProductSalesStats } from '@/lib/types/admin'
 import { faqItemSchema } from '@/lib/schemas'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -189,6 +190,40 @@ export async function assembleProductList(
     categoryIds: categoryIdsByProduct.get(product.id) ?? [],
     faqItems: parseFaqItems(product.faqItems),
   }))
+}
+
+// ─── getProductSalesMap ───────────────────────────────────────────────────────
+
+/**
+ * Returns a Map<productId, ProductSalesStats> for the given product IDs.
+ * One batched aggregate query — no N+1. Excludes cancelled orders.
+ * Products with zero sales are absent from the map; callers should default to 0.
+ */
+export async function getProductSalesMap(
+  db: Database,
+  productIds: string[],
+): Promise<Map<string, ProductSalesStats>> {
+  if (productIds.length === 0) return new Map()
+
+  const rows = await db
+    .select({
+      productId: schema.orderItems.productId,
+      unitsSold: sql<number>`COALESCE(SUM(${schema.orderItems.quantity}), 0)`,
+      revenueCents: sql<number>`COALESCE(SUM(${schema.orderItems.quantity} * ${schema.orderItems.priceCents}), 0)`,
+    })
+    .from(schema.orderItems)
+    .innerJoin(schema.orders, eq(schema.orderItems.orderId, schema.orders.id))
+    .where(
+      and(inArray(schema.orderItems.productId, productIds), ne(schema.orders.status, 'cancelled')),
+    )
+    .groupBy(schema.orderItems.productId)
+    .all()
+
+  const map = new Map<string, ProductSalesStats>()
+  for (const row of rows) {
+    map.set(row.productId, { unitsSold: row.unitsSold, revenueCents: row.revenueCents })
+  }
+  return map
 }
 
 // ─── assembleSearchIndex ──────────────────────────────────────────────────────
