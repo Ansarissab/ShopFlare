@@ -302,6 +302,24 @@ nav, [data-tab-bar] {
   }
 }
 
+/* ─── Sticky header hide-on-scroll-down / reveal-on-scroll-up ───────────────
+   When useScrollDirection() sets data-hidden="true", translateY(-100%) slides
+   the header off the top of the viewport.  Transition only fires when motion is
+   allowed; reduced-motion users see no animation (header stays visible).
+   The transform axis is independent from the scroll-driven header-shrink above
+   (which only animates height + backdrop-filter) — they coexist without conflict.
+   ─────────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  .storefront-header {
+    transition: transform 300ms ease;
+    will-change: transform;
+  }
+
+  .storefront-header[data-hidden='true'] {
+    transform: translateY(-100%);
+  }
+}
+
 /* ─── Product grid staggered entrance ───────────────────────────────────────
    .pg-enter gives each card a CSS @starting-style entrance: fades + lifts in
    from translateY(12px). The inline transition-delay on each card staggers the
@@ -338,6 +356,16 @@ nav, [data-tab-bar] {
     opacity: 1;
     transform: none;
   }
+}
+
+/* The web-chrome wrapper must NOT generate its own box, otherwise the sticky
+   StorefrontHeader inside it can only stick within this short wrapper and
+   un-sticks as soon as you scroll past the header+announcement height.
+   display:contents dissolves the box so the header's sticky containing block
+   becomes the tall page column → it stays pinned across the whole page.
+   (The standalone rule below overrides this to fully hide the chrome.) */
+[data-web-chrome] {
+  display: contents;
 }
 
 /* In standalone mode: hide web chrome and add padding for app shell */

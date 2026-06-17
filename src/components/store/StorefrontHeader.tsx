@@ -15,6 +15,7 @@ import { LocaleSwitcher } from '@/components/store/LocaleSwitcher'
 import { PrimaryNav } from '@/components/store/nav/PrimaryNav'
 import { MobileNavDrawer } from '@/components/store/nav/MobileNavDrawer'
 import { useSearchOverlay } from '@/components/store/search/SearchProvider'
+import { useScrollDirection } from '@/hooks/useScrollDirection'
 import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
 import { useT } from '@/lib/i18n/Provider'
@@ -29,13 +30,17 @@ export function StorefrontHeader() {
   const { config } = useStoreConfig()
   const { data: catData } = useApiResource<{ categories: CategoryNode[] }>('/api/categories')
   const { openSearch } = useSearchOverlay()
+  const { hidden } = useScrollDirection()
 
   const categories = catData?.categories ?? []
   const primaryNavLinks = buildPrimaryNavLinks(config)
 
   return (
     <>
-      <header className="storefront-header sticky top-0 z-40 w-full border-b bg-background">
+      <header
+        className="storefront-header sticky top-0 z-40 w-full border-b bg-background"
+        data-hidden={hidden ? 'true' : undefined}
+      >
         <div className={cn(layout.bar, 'h-16 justify-between gap-4')}>
           {/* Store name / logo */}
           <Link
