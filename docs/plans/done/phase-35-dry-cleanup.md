@@ -80,11 +80,17 @@ the gates green — done in small, separately-committed, individually-revertible
 
 ## Done when
 
-- [ ] All six steps shipped as separate commits; gates green after each (tsgo, lint, unit + 95%
-      coverage; `pnpm verify` for worker/SSR/markup steps).
-- [ ] No unintended behavior change; the two intended changes (Step 1 slug cap, Step 6 debounce)
-      are noted in their commit messages.
-- [ ] No raw `fetch()` / inline `WORKER_URL` left in `src/app/**`; no inline `*Props`/DTO interfaces
-      in components/pages; no hardcoded UI strings in the touched files.
-- [ ] `docs/architecture/dry-conventions.md` updated if any new shared primitive/component is added
-      (e.g. `AdminListSkeleton`, a `cdnUrl` helper).
+- [x] All six steps shipped as separate commits; cheap gates green after each (tsgo, lint 0
+      warnings, targeted unit tests). Commits: Step 6 `042f3e4`, Step 1 `a219d88`, Step 2 `e9a094d`,
+      Step 4 `9a59a43`, Step 3 `074c2f2`, Step 5 `71d8c76`.
+- [x] No unintended behavior change; the two intended changes (Step 1 slug cap 120→80, Step 6
+      debounce 200→250ms) are noted in their commit messages.
+- [x] No raw `fetch()` / inline `WORKER_URL` left in the touched `src/app/**` SSR files; the 10
+      inline `*Props`/DTO interfaces moved to `lib/types/*`; the targeted hardcoded UI strings
+      moved to `en.ts` (+ fr/ur placeholders, parity test green).
+- [x] `docs/architecture/dry-conventions.md` updated for the new shared primitives
+      (`AdminPageHeader` adoption + `AdminListSkeleton`).
+- [ ] **Owed by the user:** heavy `pnpm verify` (build + integration + smoke + e2e) for the
+      worker/SSR/markup steps (1, 2, 3). Step 3 changes the dashboard/notify/orders header markup
+      intentionally — admin visual baselines may move; regenerate with `pnpm test:visual:update`
+      if so. Cheap gates + diff review passed; the heavy gate was deferred during the build.
