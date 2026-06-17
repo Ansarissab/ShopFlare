@@ -6,6 +6,7 @@ import { JsonLd } from '@/components/shared/JsonLd'
 import { layout } from '@/lib/styles'
 import { getT } from '@/lib/i18n/server'
 import { fetchFromWorker, r2Url } from '@/lib/server/fetchFromWorker'
+import { serverWorkerUrl } from '@/lib/server/worker-origin'
 import { buildPageMetadata } from '@/lib/seo/metadata'
 import { breadcrumbListJsonLd } from '@/lib/seo/jsonld'
 import type { BlogListResponse } from '@/lib/types/blog'
@@ -41,7 +42,7 @@ export default async function BlogIndexPage() {
   if (!data) notFound()
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
-  const workerUrl = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
+  const workerUrl = serverWorkerUrl()
   const { posts } = data
 
   const breadcrumb = breadcrumbListJsonLd([
