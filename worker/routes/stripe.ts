@@ -189,7 +189,7 @@ app.post('/checkout-session', async (c) => {
 
     const message = err instanceof Error ? err.message : 'Stripe error'
     console.error('[stripe/checkout] session.create failed — order cancelled', { orderId, message })
-    return c.json({ error: message }, 500)
+    return c.json({ error: 'Checkout failed, please try again' }, 500)
   }
 })
 

@@ -67,6 +67,32 @@ describe('landingSectionBaseSchema', () => {
   it('ctaHref: absent (undefined) still passes — field is optional', () => {
     expect(landingSectionBaseSchema.safeParse({}).success).toBe(true)
   })
+
+  it('bodyHtml: accepts a string within 50000 chars', () => {
+    expect(landingSectionBaseSchema.safeParse({ bodyHtml: '<p>hi</p>' }).success).toBe(true)
+  })
+
+  it('bodyHtml: rejects a string exceeding 50000 chars', () => {
+    const r = landingSectionBaseSchema.safeParse({ bodyHtml: 'x'.repeat(50001) })
+    expect(r.success).toBe(false)
+  })
+
+  it('imageR2Key: accepts a key under landing/ prefix', () => {
+    expect(
+      landingSectionBaseSchema.safeParse({ imageR2Key: 'landing/hero/abc.avif' }).success,
+    ).toBe(true)
+  })
+
+  it('imageR2Key: rejects a key not under landing/ prefix', () => {
+    expect(landingSectionBaseSchema.safeParse({ imageR2Key: 'uploads/hero.jpg' }).success).toBe(
+      false,
+    )
+    expect(landingSectionBaseSchema.safeParse({ imageR2Key: 'img/hero.avif' }).success).toBe(false)
+  })
+
+  it('imageR2Key: absent (undefined) still passes — field is optional', () => {
+    expect(landingSectionBaseSchema.safeParse({}).success).toBe(true)
+  })
 })
 
 describe('heroSectionSchema', () => {
@@ -77,7 +103,7 @@ describe('heroSectionSchema', () => {
       subtext: 'Sub',
       ctaText: 'Buy',
       ctaHref: '/shop',
-      imageR2Key: 'img/hero.avif',
+      imageR2Key: 'landing/hero/abc123.avif',
     })
     expect(r.success).toBe(true)
   })
@@ -94,7 +120,7 @@ describe('storySectionSchema', () => {
     const r = storySectionSchema.safeParse({
       heading: 'Our Story',
       bodyHtml: '<p>story</p>',
-      imageR2Key: 'k',
+      imageR2Key: 'landing/story/xyz.jpg',
     })
     expect(r.success).toBe(true)
   })

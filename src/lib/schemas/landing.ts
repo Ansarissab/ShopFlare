@@ -6,7 +6,7 @@ export const landingSectionBaseSchema = z.object({
   enabled: z.boolean().optional(),
   heading: z.string().max(200).optional(),
   subtext: z.string().max(500).optional(),
-  bodyHtml: z.string().optional(),
+  bodyHtml: z.string().max(50000).optional(),
   ctaText: z.string().max(100).optional(),
   ctaHref: z
     .string()
@@ -16,7 +16,10 @@ export const landingSectionBaseSchema = z.object({
       'ctaHref must be a relative path starting with / or an http(s) URL',
     )
     .optional(),
-  imageR2Key: z.string().optional(),
+  imageR2Key: z
+    .string()
+    .regex(/^landing\//, 'imageR2Key must be under the landing/ prefix')
+    .optional(),
 })
 
 // Per-section shapes — derived from base via .pick() so there is one truth.

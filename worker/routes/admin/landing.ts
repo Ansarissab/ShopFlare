@@ -254,12 +254,14 @@ app.post('/pages/:id/activate', async (c) => {
   }
 
   const now = new Date().toISOString()
-  // Deactivate all, then activate the target — sequential to maintain invariant.
-  await db.update(schema.landingPages).set({ isActive: false, updatedAt: now })
-  await db
-    .update(schema.landingPages)
-    .set({ isActive: true, updatedAt: now })
-    .where(eq(schema.landingPages.id, id))
+  // Atomic D1 batch: deactivate all, then activate the target in one round-trip.
+  await db.batch([
+    db.update(schema.landingPages).set({ isActive: false, updatedAt: now }),
+    db
+      .update(schema.landingPages)
+      .set({ isActive: true, updatedAt: now })
+      .where(eq(schema.landingPages.id, id)),
+  ])
 
   await bumpDataVersion(db)
   return c.json({ ok: true })
@@ -386,15 +388,13 @@ app.put('/featured', async (c) => {
   await db.delete(schema.featuredProducts).where(eq(schema.featuredProducts.landingPageId, pageId))
 
   if (parsed.data.productIds.length > 0) {
-    await db
-      .insert(schema.featuredProducts)
-      .values(
-        parsed.data.productIds.map((productId, i) => ({
-          landingPageId: pageId,
-          productId,
-          sortOrder: i,
-        })),
-      )
+    await db.insert(schema.featuredProducts).values(
+      parsed.data.productIds.map((productId, i) => ({
+        landingPageId: pageId,
+        productId,
+        sortOrder: i,
+      })),
+    )
   }
 
   await bumpDataVersion(db)
