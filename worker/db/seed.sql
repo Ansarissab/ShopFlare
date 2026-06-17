@@ -217,3 +217,155 @@ INSERT OR IGNORE INTO product_images (id, variant_id, url, r2_key, sort_order) V
   ('demo_img_bag_bls_2', 'demo_var_bag_blush', 'https://picsum.photos/seed/sf-bag-bls-2/640/640.webp', 'demo/bag-blush-2.jpg', 1),
   ('demo_img_bag_bls_3', 'demo_var_bag_blush', 'https://picsum.photos/seed/sf-bag-bls-3/640/640.webp', 'demo/bag-blush-3.jpg', 2);
 
+-- ─── Demo blog posts (idempotent; delete demo_blog_* rows to remove) ──────────
+-- 4 ready-to-publish posts for a general ecommerce store. Staggered timestamps
+-- give the blog list a realistic date spread (newest → demo_blog_1 at -3 days).
+-- cover_r2_key / cover_alt are NULL — storefront handles missing covers gracefully.
+INSERT OR IGNORE INTO blog_posts
+  (id, slug, title, body_html, excerpt, cover_r2_key, cover_alt, tags, status, published_at, created_at, updated_at)
+VALUES
+
+  -- 1 · Product-care / how-to guide ──────────────────────────────────────────
+  ('demo_blog_1',
+   'how-to-care-for-your-cotton-tee',
+   'How to Care for Your Cotton T-Shirt So It Lasts for Years',
+   '<p>A good cotton tee is one of the most versatile items in your wardrobe — but only if you treat it right. Washing and drying it the wrong way is the fastest route to a shrunken, faded, sad-looking shirt. Follow these simple steps and yours will look just as good in year three as it did on day one.</p>
+
+<h2>Wash in Cold Water</h2>
+<p>Hot water is cotton''s worst enemy. It breaks down the fibres faster and is the main reason tees shrink. Always set your machine to a cold or cool cycle (30 °C or below). Cold water also uses less energy — good for your bill and the planet.</p>
+
+<h2>Turn It Inside Out</h2>
+<p>Before throwing your tee in the wash, turn it inside out. This protects the outer surface from friction and keeps prints, graphics, and the visible face of the fabric looking crisp for much longer.</p>
+
+<h2>Use a Gentle Detergent</h2>
+<p>Harsh detergents strip the natural oils from cotton fibres, making the fabric feel rough over time. A mild, fragrance-free detergent is all you need. You don''t need more than the recommended dose — extra detergent leaves residue that makes fabric stiff.</p>
+
+<h2>Skip the Tumble Dryer When You Can</h2>
+<p>Heat is the second big culprit after hot water. High dryer heat causes shrinkage and wears out elastic fibres in the weave. Air-dry your tee by laying it flat or hanging it on a hanger — this also helps it keep its shape. If you must use a dryer, choose the lowest heat setting and remove the shirt while it''s still slightly damp.</p>
+
+<h2>Store It Folded, Not Hung</h2>
+<p>Hanging heavy cotton on a thin hanger stretches the shoulder seams over time. Fold your tees and stack them — this keeps the collar and shoulders in shape.</p>
+
+<h2>Quick Checklist</h2>
+<ul>
+  <li>Cold wash (30 °C or below)</li>
+  <li>Turn inside out before washing</li>
+  <li>Mild detergent, correct dose</li>
+  <li>Air-dry flat or on a hanger</li>
+  <li>Low heat if using a dryer; remove slightly damp</li>
+  <li>Fold for storage — don''t hang on thin hangers</li>
+</ul>
+
+<p>That''s really all there is to it. A little care goes a long way, and these habits take about five seconds to build into your routine.</p>',
+   'A few simple washing and drying habits can keep your cotton tee looking new for years. Here''s exactly what to do — and what to avoid.',
+   NULL, NULL,
+   '["care","tips","apparel"]',
+   'published',
+   datetime('now', '-3 days'),
+   datetime('now', '-3 days'),
+   datetime('now', '-3 days')),
+
+  -- 2 · Buyer''s guide / how-to-choose ────────────────────────────────────────
+  ('demo_blog_2',
+   'how-to-choose-the-right-tote-bag',
+   'How to Choose the Right Tote Bag: A Practical Buyer''s Guide',
+   '<p>Tote bags have become a daily carry staple — but walk into any store and you''ll find dozens of options at wildly different price points. Knowing what to look for saves you from buying something that falls apart after a month or turns out to be the wrong size for how you actually use it.</p>
+
+<h2>Start with How You''ll Use It</h2>
+<p>This is the most important question and most people skip it. A bag for carrying groceries needs to be large and sturdy. A bag for work or uni needs structure and ideally an inner pocket for your laptop or documents. A bag for everyday errands can be lighter and more compact. Get clear on your primary use case before you look at anything else.</p>
+
+<h2>Material Matters More Than You Think</h2>
+<p>Canvas is the most common tote material — it''s durable, washable, and inexpensive. Heavy cotton canvas (around 12 oz or above) holds its shape well and handles real weight. Vegan leather gives a more polished look and wipes clean easily, making it a better fit for work or going out. Real leather is the most durable but requires more maintenance. Avoid thin nylon if you plan to carry anything heavy — the handles will dig into your shoulder.</p>
+
+<h2>Check the Stitching at the Handles</h2>
+<p>The handles are the first thing that fails on a cheap bag. Look for double-stitched or reinforced handle attachment points. Bartack stitching (the dense rectangular stitch at the base of each handle) is a good sign the manufacturer put thought into durability. Give the handles a firm tug — they shouldn''t shift or feel loose.</p>
+
+<h2>Size: Bigger Isn''t Always Better</h2>
+<p>A very large tote is great for the beach or a market run, but it encourages you to overload it — which means a heavy shoulder by the end of the day. For daily carry, a medium tote (roughly 35–40 cm wide, 30–35 cm tall) is practical without being unwieldy. Make sure the opening is wide enough that you can actually find things inside it.</p>
+
+<h2>Pockets Make a Real Difference</h2>
+<p>An open tote is essentially a bag-shaped hole. Even one interior zip pocket changes how usable the bag is — keys, cards, and your phone have a home instead of sinking to the bottom. An exterior slip pocket is a bonus for your phone or transit card.</p>
+
+<h2>Quick Checklist Before You Buy</h2>
+<ul>
+  <li>Does the size match how I''ll actually use it?</li>
+  <li>Is the material appropriate for my lifestyle (washable canvas vs. wipe-clean leather)?</li>
+  <li>Are the handles reinforced and comfortable to hold?</li>
+  <li>Is there at least one secure inner pocket?</li>
+  <li>Does the zip closure (if any) run smoothly?</li>
+</ul>
+
+<p>A good tote bag should feel like it was made for how you live, not just how it looks on a shelf. Take five minutes to answer these questions and you''ll buy something you''ll actually use every day.</p>',
+   'Not all tote bags are built the same. This guide walks you through the key things to check — size, material, stitching, and pockets — so you buy one that lasts.',
+   NULL, NULL,
+   '["guide","accessories","bags"]',
+   'published',
+   datetime('now', '-9 days'),
+   datetime('now', '-9 days'),
+   datetime('now', '-9 days')),
+
+  -- 3 · Behind-the-scenes / brand story ──────────────────────────────────────
+  ('demo_blog_3',
+   'why-we-started-shopflare',
+   'Why We Started This Store — and What We Actually Stand For',
+   '<p>We get asked this question a lot, usually from customers who want to know if we''re just another drop-shipping operation or if there''s a real person behind the orders. It''s a fair question. The internet is full of stores that look polished and deliver disappointment. We started this store because we''d been on the receiving end of that disappointment too many times ourselves.</p>
+
+<h2>The Problem We Kept Running Into</h2>
+<p>A few years ago, buying basic, well-made everyday items online in this market felt harder than it should have been. You''d either pay a lot for imported goods with a two-week wait, or buy cheap and end up replacing it in a month. The middle ground — reasonable price, decent quality, ships from here, actually arrives — was surprisingly hard to find.</p>
+
+<p>We didn''t set out to build a big brand. We started small: a few products we believed in, a simple website, and a WhatsApp number that we actually answered. That''s still the core of how we operate.</p>
+
+<h2>What We Prioritise</h2>
+<p>Every product we stock goes through a simple test: would we buy this ourselves, at this price? If the answer is no, it doesn''t go on the site. That sounds obvious, but you''d be surprised how many stores don''t apply it.</p>
+
+<p>We also care about what happens after the sale. If something arrives damaged, we fix it — no long email threads, no "please send photos to five different addresses." We''ve been customers long enough to know that how a store handles problems says more about them than how they handle a smooth order.</p>
+
+<h2>What Comes Next</h2>
+<p>We''re a small operation and we''re fine with that for now. We''d rather grow slowly and keep the quality consistent than scale up fast and start making the compromises that turn good stores into average ones.</p>
+
+<p>If you''ve got questions about a product, an order, or just want to tell us we got something wrong, our WhatsApp and email are on the contact page. We read everything.</p>
+
+<p>Thanks for shopping with us — it genuinely means a lot.</p>',
+   'We started this store because finding well-made everyday products at a fair price was harder than it should be. Here''s the honest version of why we exist.',
+   NULL, NULL,
+   '["brand","story","about"]',
+   'published',
+   datetime('now', '-16 days'),
+   datetime('now', '-16 days'),
+   datetime('now', '-16 days')),
+
+  -- 4 · Seasonal / gift-ideas ──────────────────────────────────────────────
+  ('demo_blog_4',
+   'gift-ideas-for-people-who-have-everything',
+   'Gift Ideas for People Who Say They Don''t Need Anything',
+   '<p>We all have at least one person on our list who, when asked what they want, says "nothing, really." They''re not being difficult — they just already have the things they thought to ask for. The trick is to find something useful enough that they''ll actually use it, but not so personal that it feels like a guess. Here are a few ideas that tend to land well.</p>
+
+<h2>Something They Use Every Day But Never Buy for Themselves</h2>
+<p>The best gifts in this category are the things people put off replacing even when they''re worn out — a decent coffee mug, a tote bag that''s been held together by optimism for the last year, a well-made basic tee in a colour they always reach for. These items feel low-stakes to the giver but genuinely appreciated by the receiver because they solve a small, real problem.</p>
+
+<h2>A Good Mug Is Underrated</h2>
+<p>A ceramic mug sounds boring until you''ve drunk your morning coffee out of a thick, well-made one and realised how much it actually improves the experience. Weight, handle comfort, and the way it holds heat all matter. A chunky stoneware mug — the kind that feels like it could survive a minor disaster — is a gift most people will use every single morning for years.</p>
+
+<h2>The Classic Tee in a New Colour</h2>
+<p>Everyone has a favourite t-shirt. It''s usually several years old and slightly better than everything else in their drawer because they''ve never found an exact replacement. A well-made cotton tee in a colour they wouldn''t necessarily buy themselves — a clean white, a deep navy, a washed black — gives them something new to reach for without the risk of a completely wrong gift.</p>
+
+<h2>A Bag They''ll Actually Carry</h2>
+<p>Tote bags and structured everyday bags are practical gifts that don''t expire. A good tote in a neutral colour goes with most wardrobes, holds a lot, and gets used constantly — on the commute, at the market, as a gym bag, as an everything bag. If you know the person''s style even a little, it''s hard to go wrong with a classic quilted design in black or a neutral blush.</p>
+
+<h2>How to Make It Feel More Personal</h2>
+<ul>
+  <li>Pair a mug with their favourite coffee or tea — bought separately, wrapped together</li>
+  <li>Add a handwritten note saying why you picked it specifically for them</li>
+  <li>Choose a colour you know they wear, not just one you think looks nice</li>
+  <li>If you''re unsure on size for clothing, go one up — easier to exchange down</li>
+</ul>
+
+<p>The "they don''t need anything" people usually just need someone to notice what they actually use. That''s the whole gift-giving secret.</p>',
+   'Stuck on what to buy someone who says they don''t want anything? Practical, everyday items — a good mug, a reliable bag, a quality tee — are the gifts that actually get used.',
+   NULL, NULL,
+   '["gifts","ideas","seasonal"]',
+   'published',
+   datetime('now', '-25 days'),
+   datetime('now', '-25 days'),
+   datetime('now', '-25 days'));
+
