@@ -394,6 +394,7 @@ export const en = {
     pageSaved: 'Page saved',
     // shared admin chrome
     cancel: 'Cancel',
+    viewStore: 'View store',
     stripeColumn: 'Stripe',
     reviewStatus: 'Status',
     reviewDate: 'Date',

@@ -20,6 +20,7 @@ import {
   FolderTree,
   Layers,
   Newspaper,
+  Store,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useT } from '@/lib/i18n/Provider'
@@ -82,6 +83,32 @@ function SidebarNav({
   )
 }
 
+// Shared "View store" button — used in both desktop footer and mobile sheet
+function ViewStoreButton({ collapsed = false }: { collapsed?: boolean }) {
+  const t = useT()
+  const label = t.admin.viewStore
+
+  function handleClick() {
+    window.open(`/?_cb=${Date.now()}`, '_blank', 'noopener,noreferrer')
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      aria-label={label}
+      title={collapsed ? label : undefined}
+      className={cn(
+        'flex items-center gap-2.5 rounded-md py-2 text-sm transition-colors text-muted-foreground hover:bg-muted hover:text-foreground',
+        collapsed ? 'justify-center px-2' : 'px-3',
+      )}
+    >
+      <Store className="size-4 shrink-0" aria-hidden />
+      {!collapsed && label}
+    </button>
+  )
+}
+
 // Mobile hamburger + Sheet drawer — visible only below md
 export function MobileAdminNav() {
   const [open, setOpen] = useState(false)
@@ -100,6 +127,9 @@ export function MobileAdminNav() {
           <AdminLocaleSwitcher />
         </div>
         <SidebarNav onNavigate={() => setOpen(false)} />
+        <div className="border-t p-3">
+          <ViewStoreButton />
+        </div>
       </SheetContent>
     </Sheet>
   )
@@ -137,12 +167,11 @@ export function AdminSidebar() {
 
       <SidebarNav collapsed={collapsed} />
 
-      {/* Sidebar footer — locale switcher always visible on desktop */}
-      {!collapsed && (
-        <div className="mt-auto border-t p-3">
-          <AdminLocaleSwitcher />
-        </div>
-      )}
+      {/* Sidebar footer — view store + locale switcher */}
+      <div className="mt-auto border-t p-3 flex flex-col gap-1">
+        <ViewStoreButton collapsed={collapsed} />
+        {!collapsed && <AdminLocaleSwitcher />}
+      </div>
     </aside>
   )
 }

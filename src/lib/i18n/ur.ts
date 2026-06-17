@@ -385,6 +385,7 @@ export const ur: Dictionary = {
     pageContentHint: 'Plain text shown to customers. Use blank lines to separate paragraphs.',
     pageSaved: 'Page saved',
     cancel: 'Cancel',
+    viewStore: 'View store',
     stripeColumn: 'Stripe',
     reviewStatus: 'Status',
     reviewDate: 'Date',
