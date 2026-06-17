@@ -302,7 +302,7 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-lg">
+    <div className="flex flex-col gap-6 max-w-5xl">
       <AdminPageHeader
         title={t.admin.storeSettings}
         actions={
@@ -312,757 +312,765 @@ export default function AdminSettingsPage() {
         }
       />
 
-      {/* Appearance */}
-      <div className="flex flex-col gap-4 rounded-lg border p-5">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-sm font-semibold">{t.admin.appearance}</h2>
-          <p className="text-xs text-muted-foreground">{t.admin.appearanceHint}</p>
-        </div>
-
-        {/* Style presets — each card sets all appearance fields at once */}
-        <div className="flex flex-col gap-1.5">
-          <span className="text-xs font-medium">{t.admin.stylePresets}</span>
-          <p className="text-xs text-muted-foreground">{t.admin.stylePresetsHint}</p>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {STYLE_PRESETS.map((preset) => {
-            const isActive =
-              primaryColor === preset.primaryColor &&
-              accentColor === preset.accentColor &&
-              fontFamily === preset.fontFamily &&
-              radius === preset.radius &&
-              density === preset.density &&
-              heroStyle === preset.heroStyle
-            return (
-              <button
-                key={preset.name}
-                type="button"
-                onClick={() => {
-                  setPrimaryColor(preset.primaryColor)
-                  setAccentColor(preset.accentColor)
-                  setFontFamily(preset.fontFamily)
-                  setRadius(preset.radius)
-                  setDensity(preset.density)
-                  setHeroStyle(preset.heroStyle)
-                }}
-                className={`flex flex-col gap-1.5 rounded-lg border p-2.5 text-left text-xs hover:bg-muted transition-colors ${isActive ? 'border-accent ring-1 ring-accent' : ''}`}
-              >
-                <div className="flex items-center gap-1.5">
-                  <span
-                    className="inline-block h-4 w-4 rounded-full border shrink-0"
-                    style={{ backgroundColor: preset.primaryColor }}
-                  />
-                  <span
-                    className="inline-block h-4 w-4 rounded-full border shrink-0"
-                    style={{ backgroundColor: preset.accentColor }}
-                  />
-                  <span className="font-medium truncate">{preset.name}</span>
-                </div>
-                <span className="text-muted-foreground truncate">
-                  {preset.fontFamily} · {preset.radius} · {preset.density}
-                </span>
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Color pickers */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <FormField
-            label={t.admin.primaryColor}
-            htmlFor="a-primary"
-            help={t.tooltips.settings.primaryColor}
-          >
-            <div className="flex items-center gap-2">
-              <input
-                type="color"
-                id="a-primary"
-                value={primaryColor}
-                onChange={(e) => setPrimaryColor(e.target.value)}
-                className="h-9 w-10 cursor-pointer rounded border p-0.5 bg-transparent"
-              />
-              <Input
-                value={primaryColor}
-                onChange={(e) => setPrimaryColor(e.target.value)}
-                className="font-mono text-xs"
-                maxLength={7}
-                placeholder="#1A1A18"
-              />
-            </div>
-          </FormField>
-          <FormField
-            label={t.admin.accentColor}
-            htmlFor="a-accent"
-            help={t.tooltips.settings.accentColor}
-          >
-            <div className="flex items-center gap-2">
-              <input
-                type="color"
-                id="a-accent"
-                value={accentColor}
-                onChange={(e) => setAccentColor(e.target.value)}
-                className="h-9 w-10 cursor-pointer rounded border p-0.5 bg-transparent"
-              />
-              <Input
-                value={accentColor}
-                onChange={(e) => setAccentColor(e.target.value)}
-                className="font-mono text-xs"
-                maxLength={7}
-                placeholder="#4A7C6F"
-              />
-            </div>
-          </FormField>
-        </div>
-
-        {/* Selects: radius / font / color mode */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <FormField
-            label={t.admin.borderRadius}
-            htmlFor="a-radius"
-            help={t.tooltips.settings.radius}
-          >
-            <Select value={radius} onValueChange={(v: string | null) => setRadius(v ?? 'md')}>
-              <SelectTrigger id="a-radius" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.keys(RADIUS_PRESETS).map((key) => (
-                  <SelectItem key={key} value={key}>
-                    {key}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </FormField>
-          <FormField
-            label={t.admin.fontFamily}
-            htmlFor="a-font"
-            help={t.tooltips.settings.fontFamily}
-          >
-            <Select
-              value={fontFamily}
-              onValueChange={(v: string | null) => setFontFamily(v ?? 'sans')}
-            >
-              <SelectTrigger id="a-font" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.keys(FONT_PRESETS).map((key) => (
-                  <SelectItem key={key} value={key}>
-                    {key}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </FormField>
-          <FormField
-            label={t.admin.colorMode}
-            htmlFor="a-mode"
-            help={t.tooltips.settings.colorMode}
-          >
-            <Select
-              value={colorMode}
-              onValueChange={(v: string | null) => setColorMode(v ?? 'light')}
-            >
-              <SelectTrigger id="a-mode" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="light">{t.admin.colorModeLight}</SelectItem>
-                <SelectItem value="dark">{t.admin.colorModeDark}</SelectItem>
-                <SelectItem value="system">{t.admin.colorModeSystem}</SelectItem>
-              </SelectContent>
-            </Select>
-          </FormField>
-        </div>
-
-        {/* Selects: density / hero style */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <FormField
-            label={t.admin.styleDensity}
-            htmlFor="a-density"
-            help={t.tooltips.settings.density}
-          >
-            <Select
-              value={density}
-              onValueChange={(v: string | null) => setDensity(v ?? 'comfortable')}
-            >
-              <SelectTrigger id="a-density" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.keys(DENSITY_PRESETS).map((key) => (
-                  <SelectItem key={key} value={key}>
-                    {key}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </FormField>
-          <FormField
-            label={t.admin.styleHeroStyle}
-            htmlFor="a-hero-style"
-            help={t.tooltips.settings.heroStyle}
-          >
-            <Select
-              value={heroStyle}
-              onValueChange={(v: string | null) => setHeroStyle(v ?? 'image-left')}
-            >
-              <SelectTrigger id="a-hero-style" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {HERO_STYLES.map((key) => (
-                  <SelectItem key={key} value={key}>
-                    {key}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </FormField>
-        </div>
-
-        {/* Live preview — renders the merchant's chosen colors verbatim, so its
-            contrast reflects their selection, not a fixed app defect. Excluded
-            from the automated a11y contrast gate via data-color-preview. */}
-        <div className="flex flex-col gap-2">
-          <span className="text-xs text-muted-foreground">{t.admin.livePreview}</span>
-          <div className="flex items-center gap-3" data-color-preview>
-            <span
-              className="px-3 py-1.5 text-xs font-medium"
-              style={{
-                backgroundColor: primaryColor,
-                color: /^#[0-9a-fA-F]{6}$/.test(primaryColor)
-                  ? contrastColor(primaryColor)
-                  : '#ffffff',
-                borderRadius: RADIUS_PRESETS[radius as keyof typeof RADIUS_PRESETS] ?? '0.5rem',
-              }}
-            >
-              {t.admin.previewButton}
-            </span>
-            <span className="text-xs font-medium" style={{ color: accentColor }}>
-              {t.admin.previewAccent}
-            </span>
-            <span
-              className="px-2 py-0.5 text-xs border"
-              style={{
-                color: accentColor,
-                borderColor: accentColor,
-                borderRadius: RADIUS_PRESETS[radius as keyof typeof RADIUS_PRESETS] ?? '0.5rem',
-              }}
-            >
-              {t.admin.previewBadge}
-            </span>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 items-start">
+        {/* Appearance */}
+        <div className="flex flex-col gap-4 rounded-lg border p-5 lg:col-span-2">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-sm font-semibold">{t.admin.appearance}</h2>
+            <p className="text-xs text-muted-foreground">{t.admin.appearanceHint}</p>
           </div>
-        </div>
 
-        {/* Logo upload */}
-        <FormField label={t.admin.logo} htmlFor="a-logo" help={t.tooltips.settings.logo}>
-          <div className="flex items-center gap-3">
-            {logoUrl && (
-              <div className="relative h-10 w-24 shrink-0">
-                <Image
-                  src={logoUrl}
-                  alt={t.admin.logo}
-                  fill
-                  sizes="96px"
-                  className="object-contain"
-                  unoptimized
-                />
-              </div>
-            )}
-            <input
-              ref={logoInputRef}
-              type="file"
-              id="a-logo"
-              accept="image/*"
-              className="hidden"
-              onChange={handleLogoUpload}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={logoUploading}
-              onClick={() => logoInputRef.current?.click()}
-            >
-              {logoUploading ? t.admin.saving : t.admin.uploadLogo}
-            </Button>
-            {logoUrl && (
-              <Button type="button" variant="ghost" size="sm" onClick={handleRemoveLogo}>
-                {t.admin.removeLogo}
-              </Button>
-            )}
+          {/* Style presets — each card sets all appearance fields at once */}
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium">{t.admin.stylePresets}</span>
+            <p className="text-xs text-muted-foreground">{t.admin.stylePresetsHint}</p>
           </div>
-        </FormField>
-
-        {/* Favicon upload */}
-        <FormField label={t.admin.favicon} htmlFor="a-favicon" help={t.tooltips.settings.favicon}>
-          <div className="flex items-center gap-3">
-            <input
-              ref={faviconInputRef}
-              type="file"
-              id="a-favicon"
-              accept="image/*,.ico"
-              className="hidden"
-              onChange={handleFaviconUpload}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={faviconUploading}
-              onClick={() => faviconInputRef.current?.click()}
-            >
-              {faviconUploading ? t.admin.saving : t.admin.uploadFavicon}
-            </Button>
-          </div>
-        </FormField>
-      </div>
-
-      {/* Tax */}
-      <div className="flex flex-col gap-4 rounded-lg border p-5">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-sm font-semibold">{t.admin.taxSettings}</h2>
-          <p className="text-xs text-muted-foreground">{t.admin.taxSettingsHint}</p>
-        </div>
-
-        {/* Enable toggle */}
-        <FormField
-          label={t.admin.taxEnabled}
-          htmlFor="t-enabled"
-          help={t.tooltips.settings.taxEnabled}
-        >
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="t-enabled"
-              checked={taxEnabled}
-              onCheckedChange={(val) => setTaxEnabled(val === true)}
-            />
-            <span className="text-xs text-muted-foreground">{t.admin.taxEnabledHint}</span>
-          </div>
-        </FormField>
-
-        {taxEnabled && (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormField
-                label={t.admin.taxName}
-                htmlFor="t-name"
-                help={t.tooltips.settings.taxName}
-              >
-                <Input
-                  id="t-name"
-                  value={taxName}
-                  onChange={(e) => setTaxName(e.target.value)}
-                  placeholder="GST"
-                  maxLength={30}
-                />
-              </FormField>
-              <FormField
-                label={t.admin.taxRate}
-                htmlFor="t-rate"
-                help={t.tooltips.settings.taxRate}
-              >
-                <Input
-                  id="t-rate"
-                  type="number"
-                  min={0}
-                  max={100}
-                  step={0.01}
-                  value={taxRateInput}
-                  onChange={(e) => setTaxRateInput(e.target.value)}
-                  placeholder="17"
-                />
-              </FormField>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormField
-                label={t.admin.taxBasis}
-                htmlFor="t-basis"
-                help={t.tooltips.settings.taxBasis}
-              >
-                <Select
-                  value={taxBasis}
-                  onValueChange={(v: string | null) => setTaxBasis(v ?? 'subtotal')}
-                >
-                  <SelectTrigger id="t-basis" className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="subtotal">{t.admin.taxBasisSubtotal}</SelectItem>
-                    <SelectItem value="subtotal_and_shipping">
-                      {t.admin.taxBasisSubtotalShipping}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormField>
-              <FormField
-                label={t.admin.taxInclusive}
-                htmlFor="t-inclusive"
-                help={t.tooltips.settings.taxInclusive}
-              >
-                <div className="flex items-center gap-2 pt-1">
-                  <Checkbox
-                    id="t-inclusive"
-                    checked={taxInclusive}
-                    onCheckedChange={(val) => setTaxInclusive(val === true)}
-                  />
-                </div>
-              </FormField>
-            </div>
-
-            <FormField
-              label={t.admin.taxRegistrationNumber}
-              htmlFor="t-reg"
-              help={t.tooltips.settings.taxRegistration}
-            >
-              <Input
-                id="t-reg"
-                value={taxRegistrationNumber}
-                onChange={(e) => setTaxRegistrationNumber(e.target.value)}
-                placeholder="NTN-1234567-8"
-                maxLength={50}
-              />
-            </FormField>
-
-            {/* Live preview */}
-            {Number(taxRateInput) > 0 && (
-              <div className="rounded-md bg-muted/50 p-3 text-xs flex flex-col gap-1">
-                <p className="font-medium text-muted-foreground">{t.admin.livePreview}</p>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">{t.cart.subtotal}</span>
-                  <span>5,000</span>
-                </div>
-                {!taxInclusive && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">
-                      {taxName} ({taxRateInput}%)
-                    </span>
-                    <span>{Math.round(5000 * (Number(taxRateInput) / 100)).toLocaleString()}</span>
-                  </div>
-                )}
-                {taxInclusive && (
-                  <div className="flex justify-between text-muted-foreground">
-                    <span>
-                      {taxName} {t.admin.taxInclusive.toLowerCase()}
-                    </span>
-                    <span>
-                      {Math.round(5000 - 5000 / (1 + Number(taxRateInput) / 100)).toLocaleString()}
-                    </span>
-                  </div>
-                )}
-                <div className="flex justify-between font-semibold border-t pt-1 mt-1">
-                  <span>{t.cart.total}</span>
-                  <span>
-                    {taxInclusive
-                      ? '5,000'
-                      : (5000 + Math.round(5000 * (Number(taxRateInput) / 100))).toLocaleString()}
-                  </span>
-                </div>
-              </div>
-            )}
-          </>
-        )}
-      </div>
-
-      {/* Identity */}
-      <div className="flex flex-col gap-4 rounded-lg border p-5">
-        <h2 className="text-sm font-semibold">{t.admin.sectionIdentity}</h2>
-        <FormField label={t.admin.storeName} htmlFor="s-name">
-          <Input id="s-name" value={storeName} onChange={(e) => setStoreName(e.target.value)} />
-        </FormField>
-        <FormField label={t.admin.tagline} htmlFor="s-tagline">
-          <Input id="s-tagline" value={tagline} onChange={(e) => setTagline(e.target.value)} />
-        </FormField>
-      </div>
-
-      {/* Contact */}
-      <div className="flex flex-col gap-4 rounded-lg border p-5">
-        <h2 className="text-sm font-semibold">{t.admin.sectionContact}</h2>
-        <FormField label={t.admin.whatsappNumber} htmlFor="s-wa">
-          <Input
-            id="s-wa"
-            type="tel"
-            value={whatsappNumber}
-            onChange={(e) => setWhatsappNumber(e.target.value)}
-            placeholder="+92300..."
-          />
-        </FormField>
-        <FormField label={t.admin.enableWhatsApp} htmlFor="s-wa-enabled">
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="s-wa-enabled"
-              checked={whatsappEnabled}
-              onCheckedChange={(val) => setWhatsappEnabled(val === true)}
-            />
-            <span className="text-xs text-muted-foreground">{t.admin.enableWhatsAppHint}</span>
-          </div>
-        </FormField>
-        <FormField label={t.admin.enableReviews} htmlFor="s-reviews-enabled">
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="s-reviews-enabled"
-              checked={reviewsEnabled}
-              onCheckedChange={(val) => setReviewsEnabled(val === true)}
-            />
-            <span className="text-xs text-muted-foreground">{t.admin.enableReviewsHint}</span>
-          </div>
-        </FormField>
-        <FormField label={t.admin.contactEmail} htmlFor="s-email">
-          <Input
-            id="s-email"
-            type="email"
-            value={contactEmail}
-            onChange={(e) => setContactEmail(e.target.value)}
-          />
-        </FormField>
-      </div>
-
-      {/* SEO / LLM Discovery */}
-      <div className="flex flex-col gap-4 rounded-lg border p-5">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-sm font-semibold">{t.admin.sectionSeoLlm}</h2>
-        </div>
-
-        <FormField label={t.seo.llmDiscoveryLabel} htmlFor="s-llm-discovery">
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="s-llm-discovery"
-              checked={llmDiscoveryEnabled}
-              onCheckedChange={(val) => setLlmDiscoveryEnabled(val === true)}
-            />
-            <span className="text-xs text-muted-foreground">{t.seo.llmDiscoveryHelp}</span>
-          </div>
-        </FormField>
-
-        <FormField label={t.seo.aiTrainingLabel} htmlFor="s-ai-training">
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="s-ai-training"
-              checked={aiTrainingAllowed}
-              onCheckedChange={(val) => setAiTrainingAllowed(val === true)}
-            />
-            <span className="text-xs text-muted-foreground">{t.seo.aiTrainingHelp}</span>
-          </div>
-        </FormField>
-
-        <FormField label={t.seo.faqEnabledLabel} htmlFor="s-faq-enabled">
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="s-faq-enabled"
-              checked={faqEnabled}
-              onCheckedChange={(val) => setFaqEnabled(val === true)}
-            />
-          </div>
-        </FormField>
-
-        {faqEnabled && <FaqItemsControls value={faqItems} onChange={setFaqItems} />}
-
-        <FormField label={t.admin.enableBlog} htmlFor="s-blog-enabled">
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="s-blog-enabled"
-              checked={blogEnabled}
-              onCheckedChange={(val) => setBlogEnabled(val === true)}
-            />
-          </div>
-        </FormField>
-        <p className="text-sm text-muted-foreground -mt-2">{t.admin.enableBlogHint}</p>
-      </div>
-
-      {/* Marketing / SEO — phase 32 */}
-      <MarketingControls
-        values={{
-          googleSiteVerification,
-          bingSiteVerification,
-          customHeadTags,
-          ga4MeasurementId,
-          googleAdsId,
-          metaPixelId,
-          cookieConsentEnabled,
-          indexNowKey,
-        }}
-        onChange={(key, value) => {
-          const setters: Record<string, (v: never) => void> = {
-            googleSiteVerification: setGoogleSiteVerification,
-            bingSiteVerification: setBingSiteVerification,
-            customHeadTags: setCustomHeadTags,
-            ga4MeasurementId: setGa4MeasurementId,
-            googleAdsId: setGoogleAdsId,
-            metaPixelId: setMetaPixelId,
-            cookieConsentEnabled: setCookieConsentEnabled,
-            indexNowKey: setIndexNowKey,
-          }
-          setters[key]?.(value as never)
-        }}
-      />
-
-      {/* Languages */}
-      <div className="flex flex-col gap-4 rounded-lg border p-5">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-sm font-semibold">{t.admin.localesHeading}</h2>
-          <p className="text-xs text-muted-foreground">{t.admin.localesDescription}</p>
-        </div>
-
-        <FormField label={t.admin.enabledLocalesLabel} htmlFor="s-locales">
-          <div className="flex flex-col gap-2">
-            {SHIPPED_LOCALES.map((loc) => {
-              const isEn = loc === 'en'
-              const checked = isEn || enabledLocales.includes(loc)
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {STYLE_PRESETS.map((preset) => {
+              const isActive =
+                primaryColor === preset.primaryColor &&
+                accentColor === preset.accentColor &&
+                fontFamily === preset.fontFamily &&
+                radius === preset.radius &&
+                density === preset.density &&
+                heroStyle === preset.heroStyle
               return (
-                <label key={loc} className="flex items-center gap-2 text-sm cursor-pointer">
-                  <Checkbox
-                    checked={checked}
-                    disabled={isEn}
-                    onCheckedChange={(val) => {
-                      if (isEn) return
-                      if (val === true) {
-                        setEnabledLocales((prev) => [...prev, loc])
-                      } else {
-                        const next = enabledLocales.filter((l) => l !== loc)
-                        setEnabledLocales(next)
-                        // If the disabled locale was the default, reset to 'en'
-                        if (defaultLocale === loc) setDefaultLocale('en')
-                      }
-                    }}
-                  />
-                  {LOCALES[loc].label}
-                </label>
+                <button
+                  key={preset.name}
+                  type="button"
+                  onClick={() => {
+                    setPrimaryColor(preset.primaryColor)
+                    setAccentColor(preset.accentColor)
+                    setFontFamily(preset.fontFamily)
+                    setRadius(preset.radius)
+                    setDensity(preset.density)
+                    setHeroStyle(preset.heroStyle)
+                  }}
+                  className={`flex flex-col gap-1.5 rounded-lg border p-2.5 text-left text-xs hover:bg-muted transition-colors ${isActive ? 'border-accent ring-1 ring-accent' : ''}`}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className="inline-block h-4 w-4 rounded-full border shrink-0"
+                      style={{ backgroundColor: preset.primaryColor }}
+                    />
+                    <span
+                      className="inline-block h-4 w-4 rounded-full border shrink-0"
+                      style={{ backgroundColor: preset.accentColor }}
+                    />
+                    <span className="font-medium truncate">{preset.name}</span>
+                  </div>
+                  <span className="text-muted-foreground truncate">
+                    {preset.fontFamily} · {preset.radius} · {preset.density}
+                  </span>
+                </button>
               )
             })}
           </div>
-        </FormField>
 
-        <FormField label={t.admin.defaultLocaleLabel} htmlFor="s-default-locale">
-          <Select
-            value={defaultLocale}
-            onValueChange={(v: string | null) => setDefaultLocale((v as LocaleCode) ?? 'en')}
-          >
-            <SelectTrigger id="s-default-locale" className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {enabledLocales.map((loc) => (
-                <SelectItem key={loc} value={loc}>
-                  {LOCALES[loc].label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </FormField>
-      </div>
+          {/* Color pickers */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FormField
+              label={t.admin.primaryColor}
+              htmlFor="a-primary"
+              help={t.tooltips.settings.primaryColor}
+            >
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  id="a-primary"
+                  value={primaryColor}
+                  onChange={(e) => setPrimaryColor(e.target.value)}
+                  className="h-9 w-10 cursor-pointer rounded border p-0.5 bg-transparent"
+                />
+                <Input
+                  value={primaryColor}
+                  onChange={(e) => setPrimaryColor(e.target.value)}
+                  className="font-mono text-xs"
+                  maxLength={7}
+                  placeholder="#1A1A18"
+                />
+              </div>
+            </FormField>
+            <FormField
+              label={t.admin.accentColor}
+              htmlFor="a-accent"
+              help={t.tooltips.settings.accentColor}
+            >
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  id="a-accent"
+                  value={accentColor}
+                  onChange={(e) => setAccentColor(e.target.value)}
+                  className="h-9 w-10 cursor-pointer rounded border p-0.5 bg-transparent"
+                />
+                <Input
+                  value={accentColor}
+                  onChange={(e) => setAccentColor(e.target.value)}
+                  className="font-mono text-xs"
+                  maxLength={7}
+                  placeholder="#4A7C6F"
+                />
+              </div>
+            </FormField>
+          </div>
 
-      {/* Announcement Bar */}
-      <AnnouncementControls config={config} />
+          {/* Selects: radius / font / color mode */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <FormField
+              label={t.admin.borderRadius}
+              htmlFor="a-radius"
+              help={t.tooltips.settings.radius}
+            >
+              <Select value={radius} onValueChange={(v: string | null) => setRadius(v ?? 'md')}>
+                <SelectTrigger id="a-radius" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.keys(RADIUS_PRESETS).map((key) => (
+                    <SelectItem key={key} value={key}>
+                      {key}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormField>
+            <FormField
+              label={t.admin.fontFamily}
+              htmlFor="a-font"
+              help={t.tooltips.settings.fontFamily}
+            >
+              <Select
+                value={fontFamily}
+                onValueChange={(v: string | null) => setFontFamily(v ?? 'sans')}
+              >
+                <SelectTrigger id="a-font" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.keys(FONT_PRESETS).map((key) => (
+                    <SelectItem key={key} value={key}>
+                      {key}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormField>
+            <FormField
+              label={t.admin.colorMode}
+              htmlFor="a-mode"
+              help={t.tooltips.settings.colorMode}
+            >
+              <Select
+                value={colorMode}
+                onValueChange={(v: string | null) => setColorMode(v ?? 'light')}
+              >
+                <SelectTrigger id="a-mode" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="light">{t.admin.colorModeLight}</SelectItem>
+                  <SelectItem value="dark">{t.admin.colorModeDark}</SelectItem>
+                  <SelectItem value="system">{t.admin.colorModeSystem}</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormField>
+          </div>
 
-      {/* Payments & Shipping */}
-      <div className="flex flex-col gap-4 rounded-lg border p-5">
-        <h2 className="text-sm font-semibold">{t.admin.sectionPaymentsShipping}</h2>
-        <FormField
-          label={t.admin.currency}
-          htmlFor="s-currency"
-          help={t.tooltips.settings.currency}
-        >
-          <Select value={currency} onValueChange={(v: string | null) => setCurrency(v ?? 'PKR')}>
-            <SelectTrigger id="s-currency" className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(CURRENCIES).map(([code, info]) => (
-                <SelectItem key={code} value={code}>
-                  {info.symbol} {info.name} ({code})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </FormField>
-        <FormField
-          label={t.admin.flatShippingRate}
-          htmlFor="s-flat"
-          help={t.tooltips.settings.flatShipping}
-        >
-          <Input
-            id="s-flat"
-            type="number"
-            min={0}
-            value={flatShipping}
-            onChange={(e) => setFlatShipping(e.target.value)}
-          />
-        </FormField>
-        <FormField
-          label={t.admin.freeShippingThreshold}
-          htmlFor="s-threshold"
-          help={t.tooltips.settings.freeShipThreshold}
-        >
-          <Input
-            id="s-threshold"
-            type="number"
-            min={0}
-            value={freeThreshold}
-            onChange={(e) => setFreeThreshold(e.target.value)}
-          />
-        </FormField>
-        <FormField label={t.admin.productPageSize} htmlFor="s-page-size">
-          <Input
-            id="s-page-size"
-            type="number"
-            min={MIN_PRODUCT_PAGE_SIZE}
-            max={MAX_PRODUCT_PAGE_SIZE}
-            step={6}
-            value={productPageSize}
-            onChange={(e) => setProductPageSize(e.target.value)}
-          />
-          <p className="text-xs text-muted-foreground mt-1">{t.admin.productPageSizeHint}</p>
-        </FormField>
-      </div>
+          {/* Selects: density / hero style */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FormField
+              label={t.admin.styleDensity}
+              htmlFor="a-density"
+              help={t.tooltips.settings.density}
+            >
+              <Select
+                value={density}
+                onValueChange={(v: string | null) => setDensity(v ?? 'comfortable')}
+              >
+                <SelectTrigger id="a-density" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.keys(DENSITY_PRESETS).map((key) => (
+                    <SelectItem key={key} value={key}>
+                      {key}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormField>
+            <FormField
+              label={t.admin.styleHeroStyle}
+              htmlFor="a-hero-style"
+              help={t.tooltips.settings.heroStyle}
+            >
+              <Select
+                value={heroStyle}
+                onValueChange={(v: string | null) => setHeroStyle(v ?? 'image-left')}
+              >
+                <SelectTrigger id="a-hero-style" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {HERO_STYLES.map((key) => (
+                    <SelectItem key={key} value={key}>
+                      {key}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormField>
+          </div>
 
-      {/* Bank Transfer Details */}
-      <div className="flex flex-col gap-4 rounded-lg border p-5">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-sm font-semibold">{t.admin.bankSectionTitle}</h2>
-          <p className="text-xs text-muted-foreground">{t.admin.bankSectionHint}</p>
+          {/* Live preview — renders the merchant's chosen colors verbatim, so its
+            contrast reflects their selection, not a fixed app defect. Excluded
+            from the automated a11y contrast gate via data-color-preview. */}
+          <div className="flex flex-col gap-2">
+            <span className="text-xs text-muted-foreground">{t.admin.livePreview}</span>
+            <div className="flex items-center gap-3" data-color-preview>
+              <span
+                className="px-3 py-1.5 text-xs font-medium"
+                style={{
+                  backgroundColor: primaryColor,
+                  color: /^#[0-9a-fA-F]{6}$/.test(primaryColor)
+                    ? contrastColor(primaryColor)
+                    : '#ffffff',
+                  borderRadius: RADIUS_PRESETS[radius as keyof typeof RADIUS_PRESETS] ?? '0.5rem',
+                }}
+              >
+                {t.admin.previewButton}
+              </span>
+              <span className="text-xs font-medium" style={{ color: accentColor }}>
+                {t.admin.previewAccent}
+              </span>
+              <span
+                className="px-2 py-0.5 text-xs border"
+                style={{
+                  color: accentColor,
+                  borderColor: accentColor,
+                  borderRadius: RADIUS_PRESETS[radius as keyof typeof RADIUS_PRESETS] ?? '0.5rem',
+                }}
+              >
+                {t.admin.previewBadge}
+              </span>
+            </div>
+          </div>
+
+          {/* Logo upload */}
+          <FormField label={t.admin.logo} htmlFor="a-logo" help={t.tooltips.settings.logo}>
+            <div className="flex items-center gap-3">
+              {logoUrl && (
+                <div className="relative h-10 w-24 shrink-0">
+                  <Image
+                    src={logoUrl}
+                    alt={t.admin.logo}
+                    fill
+                    sizes="96px"
+                    className="object-contain"
+                    unoptimized
+                  />
+                </div>
+              )}
+              <input
+                ref={logoInputRef}
+                type="file"
+                id="a-logo"
+                accept="image/*"
+                className="hidden"
+                onChange={handleLogoUpload}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={logoUploading}
+                onClick={() => logoInputRef.current?.click()}
+              >
+                {logoUploading ? t.admin.saving : t.admin.uploadLogo}
+              </Button>
+              {logoUrl && (
+                <Button type="button" variant="ghost" size="sm" onClick={handleRemoveLogo}>
+                  {t.admin.removeLogo}
+                </Button>
+              )}
+            </div>
+          </FormField>
+
+          {/* Favicon upload */}
+          <FormField label={t.admin.favicon} htmlFor="a-favicon" help={t.tooltips.settings.favicon}>
+            <div className="flex items-center gap-3">
+              <input
+                ref={faviconInputRef}
+                type="file"
+                id="a-favicon"
+                accept="image/*,.ico"
+                className="hidden"
+                onChange={handleFaviconUpload}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={faviconUploading}
+                onClick={() => faviconInputRef.current?.click()}
+              >
+                {faviconUploading ? t.admin.saving : t.admin.uploadFavicon}
+              </Button>
+            </div>
+          </FormField>
         </div>
-        <FormField label={t.admin.bankName} htmlFor="s-bank-name">
-          <Input
-            id="s-bank-name"
-            value={bankName}
-            onChange={(e) => setBankName(e.target.value)}
-            placeholder="Meezan Bank"
-          />
-        </FormField>
-        <FormField label={t.admin.bankAccountTitle} htmlFor="s-bank-title">
-          <Input
-            id="s-bank-title"
-            value={bankAccountTitle}
-            onChange={(e) => setBankAccountTitle(e.target.value)}
-          />
-        </FormField>
-        <FormField label={t.admin.bankAccountNumber} htmlFor="s-bank-acct">
-          <Input
-            id="s-bank-acct"
-            value={bankAccountNumber}
-            onChange={(e) => setBankAccountNumber(e.target.value)}
-          />
-        </FormField>
-        <FormField label={t.admin.bankIban} htmlFor="s-bank-iban">
-          <Input
-            id="s-bank-iban"
-            value={bankIban}
-            onChange={(e) => setBankIban(e.target.value)}
-            placeholder="PK00MEZN..."
-          />
-        </FormField>
-        <FormField label={t.admin.bankInstructions} htmlFor="s-bank-note">
-          <Textarea
-            id="s-bank-note"
-            rows={2}
-            value={bankInstructions}
-            onChange={(e) => setBankInstructions(e.target.value)}
-            className="resize-none"
-          />
-        </FormField>
+
+        {/* Tax */}
+        <div className="flex flex-col gap-4 rounded-lg border p-5">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-sm font-semibold">{t.admin.taxSettings}</h2>
+            <p className="text-xs text-muted-foreground">{t.admin.taxSettingsHint}</p>
+          </div>
+
+          {/* Enable toggle */}
+          <FormField
+            label={t.admin.taxEnabled}
+            htmlFor="t-enabled"
+            help={t.tooltips.settings.taxEnabled}
+          >
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="t-enabled"
+                checked={taxEnabled}
+                onCheckedChange={(val) => setTaxEnabled(val === true)}
+              />
+              <span className="text-xs text-muted-foreground">{t.admin.taxEnabledHint}</span>
+            </div>
+          </FormField>
+
+          {taxEnabled && (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  label={t.admin.taxName}
+                  htmlFor="t-name"
+                  help={t.tooltips.settings.taxName}
+                >
+                  <Input
+                    id="t-name"
+                    value={taxName}
+                    onChange={(e) => setTaxName(e.target.value)}
+                    placeholder="GST"
+                    maxLength={30}
+                  />
+                </FormField>
+                <FormField
+                  label={t.admin.taxRate}
+                  htmlFor="t-rate"
+                  help={t.tooltips.settings.taxRate}
+                >
+                  <Input
+                    id="t-rate"
+                    type="number"
+                    min={0}
+                    max={100}
+                    step={0.01}
+                    value={taxRateInput}
+                    onChange={(e) => setTaxRateInput(e.target.value)}
+                    placeholder="17"
+                  />
+                </FormField>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  label={t.admin.taxBasis}
+                  htmlFor="t-basis"
+                  help={t.tooltips.settings.taxBasis}
+                >
+                  <Select
+                    value={taxBasis}
+                    onValueChange={(v: string | null) => setTaxBasis(v ?? 'subtotal')}
+                  >
+                    <SelectTrigger id="t-basis" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="subtotal">{t.admin.taxBasisSubtotal}</SelectItem>
+                      <SelectItem value="subtotal_and_shipping">
+                        {t.admin.taxBasisSubtotalShipping}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormField>
+                <FormField
+                  label={t.admin.taxInclusive}
+                  htmlFor="t-inclusive"
+                  help={t.tooltips.settings.taxInclusive}
+                >
+                  <div className="flex items-center gap-2 pt-1">
+                    <Checkbox
+                      id="t-inclusive"
+                      checked={taxInclusive}
+                      onCheckedChange={(val) => setTaxInclusive(val === true)}
+                    />
+                  </div>
+                </FormField>
+              </div>
+
+              <FormField
+                label={t.admin.taxRegistrationNumber}
+                htmlFor="t-reg"
+                help={t.tooltips.settings.taxRegistration}
+              >
+                <Input
+                  id="t-reg"
+                  value={taxRegistrationNumber}
+                  onChange={(e) => setTaxRegistrationNumber(e.target.value)}
+                  placeholder="NTN-1234567-8"
+                  maxLength={50}
+                />
+              </FormField>
+
+              {/* Live preview */}
+              {Number(taxRateInput) > 0 && (
+                <div className="rounded-md bg-muted/50 p-3 text-xs flex flex-col gap-1">
+                  <p className="font-medium text-muted-foreground">{t.admin.livePreview}</p>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t.cart.subtotal}</span>
+                    <span>5,000</span>
+                  </div>
+                  {!taxInclusive && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        {taxName} ({taxRateInput}%)
+                      </span>
+                      <span>
+                        {Math.round(5000 * (Number(taxRateInput) / 100)).toLocaleString()}
+                      </span>
+                    </div>
+                  )}
+                  {taxInclusive && (
+                    <div className="flex justify-between text-muted-foreground">
+                      <span>
+                        {taxName} {t.admin.taxInclusive.toLowerCase()}
+                      </span>
+                      <span>
+                        {Math.round(
+                          5000 - 5000 / (1 + Number(taxRateInput) / 100),
+                        ).toLocaleString()}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex justify-between font-semibold border-t pt-1 mt-1">
+                    <span>{t.cart.total}</span>
+                    <span>
+                      {taxInclusive
+                        ? '5,000'
+                        : (5000 + Math.round(5000 * (Number(taxRateInput) / 100))).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Identity */}
+        <div className="flex flex-col gap-4 rounded-lg border p-5">
+          <h2 className="text-sm font-semibold">{t.admin.sectionIdentity}</h2>
+          <FormField label={t.admin.storeName} htmlFor="s-name">
+            <Input id="s-name" value={storeName} onChange={(e) => setStoreName(e.target.value)} />
+          </FormField>
+          <FormField label={t.admin.tagline} htmlFor="s-tagline">
+            <Input id="s-tagline" value={tagline} onChange={(e) => setTagline(e.target.value)} />
+          </FormField>
+        </div>
+
+        {/* Contact */}
+        <div className="flex flex-col gap-4 rounded-lg border p-5">
+          <h2 className="text-sm font-semibold">{t.admin.sectionContact}</h2>
+          <FormField label={t.admin.whatsappNumber} htmlFor="s-wa">
+            <Input
+              id="s-wa"
+              type="tel"
+              value={whatsappNumber}
+              onChange={(e) => setWhatsappNumber(e.target.value)}
+              placeholder="+92300..."
+            />
+          </FormField>
+          <FormField label={t.admin.enableWhatsApp} htmlFor="s-wa-enabled">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="s-wa-enabled"
+                checked={whatsappEnabled}
+                onCheckedChange={(val) => setWhatsappEnabled(val === true)}
+              />
+              <span className="text-xs text-muted-foreground">{t.admin.enableWhatsAppHint}</span>
+            </div>
+          </FormField>
+          <FormField label={t.admin.enableReviews} htmlFor="s-reviews-enabled">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="s-reviews-enabled"
+                checked={reviewsEnabled}
+                onCheckedChange={(val) => setReviewsEnabled(val === true)}
+              />
+              <span className="text-xs text-muted-foreground">{t.admin.enableReviewsHint}</span>
+            </div>
+          </FormField>
+          <FormField label={t.admin.contactEmail} htmlFor="s-email">
+            <Input
+              id="s-email"
+              type="email"
+              value={contactEmail}
+              onChange={(e) => setContactEmail(e.target.value)}
+            />
+          </FormField>
+        </div>
+
+        {/* SEO / LLM Discovery */}
+        <div className="flex flex-col gap-4 rounded-lg border p-5">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-sm font-semibold">{t.admin.sectionSeoLlm}</h2>
+          </div>
+
+          <FormField label={t.seo.llmDiscoveryLabel} htmlFor="s-llm-discovery">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="s-llm-discovery"
+                checked={llmDiscoveryEnabled}
+                onCheckedChange={(val) => setLlmDiscoveryEnabled(val === true)}
+              />
+              <span className="text-xs text-muted-foreground">{t.seo.llmDiscoveryHelp}</span>
+            </div>
+          </FormField>
+
+          <FormField label={t.seo.aiTrainingLabel} htmlFor="s-ai-training">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="s-ai-training"
+                checked={aiTrainingAllowed}
+                onCheckedChange={(val) => setAiTrainingAllowed(val === true)}
+              />
+              <span className="text-xs text-muted-foreground">{t.seo.aiTrainingHelp}</span>
+            </div>
+          </FormField>
+
+          <FormField label={t.seo.faqEnabledLabel} htmlFor="s-faq-enabled">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="s-faq-enabled"
+                checked={faqEnabled}
+                onCheckedChange={(val) => setFaqEnabled(val === true)}
+              />
+            </div>
+          </FormField>
+
+          {faqEnabled && <FaqItemsControls value={faqItems} onChange={setFaqItems} />}
+
+          <FormField label={t.admin.enableBlog} htmlFor="s-blog-enabled">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="s-blog-enabled"
+                checked={blogEnabled}
+                onCheckedChange={(val) => setBlogEnabled(val === true)}
+              />
+            </div>
+          </FormField>
+          <p className="text-sm text-muted-foreground -mt-2">{t.admin.enableBlogHint}</p>
+        </div>
+
+        {/* Marketing / SEO — phase 32 */}
+        <MarketingControls
+          values={{
+            googleSiteVerification,
+            bingSiteVerification,
+            customHeadTags,
+            ga4MeasurementId,
+            googleAdsId,
+            metaPixelId,
+            cookieConsentEnabled,
+            indexNowKey,
+          }}
+          onChange={(key, value) => {
+            const setters: Record<string, (v: never) => void> = {
+              googleSiteVerification: setGoogleSiteVerification,
+              bingSiteVerification: setBingSiteVerification,
+              customHeadTags: setCustomHeadTags,
+              ga4MeasurementId: setGa4MeasurementId,
+              googleAdsId: setGoogleAdsId,
+              metaPixelId: setMetaPixelId,
+              cookieConsentEnabled: setCookieConsentEnabled,
+              indexNowKey: setIndexNowKey,
+            }
+            setters[key]?.(value as never)
+          }}
+        />
+
+        {/* Languages */}
+        <div className="flex flex-col gap-4 rounded-lg border p-5">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-sm font-semibold">{t.admin.localesHeading}</h2>
+            <p className="text-xs text-muted-foreground">{t.admin.localesDescription}</p>
+          </div>
+
+          <FormField label={t.admin.enabledLocalesLabel} htmlFor="s-locales">
+            <div className="flex flex-col gap-2">
+              {SHIPPED_LOCALES.map((loc) => {
+                const isEn = loc === 'en'
+                const checked = isEn || enabledLocales.includes(loc)
+                return (
+                  <label key={loc} className="flex items-center gap-2 text-sm cursor-pointer">
+                    <Checkbox
+                      checked={checked}
+                      disabled={isEn}
+                      onCheckedChange={(val) => {
+                        if (isEn) return
+                        if (val === true) {
+                          setEnabledLocales((prev) => [...prev, loc])
+                        } else {
+                          const next = enabledLocales.filter((l) => l !== loc)
+                          setEnabledLocales(next)
+                          // If the disabled locale was the default, reset to 'en'
+                          if (defaultLocale === loc) setDefaultLocale('en')
+                        }
+                      }}
+                    />
+                    {LOCALES[loc].label}
+                  </label>
+                )
+              })}
+            </div>
+          </FormField>
+
+          <FormField label={t.admin.defaultLocaleLabel} htmlFor="s-default-locale">
+            <Select
+              value={defaultLocale}
+              onValueChange={(v: string | null) => setDefaultLocale((v as LocaleCode) ?? 'en')}
+            >
+              <SelectTrigger id="s-default-locale" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {enabledLocales.map((loc) => (
+                  <SelectItem key={loc} value={loc}>
+                    {LOCALES[loc].label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormField>
+        </div>
+
+        {/* Announcement Bar */}
+        <div className="lg:col-span-2">
+          <AnnouncementControls config={config} />
+        </div>
+
+        {/* Payments & Shipping */}
+        <div className="flex flex-col gap-4 rounded-lg border p-5">
+          <h2 className="text-sm font-semibold">{t.admin.sectionPaymentsShipping}</h2>
+          <FormField
+            label={t.admin.currency}
+            htmlFor="s-currency"
+            help={t.tooltips.settings.currency}
+          >
+            <Select value={currency} onValueChange={(v: string | null) => setCurrency(v ?? 'PKR')}>
+              <SelectTrigger id="s-currency" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(CURRENCIES).map(([code, info]) => (
+                  <SelectItem key={code} value={code}>
+                    {info.symbol} {info.name} ({code})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormField>
+          <FormField
+            label={t.admin.flatShippingRate}
+            htmlFor="s-flat"
+            help={t.tooltips.settings.flatShipping}
+          >
+            <Input
+              id="s-flat"
+              type="number"
+              min={0}
+              value={flatShipping}
+              onChange={(e) => setFlatShipping(e.target.value)}
+            />
+          </FormField>
+          <FormField
+            label={t.admin.freeShippingThreshold}
+            htmlFor="s-threshold"
+            help={t.tooltips.settings.freeShipThreshold}
+          >
+            <Input
+              id="s-threshold"
+              type="number"
+              min={0}
+              value={freeThreshold}
+              onChange={(e) => setFreeThreshold(e.target.value)}
+            />
+          </FormField>
+          <FormField label={t.admin.productPageSize} htmlFor="s-page-size">
+            <Input
+              id="s-page-size"
+              type="number"
+              min={MIN_PRODUCT_PAGE_SIZE}
+              max={MAX_PRODUCT_PAGE_SIZE}
+              step={6}
+              value={productPageSize}
+              onChange={(e) => setProductPageSize(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground mt-1">{t.admin.productPageSizeHint}</p>
+          </FormField>
+        </div>
+
+        {/* Bank Transfer Details */}
+        <div className="flex flex-col gap-4 rounded-lg border p-5">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-sm font-semibold">{t.admin.bankSectionTitle}</h2>
+            <p className="text-xs text-muted-foreground">{t.admin.bankSectionHint}</p>
+          </div>
+          <FormField label={t.admin.bankName} htmlFor="s-bank-name">
+            <Input
+              id="s-bank-name"
+              value={bankName}
+              onChange={(e) => setBankName(e.target.value)}
+              placeholder="Meezan Bank"
+            />
+          </FormField>
+          <FormField label={t.admin.bankAccountTitle} htmlFor="s-bank-title">
+            <Input
+              id="s-bank-title"
+              value={bankAccountTitle}
+              onChange={(e) => setBankAccountTitle(e.target.value)}
+            />
+          </FormField>
+          <FormField label={t.admin.bankAccountNumber} htmlFor="s-bank-acct">
+            <Input
+              id="s-bank-acct"
+              value={bankAccountNumber}
+              onChange={(e) => setBankAccountNumber(e.target.value)}
+            />
+          </FormField>
+          <FormField label={t.admin.bankIban} htmlFor="s-bank-iban">
+            <Input
+              id="s-bank-iban"
+              value={bankIban}
+              onChange={(e) => setBankIban(e.target.value)}
+              placeholder="PK00MEZN..."
+            />
+          </FormField>
+          <FormField label={t.admin.bankInstructions} htmlFor="s-bank-note">
+            <Textarea
+              id="s-bank-note"
+              rows={2}
+              value={bankInstructions}
+              onChange={(e) => setBankInstructions(e.target.value)}
+              className="resize-none"
+            />
+          </FormField>
+        </div>
       </div>
     </div>
   )
