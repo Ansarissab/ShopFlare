@@ -39,10 +39,11 @@ export default async function StorePage() {
 
   if (isFeatureEnabled(config, 'landingEnabled')) {
     const [landingRaw, productsRaw] = await Promise.all([
-      fetchFromWorker<{ sections: LandingData['sections']; featuredProductIds: string[] }>(
-        '/api/landing',
-        { revalidate: 60 },
-      ),
+      fetchFromWorker<{
+        sections: LandingData['sections']
+        featuredProductIds: string[]
+        template?: LandingData['template']
+      }>('/api/landing', { revalidate: 60 }),
       fetchFromWorker<{ products: ProductWithVariants[] }>('/api/products', { revalidate: 60 }),
     ])
 
@@ -55,6 +56,7 @@ export default async function StorePage() {
     const landing: LandingData = {
       sections: landingRaw?.sections ?? ({} as LandingData['sections']),
       featuredProducts,
+      ...(landingRaw?.template !== undefined ? { template: landingRaw.template } : {}),
     }
 
     return (

@@ -548,8 +548,8 @@ describe('LandingPage', () => {
 
   it('renders enabled sections', () => {
     const { container } = renderLanding()
-    // All 5 sections enabled by default → at least a <main> with children
-    expect(container.querySelector('main')).toBeTruthy()
+    // All 5 sections enabled by default → wrapper div with id="main-content"
+    expect(container.querySelector('#main-content')).toBeTruthy()
   })
 
   it('skips sections where enabled is false', () => {
@@ -562,7 +562,7 @@ describe('LandingPage', () => {
     expect(container.querySelector('[data-hero-style]')).toBeNull()
   })
 
-  it('renders LandingPage with all sections disabled → empty main', () => {
+  it('renders LandingPage with all sections disabled → empty wrapper', () => {
     const { container } = renderLanding({
       hero: { enabled: false },
       story: { enabled: false },
@@ -570,7 +570,7 @@ describe('LandingPage', () => {
       reviews: { enabled: false },
       cta: { enabled: false },
     })
-    expect(container.querySelector('main')).toBeTruthy()
+    expect(container.querySelector('#main-content')).toBeTruthy()
     expect(container.querySelectorAll('section').length).toBe(0)
   })
 })
