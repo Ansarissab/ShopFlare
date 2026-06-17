@@ -83,6 +83,7 @@ export default defineConfig({
         'worker/lib/health.ts',
         'worker/lib/reviews.ts',
         'worker/lib/sanitize.ts',
+        'worker/lib/landing.ts',
       ],
     },
   },

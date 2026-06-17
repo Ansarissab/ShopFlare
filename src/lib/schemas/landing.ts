@@ -1,5 +1,5 @@
 import { z } from 'zod/v4'
-import { LANDING_SECTION_KEYS } from '@/lib/constants'
+import { LANDING_SECTION_KEYS, LANDING_TEMPLATES } from '@/lib/constants'
 
 // Base fields shared across all sections — all optional; pick per-section below.
 export const landingSectionBaseSchema = z.object({
@@ -75,3 +75,21 @@ export type FeaturedProductsInput = z.infer<typeof featuredProductsSchema>
 
 // Section key validation guard.
 export const sectionKeySchema = z.enum(LANDING_SECTION_KEYS)
+
+// Landing page management schemas.
+export const landingTemplateSchema = z.enum(LANDING_TEMPLATES)
+
+export const landingPageCreateSchema = z.object({
+  name: z.string().min(1).max(100),
+  template: landingTemplateSchema.optional(),
+})
+
+// Partial update — accepts name and/or template; at least one must be provided
+// (enforced in the route handler).
+export const landingPageRenameSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  template: landingTemplateSchema.optional(),
+})
+
+export type LandingPageCreateInput = z.infer<typeof landingPageCreateSchema>
+export type LandingPageUpdateInput = z.infer<typeof landingPageRenameSchema>

@@ -79,9 +79,7 @@ export type RadiusPreset = keyof typeof RADIUS_PRESETS
 // key maps to the CSS variable emitted by next/font in the root layout
 export const FONT_PRESETS = {
   sans: 'var(--font-geist-sans)',
-  serif: 'var(--font-merriweather)',
   mono: 'var(--font-geist-mono)',
-  rounded: 'var(--font-nunito)',
 } as const
 export type FontPreset = keyof typeof FONT_PRESETS
 
@@ -123,7 +121,7 @@ export const STYLE_PRESETS = [
     name: 'Sunset',
     primaryColor: '#9a3412',
     accentColor: '#f97316',
-    fontFamily: 'serif' as const,
+    fontFamily: 'sans' as const,
     radius: 'none' as const,
     density: 'compact' as const,
     heroStyle: 'split' as const,
@@ -141,7 +139,7 @@ export const STYLE_PRESETS = [
     name: 'Elegant',
     primaryColor: '#1a1a2e',
     accentColor: '#e8d5b7',
-    fontFamily: 'serif' as const,
+    fontFamily: 'sans' as const,
     radius: 'sm' as const,
     density: 'spacious' as const,
     heroStyle: 'centered' as const,
@@ -150,7 +148,7 @@ export const STYLE_PRESETS = [
     name: 'Playful',
     primaryColor: '#7c3aed',
     accentColor: '#f59e0b',
-    fontFamily: 'rounded' as const,
+    fontFamily: 'sans' as const,
     radius: 'full' as const,
     density: 'comfortable' as const,
     heroStyle: 'image-left' as const,
@@ -262,6 +260,11 @@ export const BLOCKED_SCRAPER_BOTS = ['AhrefsBot', 'SemrushBot', 'MJ12bot', 'DotB
 
 export const LANDING_SECTION_KEYS = ['hero', 'story', 'featured', 'reviews', 'cta'] as const
 export type LandingSectionKey = (typeof LANDING_SECTION_KEYS)[number]
+
+export const LANDING_TEMPLATES = ['classic', 'wise', 'stripe', 'yc'] as const
+export type LandingTemplate = (typeof LANDING_TEMPLATES)[number]
+
+export const MAX_LANDING_PAGES = 10
 
 // ─── Categories ────────────────────────────────────────────────────────────────
 export const MAX_CATEGORY_DEPTH = 2

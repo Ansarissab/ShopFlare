@@ -3,10 +3,11 @@
 // Gated by landingEnabled flag: returns 404 when the feature is off.
 
 import { Hono } from 'hono'
-import { asc } from 'drizzle-orm'
+import { eq, asc } from 'drizzle-orm'
 import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import { isFeatureEnabled } from 'worker/lib/features'
+import { resolveActivePage } from 'worker/lib/landing'
 import type { Bindings } from 'worker/types'
 import { LANDING_SECTION_KEYS } from '@/lib/constants'
 import type { LandingSectionKey } from '@/lib/constants'
@@ -27,9 +28,24 @@ app.get('/', async (c) => {
     return c.json({ error: 'Landing page is not enabled' }, 404)
   }
 
+  const activePage = await resolveActivePage(db)
+  if (activePage === null) {
+    return c.json({ error: 'Landing page is not enabled' }, 404)
+  }
+  const pageId = activePage.id
+
   const [sectionRows, featuredRows] = await Promise.all([
-    db.select().from(schema.landingContent).all(),
-    db.select().from(schema.featuredProducts).orderBy(asc(schema.featuredProducts.sortOrder)).all(),
+    db
+      .select()
+      .from(schema.landingContent)
+      .where(eq(schema.landingContent.landingPageId, pageId))
+      .all(),
+    db
+      .select()
+      .from(schema.featuredProducts)
+      .where(eq(schema.featuredProducts.landingPageId, pageId))
+      .orderBy(asc(schema.featuredProducts.sortOrder))
+      .all(),
   ])
 
   const sections = Object.fromEntries(
@@ -53,6 +69,7 @@ app.get('/', async (c) => {
   )
 
   return c.json({
+    template: activePage.template,
     sections,
     featuredProductIds: featuredRows.map((r) => r.productId),
   })

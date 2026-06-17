@@ -1,4 +1,4 @@
-import type { LandingSectionKey } from '@/lib/constants'
+import type { LandingSectionKey, LandingTemplate } from '@/lib/constants'
 import type { Dictionary } from '@/lib/i18n'
 import type { ProductWithVariants } from './product'
 
@@ -17,6 +17,7 @@ export interface LandingSection {
 export interface LandingData {
   sections: Record<LandingSectionKey, LandingSection>
   featuredProducts: ProductWithVariants[]
+  template?: LandingTemplate
 }
 
 // Props consumed by the server LandingPage component and its children.
@@ -25,6 +26,9 @@ export interface LandingPageProps {
   storeConfig: { storeName: string; tagline?: string; logoUrl?: string; heroStyle?: string }
   t: Dictionary
 }
+
+// Template props — identical shape; alias avoids duplicating the type.
+export type LandingTemplateProps = LandingPageProps
 
 export interface HeroSectionProps {
   section: LandingSection
@@ -54,7 +58,21 @@ export interface CTABandProps {
   t: Dictionary
 }
 
+export interface LandingPageSummary {
+  id: string
+  name: string
+  template: LandingTemplate
+  isActive: boolean
+  sortOrder: number
+}
+
+export interface LandingPagesResponse {
+  pages: LandingPageSummary[]
+}
+
 export interface AdminLandingResponse {
+  pageId: string
+  pages: LandingPageSummary[]
   sections: Record<LandingSectionKey, LandingSection>
   featuredProductIds: string[]
 }
