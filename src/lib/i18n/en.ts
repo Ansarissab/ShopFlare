@@ -523,6 +523,21 @@ export const en = {
     landingFeaturedProducts: 'Featured products',
     landingFeaturedHint: 'Select up to 20 products to feature. Drag to reorder.',
     landingFeaturedSaved: 'Featured products saved',
+    // Landing page management
+    landingPagesLabel: 'Landing pages',
+    landingNewPage: 'New page',
+    landingPageName: 'Page name',
+    landingRename: 'Rename',
+    landingActivate: 'Make active',
+    landingActiveBadge: 'Active',
+    landingDeletePage: 'Delete page',
+    landingDeletePageConfirm: 'Delete this landing page? This cannot be undone.',
+    landingTemplateLabel: 'Template',
+    landingLastPageError: 'You cannot delete the only landing page.',
+    landingTemplateClassic: 'Classic',
+    landingTemplateWise: 'Wise',
+    landingTemplateStripe: 'Stripe',
+    landingTemplateYc: 'YC',
     // Style preset admin labels
     stylePresets: 'Style Presets',
     stylePresetsHint:
