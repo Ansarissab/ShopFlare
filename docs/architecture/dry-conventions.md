@@ -53,6 +53,16 @@ Shared primitives to reuse (extend, don't re-type):
   a raw `<h1>`. List loading states use `AdminListSkeleton` (`rows`, optional
   `itemClassName`) — never hand-roll a `flex flex-col gap-2` + `Array.from(...).map(<Skeleton/>)`
   block.
+- **Landing templates** (`src/components/store/landing/templates/`): the single switch
+  point for landing designs is `LANDING_TEMPLATE_REGISTRY` (`registry.ts`) — a
+  `Record<LandingTemplate, ComponentType<LandingTemplateProps>>` exhaustive over the
+  template enum. Adding a design = one component + one registry entry. All templates
+  compose from the shared kit at `templates/shared/`:
+  - `TemplateSection` — section wrapper (padding, background, id anchor).
+  - `FeaturedGrid` — product card grid, shared across all templates.
+  - `templateKit` (`templateKit.ts`) — type-scale tokens + button-style helpers derived
+    from the store's CSS-variable theme. Templates use these tokens; never hardcode hex or
+    font sizes.
 
 ## 3. Global Type Definitions
 

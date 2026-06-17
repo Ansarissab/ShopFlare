@@ -1,6 +1,6 @@
 # ShopFlare
 
-> White-label serverless ecommerce for small businesses. **$0 hosting cost.**
+White-label serverless ecommerce for small businesses. **$0 hosting cost.** Runs entirely on Cloudflare's free tier — no servers to manage, no monthly platform fees.
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.2-black)](https://nextjs.org)
 [![Cloudflare](https://img.shields.io/badge/Cloudflare-Stack-orange)](https://cloudflare.com)
@@ -11,7 +11,7 @@
 > **Deploy button deploys the API worker only.** For a full store (both workers +
 > migrations + Stripe webhook auto-setup), fork the repo and run `pnpm setup`.
 
-🧪 **1785** unit tests &nbsp;·&nbsp; 🔗 **168** integration tests &nbsp;·&nbsp; 📊 **95%** coverage
+🧪 **2084** unit tests &nbsp;·&nbsp; 🔗 integration suite (real Worker in workerd) &nbsp;·&nbsp; 📊 **95%** coverage
 
 A free, open-source, self-hosted online store. Fork it, run the setup wizard, start selling.
 No monthly platform fees — it runs entirely on Cloudflare's free tier and Stripe's
@@ -22,8 +22,19 @@ Replaces Shopify Basic ($29/month) for stores that don't need the heavyweight pl
 
 ---
 
+## Demo
+
+<!-- Replace REPLACE_WITH_HOSTED_VIDEO_URL with your hosted link (YouTube, CDN, or GitHub Release).
+     Do NOT commit the video file to the repo. -->
+[![Watch the ShopFlare demo](https://img.shields.io/badge/▶_Watch-Store_%26_Admin_demo-FF4F64)](REPLACE_WITH_HOSTED_VIDEO_URL)
+
+A 60-second tour of the storefront and admin dashboard, running on the seeded demo data.
+
+---
+
 ## Table of contents
 
+- [Demo](#demo)
 - [Features](#features)
 - [Stack](#stack)
 - [Architecture](#architecture)
@@ -56,6 +67,8 @@ Replaces Shopify Basic ($29/month) for stores that don't need the heavyweight pl
 - Verified-purchase **reviews + ratings** (only delivered orders, admin-moderated; toggleable site-wide and per-product — no redeploy needed)
 - **Notify-me** restock requests on out-of-stock sizes, with automatic restock emails
 - **Storytelling landing page** (toggleable): hero, brand story, featured products strip, reviews strip, and CTA band — all editable from admin without redeploy. When enabled, the product catalog moves to `/shop`.
+- **Selectable landing templates** — multiple named landing pages, each rendered by one of several designs (Classic, plus Wise/Stripe/YC-inspired layouts built from the store's own theme tokens); pick which is live from admin, no redeploy.
+- **Smart sticky header** — hides on scroll-down, returns on scroll-up; reduced-motion aware.
 - PWA: installable, with Web Push order alerts
 - **SEO / GEO / AEO**: server-rendered metadata + JSON-LD on every page (Product, Category, Organization, BreadcrumbList, FAQPage, Article); sitemap with `lastModified`; toggleable LLM discovery (`/llms.txt`, Markdown `.md` twins, AI-bot policy in `robots.txt`)
 - **Blog**: toggleable merchant blog at `/blog` — Trix rich text editor, cover images (R2), tags, draft/published workflow, RSS feed at `/blog/rss.xml`, Article structured data, included in sitemap
