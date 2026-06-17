@@ -173,7 +173,7 @@ describe('AdminOrderDetailPage', () => {
   })
 
   describe('handleStatusUpdate', () => {
-    it('calls apiPatch and router.refresh on success', async () => {
+    it('calls apiPatch, clears optimistic state, and calls router.refresh on success', async () => {
       apiResourceState = { data: makeOrderDetail(), loading: false, notFound: false }
       render(<AdminOrderDetailPage />)
 
@@ -191,25 +191,48 @@ describe('AdminOrderDetailPage', () => {
       )
       await waitFor(() => expect(toast.success).toHaveBeenCalledWith(en.admin.statusUpdated))
       await waitFor(() => expect(refreshMock).toHaveBeenCalled())
+
+      // After success the optimistic override is cleared — badge falls back to the
+      // server-confirmed status label (the fixture has status 'pending').
+      // Multiple elements may match (Select item + badge), so use getAllByText.
+      expect(
+        screen
+          .getAllByText(
+            new RegExp(en.orderStatusLabels['pending' as keyof typeof en.orderStatusLabels], 'i'),
+          )
+          .some((el) => el.getAttribute('data-slot') === 'badge'),
+      ).toBe(true)
     })
 
-    it('rolls back optimistic status and toasts error on apiPatch failure', async () => {
+    it('rolls back to server baseline and toasts error on apiPatch failure; does NOT refresh', async () => {
       ;(apiPatch as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('network'))
+      // Server state: status = 'pending'
       apiResourceState = { data: makeOrderDetail(), loading: false, notFound: false }
       render(<AdminOrderDetailPage />)
 
+      // Trigger optimistic update to 'shipped'
       fireEvent.click(screen.getByTestId('select-trigger'))
 
       const updateBtn = screen.getByRole('button', { name: en.admin.updateStatus })
       fireEvent.click(updateBtn)
 
       await waitFor(() => expect(toast.error).toHaveBeenCalledWith(en.errors.networkError))
+      // Refresh must NOT be called on failure
       expect(refreshMock).not.toHaveBeenCalled()
+      // Badge must show the server-confirmed value ('pending'), not the failed optimistic one.
+      // Multiple elements may match (Select item + badge), so use getAllByText.
+      expect(
+        screen
+          .getAllByText(
+            new RegExp(en.orderStatusLabels['pending' as keyof typeof en.orderStatusLabels], 'i'),
+          )
+          .some((el) => el.getAttribute('data-slot') === 'badge'),
+      ).toBe(true)
     })
   })
 
   describe('handleTrackingUpdate', () => {
-    it('calls apiPatch and router.refresh on success, shows optimistic tracking', async () => {
+    it('calls apiPatch, clears optimistic state, and calls router.refresh on success', async () => {
       apiResourceState = { data: makeOrderDetail(), loading: false, notFound: false }
       render(<AdminOrderDetailPage />)
 
@@ -228,12 +251,14 @@ describe('AdminOrderDetailPage', () => {
       await waitFor(() => expect(toast.success).toHaveBeenCalledWith(en.admin.trackingAdded))
       await waitFor(() => expect(refreshMock).toHaveBeenCalled())
 
-      // Optimistic tracking number is now visible
-      expect(screen.getByText(/TRACK123/)).toBeTruthy()
+      // After success the optimistic override is cleared — the component falls back to
+      // server data (fixture has no trackingNumber, so the tracking section is hidden)
+      expect(screen.queryByText(/TRACK123/)).toBeNull()
     })
 
-    it('rolls back optimistic tracking and toasts error on failure', async () => {
+    it('rolls back to server baseline and toasts error on failure; does NOT refresh', async () => {
       ;(apiPatch as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('network'))
+      // Server state: no tracking number
       apiResourceState = { data: makeOrderDetail(), loading: false, notFound: false }
       render(<AdminOrderDetailPage />)
 
@@ -244,7 +269,10 @@ describe('AdminOrderDetailPage', () => {
       fireEvent.click(addBtn)
 
       await waitFor(() => expect(toast.error).toHaveBeenCalledWith(en.errors.networkError))
+      // Refresh must NOT be called on failure
       expect(refreshMock).not.toHaveBeenCalled()
+      // Rolled back to server baseline (null) — tracking section not rendered
+      expect(screen.queryByText(/TRACK999/)).toBeNull()
     })
   })
 

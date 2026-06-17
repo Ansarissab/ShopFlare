@@ -45,64 +45,67 @@ function CouponRow({ coupon, onEdit, onDeleted, active }: CouponRowProps & { act
   const valueLabel = coupon.type === 'percentage' ? `${coupon.value}%` : `${coupon.value}¢`
 
   return (
-    <tr
-      className={cn(
-        'border-b last:border-0 hover:bg-muted/30 transition-colors',
-        active && layout.activeRow,
-      )}
-    >
-      <td className="px-4 py-3 font-mono text-xs font-semibold">{coupon.code}</td>
-      <td className="hidden sm:table-cell px-4 py-3 text-sm">
-        <span className="capitalize">
-          {coupon.type === 'percentage' ? t.admin.couponTypePercentage : t.admin.couponTypeFixed}
-        </span>
-      </td>
-      <td className="px-4 py-3 text-sm font-medium">{valueLabel}</td>
-      <td className="hidden sm:table-cell px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
-        {coupon.usedCount}
-        {coupon.usageLimit !== null ? ` / ${coupon.usageLimit}` : ''}
-      </td>
-      <td className="hidden sm:table-cell px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
-        {coupon.expiresAt ? formatDate(coupon.expiresAt) : '—'}
-      </td>
-      <td className="px-4 py-3">
-        <Badge variant={coupon.active ? 'default' : 'secondary'}>
-          {coupon.active ? t.admin.active : t.admin.inactive}
-        </Badge>
-      </td>
-      <td className="hidden sm:table-cell px-4 py-3">
-        {coupon.stripeCouponId ? (
-          <Badge variant="outline" className="text-xs">
-            {t.admin.syncStripeCoupon}
-          </Badge>
-        ) : (
-          <span className="text-xs text-muted-foreground">—</span>
+    <>
+      <tr
+        className={cn(
+          'border-b last:border-0 hover:bg-muted/30 transition-colors',
+          active && layout.activeRow,
         )}
-      </td>
-      <td className="px-4 py-3">
-        <div className="flex gap-1">
-          <Button
-            type="button"
-            size="icon"
-            variant="ghost"
-            className="size-7"
-            onClick={() => onEdit(coupon)}
-            aria-label={t.admin.editCoupon}
-          >
-            <Pencil className="size-3.5" aria-hidden />
-          </Button>
-          <Button
-            type="button"
-            size="icon"
-            variant="ghost"
-            className="size-7 text-destructive hover:text-destructive"
-            onClick={() => setConfirmOpen(true)}
-            aria-label={t.admin.deleteCoupon}
-          >
-            <Trash2 className="size-3.5" aria-hidden />
-          </Button>
-        </div>
-      </td>
+      >
+        <td className="px-4 py-3 font-mono text-xs font-semibold">{coupon.code}</td>
+        <td className="hidden sm:table-cell px-4 py-3 text-sm">
+          <span className="capitalize">
+            {coupon.type === 'percentage' ? t.admin.couponTypePercentage : t.admin.couponTypeFixed}
+          </span>
+        </td>
+        <td className="px-4 py-3 text-sm font-medium">{valueLabel}</td>
+        <td className="hidden sm:table-cell px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
+          {coupon.usedCount}
+          {coupon.usageLimit !== null ? ` / ${coupon.usageLimit}` : ''}
+        </td>
+        <td className="hidden sm:table-cell px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+          {coupon.expiresAt ? formatDate(coupon.expiresAt) : '—'}
+        </td>
+        <td className="px-4 py-3">
+          <Badge variant={coupon.active ? 'default' : 'secondary'}>
+            {coupon.active ? t.admin.active : t.admin.inactive}
+          </Badge>
+        </td>
+        <td className="hidden sm:table-cell px-4 py-3">
+          {coupon.stripeCouponId ? (
+            <Badge variant="outline" className="text-xs">
+              {t.admin.syncStripeCoupon}
+            </Badge>
+          ) : (
+            <span className="text-xs text-muted-foreground">—</span>
+          )}
+        </td>
+        <td className="px-4 py-3">
+          <div className="flex gap-1">
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              className="size-7"
+              onClick={() => onEdit(coupon)}
+              aria-label={t.admin.editCoupon}
+            >
+              <Pencil className="size-3.5" aria-hidden />
+            </Button>
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              className="size-7 text-destructive hover:text-destructive"
+              onClick={() => setConfirmOpen(true)}
+              aria-label={t.admin.deleteCoupon}
+            >
+              <Trash2 className="size-3.5" aria-hidden />
+            </Button>
+          </div>
+        </td>
+      </tr>
+      {/* AlertDialog hoisted outside <tr> — portaled overlay, must not be a <tr> child */}
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -117,7 +120,7 @@ function CouponRow({ coupon, onEdit, onDeleted, active }: CouponRowProps & { act
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </tr>
+    </>
   )
 }
 

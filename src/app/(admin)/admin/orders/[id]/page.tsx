@@ -48,16 +48,20 @@ export default function AdminOrderDetailPage() {
   } | null>(null)
 
   async function handleStatusUpdate() {
-    if (!newStatus || !params?.id) return
+    if (!newStatus || !params?.id || !data) return
     setSaving(true)
-    const prevStatus = optimisticStatus
+    // Capture server-confirmed baseline BEFORE applying the optimistic value
+    const serverStatus = data.order.status as OrderStatus
     setOptimisticStatus(newStatus as OrderStatus)
     try {
       await apiPatch(`/api/admin/orders/${params.id}/status`, { status: newStatus })
       toast.success(t.admin.statusUpdated)
+      // Reset optimistic override so the UI falls back to the server value after refresh
+      setOptimisticStatus(null)
       router.refresh()
     } catch {
-      setOptimisticStatus(prevStatus)
+      // Roll back to the server-confirmed value, not a prior optimistic value
+      setOptimisticStatus(serverStatus)
       toast.error(t.errors.networkError)
     } finally {
       setSaving(false)
@@ -65,9 +69,13 @@ export default function AdminOrderDetailPage() {
   }
 
   async function handleTrackingUpdate() {
-    if (!trackingNumber.trim() || !params?.id) return
+    if (!trackingNumber.trim() || !params?.id || !data) return
     setSaving(true)
-    const prevTracking = optimisticTracking
+    // Capture server-confirmed baseline BEFORE applying the optimistic value
+    const serverTracking =
+      data.order.trackingNumber != null
+        ? { trackingNumber: data.order.trackingNumber, carrier: data.order.carrier ?? '' }
+        : null
     setOptimisticTracking({ trackingNumber: trackingNumber.trim(), carrier: carrier.trim() })
     try {
       await apiPatch(`/api/admin/orders/${params.id}/tracking`, {
@@ -75,9 +83,12 @@ export default function AdminOrderDetailPage() {
         carrier: carrier.trim() || undefined,
       })
       toast.success(t.admin.trackingAdded)
+      // Reset optimistic override so the UI falls back to the server value after refresh
+      setOptimisticTracking(null)
       router.refresh()
     } catch {
-      setOptimisticTracking(prevTracking)
+      // Roll back to the server-confirmed value, not a prior optimistic value
+      setOptimisticTracking(serverTracking)
       toast.error(t.errors.networkError)
     } finally {
       setSaving(false)
