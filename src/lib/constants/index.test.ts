@@ -133,7 +133,7 @@ describe('appearance presets', () => {
 
   it('font presets resolve to css vars', () => {
     expect(FONT_PRESETS.sans).toContain('var(--font')
-    expect(Object.keys(FONT_PRESETS)).toEqual(['sans', 'serif', 'mono', 'rounded'])
+    expect(Object.keys(FONT_PRESETS)).toEqual(['sans', 'mono'])
   })
 
   it('color modes include system', () => {

@@ -55,8 +55,8 @@ describe('applyTheme', () => {
   })
 
   it('maps font preset to --store-font', () => {
-    applyTheme({ fontFamily: 'serif' })
-    expect(root().style.getPropertyValue('--store-font')).toBe(FONT_PRESETS.serif)
+    applyTheme({ fontFamily: 'sans' })
+    expect(root().style.getPropertyValue('--store-font')).toBe(FONT_PRESETS.sans)
   })
 
   it('colorMode dark forces data-theme=dark', () => {

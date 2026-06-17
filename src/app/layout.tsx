@@ -1,13 +1,6 @@
 import type * as React from 'react'
 import type { Metadata } from 'next'
-import {
-  Geist,
-  Geist_Mono,
-  Instrument_Serif,
-  Merriweather,
-  Noto_Nastaliq_Urdu,
-  Nunito,
-} from 'next/font/google'
+import { Geist, Geist_Mono, Instrument_Serif, Noto_Nastaliq_Urdu } from 'next/font/google'
 import '@/app/globals.css'
 import { ServiceWorkerProvider } from '@/components/pwa/ServiceWorkerProvider'
 import { JsonLd } from '@/components/shared/JsonLd'
@@ -38,20 +31,6 @@ const instrumentSerif = Instrument_Serif({
   weight: '400',
   style: ['normal', 'italic'],
   display: 'swap',
-})
-// Curated extra fonts — preload:false so they're only downloaded when selected by the merchant
-const merriweather = Merriweather({
-  variable: '--font-merriweather',
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  display: 'swap',
-  preload: false,
-})
-const nunito = Nunito({
-  variable: '--font-nunito',
-  subsets: ['latin'],
-  display: 'swap',
-  preload: false,
 })
 // Urdu / RTL font — loaded only when the active locale is RTL to avoid bloat on LTR pages.
 const notoNastaliq = Noto_Nastaliq_Urdu({
@@ -126,7 +105,7 @@ const bootScript = [
   "try{var s=localStorage.getItem('shopflare-theme');if(!s)return;var t=JSON.parse(s);",
   'var r=document.documentElement;',
   "var rad={none:'0rem',sm:'0.25rem',md:'0.5rem',lg:'0.75rem',full:'1.5rem'};",
-  "var fnt={sans:'var(--font-geist-sans)',serif:'var(--font-merriweather)',mono:'var(--font-geist-mono)',rounded:'var(--font-nunito)'};",
+  "var fnt={sans:'var(--font-geist-sans)',mono:'var(--font-geist-mono)'};",
   "var den={compact:'0.75',comfortable:'1',spacious:'1.25'};",
   'function lum(h){var rv=parseInt(h.slice(1,3),16)/255,g=parseInt(h.slice(3,5),16)/255,b=parseInt(h.slice(5,7),16)/255;',
   'function l(c){return c<=0.04045?c/12.92:Math.pow((c+0.055)/1.055,2.4);}',
@@ -202,8 +181,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     geistSans.variable,
     geistMono.variable,
     instrumentSerif.variable,
-    merriweather.variable,
-    nunito.variable,
     // Include the Nastaliq variable only for RTL pages so no preload occurs on LTR.
     ...(isRtl ? [notoNastaliq.variable] : []),
   ].join(' ')

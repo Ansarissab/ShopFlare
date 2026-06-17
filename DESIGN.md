@@ -10,13 +10,12 @@ its keep. The merchant's product is the visual hero — the UI stays out of the 
 
 ## Fonts
 
-| Role        | Family             | Variable             | Weights / Styles       | Notes                                      |
-|-------------|--------------------|----------------------|------------------------|--------------------------------------------|
-| Display     | Instrument Serif   | `--font-display`     | 400, 400 italic        | h1–h4 only. Self-hosted via `next/font`.   |
-| Body / UI   | Geist Sans         | `--font-geist-sans`  | variable               | Body, labels, buttons, inputs.             |
-| Prices / #  | Geist Mono         | `--font-geist-mono`  | variable               | Prices, SKUs, codes, numeric data.         |
-| Merchant alt: Merriweather | `--font-merriweather` | 400, 700 | Optional merchant body font (preload:false). |
-| Merchant alt: Nunito       | `--font-nunito`       | variable | Optional rounded font (preload:false).      |
+| Role        | Family             | Variable              | Weights / Styles | Notes                                        |
+|-------------|--------------------|-----------------------|------------------|----------------------------------------------|
+| Display     | Instrument Serif   | `--font-display`      | 400, 400 italic  | h1–h4 only. Self-hosted via `next/font`.     |
+| Body / UI   | Geist Sans         | `--font-geist-sans`   | variable         | Body, labels, buttons, inputs.               |
+| Prices / #  | Geist Mono         | `--font-geist-mono`   | variable         | Prices, SKUs, codes, numeric data.           |
+| RTL / Urdu  | Noto Nastaliq Urdu | `--font-nastaliq`     | 400, 700         | RTL locales only; injected via locale gate.  |
 
 **Loading:** `next/font/google` self-hosts all fonts at build time. Zero external
 font requests at runtime. Instrument Serif loads `normal` + `italic` in weight 400 only.
