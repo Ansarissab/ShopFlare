@@ -1,8 +1,9 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Search } from 'lucide-react'
+import { Search, ImageIcon } from 'lucide-react'
 import { useT } from '@/lib/i18n/Provider'
 import { apiGet } from '@/lib/api'
 import { SEARCH_DEBOUNCE_MS } from '@/lib/constants'
@@ -16,6 +17,7 @@ interface SearchResult {
   sub?: string
   href: string
   group: 'products' | 'orders'
+  imageUrl?: string
 }
 
 // ─── AdminSearch ──────────────────────────────────────────────────────────────
@@ -65,12 +67,14 @@ export default function AdminSearch() {
         const productHits: SearchResult[] = (productsRes?.products ?? [])
           .filter(({ product }) => product.name.toLowerCase().includes(q))
           .slice(0, 5)
-          .map(({ product }) => ({
+          .map(({ product, variants }) => ({
             id: product.id,
             label: product.name,
             sub: product.active ? undefined : t.admin.inactive,
             href: `/admin/products/${product.id}`,
             group: 'products' as const,
+            imageUrl: variants.flatMap((v) => v.images).sort((a, b) => a.sortOrder - b.sortOrder)[0]
+              ?.url,
           }))
 
         const orderHits: SearchResult[] = (ordersRes?.orders ?? [])
@@ -228,14 +232,30 @@ export default function AdminSearch() {
                         e.preventDefault()
                         navigate(r)
                       }}
-                      className={`flex w-full flex-col gap-0.5 px-3 py-2 text-left text-sm ${
+                      className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm ${
                         flatIndex(r) === highlighted
                           ? 'bg-accent text-accent-foreground'
                           : 'hover:bg-accent hover:text-accent-foreground'
                       }`}
                     >
-                      <span className="font-medium">{r.label}</span>
-                      {r.sub && <span className="text-xs text-muted-foreground">{r.sub}</span>}
+                      {r.imageUrl ? (
+                        <Image
+                          src={r.imageUrl}
+                          alt=""
+                          aria-hidden
+                          width={32}
+                          height={32}
+                          className="size-8 shrink-0 rounded object-cover"
+                        />
+                      ) : (
+                        <div className="size-8 shrink-0 rounded bg-muted flex items-center justify-center">
+                          <ImageIcon className="size-4 text-muted-foreground" aria-hidden />
+                        </div>
+                      )}
+                      <div className="flex min-w-0 flex-col gap-0.5">
+                        <span className="font-medium">{r.label}</span>
+                        {r.sub && <span className="text-xs text-muted-foreground">{r.sub}</span>}
+                      </div>
                     </button>
                   ))}
                 </div>

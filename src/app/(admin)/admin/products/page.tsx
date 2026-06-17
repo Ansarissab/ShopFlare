@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Plus, ExternalLink, List, LayoutGrid } from 'lucide-react'
+import { Plus, ExternalLink, List, LayoutGrid, ImageIcon } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -23,6 +24,9 @@ const VIEW_STORAGE_KEY = 'admin:products:view'
 
 function AdminProductCard({ product, variants, isActive }: AdminProductCardProps) {
   const t = useT()
+  const primaryImageUrl = variants
+    .flatMap((v) => v.images)
+    .sort((a, b) => a.sortOrder - b.sortOrder)[0]?.url
   return (
     <div
       className={cn(
@@ -30,11 +34,27 @@ function AdminProductCard({ product, variants, isActive }: AdminProductCardProps
         isActive && layout.activeRow,
       )}
     >
-      <div className="flex items-start justify-between gap-2">
-        <span className="font-medium leading-snug">{product.name}</span>
-        <Badge variant={product.active ? 'default' : 'secondary'} className="shrink-0">
-          {product.active ? t.admin.active : t.admin.inactive}
-        </Badge>
+      <div className="flex items-start gap-3">
+        {/* Thumbnail */}
+        {primaryImageUrl ? (
+          <Image
+            src={primaryImageUrl}
+            alt={product.name}
+            width={48}
+            height={48}
+            className="size-12 shrink-0 rounded-md object-cover"
+          />
+        ) : (
+          <div className="size-12 shrink-0 rounded-md bg-muted flex items-center justify-center">
+            <ImageIcon className="size-5 text-muted-foreground" aria-hidden />
+          </div>
+        )}
+        <div className="flex min-w-0 flex-1 items-start justify-between gap-2">
+          <span className="font-medium leading-snug">{product.name}</span>
+          <Badge variant={product.active ? 'default' : 'secondary'} className="shrink-0">
+            {product.active ? t.admin.active : t.admin.inactive}
+          </Badge>
+        </div>
       </div>
       <span className="text-xs text-muted-foreground">
         {variants.length === 1
@@ -104,7 +124,7 @@ export default function AdminProductsPage() {
         actions={
           <div className="flex items-center gap-2">
             {/* Global search — unchanged; data-shortcut-search keeps '/' focus */}
-            <div className="max-w-[200px] sm:max-w-xs">
+            <div className="max-w-50 sm:max-w-xs">
               <AdminSearch />
             </div>
 
