@@ -632,6 +632,8 @@ export const fr: Dictionary = {
     addFirstProduct: 'Add your first product',
     variantCount: '{n} variant',
     variantCountPlural: '{n} variants',
+    viewList: 'List view',
+    viewGrid: 'Grid view',
     // orders list (phase 35)
     showingOrdersOf: 'Showing {shown} of {total} orders',
     allStatusesOption: 'All',

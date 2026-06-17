@@ -1,7 +1,7 @@
 import type { OrderItem, Coupon, Review } from 'worker/db/schema'
 import type { OrderStatus } from '@/lib/constants'
 import type * as React from 'react'
-import type { ProductWithVariants } from '@/lib/types/product'
+import type { ProductWithVariants, VariantWithDetails } from '@/lib/types/product'
 
 export type { OrderItem, Coupon, Review }
 export type AdminCoupon = Coupon
@@ -197,6 +197,14 @@ export interface ProductFormProps {
 export interface AdminListSkeletonProps {
   rows: number
   itemClassName?: string
+}
+
+export type ProductViewMode = 'list' | 'grid'
+
+export interface AdminProductCardProps {
+  product: { id: string; name: string; active: boolean }
+  variants: VariantWithDetails[]
+  isActive: boolean
 }
 
 export interface DashboardStats {
