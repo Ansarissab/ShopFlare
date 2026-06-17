@@ -62,8 +62,10 @@ function pidAlive(pid) {
   try {
     process.kill(pid, 0)
     return true
-  } catch {
-    return false // ESRCH or EPERM with ESRCH → not alive
+  } catch (err) {
+    // ESRCH = process not found → truly dead.
+    // EPERM = process exists but owned by another user → alive, do not reap.
+    return err.code !== 'ESRCH'
   }
 }
 
