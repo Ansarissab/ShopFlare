@@ -60,7 +60,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
               <MobileAdminNav />
               <span className="text-sm font-semibold tracking-tight">Admin</span>
             </header>
-            <main className="flex-1 p-4 sm:p-6">{children}</main>
+            <main className="p-4 sm:p-6">{children}</main>
           </div>
         </div>
         <AdminShortcuts />
