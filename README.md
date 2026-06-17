@@ -60,6 +60,10 @@ Replaces Shopify Basic ($29/month) for stores that don't need the heavyweight pl
 - **SEO / GEO / AEO**: server-rendered metadata + JSON-LD on every page (Product, Category, Organization, BreadcrumbList, FAQPage, Article); sitemap with `lastModified`; toggleable LLM discovery (`/llms.txt`, Markdown `.md` twins, AI-bot policy in `robots.txt`)
 - **Blog**: toggleable merchant blog at `/blog` — Trix rich text editor, cover images (R2), tags, draft/published workflow, RSS feed at `/blog/rss.xml`, Article structured data, included in sitemap
 - **Status / uptime**: machine `GET /healthz` (D1/KV/R2 probed independently, 200 ok / 503 degraded), public `/status` SSR live snapshot, and Better Stack free-tier monitor for uptime history + alerts
+- **Global search overlay** — header search button (and `/` shortcut) opens a lazy-loaded product-search modal from any page; full catalog searched via Fuse.js with category + in-stock filters; results link directly to products
+- **Announcement bar** — thin dismissible banner above the header; merchant-controlled from admin (types: single, scheduled with start/end datetime, or rotating carousel); dismissal keyed to message version so a new announcement re-shows; CSS-driven carousel, `prefers-reduced-motion`-aware
+- **Dedicated FAQ page** (`/faq`) — store-wide accordion (multi-open, RTL-aware), feature-flag-gated; per-product FAQ accordion on each product page; FAQPage JSON-LD emitted on both; admin add/remove/reorder rows without redeploy
+- **i18n locale engine** — middleware path-prefix routing (`/fr`, `/ur`); `getT()` / `useT()` resolver; locale switcher in header + admin; RTL layout for Urdu with scoped Noto Nastaliq font; en/fr/ur dictionaries (fr/ur UI chrome scaffolded, real translations are a follow-up); `enabledLocales` + `defaultLocale` configurable in admin without redeploy
 - **Keyboard shortcuts** — `/` search, `c` cart, `?` cheat-sheet, `Esc` close; localized + RTL-aware, respects reduced-motion
 
 **Admin dashboard** (app-level password login → Bearer session token)
@@ -71,6 +75,9 @@ Replaces Shopify Basic ($29/month) for stores that don't need the heavyweight pl
 - **POS** (in-person cash register mode)
 - Store settings: name, tagline, logo, currency, shipping, contact, **products per page** — all editable, **no redeploy**
 - **Style Presets**: 6 named looks (Midnight, Emerald, Sunset, Ocean, Elegant, Playful), each setting colors, font, radius, density, and hero layout in one click via the CSS-variable theme engine
+- **Tax settings** — optional flat-rate tax (GST/VAT/Sales Tax); exclusive (add on top) or inclusive (extracted for display); configurable tax name, rate, basis (subtotal only or subtotal + shipping), and registration number; tax line shown in cart, checkout, order tracking, and admin order detail; persisted as immutable `taxCents` snapshot on every order
+- **Advanced analytics** — tabbed dashboard (Overview · Products · Customers · Funnel); product leaderboard, variant/size breakdown, slow-movers, frequently-bought-together pairs; customer RFM segmentation, repeat-rate, CLV; checkout-abandonment rate from existing pending orders; per-product stats panel on each product edit page
+- **Marketing & SEO** — admin-configurable GA4, Google Ads, and Meta Pixel IDs loaded only after cookie consent; cookie consent banner (GDPR-aware, gates all tags); Google Search Console + Bing site-verification meta tags; IndexNow auto-ping on product changes; hreflang alternates + per-locale sitemap URLs for enabled locales
 - **Keyboard shortcuts** — `g`-prefixed "go to" navigation (orders/products/coupons/analytics), `c` create, `j`/`k` row navigation, `/` search, `?` cheat-sheet
 
 **Dynamic-first:** anything a non-developer needs to change lives in D1 and is editable from the
