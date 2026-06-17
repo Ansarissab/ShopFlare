@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
+import { serverWorkerUrl } from '@/lib/server/worker-origin'
 import { isFeatureEnabled } from '@/lib/features'
 import { AI_SEARCH_BOTS, AI_TRAINING_BOTS, BLOCKED_SCRAPER_BOTS } from '@/lib/constants'
 import type { StoreConfig } from '@/lib/types/common'
@@ -10,7 +11,7 @@ export async function GET() {
   const config = await fetchFromWorker<StoreConfig>('/api/config/store', { revalidate: 300 })
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
-  const workerUrl = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
+  const workerUrl = serverWorkerUrl()
   const resolvedSiteUrl = siteUrl || (workerUrl ? workerUrl.replace(/\/api$/, '') : '')
 
   const llmEnabled = isFeatureEnabled(config, 'llmDiscoveryEnabled')

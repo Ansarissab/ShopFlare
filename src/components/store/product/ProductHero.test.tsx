@@ -87,6 +87,7 @@ vi.mock('@/components/store/product/ProductActions', async () => {
       onNotifyMe: () => void
       allSizesOOS: boolean
       isAddingToCart: boolean
+      isAdded?: boolean
       selectedSize: SizeOption | null
     }) =>
       createElement(
@@ -95,6 +96,7 @@ vi.mock('@/components/store/product/ProductActions', async () => {
           'data-testid': 'actions',
           'data-oos': String(p.allSizesOOS),
           'data-adding': String(p.isAddingToCart),
+          'data-added': String(p.isAdded ?? false),
           'data-size': p.selectedSize?.id ?? '',
         },
         createElement('button', { 'data-testid': 'add', onClick: p.onAddToCart }, 'add'),
@@ -330,6 +332,11 @@ describe('ProductHero', () => {
   it('forwards isAddingToCart to ProductActions', () => {
     render(<ProductHero {...makeProps({ isAddingToCart: true })} />)
     expect(screen.getByTestId('actions').getAttribute('data-adding')).toBe('true')
+  })
+
+  it('forwards isAdded to ProductActions', () => {
+    render(<ProductHero {...makeProps({ isAdded: true })} />)
+    expect(screen.getByTestId('actions').getAttribute('data-added')).toBe('true')
   })
 
   it('opens the notify dialog when notify-me is clicked', async () => {

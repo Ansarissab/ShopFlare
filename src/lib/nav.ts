@@ -8,6 +8,19 @@ export function catalogHref(landingEnabled?: boolean): string {
   return landingEnabled ? '/shop' : '/'
 }
 
+/**
+ * Returns the canonical URL for a category listing page given its slug.
+ *
+ * Category pages live at `/category/<slug>` — NOT `/shop/<slug>`.
+ * Use this helper everywhere a "Browse <category>" link is built so a
+ * future route change only needs updating here.
+ *
+ * Example: buildCategoryHref('accessories') → '/category/accessories'
+ */
+export function buildCategoryHref(slug: string): string {
+  return `/category/${encodeURIComponent(slug)}`
+}
+
 // ─── Primary nav link model ────────────────────────────────────────────────────
 
 /** A single entry in the primary navigation bar.

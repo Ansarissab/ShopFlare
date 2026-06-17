@@ -41,6 +41,30 @@ export const layout = {
   activeRow: 'bg-muted ring-1 ring-inset ring-ring',
 } as const
 
+// ─── Motion / entrance stagger ────────────────────────────────────────────────
+
+/** Cap so the last card in a long list doesn't wait forever. */
+export const MAX_STAGGER_MS = 480
+
+/**
+ * Per-card stagger delay for the `.pg-enter` CSS entrance animation.
+ * Increment is 60 ms per card, capped at MAX_STAGGER_MS.
+ * Pass the result directly to React's `style.transitionDelay`.
+ *
+ * @example
+ *   <Card className="pg-enter" style={{ transitionDelay: staggerDelay(index) }} />
+ */
+export function staggerDelay(index: number): string {
+  return `${Math.min(index * 60, MAX_STAGGER_MS)}ms`
+}
+
+// ─── Price / money ────────────────────────────────────────────────────────────
+// Rule 6: any number representing money → monospaced + tabular digits (no digit jitter).
+// Compose with your own text-size / font-weight / color classes via cn().
+export const price = {
+  mono: 'font-mono tabular-nums',
+} as const
+
 // PWA-specific safe-area utilities (combine with Tailwind via cn())
 export const safeArea = {
   top: 'pt-[var(--safe-top)]',

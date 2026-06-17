@@ -6,6 +6,47 @@ import { en } from '@/lib/i18n/en'
 import { ApiError } from '@/lib/api'
 import type { ProductWithVariants } from '@/lib/types/product'
 
+// ─── AlertDialog mock — renders content inline when open ────────────────────
+vi.mock('@/components/ui/alert-dialog', () => ({
+  AlertDialog: ({
+    open,
+    children,
+  }: {
+    open: boolean
+    onOpenChange?: (v: boolean) => void
+    children: React.ReactNode
+  }) => (open ? <div data-testid="alert-dialog">{children}</div> : null),
+  AlertDialogContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  AlertDialogHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  AlertDialogTitle: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  AlertDialogDescription: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  AlertDialogFooter: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  AlertDialogCancel: ({
+    children,
+    ...props
+  }: {
+    children: React.ReactNode
+    [k: string]: unknown
+  }) => (
+    <button type="button" data-testid="alert-dialog-cancel" {...props}>
+      {children}
+    </button>
+  ),
+  AlertDialogAction: ({
+    children,
+    onClick,
+    ...props
+  }: {
+    children: React.ReactNode
+    onClick?: () => void
+    [k: string]: unknown
+  }) => (
+    <button type="button" data-testid="alert-dialog-action" onClick={onClick} {...props}>
+      {children}
+    </button>
+  ),
+}))
+
 // Form controls share label text with HelpTip triggers, so getByLabelText is
 // ambiguous. Look controls up by their explicit id instead.
 function byId(id: string): HTMLElement {
@@ -321,10 +362,13 @@ describe('ProductForm — edit mode (with initial)', () => {
 
   it('delete variant confirmed removes it', async () => {
     ;(apiGet as ReturnType<typeof vi.fn>).mockResolvedValue(stats)
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     const v = makeVariant('var-1', [makeSize('size-1')])
     render(<ProductForm initial={makeProduct(undefined, [v])} />)
+    // open the AlertDialog
     fireEvent.click(screen.getByLabelText(en.admin.deleteVariant))
+    // dialog is now open — click the destructive Action
+    await waitFor(() => expect(screen.getByTestId('alert-dialog-action')).toBeTruthy())
+    fireEvent.click(screen.getByTestId('alert-dialog-action'))
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith(en.admin.variantDeleted))
     expect(apiDelete).toHaveBeenCalledWith('/api/admin/products/variants/var-1')
     expect(screen.getByText(en.admin.noVariantsYet)).toBeTruthy()
@@ -332,20 +376,23 @@ describe('ProductForm — edit mode (with initial)', () => {
 
   it('delete variant cancelled does nothing', async () => {
     ;(apiGet as ReturnType<typeof vi.fn>).mockResolvedValue(stats)
-    vi.spyOn(window, 'confirm').mockReturnValue(false)
     const v = makeVariant('var-1', [makeSize('size-1')])
     render(<ProductForm initial={makeProduct(undefined, [v])} />)
+    // open the AlertDialog then click Cancel
     fireEvent.click(screen.getByLabelText(en.admin.deleteVariant))
+    await waitFor(() => expect(screen.getByTestId('alert-dialog-cancel')).toBeTruthy())
+    fireEvent.click(screen.getByTestId('alert-dialog-cancel'))
     expect(apiDelete).not.toHaveBeenCalled()
   })
 
   it('delete variant failure toasts network error', async () => {
     ;(apiGet as ReturnType<typeof vi.fn>).mockResolvedValue(stats)
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     ;(apiDelete as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('boom'))
     const v = makeVariant('var-1', [makeSize('size-1')])
     render(<ProductForm initial={makeProduct(undefined, [v])} />)
     fireEvent.click(screen.getByLabelText(en.admin.deleteVariant))
+    await waitFor(() => expect(screen.getByTestId('alert-dialog-action')).toBeTruthy())
+    fireEvent.click(screen.getByTestId('alert-dialog-action'))
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith(en.errors.networkError))
   })
 
@@ -454,9 +501,13 @@ describe('ProductForm — edit mode (with initial)', () => {
 
   it('danger zone delete confirmed navigates away', async () => {
     ;(apiGet as ReturnType<typeof vi.fn>).mockResolvedValue(stats)
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     render(<ProductForm initial={makeProduct()} />)
+    // click the danger zone button — opens the AlertDialog
     fireEvent.click(screen.getByText(en.admin.deleteProduct))
+    // dialog renders — there are now two "Delete Product" buttons (trigger + action).
+    // the action button has data-testid="alert-dialog-action"
+    await waitFor(() => expect(screen.getByTestId('alert-dialog-action')).toBeTruthy())
+    fireEvent.click(screen.getByTestId('alert-dialog-action'))
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith(en.admin.productDeleted))
     expect(apiDelete).toHaveBeenCalledWith('/api/admin/products/prod-1')
     expect(pushMock).toHaveBeenCalledWith('/admin/products')
@@ -464,18 +515,20 @@ describe('ProductForm — edit mode (with initial)', () => {
 
   it('danger zone delete cancelled does nothing', async () => {
     ;(apiGet as ReturnType<typeof vi.fn>).mockResolvedValue(stats)
-    vi.spyOn(window, 'confirm').mockReturnValue(false)
     render(<ProductForm initial={makeProduct()} />)
     fireEvent.click(screen.getByText(en.admin.deleteProduct))
+    await waitFor(() => expect(screen.getByTestId('alert-dialog-cancel')).toBeTruthy())
+    fireEvent.click(screen.getByTestId('alert-dialog-cancel'))
     expect(apiDelete).not.toHaveBeenCalled()
   })
 
   it('danger zone delete failure toasts network error', async () => {
     ;(apiGet as ReturnType<typeof vi.fn>).mockResolvedValue(stats)
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     ;(apiDelete as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('boom'))
     render(<ProductForm initial={makeProduct()} />)
     fireEvent.click(screen.getByText(en.admin.deleteProduct))
+    await waitFor(() => expect(screen.getByTestId('alert-dialog-action')).toBeTruthy())
+    fireEvent.click(screen.getByTestId('alert-dialog-action'))
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith(en.errors.networkError))
   })
 

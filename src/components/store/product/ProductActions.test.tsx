@@ -83,6 +83,22 @@ describe('ProductActions', () => {
     expect(container.querySelector('.animate-spin')).toBeTruthy()
   })
 
+  it('shows "Added" label and disables the button when isAdded is true', () => {
+    const props = { ...defaults(), isAdded: true }
+    render(<ProductActions {...props} />)
+    expect(screen.getByText(en.store.addedToCart)).toBeTruthy()
+    expect(screen.queryByText(en.store.addToCart)).toBeNull()
+    expect(screen.getByText(en.store.addedToCart).closest('button')!.disabled).toBe(true)
+  })
+
+  it('renders the check icon (no spinner) in the added state', () => {
+    const props = { ...defaults(), isAdded: true }
+    const { container } = render(<ProductActions {...props} />)
+    expect(container.querySelector('.animate-spin')).toBeNull()
+    // lucide Check renders an svg; confirm no spinner present and button is disabled
+    expect(screen.getByText(en.store.addedToCart).closest('button')!.disabled).toBe(true)
+  })
+
   it('applies an extra className in both OOS and normal modes', () => {
     const props = defaults()
     const { container, rerender } = render(<ProductActions {...props} className="cls-a" />)

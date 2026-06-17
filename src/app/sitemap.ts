@@ -2,11 +2,12 @@ import type { MetadataRoute } from 'next'
 import { POLICY_SLUGS, DEFAULT_LOCALE } from '@/lib/constants'
 import type { LocaleCode } from '@/lib/constants'
 import { buildLocaleAlternates } from '@/lib/seo/hreflang'
+import { serverWorkerUrl } from '@/lib/server/worker-origin'
 
 export const revalidate = 3600
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const workerUrl = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
+  const workerUrl = serverWorkerUrl()
   const siteUrl =
     process.env.NEXT_PUBLIC_SITE_URL ?? (workerUrl ? workerUrl.replace(/\/api$/, '') : '')
 

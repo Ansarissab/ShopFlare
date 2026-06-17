@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import { staggerDelay } from '@/lib/styles'
 import type { HeroSectionProps } from '@/lib/types'
 
 export function HeroSection({
@@ -39,6 +40,11 @@ export function HeroSection({
               priority
             />
           )}
+          {/*
+           * text-white is an intentional legibility hardcode here — NOT a DRY violation.
+           * The full-bleed overlay darkens the photo to brightness-50; text-primary-foreground
+           * is merchant-overridable and could be dark, making the text invisible over the image.
+           */}
           <div className="relative z-10 max-w-2xl text-white">
             <h1 className="text-4xl sm:text-5xl">{heading}</h1>
             {subtext && <p className="mt-4 text-lg opacity-90">{subtext}</p>}
@@ -135,31 +141,39 @@ export function HeroSection({
               imageUrl ? 'max-w-lg sm:max-w-xl' : 'max-w-2xl',
             )}
           >
-            {/* Store name — mono watermark, uppercase, tracked */}
+            {/* Store name — mono watermark, uppercase, tracked (stagger index 0) */}
             {storeName && (
-              <span className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              <span
+                className="hero-poster-item font-mono text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground"
+                style={{ transitionDelay: staggerDelay(0) }}
+              >
                 {storeName}
               </span>
             )}
 
-            {/* Dominant serif headline — clamp for fluid sizing */}
+            {/* Dominant serif headline — clamp for fluid sizing (stagger index 1) */}
             <h1
-              className="text-foreground tracking-tight leading-[1.05]"
-              style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)' }}
+              className="hero-poster-item text-foreground tracking-tight leading-[1.05]"
+              style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', transitionDelay: staggerDelay(1) }}
             >
               {heading}
             </h1>
 
-            {/* Supporting sentence — one short line, muted Geist */}
+            {/* Supporting sentence — one short line, muted Geist (stagger index 2) */}
             {subtext && (
-              <p className="text-base text-muted-foreground sm:text-lg max-w-sm">{subtext}</p>
+              <p
+                className="hero-poster-item text-base text-muted-foreground sm:text-lg max-w-sm"
+                style={{ transitionDelay: staggerDelay(2) }}
+              >
+                {subtext}
+              </p>
             )}
 
-            {/* Single CTA */}
-            <div>
+            {/* Single CTA (stagger index 3) */}
+            <div className="hero-poster-item" style={{ transitionDelay: staggerDelay(3) }}>
               <Link
                 href={ctaHref}
-                className="inline-flex items-center rounded-md bg-primary px-7 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent min-h-[44px]"
+                className="inline-flex items-center rounded-md bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent min-h-[44px]"
               >
                 {ctaText}
               </Link>

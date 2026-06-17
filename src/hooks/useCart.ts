@@ -22,6 +22,12 @@ type CartState = {
   isOpen: boolean
   couponCode: string | null
   discountCents: number
+  /**
+   * Unix timestamp (ms) of the last successful addItem call.
+   * Subscribers use this to trigger the cart-icon pulse animation.
+   * Not persisted — resets to 0 on page load.
+   */
+  lastAddedAt: number
   addItem: (item: CartItem) => void
   removeItem: (sizeOptionId: string) => void
   updateQuantity: (sizeOptionId: string, qty: number) => void
@@ -39,20 +45,19 @@ export const useCart = create<CartState>()(
       isOpen: false,
       couponCode: null,
       discountCents: 0,
+      lastAddedAt: 0,
 
       addItem: (item) =>
         set((state) => {
           const existing = state.items.find((i) => i.sizeOptionId === item.sizeOptionId)
-          if (existing) {
-            return {
-              items: state.items.map((i) =>
+          const nextItems = existing
+            ? state.items.map((i) =>
                 i.sizeOptionId === item.sizeOptionId
                   ? { ...i, quantity: i.quantity + item.quantity }
                   : i,
-              ),
-            }
-          }
-          return { items: [...state.items, item] }
+              )
+            : [...state.items, item]
+          return { items: nextItems, lastAddedAt: Date.now() }
         }),
 
       removeItem: (sizeOptionId) =>
@@ -84,7 +89,16 @@ export const useCart = create<CartState>()(
 
       removeCoupon: () => set({ couponCode: null, discountCents: 0 }),
     }),
-    { name: 'cart' },
+    {
+      name: 'cart',
+      // lastAddedAt is transient — exclude from localStorage so it resets on page load
+      partialize: (state) => ({
+        items: state.items,
+        isOpen: state.isOpen,
+        couponCode: state.couponCode,
+        discountCents: state.discountCents,
+      }),
+    },
   ),
 )
 

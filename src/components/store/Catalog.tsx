@@ -139,9 +139,10 @@ export function Catalog({ basePath = '/', initialProducts, initialCategories }: 
 
   if (items.length === 0) {
     return (
-      <div className={cn(layout.centeredState, 'max-w-7xl')}>
-        <h1>{t.store.comingSoon}</h1>
-        <p className="text-muted-foreground">{t.store.comingSoonBody}</p>
+      <div className={cn(layout.centeredState, 'max-w-7xl py-24')}>
+        <h1 className="text-[clamp(2rem,5vw,3rem)] tracking-tight">{t.store.comingSoon}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t.store.comingSoonBody}</p>
+        <p className="text-sm text-muted-foreground">{t.store.comingSoonSubtext}</p>
       </div>
     )
   }
@@ -170,8 +171,9 @@ export function Catalog({ basePath = '/', initialProducts, initialCategories }: 
 
       {visibleItems.length === 0 ? (
         query ? (
-          <div className={cn(layout.centeredState, 'min-h-[30vh]')}>
-            <p className="text-muted-foreground">
+          <div className={cn(layout.centeredState, 'min-h-[40vh] py-16')}>
+            <h2 className="tracking-tight text-2xl">{t.store.searchNoResultsHeading}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
               {t.store.searchNoResults} &quot;{query}&quot;
             </p>
             <button
@@ -182,14 +184,15 @@ export function Catalog({ basePath = '/', initialProducts, initialCategories }: 
                 const paramStr = params.toString()
                 router.replace(paramStr ? `${basePath}?${paramStr}` : basePath, { scroll: false })
               }}
-              className="mt-2 text-sm text-primary underline-offset-4 hover:underline"
+              className="mt-3 text-sm text-primary underline-offset-4 hover:underline"
             >
               {t.store.searchClearHint}
             </button>
           </div>
         ) : (
-          <div className={cn(layout.centeredState, 'min-h-[30vh]')}>
-            <p className="text-muted-foreground">{t.store.categoryEmpty}</p>
+          <div className={cn(layout.centeredState, 'min-h-[40vh] py-16')}>
+            <h2 className="tracking-tight text-2xl">{t.store.categoryEmptyHeading}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{t.store.categoryEmptySubtext}</p>
           </div>
         )
       ) : (

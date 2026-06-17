@@ -1,3 +1,5 @@
+import { serverWorkerUrl } from '@/lib/server/worker-origin'
+
 export const dynamic = 'force-dynamic'
 
 interface BlogPostSummary {
@@ -25,7 +27,7 @@ function xmlEscape(str: string): string {
 }
 
 export async function GET(): Promise<Response> {
-  const workerUrl = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
+  const workerUrl = serverWorkerUrl()
   const siteUrl =
     process.env.NEXT_PUBLIC_SITE_URL ?? (workerUrl ? workerUrl.replace(/\/api$/, '') : '')
 

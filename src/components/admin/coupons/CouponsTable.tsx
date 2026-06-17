@@ -1,9 +1,20 @@
 'use client'
 
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { Pencil, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog'
 import { HelpTip } from '@/components/common/HelpTip'
 import { useT } from '@/lib/i18n/Provider'
 import { apiDelete } from '@/lib/api'
@@ -18,8 +29,10 @@ import type { CouponRowProps, CouponsTableProps } from '@/lib/types/admin'
 
 function CouponRow({ coupon, onEdit, onDeleted, active }: CouponRowProps & { active?: boolean }) {
   const t = useT()
+  const [confirmOpen, setConfirmOpen] = useState(false)
+
   async function handleDelete() {
-    if (!confirm(t.admin.deleteCouponConfirm)) return
+    setConfirmOpen(false)
     try {
       await apiDelete(`/api/admin/coupons/${coupon.id}`)
       toast.success(t.admin.couponDeleted)
@@ -83,12 +96,27 @@ function CouponRow({ coupon, onEdit, onDeleted, active }: CouponRowProps & { act
             size="icon"
             variant="ghost"
             className="size-7 text-destructive hover:text-destructive"
-            onClick={handleDelete}
+            onClick={() => setConfirmOpen(true)}
             aria-label={t.admin.deleteCoupon}
           >
             <Trash2 className="size-3.5" aria-hidden />
           </Button>
         </div>
+        {/* Dialog lives inside the actions cell (valid <td> child); base-ui portals the overlay to body */}
+        <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t.admin.deleteCoupon}</AlertDialogTitle>
+              <AlertDialogDescription>{t.admin.deleteCouponConfirm}</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t.admin.cancel}</AlertDialogCancel>
+              <AlertDialogAction variant="destructive" onClick={handleDelete}>
+                {t.admin.deleteCoupon}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </td>
     </tr>
   )

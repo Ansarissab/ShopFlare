@@ -105,31 +105,31 @@ describe('Admin settings — locale controls', () => {
 
   it('renders checkboxes for all shipped locales', () => {
     renderPage()
-    expect(screen.getByLabelText('English')).toBeTruthy()
-    expect(screen.getByLabelText('Français')).toBeTruthy()
-    expect(screen.getByLabelText('اردو')).toBeTruthy()
+    expect(screen.getByRole('checkbox', { name: 'English' })).toBeTruthy()
+    expect(screen.getByRole('checkbox', { name: 'Français' })).toBeTruthy()
+    expect(screen.getByRole('checkbox', { name: 'اردو' })).toBeTruthy()
   })
 
   it('English checkbox is always checked and disabled', () => {
     renderPage()
-    const enBox = screen.getByLabelText('English') as HTMLInputElement
-    expect(enBox.checked).toBe(true)
-    expect(enBox.disabled).toBe(true)
+    const enBox = screen.getByRole('checkbox', { name: 'English' })
+    expect(enBox.getAttribute('aria-checked')).toBe('true')
+    expect(enBox.getAttribute('aria-disabled')).toBe('true')
   })
 
   it('seeds enabledLocales from config', () => {
     mockConfig = { ...BASE_CONFIG, enabledLocales: ['en', 'fr'], defaultLocale: 'en' }
     renderPage()
-    const frBox = screen.getByLabelText('Français') as HTMLInputElement
-    const urBox = screen.getByLabelText('اردو') as HTMLInputElement
-    expect(frBox.checked).toBe(true)
-    expect(urBox.checked).toBe(false)
+    const frBox = screen.getByRole('checkbox', { name: 'Français' })
+    const urBox = screen.getByRole('checkbox', { name: 'اردو' })
+    expect(frBox.getAttribute('aria-checked')).toBe('true')
+    expect(urBox.getAttribute('aria-checked')).toBe('false')
   })
 
   it('checking a locale adds it to enabledLocales in the save payload', async () => {
     mockConfig = { ...BASE_CONFIG, enabledLocales: ['en'], defaultLocale: 'en' }
     renderPage()
-    fireEvent.click(screen.getByLabelText('Français'))
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Français' }))
     await clickSave()
     await waitFor(() => expect(apiPutMock).toHaveBeenCalled())
     const payload = apiPutMock.mock.calls[0][1] as Record<string, unknown>
@@ -139,7 +139,7 @@ describe('Admin settings — locale controls', () => {
   it('unchecking a locale removes it from the payload', async () => {
     mockConfig = { ...BASE_CONFIG, enabledLocales: ['en', 'fr'], defaultLocale: 'en' }
     renderPage()
-    fireEvent.click(screen.getByLabelText('Français'))
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Français' }))
     await clickSave()
     await waitFor(() => expect(apiPutMock).toHaveBeenCalled())
     const payload = apiPutMock.mock.calls[0][1] as Record<string, unknown>
@@ -150,7 +150,7 @@ describe('Admin settings — locale controls', () => {
     mockConfig = { ...BASE_CONFIG, enabledLocales: ['en', 'fr'], defaultLocale: 'fr' }
     renderPage()
     // Uncheck fr — which is currently the default
-    fireEvent.click(screen.getByLabelText('Français'))
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Français' }))
     await clickSave()
     await waitFor(() => expect(apiPutMock).toHaveBeenCalled())
     const payload = apiPutMock.mock.calls[0][1] as Record<string, unknown>

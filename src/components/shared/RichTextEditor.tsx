@@ -83,7 +83,7 @@ export function RichTextEditor({ value, onChange, uploadEndpoint }: RichTextEdit
       <trix-editor
         ref={editorRef as React.RefObject<TrixEditorElement>}
         input={inputId}
-        className="trix-content border rounded-md p-2 min-h-[200px] focus:outline-none"
+        className="trix-content border rounded-md p-2 min-h-[200px] focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
       />
     </div>
   )

@@ -6,6 +6,7 @@ import { ShoppingCart, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useCart, useCartItemCount } from '@/hooks/useCart'
+import { useCartPulse } from '@/hooks/useCartPulse'
 import { useStoreConfig } from '@/hooks/useStoreConfig'
 import { useApiResource } from '@/hooks/useApiResource'
 import { CartSheet } from '@/components/store/cart/CartSheet'
@@ -24,6 +25,7 @@ export function StorefrontHeader() {
   const t = useT()
   const { openCart } = useCart()
   const itemCount = useCartItemCount()
+  const isPulsing = useCartPulse()
   const { config } = useStoreConfig()
   const { data: catData } = useApiResource<{ categories: CategoryNode[] }>('/api/categories')
   const { openSearch } = useSearchOverlay()
@@ -33,7 +35,7 @@ export function StorefrontHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full border-b bg-background">
+      <header className="storefront-header sticky top-0 z-40 w-full border-b bg-background">
         <div className={cn(layout.bar, 'h-16 justify-between gap-4')}>
           {/* Store name / logo */}
           <Link
@@ -91,7 +93,7 @@ export function StorefrontHeader() {
               className="relative"
               onClick={openCart}
             >
-              <ShoppingCart className="h-5 w-5" />
+              <ShoppingCart className={cn('h-5 w-5', isPulsing && 'cart-added-pulse')} />
               {itemCount > 0 && (
                 <Badge className="absolute -top-1 -inset-e-1 flex h-4 w-4 items-center justify-center rounded-full p-0 text-[10px]">
                   {itemCount > 99 ? '99+' : itemCount}

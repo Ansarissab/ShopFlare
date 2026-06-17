@@ -1,9 +1,11 @@
 // ISR Web App Manifest for the storefront.
 // Fetches store config so name/colors/icons reflect merchant branding.
 // revalidate=300: CF Pages edge caches for 5 min, avoiding per-request invocations.
+import { serverWorkerUrl } from '@/lib/server/worker-origin'
+
 export const revalidate = 300
 
-const WORKER_URL = process.env.NEXT_PUBLIC_WORKER_URL?.replace(/\/$/, '') ?? ''
+const WORKER_URL = serverWorkerUrl()
 const FALLBACK_NAME = 'ShopFlare'
 const FALLBACK_THEME = '#1A1A18'
 const FALLBACK_BG = '#141412'

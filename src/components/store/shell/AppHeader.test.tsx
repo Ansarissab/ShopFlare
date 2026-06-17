@@ -13,7 +13,8 @@ vi.mock('@/hooks/useDisplayMode', () => ({
 
 vi.mock('@/hooks/useCart', () => ({
   useCartItemCount: () => cartCount,
-  useCart: (selector: (s: { openCart: () => void }) => unknown) => selector({ openCart }),
+  useCart: (selector: (s: { openCart: () => void; lastAddedAt: number }) => unknown) =>
+    selector({ openCart, lastAddedAt: 0 }),
 }))
 
 vi.mock('@/hooks/useStoreConfig', () => ({

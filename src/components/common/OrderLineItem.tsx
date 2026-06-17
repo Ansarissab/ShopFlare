@@ -1,19 +1,11 @@
 'use client'
 
-// TODO: move OrderLineItemProps to lib/types/store.ts
-
 import Image from 'next/image'
 import { formatPrice } from '@/lib/utils/index'
 import { useT } from '@/lib/i18n/Provider'
+import type { OrderLineItemProps } from '@/lib/types/admin'
 
-export interface OrderLineItemProps {
-  imageUrl?: string | null
-  productName: string
-  variantLabel: string
-  size: string
-  quantity: number
-  priceCents: number
-}
+export type { OrderLineItemProps }
 
 /**
  * Presentational row: size-16 thumbnail + name + variant/size + qty + line total.

@@ -11,7 +11,7 @@ export function LandingPage({ landing, storeConfig, t }: LandingPageProps) {
   const { sections, featuredProducts } = landing
 
   return (
-    <main>
+    <main id="main-content">
       {LANDING_SECTION_KEYS.map((key) => {
         const section = sections[key]
         if (!section?.enabled) return null

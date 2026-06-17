@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { CreditCard, Banknote, Building2, MessageCircle } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { CreditCard, Banknote, Building2, MessageCircle, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ManualOrderForm } from '@/components/store/checkout/ManualOrderForm'
 import { TurnstileWidget } from '@/components/store/checkout/TurnstileWidget'
@@ -29,6 +29,7 @@ export function CheckoutMethodSelector() {
   const [stripeLoading, setStripeLoading] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
   const [turnstileError, setTurnstileError] = useState(false)
+  const radioRefs = useRef<Map<MethodValue, HTMLButtonElement | null>>(new Map())
 
   const bankEnabled = !!config?.bankAccountNumber
 
@@ -62,6 +63,32 @@ export function CheckoutMethodSelector() {
       icon: MessageCircle,
     },
   ]
+
+  const handleRadioKeyDown = (
+    e: React.KeyboardEvent<HTMLButtonElement>,
+    currentValue: MethodValue,
+  ) => {
+    const methodValues = methods.map((m) => m.value)
+    const idx = methodValues.indexOf(currentValue)
+    let nextIdx: number | null = null
+
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+      nextIdx = (idx + 1) % methodValues.length
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      nextIdx = (idx - 1 + methodValues.length) % methodValues.length
+    } else if (e.key === 'Home') {
+      nextIdx = 0
+    } else if (e.key === 'End') {
+      nextIdx = methodValues.length - 1
+    }
+
+    if (nextIdx !== null) {
+      e.preventDefault()
+      const nextValue = methodValues[nextIdx]
+      setActive(nextValue)
+      radioRefs.current.get(nextValue)?.focus()
+    }
+  }
 
   async function handleStripeCheckout() {
     if (!turnstileToken) {
@@ -106,10 +133,15 @@ export function CheckoutMethodSelector() {
           return (
             <button
               key={m.value}
+              ref={(el) => {
+                radioRefs.current.set(m.value, el)
+              }}
               type="button"
               role="radio"
               aria-checked={selected}
+              tabIndex={selected ? 0 : -1}
               onClick={() => setActive(m.value)}
+              onKeyDown={(e) => handleRadioKeyDown(e, m.value)}
               className={cn(
                 'flex items-start gap-3 rounded-lg border p-4 text-start transition-colors',
                 selected
@@ -155,11 +187,19 @@ export function CheckoutMethodSelector() {
             )}
             <Button
               size="lg"
-              className="w-full"
+              className="w-full gap-2"
               onClick={handleStripeCheckout}
               disabled={stripeLoading || !turnstileToken}
+              aria-busy={stripeLoading}
             >
-              {stripeLoading ? '…' : t.checkout.payWithCard}
+              {stripeLoading ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  {t.checkout.processingOrder}
+                </>
+              ) : (
+                t.checkout.payWithCard
+              )}
             </Button>
           </div>
         )}
@@ -185,8 +225,7 @@ export function CheckoutMethodSelector() {
 
         {active === 'whatsapp' && (
           <p className="text-sm text-muted-foreground">
-            WhatsApp ordering is available directly on each product page. Visit the product you want
-            and tap &ldquo;{t.store.orderOnWhatsApp}&rdquo; to send your order.
+            {t.checkout.whatsappPanelNote.replace('{action}', t.store.orderOnWhatsApp)}
           </p>
         )}
       </div>

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, cleanup, waitFor } from '@testing-library/react'
+import { render, cleanup, waitFor, act } from '@testing-library/react'
 import { ProductHeroWrapper } from './ProductHeroWrapper'
 import { en } from '@/lib/i18n/en'
 import type { ProductHeroProps } from '@/lib/types/product'
@@ -203,5 +203,115 @@ describe('ProductHeroWrapper', () => {
     expect(built.variantId).toBe('')
     expect(built.variantLabel).toBe('')
     expect(built.imageUrl).toBe('')
+  })
+
+  // ── Add-to-cart confirmation (isAdded) ─────────────────────────────────────
+
+  it('passes isAdded=false to ProductHero before any add', () => {
+    render(<ProductHeroWrapper item={item} />)
+    expect(heroProps!.isAdded).toBe(false)
+  })
+
+  it('sets isAdded=true immediately after onAddToCart fires', () => {
+    vi.useFakeTimers()
+    try {
+      render(<ProductHeroWrapper item={item} />)
+      act(() => {
+        heroProps!.onAddToCart(sizeA)
+      })
+      expect(heroProps!.isAdded).toBe(true)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('reverts isAdded to false after ~1500ms', () => {
+    vi.useFakeTimers()
+    try {
+      render(<ProductHeroWrapper item={item} />)
+      act(() => {
+        heroProps!.onAddToCart(sizeA)
+      })
+      expect(heroProps!.isAdded).toBe(true)
+      act(() => {
+        vi.advanceTimersByTime(1500)
+      })
+      expect(heroProps!.isAdded).toBe(false)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('does not revert before 1500ms', () => {
+    vi.useFakeTimers()
+    try {
+      render(<ProductHeroWrapper item={item} />)
+      act(() => {
+        heroProps!.onAddToCart(sizeA)
+      })
+      act(() => {
+        vi.advanceTimersByTime(1499)
+      })
+      expect(heroProps!.isAdded).toBe(true)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('clears the pending revert timer when onAddToCart is called a second time rapidly', () => {
+    // This exercises the `if (addedTimerRef.current !== null) clearTimeout(...)` branch.
+    vi.useFakeTimers()
+    try {
+      render(<ProductHeroWrapper item={item} />)
+      // First add — starts timer
+      act(() => {
+        heroProps!.onAddToCart(sizeA)
+      })
+      expect(heroProps!.isAdded).toBe(true)
+      // Advance partially (not enough to revert)
+      act(() => {
+        vi.advanceTimersByTime(800)
+      })
+      // Second add while timer is still pending — clears old timer, starts new one
+      act(() => {
+        heroProps!.onAddToCart(sizeNoStripe)
+      })
+      expect(heroProps!.isAdded).toBe(true)
+      // Advance another 800ms (1600ms total from first add, 800ms from second add)
+      // The first timer would have fired at 1500ms but was cleared; still in "added" state
+      act(() => {
+        vi.advanceTimersByTime(800)
+      })
+      expect(heroProps!.isAdded).toBe(true)
+      // Advance the remaining time for the second timer to fire
+      act(() => {
+        vi.advanceTimersByTime(700)
+      })
+      expect(heroProps!.isAdded).toBe(false)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('cleans up the revert timer on unmount (unmount with pending timer)', () => {
+    // Exercises the useEffect cleanup: `if (addedTimerRef.current !== null) clearTimeout(...)`
+    vi.useFakeTimers()
+    const { unmount } = render(<ProductHeroWrapper item={item} />)
+    try {
+      act(() => {
+        heroProps!.onAddToCart(sizeA)
+      })
+      expect(heroProps!.isAdded).toBe(true)
+      // Unmount while timer is still pending — should not throw or produce act() warnings
+      act(() => {
+        unmount()
+      })
+      // Advance past the timer duration — no setState-after-unmount should occur
+      act(() => {
+        vi.advanceTimersByTime(2000)
+      })
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })

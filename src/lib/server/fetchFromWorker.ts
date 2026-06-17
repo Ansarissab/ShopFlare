@@ -2,11 +2,12 @@
 // Use only in async server components and generateMetadata functions (never in
 // 'use client' code — for client fetches use lib/api.ts).
 
+import { serverWorkerUrl } from '@/lib/server/worker-origin'
+
 /** Convert an R2 key to its public CDN URL (server-side only). */
 export function r2Url(key: string | null | undefined): string | null {
   if (!key) return null
-  const workerUrl = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
-  return `${workerUrl}/cdn/${key}`
+  return `${serverWorkerUrl()}/cdn/${key}`
 }
 
 export interface FetchOptions {
@@ -20,8 +21,7 @@ export interface FetchOptions {
 }
 
 export async function fetchFromWorker<T>(path: string, opts: FetchOptions = {}): Promise<T | null> {
-  // Read lazily so tests can stub NEXT_PUBLIC_WORKER_URL per-call via vi.stubEnv.
-  const workerUrl = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
+  const workerUrl = serverWorkerUrl()
   const revalidate = opts.revalidate ?? 60
   const cacheConfig: RequestInit['next'] = revalidate === false ? { revalidate: 0 } : { revalidate }
 

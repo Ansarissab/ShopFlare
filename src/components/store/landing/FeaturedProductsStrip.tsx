@@ -1,5 +1,5 @@
 import { ProductCard } from '@/components/store/product/ProductCard'
-import { layout } from '@/lib/styles'
+import { layout, staggerDelay } from '@/lib/styles'
 import type { FeaturedProductsStripProps } from '@/lib/types'
 import type { ProductWithVariants } from '@/lib/types/product'
 
@@ -10,7 +10,7 @@ export function FeaturedProductsStrip({ section, products, t }: FeaturedProducts
 
   return (
     <section className={layout.landingSection} aria-label={heading}>
-      <h2 className="mb-8 text-3xl font-bold">{heading}</h2>
+      <h2 className="mb-8 text-3xl">{heading}</h2>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {products.map((item: ProductWithVariants, index: number) => (
           <ProductCard
@@ -19,6 +19,9 @@ export function FeaturedProductsStrip({ section, products, t }: FeaturedProducts
             variants={item.variants}
             sizes={item.variants.flatMap((v) => v.sizes)}
             images={item.variants.flatMap((v) => v.images)}
+            // pg-enter triggers CSS @starting-style entrance (gated on prefers-reduced-motion)
+            className="pg-enter"
+            style={{ transitionDelay: staggerDelay(index) }}
             priority={index < 4}
           />
         ))}

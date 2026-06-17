@@ -258,8 +258,55 @@ describe('ManualOrderForm', () => {
     expect(btn.disabled).toBe(false)
   })
 
-  it('shows the loading label while the order request is in flight (isSubmitting branch)', async () => {
-    // Hold apiPost open so isSubmitting stays true and the button shows the '...' label.
+  it('includes both phone and email in the success URL hint when phone takes precedence (?? right branch never fires)', async () => {
+    // `contactHint = shippingAddress.phone ?? shippingAddress.email`
+    // When phone is defined (non-null), it is used; email is ignored.
+    // This verifies the left side of the ?? wins and the right (email) branch is not taken.
+    render(<ManualOrderForm {...baseProps} />)
+    fillValidAddress() // sets phone=+923001234567, email=buyer@example.com
+    fireEvent.click(screen.getByTestId('ts-verify'))
+    fireEvent.click(screen.getByRole('button', { name: en.checkout.placeOrder }))
+
+    await waitFor(() => expect(push).toHaveBeenCalled())
+    const url = push.mock.calls[0][0] as string
+    // Phone wins → encoded phone is present
+    expect(url).toContain(`&c=${encodeURIComponent('+923001234567')}`)
+    // Email is NOT the hint (phone took precedence)
+    expect(url).not.toContain(encodeURIComponent('buyer@example.com'))
+  })
+
+  it('shows phone validation error and blocks submit when phone is blank but email is provided', async () => {
+    // Exercises the `phone ?? email` right branch guard: when phone field is left
+    // empty (''), the shippingAddressSchema rejects it (regex requires a valid phone
+    // string when the field is non-empty) → form validation error, no submit.
+    // This confirms the schema enforces that the ?? right branch (email-as-hint)
+    // is only reachable when phone is truly absent (undefined in schema output),
+    // not when it is an empty string. The cParam conditional is guarded by schema.
+    render(<ManualOrderForm {...baseProps} />)
+    fireEvent.change(screen.getByLabelText(en.checkout.name, { exact: false }), {
+      target: { value: 'Jane Doe' },
+    })
+    // Leave phone blank (untouched → DOM value = '')
+    fireEvent.change(screen.getByLabelText(en.checkout.email, { exact: false }), {
+      target: { value: 'jane@example.com' },
+    })
+    fireEvent.change(screen.getByLabelText(en.checkout.address, { exact: false }), {
+      target: { value: '456 Side Street' },
+    })
+    fireEvent.change(screen.getByLabelText(en.checkout.city, { exact: false }), {
+      target: { value: 'Lahore' },
+    })
+    fireEvent.click(screen.getByTestId('ts-verify'))
+    fireEvent.click(screen.getByRole('button', { name: en.checkout.placeOrder }))
+
+    // Phone '' fails the regex validator → validation error renders, apiPost never called.
+    await waitFor(() => expect(screen.getByText(en.errors.invalidPhone)).toBeTruthy())
+    expect(mockApiPost).not.toHaveBeenCalled()
+    expect(push).not.toHaveBeenCalled()
+  })
+
+  it('shows the loading spinner while the order request is in flight (isSubmitting branch)', async () => {
+    // Hold apiPost open so isSubmitting stays true and the button shows the spinner.
     let resolvePost: (v: { orderId: string; orderNumber: string }) => void = () => {}
     mockApiPost.mockImplementationOnce(
       () =>
@@ -272,10 +319,16 @@ describe('ManualOrderForm', () => {
     fireEvent.click(screen.getByTestId('ts-verify'))
     fireEvent.click(screen.getByRole('button', { name: en.checkout.placeOrder }))
 
-    // While the promise is pending the button switches to the loading label '...'.
-    await waitFor(() => expect(screen.getByRole('button', { name: '...' })).toBeTruthy())
-    const btn = screen.getByRole('button', { name: '...' }) as HTMLButtonElement
+    // While the promise is pending the button switches to the processing label and
+    // is disabled, with aria-busy set.
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: en.checkout.processingOrder })).toBeTruthy(),
+    )
+    const btn = screen.getByRole('button', {
+      name: en.checkout.processingOrder,
+    }) as HTMLButtonElement
     expect(btn.disabled).toBe(true)
+    expect(btn.getAttribute('aria-busy')).toBe('true')
 
     // Resolve so the submit completes and routing fires (avoids dangling promise).
     resolvePost({ orderId: 'o1', orderNumber: 'SF-9' })

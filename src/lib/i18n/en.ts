@@ -1,6 +1,7 @@
 export const en = {
   store: {
     addToCart: 'Add to Cart',
+    addedToCart: 'Added',
     buyNow: 'Buy Now',
     orderOnWhatsApp: 'Order on WhatsApp',
     cashOnDelivery: 'Cash on Delivery',
@@ -19,6 +20,10 @@ export const en = {
     discount: '{percent}% off',
     comingSoon: 'Coming Soon',
     comingSoonBody: 'Check back soon for new products.',
+    comingSoonSubtext: 'We are preparing something great.',
+    categoryEmptyHeading: 'Nothing here yet',
+    categoryEmptySubtext: 'Try a different category or browse all products.',
+    searchNoResultsHeading: 'No results found',
     notifySuccess: "You'll be notified when it's back in stock!",
     trackOrder: 'Track Order',
     allProducts: 'All Products',
@@ -60,6 +65,11 @@ export const en = {
     categoriesNav: 'Categories',
     dismissAnnouncement: 'Dismiss announcement',
     announcementBar: 'Announcement',
+    freeShippingQualified: 'Free Shipping!',
+    storyImageAlt: 'Our story',
+    productImageAlt: '{productName} — image {n}',
+    productThumbnailAlt: '{productName} thumbnail {n}',
+    notifyMeDescription: "We'll let you know when {variant} / {size} is back in stock.",
   },
   search: {
     title: 'Search products',
@@ -119,6 +129,9 @@ export const en = {
       'Place your order, then transfer the total to our bank account using your order number as the reference. We confirm your order once the payment arrives.',
     calculatedAtDelivery: 'Calculated at delivery',
     securityCheckFailed: 'Security check failed. Please refresh and try again.',
+    processingOrder: 'Processing…',
+    whatsappPanelNote:
+      'WhatsApp ordering is available directly on each product page. Visit the product you want and tap “{action}” to send your order.',
   },
   // Reusable bank-transfer copy — shared by the checkout success page, the order
   // tracking page, and the confirmation email (worker imports `en`). DRY.
@@ -213,10 +226,17 @@ export const en = {
     editProduct: 'Edit Product',
     deleteProduct: 'Delete Product',
     deleteProductConfirm: 'Delete this product? This cannot be undone.',
+    deleteVariantConfirm: 'Delete this variant? This cannot be undone.',
+    basicInfo: 'Basic Info',
     totalOrders: 'Total Orders',
     totalRevenue: 'Total Revenue',
     pendingOrders: 'Pending Orders',
     lowStockAlert: 'Low Stock',
+    statSubCancelledDelivered: '{cancelled} cancelled · {delivered} delivered',
+    statSubRevenueAvg: 'excl. cancelled · avg {avg}/order',
+    statSubNeedAttention: 'need attention',
+    statSubAllCaughtUp: 'all caught up',
+    statSubVariantsBelow: 'variants below threshold',
     recentOrders: 'Recent Orders',
     revenueChart: 'Revenue — Last 14 Days',
     ordersChart: 'Order Status',
@@ -229,6 +249,10 @@ export const en = {
     statusUpdated: 'Status updated',
     trackingAdded: 'Tracking number saved',
     orderDetail: 'Order Detail',
+    orderNotFound: 'Order not found.',
+    backToOrders: 'Back to orders',
+    orderItems: 'Items',
+    orderDiscount: 'Discount',
     shippingAddress: 'Shipping Address',
     // products
     productName: 'Product Name',
@@ -612,6 +636,11 @@ export const en = {
     saveAnnouncement: 'Save announcement bar',
     announcementSaved: 'Announcement bar saved',
     announcementMaxMessages: 'Maximum {max} messages',
+    // settings section headings (phase 34)
+    sectionIdentity: 'Identity',
+    sectionContact: 'Contact',
+    sectionSeoLlm: 'SEO / LLM Discovery',
+    sectionPaymentsShipping: 'Payments & Shipping',
     // FAQ rows editor chrome (phase 30)
     faqQuestionLabel: 'Question',
     faqAnswerLabel: 'Answer',
@@ -767,7 +796,8 @@ export const en = {
       subtext: 'Short supporting text shown beneath the heading.',
       bodyHtml: 'Rich-text body — written in the editor below.',
       ctaText: 'Button label.',
-      ctaHref: 'Where the button links. Use a path like /shop or a full URL.',
+      ctaHref:
+        'Where the button links. Use /shop for the full catalog, /category/<slug> for a specific category (e.g. /category/accessories), or a full URL.',
       imageR2Key: 'Section image.',
     },
   },

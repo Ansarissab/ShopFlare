@@ -35,7 +35,7 @@ export function VariantSelector({
             >
               {variant.colorHex && (
                 <span
-                  className="size-3.5 rounded-full border border-black/10 flex-none"
+                  className="size-3.5 rounded-full border border-foreground/10 flex-none"
                   style={{ backgroundColor: variant.colorHex }}
                   aria-hidden="true"
                 />

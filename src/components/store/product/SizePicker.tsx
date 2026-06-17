@@ -3,6 +3,7 @@
 import { cn } from '@/lib/utils'
 import { formatPrice } from '@/lib/utils/index'
 import { useT } from '@/lib/i18n/Provider'
+import { price as priceStyle } from '@/lib/styles'
 import { LOW_STOCK_THRESHOLD } from '@/lib/constants'
 import { Badge } from '@/components/ui/badge'
 import type { SizePickerProps } from '@/lib/types/product'
@@ -43,6 +44,7 @@ export function SizePicker({ sizes, selectedSizeId, onSelect, className }: SizeP
                 <span
                   className={cn(
                     'text-xs',
+                    priceStyle.mono,
                     isSelected ? 'text-primary-foreground/80' : 'text-muted-foreground',
                   )}
                 >

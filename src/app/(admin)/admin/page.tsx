@@ -24,11 +24,18 @@ import { useT } from '@/lib/i18n/Provider'
 import { formatPrice, shortDay } from '@/lib/utils/index'
 import { CHART_TOOLTIP_STYLE } from '@/lib/constants/chart'
 import { useApiResource } from '@/hooks/useApiResource'
+import { useChartTheme } from '@/hooks/useChartTheme'
 import type { AdminOrdersResponse } from '@/lib/types/admin'
 import type { Dictionary } from '@/lib/i18n/index'
 
 // ─── Chart helpers ────────────────────────────────────────────────────────────
 
+/**
+ * Semantic status hues for the pie chart.
+ * These are intentionally distinct per-status (not theme tokens) so the
+ * donut segments remain identifiable. They use Tailwind-equivalent palette
+ * values that work on both light and dark backgrounds.
+ */
 const STATUS_COLORS: Record<string, string> = {
   pending: '#f59e0b',
   confirmed: '#4A7C6F',
@@ -140,6 +147,7 @@ function computeStats(data: AdminOrdersResponse | null, t: Dictionary): Dashboar
 
 export default function AdminDashboardPage() {
   const t = useT()
+  const chart = useChartTheme()
   const { data, loading } = useApiResource<AdminOrdersResponse>('/api/admin/orders?limit=200')
   const stats = computeStats(data, t)
 
@@ -147,7 +155,7 @@ export default function AdminDashboardPage() {
     <div className="flex flex-col gap-8">
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">{t.admin.dashboard}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">{t.admin.dashboard}</h1>
         <div className="flex flex-wrap gap-2">
           <Link
             href="/admin/products/new"
@@ -181,25 +189,28 @@ export default function AdminDashboardPage() {
             <StatCard
               label={t.admin.totalOrders}
               value={stats.total}
-              sub={`${stats.cancelled} cancelled · ${stats.delivered} delivered`}
+              sub={t.admin.statSubCancelledDelivered
+                .replace('{cancelled}', String(stats.cancelled))
+                .replace('{delivered}', String(stats.delivered))}
               help={t.tooltips.dashboard.totalOrders}
             />
             <StatCard
               label={t.admin.totalRevenue}
               value={formatPrice(stats.revenueCents)}
-              sub={`excl. cancelled · avg ${formatPrice(stats.avgOrderCents)}/order`}
+              sub={t.admin.statSubRevenueAvg.replace('{avg}', formatPrice(stats.avgOrderCents))}
               help={t.tooltips.dashboard.revenue}
+              mono
             />
             <StatCard
               label={t.admin.pendingOrders}
               value={stats.pending}
-              sub={stats.pending > 0 ? 'need attention' : 'all caught up'}
+              sub={stats.pending > 0 ? t.admin.statSubNeedAttention : t.admin.statSubAllCaughtUp}
               help={t.tooltips.dashboard.pending}
             />
             <StatCard
               label={t.admin.lowStockAlert}
               value={stats.lowStock}
-              sub="variants below threshold"
+              sub={t.admin.statSubVariantsBelow}
               href="/admin/products"
             />
           </div>
@@ -216,20 +227,20 @@ export default function AdminDashboardPage() {
                 >
                   <defs>
                     <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#1A1A18" stopOpacity={0.12} />
-                      <stop offset="95%" stopColor="#1A1A18" stopOpacity={0} />
+                      <stop offset="5%" stopColor={chart.fg} stopOpacity={0.12} />
+                      <stop offset="95%" stopColor={chart.fg} stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={chart.border} vertical={false} />
                   <XAxis
                     dataKey="label"
-                    tick={{ fontSize: 11, fill: '#6B6B62' }}
+                    tick={{ fontSize: 11, fill: chart.mutedFg }}
                     tickLine={false}
                     axisLine={false}
                     interval={1}
                   />
                   <YAxis
-                    tick={{ fontSize: 11, fill: '#6B6B62' }}
+                    tick={{ fontSize: 11, fill: chart.mutedFg }}
                     tickLine={false}
                     axisLine={false}
                     tickFormatter={(v) => (v === 0 ? '0' : `${v}`)}
@@ -242,7 +253,7 @@ export default function AdminDashboardPage() {
                   <Area
                     type="monotone"
                     dataKey="revenue"
-                    stroke="#1A1A18"
+                    stroke={chart.fg}
                     strokeWidth={2}
                     fill="url(#revGrad)"
                     dot={false}

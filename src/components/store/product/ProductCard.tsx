@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { formatPrice, getPriceRange } from '@/lib/utils/index'
 import { prefetch } from '@/lib/api'
+import { price as priceStyle } from '@/lib/styles'
 import { useViewportPrefetch } from '@/hooks/useViewportPrefetch'
 import { useCart } from '@/hooks/useCart'
 import { useT } from '@/lib/i18n/Provider'
@@ -86,8 +87,8 @@ export function ProductCard({
               'object-cover',
               // Zoom on hover — transform only, never "all". Gated by prefers-reduced-motion
               // via the Tailwind motion-safe: variant.
-              'motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-out',
-              'motion-safe:group-hover:scale-[1.03]',
+              'motion-safe:transition-[transform,filter] motion-safe:duration-300 motion-safe:ease-out',
+              'motion-safe:group-hover:scale-[1.03] motion-safe:group-hover:grayscale',
             )}
           />
         ) : (
@@ -121,7 +122,7 @@ export function ProductCard({
                 'text-xs font-medium tracking-wide',
                 'bg-background/90 backdrop-blur-[2px]',
                 'text-foreground border-t border-border/60',
-                'transition-colors hover:bg-background cursor-pointer',
+                'transition-colors hover:bg-background cursor-pointer motion-safe:active:scale-95',
               )}
             >
               {t.store.quickAdd}
@@ -137,7 +138,7 @@ export function ProductCard({
         </p>
 
         {minPrice !== null && (
-          <p className="shrink-0 font-mono text-sm font-medium text-foreground tabular-nums">
+          <p className={cn('shrink-0 text-sm font-medium text-foreground', priceStyle.mono)}>
             {formatPrice(minPrice)}
             {maxPrice !== null && maxPrice !== minPrice && '+'}
           </p>
@@ -155,7 +156,7 @@ export function ProductCard({
           {colorVariants.map((v) => (
             <span
               key={v.id}
-              className="size-3 rounded-full border border-black/10 flex-none"
+              className="size-3 rounded-full border border-foreground/10 flex-none"
               style={{ backgroundColor: v.colorHex! }}
               title={v.label}
             />

@@ -1,6 +1,6 @@
 'use client'
 
-import { Loader2, ShoppingCart, Zap, MessageCircle, Banknote, Bell } from 'lucide-react'
+import { Check, Loader2, ShoppingCart, Zap, MessageCircle, Banknote, Bell } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useT } from '@/lib/i18n/Provider'
 import { cn } from '@/lib/utils'
@@ -10,6 +10,7 @@ export function ProductActions({
   selectedSize,
   allSizesOOS,
   isAddingToCart,
+  isAdded = false,
   showWhatsApp,
   onAddToCart,
   onBuyNow,
@@ -32,21 +33,24 @@ export function ProductActions({
     )
   }
 
+  // idle → adding (spinner) → added (check) → idle
+  function cartIcon() {
+    if (isAddingToCart) return <Loader2 className="size-4 animate-spin" />
+    if (isAdded) return <Check className="size-4" />
+    return <ShoppingCart className="size-4" />
+  }
+
   return (
     <div className={cn('flex flex-col gap-3', className)}>
       {/* Primary: Add to Cart */}
       <Button
         size="lg"
         className="w-full gap-2 min-h-11"
-        disabled={!hasSelection || isAddingToCart}
+        disabled={!hasSelection || isAddingToCart || isAdded}
         onClick={onAddToCart}
       >
-        {isAddingToCart ? (
-          <Loader2 className="size-4 animate-spin" />
-        ) : (
-          <ShoppingCart className="size-4" />
-        )}
-        {t.store.addToCart}
+        {cartIcon()}
+        {isAdded ? t.store.addedToCart : t.store.addToCart}
       </Button>
 
       {/* Secondary: Buy Now (Stripe Checkout) */}

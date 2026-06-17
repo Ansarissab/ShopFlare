@@ -236,18 +236,68 @@ nav, [data-tab-bar] {
   }
 }
 
-/* ─── Hero poster text entrance ─────────────────────────────────────────────
-   .hero-poster-text fades + lifts in when the poster hero first renders.
-   Single transition, no JS animation library. Gated on prefers-reduced-motion.
+/* ─── Hero poster text entrance — per-element stagger ───────────────────────
+   Each .hero-poster-item child (watermark, headline, subtext, CTA) enters
+   individually. The inline transitionDelay (via staggerDelay()) staggers them
+   60ms apart (brand first, CTA last). The container keeps .hero-poster-text
+   for the CSS selector scope. Gated on prefers-reduced-motion.
    ─────────────────────────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: no-preference) {
-  .hero-poster-text {
+  .hero-poster-item {
     transition: opacity 400ms ease-out, transform 400ms ease-out;
     transition-behavior: allow-discrete;
 
     @starting-style {
       opacity: 0;
       transform: translateY(16px);
+    }
+  }
+}
+
+/* ─── Add-to-cart cart icon pulse ───────────────────────────────────────────
+   .cart-added-pulse: brief scale(1.2)→scale(1) on the header cart icon.
+   Applied for ~300ms after each addItem call via isPulsing state.
+   Gated on prefers-reduced-motion: no-preference — reduced-motion skips the
+   pulse entirely, but the button label/icon swap in ProductActions still fires.
+   ─────────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes cart-added-pulse {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
+  .cart-added-pulse {
+    animation: cart-added-pulse 300ms ease-in-out both;
+  }
+}
+
+/* ─── Sticky header shrink-on-scroll ────────────────────────────────────────
+   Past ~80px scroll the header compresses from h-16 (4rem) → h-12 (3rem) and
+   gains backdrop blur + translucent background.
+   Mechanism: CSS scroll-driven animation (animation-timeline: scroll(root)).
+   Progressive enhancement — browsers without scroll-timeline keep h-16.
+   Gated on prefers-reduced-motion: no-preference; reduced-motion = static.
+   ─────────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll()) {
+    @keyframes header-shrink {
+      from {
+        height: 4rem;
+        background-color: var(--bg);
+        backdrop-filter: none;
+      }
+      to {
+        height: 3rem;
+        background-color: color-mix(in srgb, var(--bg) 85%, transparent);
+        backdrop-filter: blur(8px);
+      }
+    }
+
+    .storefront-header {
+      animation: header-shrink linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0px 80px;
     }
   }
 }
@@ -267,6 +317,26 @@ nav, [data-tab-bar] {
       opacity: 0;
       transform: translateY(12px);
     }
+  }
+}
+
+/* ─── Scroll-reveal section entrance ────────────────────────────────────────
+   .reveal-init / .reveal-in drive IntersectionObserver-triggered fade+lift for
+   below-the-fold landing sections (StorySection, ReviewsStrip, CTABand).
+   Applied by useReveal() ONLY after client mount AND only when motion is allowed.
+   Server HTML never receives .reveal-init, so SSR/no-JS renders fully visible.
+   Gated on prefers-reduced-motion: no-preference — reduced-motion skips it.
+   ─────────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal-init {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 500ms ease-out, transform 500ms ease-out;
+  }
+
+  .reveal-in {
+    opacity: 1;
+    transform: none;
   }
 }
 

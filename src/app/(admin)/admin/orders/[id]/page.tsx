@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { ArrowLeft } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
@@ -25,10 +25,12 @@ import { ORDER_STATUSES } from '@/lib/constants'
 import { apiPatch } from '@/lib/api'
 import { useApiResource } from '@/hooks/useApiResource'
 import type { AdminOrderDetail } from '@/lib/types/admin'
+import type { OrderStatus } from '@/lib/constants'
 
 export default function AdminOrderDetailPage() {
   const t = useT()
   const params = useParams<{ id: string }>()
+  const router = useRouter()
   const { data, loading, notFound } = useApiResource<AdminOrderDetail>(
     params?.id ? `/api/admin/orders/${params.id}` : null,
   )
@@ -38,14 +40,28 @@ export default function AdminOrderDetailPage() {
   const [carrier, setCarrier] = useState('')
   const [saving, setSaving] = useState(false)
 
+  // Optimistic display overrides — null means "use server data"
+  const [optimisticStatus, setOptimisticStatus] = useState<OrderStatus | null>(null)
+  const [optimisticTracking, setOptimisticTracking] = useState<{
+    trackingNumber: string
+    carrier: string
+  } | null>(null)
+
   async function handleStatusUpdate() {
-    if (!newStatus || !params?.id) return
+    if (!newStatus || !params?.id || !data) return
     setSaving(true)
+    // Capture server-confirmed baseline BEFORE applying the optimistic value
+    const serverStatus = data.order.status as OrderStatus
+    setOptimisticStatus(newStatus as OrderStatus)
     try {
       await apiPatch(`/api/admin/orders/${params.id}/status`, { status: newStatus })
       toast.success(t.admin.statusUpdated)
-      window.location.reload()
+      // Reset optimistic override so the UI falls back to the server value after refresh
+      setOptimisticStatus(null)
+      router.refresh()
     } catch {
+      // Roll back to the server-confirmed value, not a prior optimistic value
+      setOptimisticStatus(serverStatus)
       toast.error(t.errors.networkError)
     } finally {
       setSaving(false)
@@ -53,16 +69,26 @@ export default function AdminOrderDetailPage() {
   }
 
   async function handleTrackingUpdate() {
-    if (!trackingNumber.trim() || !params?.id) return
+    if (!trackingNumber.trim() || !params?.id || !data) return
     setSaving(true)
+    // Capture server-confirmed baseline BEFORE applying the optimistic value
+    const serverTracking =
+      data.order.trackingNumber != null
+        ? { trackingNumber: data.order.trackingNumber, carrier: data.order.carrier ?? '' }
+        : null
+    setOptimisticTracking({ trackingNumber: trackingNumber.trim(), carrier: carrier.trim() })
     try {
       await apiPatch(`/api/admin/orders/${params.id}/tracking`, {
         trackingNumber: trackingNumber.trim(),
         carrier: carrier.trim() || undefined,
       })
       toast.success(t.admin.trackingAdded)
-      window.location.reload()
+      // Reset optimistic override so the UI falls back to the server value after refresh
+      setOptimisticTracking(null)
+      router.refresh()
     } catch {
+      // Roll back to the server-confirmed value, not a prior optimistic value
+      setOptimisticTracking(serverTracking)
       toast.error(t.errors.networkError)
     } finally {
       setSaving(false)
@@ -82,15 +108,19 @@ export default function AdminOrderDetailPage() {
   if (notFound || !data) {
     return (
       <div className="flex flex-col items-center gap-3 py-20 text-center">
-        <p className="text-muted-foreground">Order not found.</p>
+        <p className="text-muted-foreground">{t.admin.orderNotFound}</p>
         <Link href="/admin/orders" className="text-sm text-primary underline">
-          Back to orders
+          {t.admin.backToOrders}
         </Link>
       </div>
     )
   }
 
   const { order, items, shippingAddress } = data
+
+  const displayStatus = optimisticStatus ?? (order.status as keyof typeof t.orderStatusLabels)
+  const displayTrackingNumber = optimisticTracking?.trackingNumber ?? order.trackingNumber
+  const displayCarrier = optimisticTracking?.carrier ?? order.carrier
 
   return (
     <div className="flex flex-col gap-6 max-w-3xl">
@@ -101,11 +131,11 @@ export default function AdminOrderDetailPage() {
         >
           <ArrowLeft className="size-4" />
         </Link>
-        <h1 className="text-xl font-bold tracking-tight">
+        <h1 className="text-xl font-semibold tracking-tight">
           {t.admin.orderDetail} — {order.orderNumber}
         </h1>
         <Badge variant="secondary" className="capitalize ml-auto">
-          {t.orderStatusLabels[order.status as keyof typeof t.orderStatusLabels] ?? order.status}
+          {t.orderStatusLabels[displayStatus as keyof typeof t.orderStatusLabels] ?? displayStatus}
         </Badge>
       </div>
 
@@ -130,7 +160,7 @@ export default function AdminOrderDetailPage() {
 
       {/* Items */}
       <div className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium text-muted-foreground">Items</h2>
+        <h2 className="text-sm font-medium text-muted-foreground">{t.admin.orderItems}</h2>
         <ul className="flex flex-col gap-3">
           {items.map((item, idx) => (
             <OrderLineItem
@@ -162,7 +192,10 @@ export default function AdminOrderDetailPage() {
         </div>
         {order.discountCents > 0 && (
           <div className="flex justify-between text-green-600">
-            <span>Discount {order.couponCode ? `(${order.couponCode})` : ''}</span>
+            <span>
+              {t.admin.orderDiscount}
+              {order.couponCode ? ` (${order.couponCode})` : ''}
+            </span>
             <span>-{formatPrice(order.discountCents)}</span>
           </div>
         )}
@@ -190,8 +223,8 @@ export default function AdminOrderDetailPage() {
             <SelectTrigger>
               <SelectValue
                 placeholder={
-                  t.orderStatusLabels[order.status as keyof typeof t.orderStatusLabels] ??
-                  order.status
+                  t.orderStatusLabels[displayStatus as keyof typeof t.orderStatusLabels] ??
+                  displayStatus
                 }
               />
             </SelectTrigger>
@@ -237,14 +270,14 @@ export default function AdminOrderDetailPage() {
         </div>
       </div>
 
-      {order.trackingNumber && (
+      {displayTrackingNumber && (
         <div className="rounded-lg border bg-muted/40 p-4 text-sm">
           <p className="font-medium">
-            {t.admin.trackingNumber}: {order.trackingNumber}
+            {t.admin.trackingNumber}: {displayTrackingNumber}
           </p>
-          {order.carrier && (
+          {displayCarrier && (
             <p className="text-muted-foreground">
-              {t.admin.carrier}: {order.carrier}
+              {t.admin.carrier}: {displayCarrier}
             </p>
           )}
         </div>

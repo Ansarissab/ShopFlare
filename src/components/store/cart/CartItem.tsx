@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { useT } from '@/lib/i18n/Provider'
 import { cn } from '@/lib/utils'
 import { formatPrice } from '@/lib/utils/index'
+import { price as priceStyle } from '@/lib/styles'
 import { useCart } from '@/hooks/useCart'
 import type { CartItemProps } from '@/lib/types/cart'
 
@@ -57,7 +58,7 @@ export function CartItem({ item }: CartItemProps) {
           </div>
 
           {/* Price */}
-          <span className="text-sm font-semibold text-foreground">
+          <span className={cn('text-sm font-semibold text-foreground', priceStyle.mono)}>
             {formatPrice(item.priceCents * item.quantity)}
           </span>
 

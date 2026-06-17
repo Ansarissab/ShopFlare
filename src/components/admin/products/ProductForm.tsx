@@ -4,6 +4,16 @@ import { useState, useEffect, type MouseEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, Trash2, ChevronDown, ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -54,28 +64,35 @@ function ProductStatsPanel({ productId }: { productId: string }) {
         </div>
       ) : stats ? (
         <>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div className="rounded-lg border p-3">
-              <p className="text-xs text-muted-foreground">{t.admin.analyticsUnitsSold}</p>
-              <p className="text-base font-semibold">{stats.unitsSold.toLocaleString()}</p>
+          {/* Flat stat strip — no nested cards (DESIGN Rule 5) */}
+          <dl className="grid grid-cols-2 divide-x divide-y sm:grid-cols-4 sm:divide-y-0 border rounded-lg overflow-hidden">
+            <div className="flex flex-col gap-0.5 px-4 py-3">
+              <dt className="text-xs text-muted-foreground">{t.admin.analyticsUnitsSold}</dt>
+              <dd className="text-base font-semibold font-geist-mono">
+                {stats.unitsSold.toLocaleString()}
+              </dd>
             </div>
-            <div className="rounded-lg border p-3">
-              <p className="text-xs text-muted-foreground">{t.admin.analyticsOrders}</p>
-              <p className="text-base font-semibold">{stats.orders.toLocaleString()}</p>
+            <div className="flex flex-col gap-0.5 px-4 py-3">
+              <dt className="text-xs text-muted-foreground">{t.admin.analyticsOrders}</dt>
+              <dd className="text-base font-semibold font-geist-mono">
+                {stats.orders.toLocaleString()}
+              </dd>
             </div>
-            <div className="rounded-lg border p-3">
-              <p className="text-xs text-muted-foreground">{t.admin.totalRevenue}</p>
-              <p className="text-base font-semibold">{formatPrice(stats.revenueCents)}</p>
+            <div className="flex flex-col gap-0.5 px-4 py-3">
+              <dt className="text-xs text-muted-foreground">{t.admin.totalRevenue}</dt>
+              <dd className="text-base font-semibold font-geist-mono">
+                {formatPrice(stats.revenueCents)}
+              </dd>
             </div>
-            <div className="rounded-lg border p-3">
-              <p className="text-xs text-muted-foreground">{t.admin.analyticsLastSold}</p>
-              <p className="text-base font-semibold">
+            <div className="flex flex-col gap-0.5 px-4 py-3">
+              <dt className="text-xs text-muted-foreground">{t.admin.analyticsLastSold}</dt>
+              <dd className="text-base font-semibold">
                 {stats.lastSoldAt
                   ? new Date(stats.lastSoldAt).toLocaleDateString()
                   : t.admin.analyticsNeverSold}
-              </p>
+              </dd>
             </div>
-          </div>
+          </dl>
 
           {stats.affinityPartners.length > 0 && (
             <div className="flex flex-col gap-2">
@@ -148,6 +165,11 @@ export function ProductForm({ initial }: ProductFormProps) {
 
   // sizeId → { fieldName → errorMessage } — cleared on successful save or on field change
   const [sizeErrors, setSizeErrors] = useState<Record<string, Record<string, string>>>({})
+
+  // AlertDialog state: which variant is pending deletion (null = closed)
+  const [pendingDeleteVariantId, setPendingDeleteVariantId] = useState<string | null>(null)
+  // AlertDialog state: whether product delete confirmation is open
+  const [deleteProductOpen, setDeleteProductOpen] = useState(false)
 
   function clearSizeError(sizeId: string, field: string) {
     setSizeErrors((prev) => {
@@ -244,7 +266,13 @@ export function ProductForm({ initial }: ProductFormProps) {
   }
 
   async function deleteVariant(variantId: string) {
-    if (!confirm(t.admin.deleteProductConfirm)) return
+    setPendingDeleteVariantId(variantId)
+  }
+
+  async function confirmDeleteVariant() {
+    if (!pendingDeleteVariantId) return
+    const variantId = pendingDeleteVariantId
+    setPendingDeleteVariantId(null)
     try {
       await apiDelete(`/api/admin/products/variants/${variantId}`)
       setVariants((prev) => prev.filter((v) => v.id !== variantId))
@@ -385,7 +413,7 @@ export function ProductForm({ initial }: ProductFormProps) {
     <div className="flex flex-col gap-6 max-w-3xl">
       {/* Basic fields */}
       <div className="rounded-lg border p-5 flex flex-col gap-4">
-        <h2 className="text-sm font-semibold">Basic Info</h2>
+        <h2 className="text-sm font-semibold">{t.admin.basicInfo}</h2>
 
         <FormField label={t.admin.productName} htmlFor="product-name">
           <Input id="product-name" value={name} onChange={(e) => setName(e.target.value)} />
@@ -579,7 +607,9 @@ export function ProductForm({ initial }: ProductFormProps) {
                         {/* Sizes */}
                         <div>
                           <div className="flex items-center justify-between mb-2">
-                            <p className="text-xs font-medium text-muted-foreground">Sizes</p>
+                            <p className="text-xs font-medium text-muted-foreground">
+                              {t.admin.sizes}
+                            </p>
                             <Button size="sm" variant="ghost" onClick={() => addSize(variant.id)}>
                               <Plus className="size-3.5 mr-1" aria-hidden />
                               {t.admin.addSize}
@@ -725,21 +755,59 @@ export function ProductForm({ initial }: ProductFormProps) {
             variant="destructive"
             size="sm"
             className="w-fit"
-            onClick={async () => {
-              if (!confirm(t.admin.deleteProductConfirm)) return
-              try {
-                await apiDelete(`/api/admin/products/${initial.product.id}`)
-                toast.success(t.admin.productDeleted)
-                router.push('/admin/products')
-              } catch {
-                toast.error(t.errors.networkError)
-              }
-            }}
+            onClick={() => setDeleteProductOpen(true)}
           >
             {t.admin.deleteProduct}
           </Button>
+          <AlertDialog open={deleteProductOpen} onOpenChange={setDeleteProductOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t.admin.deleteProduct}</AlertDialogTitle>
+                <AlertDialogDescription>{t.admin.deleteProductConfirm}</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t.admin.cancel}</AlertDialogCancel>
+                <AlertDialogAction
+                  variant="destructive"
+                  onClick={async () => {
+                    setDeleteProductOpen(false)
+                    try {
+                      await apiDelete(`/api/admin/products/${initial.product.id}`)
+                      toast.success(t.admin.productDeleted)
+                      router.push('/admin/products')
+                    } catch {
+                      toast.error(t.errors.networkError)
+                    }
+                  }}
+                >
+                  {t.admin.deleteProduct}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       )}
+
+      {/* Variant delete confirmation */}
+      <AlertDialog
+        open={pendingDeleteVariantId !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingDeleteVariantId(null)
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.admin.deleteVariant}</AlertDialogTitle>
+            <AlertDialogDescription>{t.admin.deleteVariantConfirm}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t.admin.cancel}</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={confirmDeleteVariant}>
+              {t.admin.deleteVariant}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

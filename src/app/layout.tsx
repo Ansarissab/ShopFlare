@@ -13,6 +13,7 @@ import { ServiceWorkerProvider } from '@/components/pwa/ServiceWorkerProvider'
 import { JsonLd } from '@/components/shared/JsonLd'
 import { organizationJsonLd } from '@/lib/seo/jsonld'
 import { fetchFromWorker } from '@/lib/server/fetchFromWorker'
+import { serverWorkerUrl } from '@/lib/server/worker-origin'
 import type { StoreConfig } from '@/lib/types/common'
 import { DEFAULT_LOCALE, LOCALES } from '@/lib/constants'
 import { getLocaleHeader } from '@/lib/i18n/server'
@@ -63,7 +64,7 @@ const notoNastaliq = Noto_Nastaliq_Urdu({
 
 // Dynamic store metadata — cached 5 min, fails gracefully when worker is unavailable.
 export async function generateMetadata(): Promise<Metadata> {
-  const workerUrl = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
+  const workerUrl = serverWorkerUrl()
   // Resolve absolute site origin so metadataBase is always an absolute URL,
   // which causes Next.js to auto-absolutize all relative canonical/alternate hrefs.
   const siteUrl = await resolveSiteUrl()
@@ -145,7 +146,7 @@ const bootScript = [
   '})();',
 ].join('')
 
-const workerOrigin = process.env.NEXT_PUBLIC_WORKER_URL ?? ''
+const workerOrigin = serverWorkerUrl()
 
 // ─── Custom head tag injection ─────────────────────────────────────────────────
 // Parses a sanitizeHeadTags() output (guaranteed to contain only <meta> and

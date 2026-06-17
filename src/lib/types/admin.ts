@@ -49,6 +49,15 @@ export interface AdminOrderDetail {
   shippingAddress: Record<string, string> | null
 }
 
+export interface OrderLineItemProps {
+  imageUrl?: string | null
+  productName: string
+  variantLabel: string
+  size: string
+  quantity: number
+  priceCents: number
+}
+
 export interface AdminOrdersResponse {
   orders: AdminOrder[]
   total: number
@@ -100,6 +109,8 @@ export interface AdminStatCardProps {
   href?: string
   /** Optional explanatory tooltip shown beside the label via HelpTip. */
   help?: string
+  /** Render the value in monospace (default true for numeric/money values). */
+  mono?: boolean
 }
 
 export interface CouponsResponse {

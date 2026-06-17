@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
+import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { TurnstileWidget } from '@/components/store/checkout/TurnstileWidget'
@@ -191,8 +192,15 @@ export function ManualOrderForm({ endpoint, successMethod, submitLabel }: Manual
         <p className="text-xs text-destructive">{t.checkout.securityCheckFailed}</p>
       )}
 
-      <Button type="submit" size="lg" className="w-full" disabled={isSubmitting || !turnstileToken}>
-        {isSubmitting ? '...' : submitLabel}
+      <Button
+        type="submit"
+        size="lg"
+        className="w-full gap-2"
+        disabled={isSubmitting || !turnstileToken}
+        aria-busy={isSubmitting}
+      >
+        {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : null}
+        {isSubmitting ? t.checkout.processingOrder : submitLabel}
       </Button>
     </form>
   )

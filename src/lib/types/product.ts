@@ -30,6 +30,7 @@ export interface WhatsAppOrderParams {
 
 export interface ImageCarouselProps {
   images: ProductImage[]
+  productName: string
   className?: string
 }
 
@@ -53,6 +54,8 @@ export interface ProductActionsProps {
   selectedSize: SizeOption | null
   allSizesOOS: boolean
   isAddingToCart: boolean
+  /** True for ~1.5s after a successful add — shows the Check icon + "Added" label. */
+  isAdded?: boolean
   showWhatsApp: boolean
   onAddToCart: () => void
   onBuyNow: () => void
@@ -92,6 +95,8 @@ export interface ProductHeroProps {
   onWhatsApp: (sizeOption: SizeOption) => void
   onCOD: (sizeOption: SizeOption) => void
   isAddingToCart?: boolean
+  /** True for ~1.5s after a successful add — drives the confirmation state in ProductActions. */
+  isAdded?: boolean
   className?: string
 }
 

@@ -5,6 +5,7 @@ import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { formatPrice, getPriceRange } from '@/lib/utils/index'
+import { price as priceStyle } from '@/lib/styles'
 import { useT } from '@/lib/i18n/Provider'
 import { ImageCarousel } from '@/components/store/product/ImageCarousel'
 import { VariantSelector } from '@/components/store/product/VariantSelector'
@@ -31,6 +32,7 @@ export function ProductHero({
   onWhatsApp,
   onCOD,
   isAddingToCart = false,
+  isAdded = false,
   className,
 }: ProductHeroProps) {
   const t = useT()
@@ -73,7 +75,7 @@ export function ProductHero({
       className={cn('grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-16 md:items-start', className)}
     >
       {/* Left: Image gallery — full-width, color in view */}
-      <ImageCarousel images={currentImages} />
+      <ImageCarousel images={currentImages} productName={product.name} />
 
       {/* Right: sticky purchase panel — commerce stack, always reachable */}
       <div className="md:sticky md:top-24 flex flex-col gap-5">
@@ -92,7 +94,7 @@ export function ProductHero({
 
         {/* Price — Geist Mono, prominent */}
         {priceLabel && (
-          <p className="font-mono text-2xl font-medium text-foreground tabular-nums">
+          <p className={cn('text-2xl font-medium text-foreground', priceStyle.mono)}>
             {priceLabel}
           </p>
         )}
@@ -130,6 +132,7 @@ export function ProductHero({
           selectedSize={selectedSize}
           allSizesOOS={allSizesOOS}
           isAddingToCart={isAddingToCart}
+          isAdded={isAdded}
           showWhatsApp={showWhatsApp}
           onAddToCart={() => selectedSize && onAddToCart(selectedSize)}
           onBuyNow={() => selectedSize && onBuyNow(selectedSize)}

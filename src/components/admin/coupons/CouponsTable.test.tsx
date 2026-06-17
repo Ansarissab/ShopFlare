@@ -9,6 +9,47 @@ import { toast } from 'sonner'
 import type { AdminCoupon } from '@/lib/types/admin'
 import type { ListNavController } from '@/lib/types/shortcuts'
 
+// ─── AlertDialog mock — renders content inline when open ────────────────────
+vi.mock('@/components/ui/alert-dialog', () => ({
+  AlertDialog: ({
+    open,
+    children,
+  }: {
+    open: boolean
+    onOpenChange?: (v: boolean) => void
+    children: React.ReactNode
+  }) => (open ? <div data-testid="alert-dialog">{children}</div> : null),
+  AlertDialogContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  AlertDialogHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  AlertDialogTitle: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  AlertDialogDescription: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  AlertDialogFooter: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  AlertDialogCancel: ({
+    children,
+    ...props
+  }: {
+    children: React.ReactNode
+    [k: string]: unknown
+  }) => (
+    <button type="button" data-testid="alert-dialog-cancel" {...props}>
+      {children}
+    </button>
+  ),
+  AlertDialogAction: ({
+    children,
+    onClick,
+    ...props
+  }: {
+    children: React.ReactNode
+    onClick?: () => void
+    [k: string]: unknown
+  }) => (
+    <button type="button" data-testid="alert-dialog-action" onClick={onClick} {...props}>
+      {children}
+    </button>
+  ),
+}))
+
 vi.mock('@/lib/api', () => ({
   apiDelete: vi.fn(() => Promise.resolve({})),
 }))
@@ -177,16 +218,18 @@ describe('CouponsTable', () => {
 
   it('does nothing when delete confirm is cancelled', async () => {
     const onDeleted = vi.fn()
-    vi.spyOn(window, 'confirm').mockReturnValue(false)
     render(<CouponsTable coupons={[makeCoupon()]} onEdit={vi.fn()} onDeleted={onDeleted} />)
+    // open the AlertDialog
     fireEvent.click(screen.getByLabelText(en.admin.deleteCoupon))
+    await waitFor(() => expect(screen.getByTestId('alert-dialog-cancel')).toBeTruthy())
+    // click Cancel — dialog closes, no delete
+    fireEvent.click(screen.getByTestId('alert-dialog-cancel'))
     expect(apiDelete).not.toHaveBeenCalled()
     expect(onDeleted).not.toHaveBeenCalled()
   })
 
   it('deletes, toasts success, and calls onDeleted when confirmed', async () => {
     const onDeleted = vi.fn()
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     render(
       <CouponsTable
         coupons={[makeCoupon({ id: 'cpn-9' })]}
@@ -194,7 +237,10 @@ describe('CouponsTable', () => {
         onDeleted={onDeleted}
       />,
     )
+    // open the AlertDialog then confirm
     fireEvent.click(screen.getByLabelText(en.admin.deleteCoupon))
+    await waitFor(() => expect(screen.getByTestId('alert-dialog-action')).toBeTruthy())
+    fireEvent.click(screen.getByTestId('alert-dialog-action'))
     await waitFor(() => {
       expect(apiDelete).toHaveBeenCalledWith('/api/admin/coupons/cpn-9')
       expect(toast.success).toHaveBeenCalledWith(en.admin.couponDeleted)
@@ -204,10 +250,12 @@ describe('CouponsTable', () => {
 
   it('toasts a network error when delete fails', async () => {
     const onDeleted = vi.fn()
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     vi.mocked(apiDelete).mockRejectedValueOnce(new Error('boom'))
     render(<CouponsTable coupons={[makeCoupon()]} onEdit={vi.fn()} onDeleted={onDeleted} />)
+    // open the AlertDialog then confirm
     fireEvent.click(screen.getByLabelText(en.admin.deleteCoupon))
+    await waitFor(() => expect(screen.getByTestId('alert-dialog-action')).toBeTruthy())
+    fireEvent.click(screen.getByTestId('alert-dialog-action'))
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(en.errors.networkError)
     })

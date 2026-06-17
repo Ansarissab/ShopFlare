@@ -25,7 +25,7 @@ export function AdminPageHeader({ title, actions, backHref }: AdminPageHeaderPro
             <ArrowLeft className="size-4" aria-hidden />
           </Link>
         )}
-        <h1 className="text-xl font-bold tracking-tight">{title}</h1>
+        <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2 sm:gap-3">{actions}</div>}
     </div>

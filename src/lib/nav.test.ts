@@ -1,6 +1,33 @@
 import { describe, it, expect } from 'vitest'
-import { catalogHref, buildPrimaryNavLinks } from '@/lib/nav'
+import { catalogHref, buildCategoryHref, buildPrimaryNavLinks } from '@/lib/nav'
 import type { StoreConfig } from '@/lib/types/common'
+
+// ─── buildCategoryHref ────────────────────────────────────────────────────────
+// Regression: "Browse accessories" (and any category CTA) must resolve to
+// /category/<slug>, NOT /shop/<slug>. /shop/[slug] has no route; clicking it 404s.
+
+describe('buildCategoryHref', () => {
+  it('resolves accessories slug to /category/accessories', () => {
+    expect(buildCategoryHref('accessories')).toBe('/category/accessories')
+  })
+
+  it('resolves apparel slug to /category/apparel', () => {
+    expect(buildCategoryHref('apparel')).toBe('/category/apparel')
+  })
+
+  it('does NOT produce a /shop/<slug> URL (which has no route)', () => {
+    expect(buildCategoryHref('accessories')).not.toMatch(/^\/shop\//)
+  })
+
+  it('works for arbitrary slug values', () => {
+    expect(buildCategoryHref('new-arrivals')).toBe('/category/new-arrivals')
+  })
+
+  it('percent-encodes slugs with spaces or non-ASCII characters', () => {
+    expect(buildCategoryHref('summer sale')).toBe('/category/summer%20sale')
+    expect(buildCategoryHref('ropa-niños')).toBe('/category/ropa-ni%C3%B1os')
+  })
+})
 
 describe('catalogHref', () => {
   it('returns / when landing is disabled', () => {
