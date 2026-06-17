@@ -6,7 +6,15 @@
   "name": "shopflare-web",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-05-31",
-  "compatibility_flags": ["nodejs_compat"],
+  // global_fetch_strictly_public: REQUIRED. This worker fetches the API worker
+  // (shopflare-worker) which lives on the same *.workers.dev zone. Without this
+  // flag a same-zone Worker→Worker subrequest fails on the edge with error 1042
+  // ("Worker tried to fetch from another Worker on the same zone"), so every SSR
+  // data fetch threw → notFound() on every page. The flag forces fetch() to route
+  // strictly over the public internet, so it reaches the API worker normally.
+  // (Local `preview`/`dev` workerd doesn't enforce this, which is why it only bit
+  // the deployed worker.) See https://developers.cloudflare.com/workers/observability/errors/
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
