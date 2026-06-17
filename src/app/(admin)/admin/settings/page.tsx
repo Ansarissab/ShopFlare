@@ -538,10 +538,10 @@ export default function AdminSettingsPage() {
                 borderRadius: RADIUS_PRESETS[radius as keyof typeof RADIUS_PRESETS] ?? '0.5rem',
               }}
             >
-              Button
+              {t.admin.previewButton}
             </span>
             <span className="text-xs font-medium" style={{ color: accentColor }}>
-              Accent
+              {t.admin.previewAccent}
             </span>
             <span
               className="px-2 py-0.5 text-xs border"
@@ -551,7 +551,7 @@ export default function AdminSettingsPage() {
                 borderRadius: RADIUS_PRESETS[radius as keyof typeof RADIUS_PRESETS] ?? '0.5rem',
               }}
             >
-              Badge
+              {t.admin.previewBadge}
             </span>
           </div>
         </div>
@@ -563,7 +563,7 @@ export default function AdminSettingsPage() {
               <div className="relative h-10 w-24 shrink-0">
                 <Image
                   src={logoUrl}
-                  alt="Logo"
+                  alt={t.admin.logo}
                   fill
                   sizes="96px"
                   className="object-contain"

@@ -61,10 +61,10 @@ function SuccessContent() {
 
   const paymentNote =
     method === 'cod'
-      ? 'Your order will be confirmed by our team shortly.'
+      ? t.checkout.codNote
       : method === 'bank_transfer'
         ? t.bankTransfer.awaitingPayment
-        : "Payment confirmed. You'll receive an email receipt."
+        : t.checkout.stripeNote
 
   return (
     <div className="flex w-full max-w-md flex-col items-center gap-6 text-center">

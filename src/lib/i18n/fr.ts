@@ -135,6 +135,10 @@ export const fr: Dictionary = {
     processingOrder: 'Traitement…',
     whatsappPanelNote:
       'La commande WhatsApp est disponible directement sur chaque page produit. Visitez le produit souhaité et appuyez sur « {action} » pour envoyer votre commande.',
+    // checkout success payment notes (phase 35)
+    codNote: 'Your order will be confirmed by our team shortly.',
+    stripeNote: "Payment confirmed. You'll receive an email receipt.",
+    itemsHeading: 'Items',
   },
   bankTransfer: {
     heading: 'Bank Transfer Instructions',
@@ -617,6 +621,20 @@ export const fr: Dictionary = {
     sectionContact: 'Contact',
     sectionSeoLlm: 'SEO / Découverte LLM',
     sectionPaymentsShipping: 'Paiements & Livraison',
+    // dashboard chart labels (phase 35)
+    revenueLabel: 'Revenue',
+    // appearance live preview labels (phase 35)
+    previewButton: 'Button',
+    previewAccent: 'Accent',
+    previewBadge: 'Badge',
+    // products list (phase 35)
+    noProductsYet: 'No products yet.',
+    addFirstProduct: 'Add your first product',
+    variantCount: '{n} variant',
+    variantCountPlural: '{n} variants',
+    // orders list (phase 35)
+    showingOrdersOf: 'Showing {shown} of {total} orders',
+    allStatusesOption: 'All',
     // FAQ rows editor chrome (phase 30)
     faqQuestionLabel: 'Question',
     faqAnswerLabel: 'Réponse',

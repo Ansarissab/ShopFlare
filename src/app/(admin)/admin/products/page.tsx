@@ -49,9 +49,9 @@ export default function AdminProductsPage() {
         <div className="flex flex-col gap-3">
           {!data?.products?.length ? (
             <div className="py-20 text-center text-sm text-muted-foreground">
-              No products yet.{' '}
+              {t.admin.noProductsYet}{' '}
               <Link href="/admin/products/new" className="text-primary underline">
-                Add your first product
+                {t.admin.addFirstProduct}
               </Link>
             </div>
           ) : (
@@ -71,7 +71,9 @@ export default function AdminProductsPage() {
                     </Badge>
                   </div>
                   <span className="text-xs text-muted-foreground">
-                    {variants.length} variant{variants.length !== 1 ? 's' : ''}
+                    {variants.length === 1
+                      ? t.admin.variantCount.replace('{n}', String(variants.length))
+                      : t.admin.variantCountPlural.replace('{n}', String(variants.length))}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">

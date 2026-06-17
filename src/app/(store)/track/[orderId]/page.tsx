@@ -86,7 +86,7 @@ function OrderTrackingContent() {
         <h1 className="text-2xl font-semibold tracking-tight">{t.tracking.notFound}</h1>
         <p className="text-sm text-muted-foreground">{t.tracking.notFoundBody}</p>
         <Link href="/track" className="text-sm text-primary underline-offset-4 hover:underline">
-          Back to tracking
+          {t.tracking.backToTracking}
         </Link>
       </div>
     )
@@ -130,7 +130,7 @@ function OrderTrackingContent() {
 
       {/* Items */}
       <div className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium text-muted-foreground">Items</h2>
+        <h2 className="text-sm font-medium text-muted-foreground">{t.checkout.itemsHeading}</h2>
         <ul className="flex flex-col gap-3">
           {items.map((item, idx) => (
             <OrderLineItem

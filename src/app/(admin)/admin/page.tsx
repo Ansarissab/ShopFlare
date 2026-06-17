@@ -228,7 +228,7 @@ export default function AdminDashboardPage() {
                     tickFormatter={(v) => (v === 0 ? '0' : `${v}`)}
                   />
                   <Tooltip
-                    formatter={(val) => [formatPrice(Number(val) * 100), 'Revenue']}
+                    formatter={(val) => [formatPrice(Number(val) * 100), t.admin.revenueLabel]}
                     contentStyle={CHART_TOOLTIP_STYLE}
                     labelStyle={{ fontWeight: 600, marginBottom: 2 }}
                   />

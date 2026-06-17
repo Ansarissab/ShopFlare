@@ -132,6 +132,10 @@ export const en = {
     processingOrder: 'Processing…',
     whatsappPanelNote:
       'WhatsApp ordering is available directly on each product page. Visit the product you want and tap “{action}” to send your order.',
+    // checkout success payment notes (phase 35)
+    codNote: 'Your order will be confirmed by our team shortly.',
+    stripeNote: "Payment confirmed. You'll receive an email receipt.",
+    itemsHeading: 'Items',
   },
   // Reusable bank-transfer copy — shared by the checkout success page, the order
   // tracking page, and the confirmation email (worker imports `en`). DRY.
@@ -641,6 +645,20 @@ export const en = {
     sectionContact: 'Contact',
     sectionSeoLlm: 'SEO / LLM Discovery',
     sectionPaymentsShipping: 'Payments & Shipping',
+    // dashboard chart labels (phase 35)
+    revenueLabel: 'Revenue',
+    // appearance live preview labels (phase 35)
+    previewButton: 'Button',
+    previewAccent: 'Accent',
+    previewBadge: 'Badge',
+    // products list (phase 35)
+    noProductsYet: 'No products yet.',
+    addFirstProduct: 'Add your first product',
+    variantCount: '{n} variant',
+    variantCountPlural: '{n} variants',
+    // orders list (phase 35)
+    showingOrdersOf: 'Showing {shown} of {total} orders',
+    allStatusesOption: 'All',
     // FAQ rows editor chrome (phase 30)
     faqQuestionLabel: 'Question',
     faqAnswerLabel: 'Answer',

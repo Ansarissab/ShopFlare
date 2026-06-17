@@ -135,6 +135,10 @@ export const ur: Dictionary = {
     processingOrder: 'پروسیسنگ…',
     whatsappPanelNote:
       'واٹس ایپ آرڈر براہ راست ہر پروڈکٹ صفحے پر دستیاب ہے۔ مطلوبہ پروڈکٹ پر جائیں اور آرڈر بھیجنے کے لیے «{action}» تھپتھپائیں۔',
+    // checkout success payment notes (phase 35)
+    codNote: 'Your order will be confirmed by our team shortly.',
+    stripeNote: "Payment confirmed. You'll receive an email receipt.",
+    itemsHeading: 'Items',
   },
   bankTransfer: {
     heading: 'Bank Transfer Instructions',
@@ -616,6 +620,20 @@ export const ur: Dictionary = {
     sectionContact: 'رابطہ',
     sectionSeoLlm: 'SEO / LLM دریافت',
     sectionPaymentsShipping: 'ادائیگی اور شپنگ',
+    // dashboard chart labels (phase 35)
+    revenueLabel: 'Revenue',
+    // appearance live preview labels (phase 35)
+    previewButton: 'Button',
+    previewAccent: 'Accent',
+    previewBadge: 'Badge',
+    // products list (phase 35)
+    noProductsYet: 'No products yet.',
+    addFirstProduct: 'Add your first product',
+    variantCount: '{n} variant',
+    variantCountPlural: '{n} variants',
+    // orders list (phase 35)
+    showingOrdersOf: 'Showing {shown} of {total} orders',
+    allStatusesOption: 'All',
     // FAQ rows editor chrome (phase 30)
     faqQuestionLabel: 'سوال',
     faqAnswerLabel: 'جواب',

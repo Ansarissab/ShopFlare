@@ -36,7 +36,7 @@ export default function AdminOrdersPage() {
               <SelectValue placeholder={t.admin.allStatuses} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="all">{t.admin.allStatusesOption}</SelectItem>
               {ORDER_STATUSES.map((s) => (
                 <SelectItem key={s} value={s} className="capitalize">
                   {t.orderStatusLabels[s]}
@@ -51,7 +51,9 @@ export default function AdminOrdersPage() {
 
       {data && (
         <p className="text-xs text-muted-foreground">
-          Showing {data.orders.length} of {data.total} orders
+          {t.admin.showingOrdersOf
+            .replace('{shown}', String(data.orders.length))
+            .replace('{total}', String(data.total))}
         </p>
       )}
     </div>
