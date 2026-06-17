@@ -299,14 +299,29 @@ describe('CheckoutMethodSelector', () => {
     expect(cardBtn.getAttribute('aria-checked')).toBe('true')
   })
 
+  it('ArrowRight moves focus to the next radio (same as ArrowDown)', () => {
+    render(<CheckoutMethodSelector />)
+    // COD is active (index 1). ArrowRight → whatsapp (index 2).
+    const codBtn = screen.getByRole('radio', { name: new RegExp(en.store.cashOnDelivery) })
+    fireEvent.keyDown(codBtn, { key: 'ArrowRight' })
+    const whatsappBtn = screen.getByRole('radio', { name: new RegExp(en.store.orderOnWhatsApp) })
+    expect(whatsappBtn.getAttribute('aria-checked')).toBe('true')
+    expect(whatsappBtn.getAttribute('tabindex')).toBe('0')
+    expect(codBtn.getAttribute('tabindex')).toBe('-1')
+    // Focus must have moved to the whatsapp button (handler calls .focus() on the target ref)
+    expect(document.activeElement).toBe(whatsappBtn)
+  })
+
   it('non-navigation keys do not change active method or call preventDefault', () => {
     render(<CheckoutMethodSelector />)
     const codBtn = screen.getByRole('radio', { name: new RegExp(en.store.cashOnDelivery) })
-    // Firing a non-nav key — it should be a no-op (nextIdx stays null → no setActive)
-    fireEvent.keyDown(codBtn, { key: 'Tab' })
+    // Firing a non-nav key — preventDefault must NOT be called; selection must not change.
+    const preventDefault = vi.fn()
+    fireEvent.keyDown(codBtn, { key: 'Tab', preventDefault })
     // COD should still be active
     expect(codBtn.getAttribute('aria-checked')).toBe('true')
     const cardBtn = screen.getByRole('radio', { name: new RegExp(en.checkout.payWithCard) })
     expect(cardBtn.getAttribute('aria-checked')).toBe('false')
+    expect(preventDefault).not.toHaveBeenCalled()
   })
 })

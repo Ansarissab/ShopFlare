@@ -275,6 +275,36 @@ describe('ManualOrderForm', () => {
     expect(url).not.toContain(encodeURIComponent('buyer@example.com'))
   })
 
+  it('shows phone validation error and blocks submit when phone is blank but email is provided', async () => {
+    // Exercises the `phone ?? email` right branch guard: when phone field is left
+    // empty (''), the shippingAddressSchema rejects it (regex requires a valid phone
+    // string when the field is non-empty) → form validation error, no submit.
+    // This confirms the schema enforces that the ?? right branch (email-as-hint)
+    // is only reachable when phone is truly absent (undefined in schema output),
+    // not when it is an empty string. The cParam conditional is guarded by schema.
+    render(<ManualOrderForm {...baseProps} />)
+    fireEvent.change(screen.getByLabelText(en.checkout.name, { exact: false }), {
+      target: { value: 'Jane Doe' },
+    })
+    // Leave phone blank (untouched → DOM value = '')
+    fireEvent.change(screen.getByLabelText(en.checkout.email, { exact: false }), {
+      target: { value: 'jane@example.com' },
+    })
+    fireEvent.change(screen.getByLabelText(en.checkout.address, { exact: false }), {
+      target: { value: '456 Side Street' },
+    })
+    fireEvent.change(screen.getByLabelText(en.checkout.city, { exact: false }), {
+      target: { value: 'Lahore' },
+    })
+    fireEvent.click(screen.getByTestId('ts-verify'))
+    fireEvent.click(screen.getByRole('button', { name: en.checkout.placeOrder }))
+
+    // Phone '' fails the regex validator → validation error renders, apiPost never called.
+    await waitFor(() => expect(screen.getByText(en.errors.invalidPhone)).toBeTruthy())
+    expect(mockApiPost).not.toHaveBeenCalled()
+    expect(push).not.toHaveBeenCalled()
+  })
+
   it('shows the loading spinner while the order request is in flight (isSubmitting branch)', async () => {
     // Hold apiPost open so isSubmitting stays true and the button shows the spinner.
     let resolvePost: (v: { orderId: string; orderNumber: string }) => void = () => {}

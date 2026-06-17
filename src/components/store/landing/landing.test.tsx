@@ -554,10 +554,10 @@ describe('LandingPage', () => {
 
   it('skips sections where enabled is false', () => {
     const { container } = renderLanding({ hero: { enabled: false }, cta: { enabled: false } })
+    // featured returns null when no products; reviews returns null when no data;
+    // story section should still render → at least 1 section present.
     const sections = container.querySelectorAll('section')
-    // featured returns null when no products; reviews returns null when no data
-    // story section should still render
-    expect(sections.length).toBeGreaterThanOrEqual(0)
+    expect(sections.length).toBeGreaterThanOrEqual(1)
     // No hero section (data-hero-style attr is on the hero section element)
     expect(container.querySelector('[data-hero-style]')).toBeNull()
   })

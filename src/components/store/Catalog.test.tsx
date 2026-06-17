@@ -11,9 +11,10 @@ import type { ProductWithVariants } from '@/lib/types/product'
 // ── Next.js navigation stubs ────────────────────────────────────────────────
 // mockSearchParams is mutable so individual tests can seed initial q/category.
 const mockSearchParamsMap: Record<string, string | null> = {}
+const mockRouterReplace = vi.fn()
 
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ replace: vi.fn() }),
+  useRouter: () => ({ replace: mockRouterReplace }),
   useSearchParams: () => ({ get: (key: string) => mockSearchParamsMap[key] ?? null }),
 }))
 
@@ -97,6 +98,7 @@ vi.mock('@/components/shared/InfiniteScrollSentinel', async () => {
 afterEach(() => {
   cleanup()
   vi.clearAllMocks()
+  mockRouterReplace.mockReset()
   // reset state back to defaults
   mockProductsState = { data: null, loading: true, error: null }
   mockCatsState = { data: { categories: [] }, loading: false, error: null }
@@ -246,8 +248,12 @@ describe('Catalog — search / clear handler', () => {
     // The clear-search button must be present.
     const clearBtn = screen.getByRole('button')
     expect(clearBtn).toBeTruthy()
-    // Click the clear button — exercises the () => setQuery('') handler.
+    // Click the clear button — must call router.replace with the 'q' param removed.
     fireEvent.click(clearBtn)
+    expect(mockRouterReplace).toHaveBeenCalledTimes(1)
+    // The URL passed to replace must NOT contain the 'q' query param.
+    const replacedUrl = mockRouterReplace.mock.calls[0][0] as string
+    expect(replacedUrl).not.toContain('q=')
   })
 
   it('renders empty-category state when query is empty but visibleItems is empty', () => {
@@ -365,8 +371,8 @@ describe('Catalog — hasMore branch (pagination)', () => {
     const products = Array.from({ length: 25 }, (_, i) => makeProduct(`pg${i}`))
     mockProductsState = { data: { products }, loading: false, error: null }
     render(<Catalog basePath="/" />)
-    // The hasMore=true branch renders "Showing {shown} of {total} products".
-    expect(screen.getByText(/showing/i)).toBeTruthy()
+    // The hasMore=true branch renders "Showing {shown} of {total} products" — "X of Y" form.
+    expect(screen.getByText(/\d+\s+of\s+\d+/)).toBeTruthy()
     expect(screen.getByTestId('product-grid')).toBeTruthy()
   })
 
@@ -376,8 +382,9 @@ describe('Catalog — hasMore branch (pagination)', () => {
     mockProductsState = { data: { products }, loading: false, error: null }
     render(<Catalog basePath="/" />)
     expect(screen.getByTestId('product-grid')).toBeTruthy()
-    // hasMore=false branch: uses t.store.showingProducts (single-count string)
+    // hasMore=false branch: plain count form (no "X of Y")
     expect(screen.getByText(/showing/i)).toBeTruthy()
+    expect(screen.queryByText(/\d+\s+of\s+\d+/)).toBeNull()
   })
 })
 

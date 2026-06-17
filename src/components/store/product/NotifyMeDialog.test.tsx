@@ -134,36 +134,27 @@ describe('NotifyMeDialog', () => {
     ).toBeTruthy()
   })
 
-  it('submits with phone only (email left blank) — email spread branch is false', async () => {
-    // Exercises `values.email ? { email }` = false → email NOT in payload.
-    // The form submits when phone is valid and email is left as '' (which fails email
-    // validation individually but the zod refinement only requires email OR phone).
-    // We verify by checking that the payload does NOT include email when only phone is valid.
+  it('shows invalid-email error when phone is valid but email field has a bad value', async () => {
+    // Exercises the `errors.email &&` JSX branch: an invalid email string triggers the error
+    // display even when a valid phone is also provided.
+    // The zod schema validates email individually (z.string().email()) before the
+    // cross-field refinement runs — a bad email value always produces an error.
     const props = baseProps()
     render(<NotifyMeDialog {...props} />)
-    // Leave email blank; provide only a valid phone
+    fireEvent.change(screen.getByLabelText(en.checkout.email), {
+      target: { value: 'not-valid' },
+    })
     fireEvent.change(screen.getByLabelText(en.checkout.phone), {
       target: { value: '+15550001111' },
     })
-    fireEvent.click(screen.getByRole('button', { name: en.store.notifyMe }))
+    // Submit via the form element (same approach as the existing invalidEmail test above)
+    const form = document.querySelector('form') as HTMLFormElement
+    fireEvent.submit(form)
 
-    // email='' fails validation individually → form errors, no API call
-    // This exercises the path where email is absent/invalid, phone carries the form
-    await waitFor(() => {
-      // If zod rejects the empty email we see a validation error (email branch in JSX)
-      // or the form submits without email if schema skips empty optional fields.
-      const emailError = screen.queryByText(en.errors.invalidEmail)
-      const called = apiPostMock.mock.calls.length > 0
-      return emailError !== null || called
+    // Bad email → validation fires → invalidEmail error shown, apiPost never called.
+    await waitFor(() => expect(screen.getByText(en.errors.invalidEmail)).toBeTruthy(), {
+      timeout: 3000,
     })
-
-    if (apiPostMock.mock.calls.length > 0) {
-      // Schema accepted phone-only submit → verify email not in payload
-      const payload = apiPostMock.mock.calls[0][1] as Record<string, unknown>
-      expect('email' in payload).toBe(false)
-      expect(payload.phone).toBe('+15550001111')
-      await waitFor(() => expect(toastSuccess).toHaveBeenCalledWith(en.store.notifySuccess))
-    }
-    // Either path exercised the email false-branch in one form or another
+    expect(apiPostMock).not.toHaveBeenCalled()
   })
 })
