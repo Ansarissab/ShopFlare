@@ -19,10 +19,9 @@ describe('fetchFromWorker', () => {
     })
     const result = await fetchFromWorker('/api/config/store')
     expect(result).toEqual({ storeName: 'Acme' })
-    expect(fetchMock).toHaveBeenCalledWith(
-      'https://worker.test/api/config/store',
-      expect.objectContaining({ next: { revalidate: 60 } }),
-    )
+    expect(fetchMock).toHaveBeenCalledWith('https://worker.test/api/config/store', {
+      cache: 'no-store',
+    })
   })
 
   it('returns null on 404', async () => {
@@ -43,30 +42,26 @@ describe('fetchFromWorker', () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
-  it('returns null when fetch throws', async () => {
+  it('returns null and logs on fetch throw', async () => {
     vi.stubEnv('NEXT_PUBLIC_WORKER_URL', 'https://worker.test')
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     fetchMock.mockRejectedValueOnce(new Error('network down'))
     expect(await fetchFromWorker('/api/config/store')).toBeNull()
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('[fetchFromWorker]'),
+      'network down',
+    )
   })
 
-  it('uses revalidate: 0 when revalidate is false', async () => {
+  it('revalidate option is accepted but fetch always uses cache: no-store', async () => {
     vi.stubEnv('NEXT_PUBLIC_WORKER_URL', 'https://worker.test')
-    fetchMock.mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({}) })
+    fetchMock.mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
+
     await fetchFromWorker('/api/config/store', { revalidate: false })
-    expect(fetchMock).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.objectContaining({ next: { revalidate: 0 } }),
-    )
-  })
+    expect(fetchMock).toHaveBeenLastCalledWith(expect.any(String), { cache: 'no-store' })
 
-  it('uses custom revalidate when provided', async () => {
-    vi.stubEnv('NEXT_PUBLIC_WORKER_URL', 'https://worker.test')
-    fetchMock.mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({}) })
     await fetchFromWorker('/api/config/store', { revalidate: 300 })
-    expect(fetchMock).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.objectContaining({ next: { revalidate: 300 } }),
-    )
+    expect(fetchMock).toHaveBeenLastCalledWith(expect.any(String), { cache: 'no-store' })
   })
 })
 
