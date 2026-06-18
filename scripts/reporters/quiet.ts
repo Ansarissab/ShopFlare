@@ -7,9 +7,10 @@
  *   - Final line: one-line summary (files, tests, duration).
  *
  * Verbose opt-in:
- *   VITEST_VERBOSE=1 pnpm test:unit   →  falls back to Vitest's built-in default reporter.
+ *   TEST_VERBOSE=1 pnpm test:unit    →  falls back to Vitest's built-in default reporter.
+ *   VITEST_VERBOSE=1 also works as an alias for backward compatibility.
  *   (The config in vitest.config.ts / vitest.integration.config.ts handles that switch;
- *    this file is only loaded when VITEST_VERBOSE is NOT '1'.)
+ *    this file is only loaded when TEST_VERBOSE / VITEST_VERBOSE is NOT '1'.)
  *
  * Safety contract:
  *   - This reporter ONLY controls printing. It never touches process.exitCode or throws

@@ -1,5 +1,17 @@
 import { defineConfig, devices } from '@playwright/test'
+import type { ReporterDescription } from '@playwright/test'
 import { ADMIN_STORAGE_STATE, E2E_ADMIN_PASSWORD, E2E_ADMIN_SESSION_SECRET } from './e2e/constants'
+
+// TEST_VERBOSE=1 → full 'list' reporter (every test line).
+// Unset (or 0) → quiet reporter: failures + compact summary + live heartbeat.
+// VITEST_VERBOSE=1 is honored by the Vitest configs as an alias for TEST_VERBOSE.
+const isVerbose = process.env.TEST_VERBOSE === '1'
+const pwReporter: ReporterDescription[] = isVerbose
+  ? [['list'], ['html', { outputFolder: 'playwright-report', open: 'never' }]]
+  : [
+      ['./scripts/reporters/playwright-quiet.ts'],
+      ['html', { outputFolder: 'playwright-report', open: 'never' }],
+    ]
 
 // Ports come from the e2e launcher (scripts/e2e.mjs), which scans for free ports
 // ONCE and exports them as PW_PORT / PW_WORKER_PORT so this config AND every
@@ -24,7 +36,7 @@ export default defineConfig({
   // Local: cap at 3 (was unbounded → up to 8 browser workers on an 8-core box).
   // CI stays single-worker for deterministic timing.
   workers: process.env.CI ? 1 : 3,
-  reporter: [['list'], ['html', { outputFolder: 'playwright-report', open: 'never' }]],
+  reporter: pwReporter,
   use: {
     baseURL,
     trace: 'on-first-retry',

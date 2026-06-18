@@ -401,6 +401,21 @@ pnpm test:visual:update   # regenerate machine-local baselines
 free ports, so they never collide with a running dev server and can be run while `pnpm dev`
 is active.
 
+**Test output — quiet by default, with a live heartbeat.** Every suite (unit + integration on
+Vitest, e2e/smoke/visual on Playwright) uses a custom reporter that prints only **failures + a
+one-line summary** instead of the per-test firehose — and a **live heartbeat** so a long or
+concurrent run is visibly working (`⠹ running tests… 42s · 12/120`) rather than sitting silent
+(important during the long collection phase and when steps run alongside `build`). For the full
+per-test output, set `TEST_VERBOSE=1`:
+
+```bash
+TEST_VERBOSE=1 pnpm verify        # full output across all suites
+TEST_VERBOSE=1 pnpm test:e2e      # full Playwright list reporter
+```
+
+`VITEST_VERBOSE=1` still works for the Vitest suites (backward-compatible alias). The reporters
+control **display only** — failures and the process exit code are never suppressed.
+
 **Coverage gate = unit project only, 95%.** Worker routes run in the miniflare/workerd pool
 where v8 can't instrument them; they're covered behaviorally by the integration suite instead.
 See [docs/adr/0008-coverage-gate-unit-only.md](docs/adr/0008-coverage-gate-unit-only.md).

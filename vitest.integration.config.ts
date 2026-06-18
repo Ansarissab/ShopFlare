@@ -2,9 +2,9 @@ import { defineWorkersConfig, readD1Migrations } from '@cloudflare/vitest-pool-w
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 
-// VITEST_VERBOSE=1 → full default reporter; unset → quiet (failures + summary only).
+// TEST_VERBOSE=1 (or VITEST_VERBOSE=1 as alias) → full default reporter; unset → quiet (failures + summary only).
 const reporter =
-  process.env.VITEST_VERBOSE === '1'
+  process.env.TEST_VERBOSE === '1' || process.env.VITEST_VERBOSE === '1'
     ? 'default'
     : path.join(path.dirname(fileURLToPath(import.meta.url)), 'scripts/reporters/quiet.ts')
 
