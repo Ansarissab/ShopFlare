@@ -39,8 +39,22 @@ export async function fetchFromWorker<T>(path: string, opts: FetchOptions = {}):
     if (!res.ok && !opts.allowNonOk) throw new Error(`${res.status} ${res.statusText}`)
     return (await res.json()) as T
   } catch (err) {
-    // Never silently swallow — a failing server fetch is why pages 404. Make it visible
-    // in `wrangler tail` so the next incident is diagnosable in seconds, not hours.
+    // Re-throw Next's control-flow signals — NEVER swallow them. A `cache: 'no-store'`
+    // fetch during static generation throws DYNAMIC_SERVER_USAGE to tell Next "render
+    // this route dynamically"; swallowing it makes Next statically render the route with
+    // null data instead (e.g. /checkout/success built with a null store config). Same for
+    // NEXT_REDIRECT / NEXT_NOT_FOUND. These are identified by a string `digest`.
+    if (
+      err &&
+      typeof err === 'object' &&
+      typeof (err as { digest?: unknown }).digest === 'string' &&
+      ((err as { digest: string }).digest.startsWith('DYNAMIC_SERVER_USAGE') ||
+        (err as { digest: string }).digest.startsWith('NEXT_'))
+    ) {
+      throw err
+    }
+    // Genuine fetch failure — log (never silent; a failing server fetch is why pages 404,
+    // visible in `wrangler tail`) and degrade to null.
     console.error(`[fetchFromWorker] ${path} failed:`, err instanceof Error ? err.message : err)
     return null
   }
