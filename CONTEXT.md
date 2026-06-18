@@ -141,9 +141,13 @@ An optional storytelling home page that replaces the Product grid at `/` when en
 
 A Product the Merchant selects to highlight in the Landing Page's featured strip. Selection is Merchant-controlled and stored in Store Config / D1.
 
+## Landing Template
+
+The visual design a Landing Page is rendered with. Merchants can have multiple Landing Pages, each assigned a Template (e.g. Classic plus premium layouts inspired by Wise/Stripe/YC but built from our own theme tokens). Templates are the single switch point `LANDING_TEMPLATE_REGISTRY` (a `Record<LandingTemplate, Component>`) and all compose from the shared kit in `templates/shared/` — `TemplateSection`, `FeaturedGrid`, and `templateKit` (type-scale + button tokens derived from the CSS-variable theme). Adding a design = one component + one registry entry. Distinct from a Style Preset (which recolors/restyles) — a Template changes the layout itself.
+
 ## Style Preset
 
-A named, one-click "look" (e.g. Minimal, Bold, Elegant, Playful) bundling brand colors, font, corner radius, density, and hero style. Applied via the existing CSS-variable theme engine. Distinct from full alternate layout templates (a v2 concept).
+A named, one-click "look" (e.g. Minimal, Bold, Elegant, Playful) bundling brand colors, font, corner radius, density, and hero style. Applied via the existing CSS-variable theme engine. Distinct from a Landing Template, which swaps the page layout itself (see above).
 
 ## Rich Text
 
