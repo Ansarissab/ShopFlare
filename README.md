@@ -279,6 +279,12 @@ pnpm db:seed           # remote D1
 Every row uses a fixed `demo_*` id with `INSERT OR IGNORE`, so re-running never clobbers data
 you've edited in admin. Delete the `demo_*` rows to remove the sample data.
 
+> ⚠️ **Demo data — not for a real store.** This includes two **active, no-expiry** coupons
+> (`WELCOME10`, `FLAT500`) plus fake products/orders. If you're launching a store you actually
+> sell from, **don't seed it** — or clear the demo rows afterward (`DELETE FROM <table> WHERE
+> id LIKE 'demo_%'`; the active coupons especially must not survive into a live store). See the
+> header of `worker/db/seed.sql` for the full one-pass cleanup.
+
 ---
 
 ## Scripts

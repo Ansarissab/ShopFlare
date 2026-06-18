@@ -17,6 +17,18 @@
 -- never clobbers data you've since edited in the Admin Dashboard. To reset the
 -- demo data, delete the `demo_*` / `ORD-DEMO0001` rows first, then re-seed.
 --
+-- ⚠️  DEMO / SHOWCASE DATA — NOT FOR A REAL STORE.
+-- This inserts fake products, a fake delivered order, a fake review, AND two
+-- ACTIVE, no-expiry coupons (WELCOME10, FLAT500). If you're launching a store you
+-- actually sell from, do NOT run this seed — or clear it afterward. Every demo row
+-- is prefixed `demo_` (+ the order `ORD-DEMO0001`), so a real store starts clean by
+-- simply not seeding, or removes the demo set in one pass:
+--   DELETE FROM coupons WHERE id LIKE 'demo_%';
+--   DELETE FROM orders  WHERE id LIKE 'demo_%';   -- order_items cascade
+--   DELETE FROM reviews WHERE id LIKE 'demo_%';
+--   DELETE FROM products WHERE id LIKE 'demo_%';  -- variants/sizes/images cascade
+-- The active demo coupons especially must not survive into a live store.
+--
 -- Currency note: default currency is PKR (0-decimal in src/lib/constants), so
 -- the *_cents columns hold whole rupees here (e.g. 2500 = ₨2,500). If you change
 -- the currency to a 2-decimal one (USD/EUR…), treat these as minor units.
