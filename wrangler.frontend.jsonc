@@ -15,6 +15,13 @@
   // (Local `preview`/`dev` workerd doesn't enforce this, which is why it only bit
   // the deployed worker.) See https://developers.cloudflare.com/workers/observability/errors/
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  // Service binding to the API worker — an INTERNAL worker→worker call (no public
+  // round-trip), which fetchFromWorker prefers over the public fetch to cut SSR TTFB.
+  // The public fetch (enabled by global_fetch_strictly_public above) stays as the
+  // fallback for when the binding is absent/unavailable (local `next dev`, build-time
+  // static generation, or a preview without the API worker running). Service name must
+  // match the API worker's `name` in wrangler.toml / wrangler.prod.toml.
+  "services": [{ "binding": "API", "service": "shopflare-worker" }],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
