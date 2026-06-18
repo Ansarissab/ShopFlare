@@ -135,45 +135,19 @@ export async function assembleProductList(
 
   const productIds = activeProducts.map((p) => p.id)
 
-  // 2. Batch: all variants for these products
-  const allVariants = await db
-    .select()
-    .from(schema.variants)
-    .where(inArray(schema.variants.productId, productIds))
-    .all()
-
-  if (allVariants.length === 0) {
-    return activeProducts.map((product) => ({
-      product,
-      variants: [],
-      categoryIds: [],
-      faqItems: parseFaqItems(product.faqItems),
-    }))
-  }
-
-  const variantIds = allVariants.map((v) => v.id)
-
-  // 3. Batch: all images for these variants
-  const allImages = await db
-    .select()
-    .from(schema.productImages)
-    .where(inArray(schema.productImages.variantId, variantIds))
-    .all()
-
-  // 4. Batch: all size options for these variants (active filter applied in groupVariants)
-  const allSizes = await db
-    .select()
-    .from(schema.sizeOptions)
-    .where(inArray(schema.sizeOptions.variantId, variantIds))
-    .all()
-
-  // 5. Batch: category assignments for these products
-  const allProductIds = activeProducts.map((p) => p.id)
-  const categoryAssignments = await db
-    .select()
-    .from(schema.productCategories)
-    .where(inArray(schema.productCategories.productId, allProductIds))
-    .all()
+  // Each D1 query is a cross-region round-trip, so the batched reads are run in
+  // dependency WAVES, parallelizing the independent ones (was 5 sequential reads):
+  //   wave A: variants + category assignments (both keyed on productIds)
+  //   wave B: images + size options (both keyed on variantIds, known after wave A)
+  // This collapses ~5 round-trips to ~3 — lower TTFB with no caching/staleness.
+  const [allVariants, categoryAssignments] = await Promise.all([
+    db.select().from(schema.variants).where(inArray(schema.variants.productId, productIds)).all(),
+    db
+      .select()
+      .from(schema.productCategories)
+      .where(inArray(schema.productCategories.productId, productIds))
+      .all(),
+  ])
 
   // Build map: productId → categoryId[]
   const categoryIdsByProduct = new Map<string, string[]>()
@@ -182,6 +156,30 @@ export async function assembleProductList(
     arr.push(row.categoryId)
     categoryIdsByProduct.set(row.productId, arr)
   }
+
+  if (allVariants.length === 0) {
+    return activeProducts.map((product) => ({
+      product,
+      variants: [],
+      categoryIds: categoryIdsByProduct.get(product.id) ?? [],
+      faqItems: parseFaqItems(product.faqItems),
+    }))
+  }
+
+  const variantIds = allVariants.map((v) => v.id)
+
+  const [allImages, allSizes] = await Promise.all([
+    db
+      .select()
+      .from(schema.productImages)
+      .where(inArray(schema.productImages.variantId, variantIds))
+      .all(),
+    db
+      .select()
+      .from(schema.sizeOptions)
+      .where(inArray(schema.sizeOptions.variantId, variantIds))
+      .all(),
+  ])
 
   // 6. Group in JS — O(n) Maps, no further DB round-trips
   return activeProducts.map((product) => ({
