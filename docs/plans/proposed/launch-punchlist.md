@@ -17,18 +17,18 @@ Legend: ⏱ effort · 🚀 needs a prod deploy · 🔑 needs secrets/config the 
 
 ---
 
-## Tier 1 — Quick wins (minutes, no deploy, no secrets)
+## Tier 1 — Quick wins (minutes, no deploy, no secrets) — ✅ DONE
 
-- [ ] **1. Retire the stray plan doc.** `docs/plans/proposed/repo-hygiene-remove-graphify-out.md`
-  is untracked but already done (graphify-out removed in `88f8d19`). Move to
-  `docs/plans/done/` (keep the record) or delete. ⏱ 1 min
-- [ ] **2. CONTEXT.md glossary — multi-landing templates.** Add a **Landing Template** entry
-  (selectable per-page designs via `LANDING_TEMPLATE_REGISTRY` + the shared `templateKit`),
-  and fix the stale **Style Preset** note that still calls alternate layout templates "a v2
-  concept" (shipped in phase 36). ⏱ 5 min
-- [ ] **3. ADMIN_DEV_BYPASS dev login bypass.** `ADMIN_DEV_BYPASS=1` in dev doesn't actually
-  bypass the admin login on the frontend (diagnosed earlier, never fixed). Dev-only
-  convenience, zero prod impact. Fix the frontend gate + a regression test. ⏱ ~20 min
+- [x] **1. Retire the stray plan doc.** Moved `repo-hygiene-remove-graphify-out.md`
+  proposed→done (graphify-out already removed in `88f8d19`).
+- [x] **2. CONTEXT.md glossary — multi-landing templates.** Added the **Landing Template**
+  entry (`LANDING_TEMPLATE_REGISTRY` + shared `templateKit`) and fixed the stale **Style
+  Preset** "v2 concept" note.
+- [x] **3. ADMIN_DEV_BYPASS dev login bypass.** Added `isAdminDevBypass()` in `src/lib/api.ts`
+  (single source; dev + `NEXT_PUBLIC_ADMIN_DEV_BYPASS=1`, inert in prod builds); `AdminShell`
+  skips the login redirect when on. Mirrors the backend two-condition guard in
+  `worker/lib/access.ts`. +5 unit tests. Activate with `NEXT_PUBLIC_ADMIN_DEV_BYPASS=1` in
+  `.env.local` (plus the worker side: `ENVIRONMENT=development` + `ADMIN_DEV_BYPASS=1`).
 
 ## Tier 2 — Quick prod checks (curl-only, no deploy)
 

@@ -16,6 +16,7 @@ import {
   setAdminToken,
   clearAdminToken,
   resolveWorkerUrl,
+  isAdminDevBypass,
 } from '@/lib/api'
 
 // Build a Response-like fetch result.
@@ -77,6 +78,38 @@ describe('resolveWorkerUrl (dev/prod isolation)', () => {
     expect(resolveWorkerUrl()).toBe('http://localhost:8787')
     vi.stubEnv('NODE_ENV', 'production')
     expect(resolveWorkerUrl()).toBe('')
+  })
+})
+
+describe('isAdminDevBypass', () => {
+  it('returns true when NODE_ENV=development AND flag=1', () => {
+    vi.stubEnv('NODE_ENV', 'development')
+    vi.stubEnv('NEXT_PUBLIC_ADMIN_DEV_BYPASS', '1')
+    expect(isAdminDevBypass()).toBe(true)
+  })
+
+  it('returns false when flag is unset in development', () => {
+    vi.stubEnv('NODE_ENV', 'development')
+    vi.stubEnv('NEXT_PUBLIC_ADMIN_DEV_BYPASS', '')
+    expect(isAdminDevBypass()).toBe(false)
+  })
+
+  it('returns false when flag=1 but NODE_ENV=production', () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    vi.stubEnv('NEXT_PUBLIC_ADMIN_DEV_BYPASS', '1')
+    expect(isAdminDevBypass()).toBe(false)
+  })
+
+  it('returns false when flag=1 but NODE_ENV=test', () => {
+    vi.stubEnv('NODE_ENV', 'test')
+    vi.stubEnv('NEXT_PUBLIC_ADMIN_DEV_BYPASS', '1')
+    expect(isAdminDevBypass()).toBe(false)
+  })
+
+  it('returns false when both are unset', () => {
+    vi.stubEnv('NODE_ENV', '')
+    vi.stubEnv('NEXT_PUBLIC_ADMIN_DEV_BYPASS', '')
+    expect(isAdminDevBypass()).toBe(false)
   })
 })
 

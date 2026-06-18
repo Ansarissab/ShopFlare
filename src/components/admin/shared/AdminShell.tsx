@@ -6,7 +6,7 @@ import { AdminSidebar, MobileAdminNav } from '@/components/admin/shared/AdminSid
 import { ListNavProvider } from '@/components/admin/shared/ListNavContext'
 import AdminShortcuts from '@/components/admin/shared/AdminShortcuts'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { getAdminToken } from '@/lib/api'
+import { getAdminToken, isAdminDevBypass } from '@/lib/api'
 
 // Read the admin token without a setState-in-effect cascade or a hydration
 // mismatch: the server snapshot is always null, the client snapshot reads
@@ -23,11 +23,17 @@ function useAdminToken(): string | null {
 // Bearer token). This gate is UX: it redirects to /admin/login when no token is
 // present so the merchant isn't shown an empty dashboard. The admin pages fetch
 // all data via the API, so the static shell carries no protected data itself.
+//
+// Dev bypass: when isAdminDevBypass() is true (NODE_ENV=development +
+// NEXT_PUBLIC_ADMIN_DEV_BYPASS=1), the login redirect is skipped entirely so the
+// dashboard renders without a real token. This mirrors the backend bypass in
+// worker/lib/access.ts and is inert in production builds.
 export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
   const token = useAdminToken()
   const isLogin = pathname === '/admin/login'
+  const devBypass = isAdminDevBypass()
 
   // Gate the redirect on client mount. During hydration useSyncExternalStore still
   // returns the server snapshot (null), so without this an already-logged-in user
@@ -39,15 +45,16 @@ export function AdminShell({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
-    if (mounted && !isLogin && !token) router.replace('/admin/login')
-  }, [mounted, isLogin, token, router])
+    if (mounted && !isLogin && !token && !devBypass) router.replace('/admin/login')
+  }, [mounted, isLogin, token, devBypass, router])
 
   // Login page renders bare — no sidebar chrome, no token required.
   if (isLogin) return <>{children}</>
 
-  // No token yet → render nothing while the effect redirects (avoids a flash of
-  // the dashboard).
-  if (!token) return null
+  // No token and dev bypass is off → render nothing while the effect redirects
+  // (avoids a flash of the dashboard). Dev bypass skips this guard so the
+  // dashboard renders immediately without waiting for a real token.
+  if (!token && !devBypass) return null
 
   return (
     <TooltipProvider delay={200}>

@@ -65,6 +65,22 @@ export type ApiOptions = {
 // It can't live in a cookie: the frontend and API run on separate *.workers.dev
 // hosts and workers.dev is a public-suffix domain, so a shared cookie is blocked
 // by browsers. We store the token in localStorage and attach it as a header.
+// ---------------------------------------------------------------------------
+// Dev bypass flag — mirrors the backend two-condition guard in worker/lib/access.ts
+// ---------------------------------------------------------------------------
+// Active ONLY when:
+//   1. NODE_ENV === 'development' (never true in a production Next.js build), AND
+//   2. NEXT_PUBLIC_ADMIN_DEV_BYPASS === '1' (explicit opt-in via .env.local)
+//
+// Set `NEXT_PUBLIC_ADMIN_DEV_BYPASS=1` in `.env.local` to skip the admin login
+// screen during local development. The backend already accepts unauthenticated
+// admin requests under the same conditions (ENVIRONMENT=development +
+// ADMIN_DEV_BYPASS=1 in wrangler dev). This function is the single place that
+// evaluates the flag — import it wherever you need the bypass state.
+export function isAdminDevBypass(): boolean {
+  return process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_ADMIN_DEV_BYPASS === '1'
+}
+
 const ADMIN_TOKEN_KEY = 'shopflare_admin_token'
 
 export function getAdminToken(): string | null {
