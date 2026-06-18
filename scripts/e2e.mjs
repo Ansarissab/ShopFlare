@@ -175,6 +175,28 @@ spawnSync('pnpm', ['db:migrate:local'], { stdio: 'inherit' })
 console.log('[e2e] Seeding local D1…')
 spawnSync('pnpm', ['db:seed:local'], { stdio: 'inherit' })
 
+// Normalize feature flags to their defaults (both OFF) so e2e is deterministic
+// regardless of what a dev has toggled in their local admin. The seed is
+// INSERT OR IGNORE and never resets an existing key, so a manual `landingEnabled=true`
+// (or blogEnabled) persists in the local D1 and silently breaks the home specs — they
+// expect the catalog grid at `/`, but landing-on moves the catalog to `/shop`. Blog is
+// re-enabled per-suite by e2e/auth.setup.ts; landing is intentionally left OFF.
+console.log('[e2e] Normalizing feature flags (landing/blog OFF) for a deterministic baseline…')
+spawnSync(
+  'pnpm',
+  [
+    'exec',
+    'wrangler',
+    'd1',
+    'execute',
+    'shopflare-db0',
+    '--local',
+    '--command',
+    "UPDATE store_config SET value = 'false' WHERE key IN ('landingEnabled', 'blogEnabled');",
+  ],
+  { stdio: 'inherit' },
+)
+
 // Determine app port: re-validate any pre-set PW_PORT (a stale export may point
 // at an occupied port), then scan from appBase if needed.
 let port
