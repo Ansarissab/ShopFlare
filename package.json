@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "dev:all": "concurrently -k -n web,worker -c cyan,magenta \"pnpm dev\" \"pnpm worker:dev\"",
-    "dev:setup": "pnpm db:migrate:local && pnpm db:seed:local",
+    "dev:setup": "pnpm db:migrate:local && pnpm db:seed:local && pnpm seed:images",
     "dev:fresh": "pnpm dev:setup && pnpm dev:all",
     "build": "NEXT_TELEMETRY_DISABLED=1 next build --turbopack",
     "build:webpack": "NEXT_TELEMETRY_DISABLED=1 next build --webpack",
@@ -46,6 +46,8 @@
     "db:migrate:prod": "wrangler d1 migrations apply shopflare-db0 --remote --config wrangler.prod.toml",
     "db:seed:prod": "wrangler d1 execute shopflare-db0 --remote --config wrangler.prod.toml --file=worker/db/seed.sql",
     "db:seed:local": "wrangler d1 execute shopflare-db0 --local --file=worker/db/seed.sql",
+    "seed:images": "node scripts/seed-images.mjs",
+    "seed:images:prod": "node scripts/seed-images.mjs --remote",
     "db:seed": "wrangler d1 execute shopflare-db0 --remote --file=worker/db/seed.sql",
     "prepare": "git config core.hooksPath .githooks"
   },

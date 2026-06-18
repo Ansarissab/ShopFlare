@@ -21,6 +21,8 @@
  * See docs/adr/0021-image-optimization-cloudflare.md.
  */
 
+import { resolveWorkerUrl } from '@/lib/worker-url'
+
 interface LoaderParams {
   src: string
   width: number
@@ -48,10 +50,28 @@ const RESIZE_RULES: ResizeRule[] = [
   },
 ]
 
+/**
+ * Worker origin that serves R2 product images at /cdn/<key>. Resolved through the SAME dev/prod
+ * guard as the client (lib/api.ts) and CSP (next.config.ts) so the three can never diverge:
+ * dev → http://localhost:8787, prod → the configured NEXT_PUBLIC_WORKER_URL. Resolved per call
+ * (the helper is trivial and the env reads are build-time-inlined) so it stays test-stubbable.
+ */
+function workerOrigin(): string {
+  return resolveWorkerUrl({
+    NEXT_PUBLIC_WORKER_URL: process.env.NEXT_PUBLIC_WORKER_URL,
+    NODE_ENV: process.env.NODE_ENV,
+    NEXT_PUBLIC_ALLOW_REMOTE_API: process.env.NEXT_PUBLIC_ALLOW_REMOTE_API,
+  })
+}
+
 export default function imageLoader({ src, width }: LoaderParams): string {
+  // ENV-AGNOSTIC R2 path from the demo seed ('/cdn/demo/x.jpg') → prefix the worker origin so one
+  // seed.sql works in every environment. Admin uploads store an ABSOLUTE '<origin>/cdn/<key>' URL,
+  // which starts with http(s) (not '/cdn/') and falls through to passthrough unchanged.
+  if (src.startsWith('/cdn/')) return `${workerOrigin()}${src}`
   for (const rule of RESIZE_RULES) {
     if (rule.test(src)) return rule.toWidth(src, width)
   }
-  // No rule matched: R2 /cdn (sized at upload), data:, blob:, or any other URL — leave as-is.
+  // No rule matched: absolute R2 /cdn (sized at upload), data:, blob:, or any other URL — leave as-is.
   return src
 }

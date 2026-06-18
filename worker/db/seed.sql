@@ -63,7 +63,7 @@ INSERT OR IGNORE INTO variants (id, product_id, label, color_hex, sort_order) VA
   ('demo_var_tshirt_black', 'demo_tshirt', 'Black', '#111111', 0),
   ('demo_var_tshirt_white', 'demo_tshirt', 'White', '#f5f5f5', 1),
   ('demo_var_mug_white',    'demo_mug',    'White', '#ffffff', 0),
-  ('demo_var_cap_navy',     'demo_cap',    'Navy',  '#1e2a4a', 0);
+  ('demo_var_cap_navy',     'demo_cap',    'Stone', '#d9d4ca', 0);
 
 -- ─── Size options (priceCents = whole rupees for PKR; stock -1 = unlimited) ───
 INSERT OR IGNORE INTO size_options (id, variant_id, size, sku, price_cents, stock, active) VALUES
@@ -76,23 +76,27 @@ INSERT OR IGNORE INTO size_options (id, variant_id, size, sku, price_cents, stoc
   ('demo_sz_tsw_s', 'demo_var_tshirt_white', 'S',  'TSW-S', 2500, 12, 1),
   ('demo_sz_tsw_m', 'demo_var_tshirt_white', 'M',  'TSW-M', 2500, 18, 1),
   ('demo_sz_tsw_l', 'demo_var_tshirt_white', 'L',  'TSW-L', 2500, 10, 1),
+  ('demo_sz_tsw_xl','demo_var_tshirt_white', 'XL', 'TSW-XL',2700,  8, 1),
   -- Mug · White (unlimited stock)
   ('demo_sz_mug_os','demo_var_mug_white',    'One Size', 'MUG-OS', 1200, -1, 1),
   -- Cap · Navy
   ('demo_sz_cap_os','demo_var_cap_navy',     'One Size', 'CAP-OS', 1800, 30, 1);
 
--- ─── Product images (external placeholders; swap for real R2 uploads in admin) ─
--- DEMO ONLY: URLs use picsum WebP to keep PageSpeed green (~60-70% smaller than JPEG).
--- Production uses real R2 uploads served as AVIF/WebP via the ImageUpload pipeline.
+-- ─── Product images (real product photos, served from R2) ──────────────────────
+-- `url` is an ENV-AGNOSTIC relative '/cdn/<r2_key>' so one seed works in every env: the image
+-- loader (image-loader.ts) prefixes the worker origin at render time (dev → localhost:8787,
+-- prod → the configured worker). The bytes at each r2_key are small AVIF product photos
+-- (Unsplash, free license) uploaded to the R2 bucket via `pnpm seed:images` / wrangler r2 put.
+-- Admin uploads store an absolute '<origin>/cdn/<key>' instead — both render through the loader.
 INSERT OR IGNORE INTO product_images (id, variant_id, url, r2_key, sort_order) VALUES
-  ('demo_img_tsb', 'demo_var_tshirt_black', 'https://picsum.photos/seed/shopflare-tshirt-black/640/640.webp', 'demo/tshirt-black.jpg', 0),
-  ('demo_img_tsb_2', 'demo_var_tshirt_black', 'https://picsum.photos/seed/sf-tsb-front/640/640.webp', 'demo/tshirt-black-2.jpg', 1),
-  ('demo_img_tsb_3', 'demo_var_tshirt_black', 'https://picsum.photos/seed/sf-tsb-detail/640/640.webp', 'demo/tshirt-black-3.jpg', 2),
-  ('demo_img_tsw', 'demo_var_tshirt_white', 'https://picsum.photos/seed/shopflare-tshirt-white/640/640.webp', 'demo/tshirt-white.jpg', 0),
-  ('demo_img_tsw_2', 'demo_var_tshirt_white', 'https://picsum.photos/seed/sf-tsw-side/640/640.webp', 'demo/tshirt-white-2.jpg', 1),
-  ('demo_img_tsw_3', 'demo_var_tshirt_white', 'https://picsum.photos/seed/sf-tsw-back/640/640.webp', 'demo/tshirt-white-3.jpg', 2),
-  ('demo_img_mug', 'demo_var_mug_white',    'https://picsum.photos/seed/shopflare-mug/640/640.webp',          'demo/mug.jpg',          0),
-  ('demo_img_cap', 'demo_var_cap_navy',     'https://picsum.photos/seed/shopflare-cap/640/640.webp',          'demo/cap.jpg',          0);
+  ('demo_img_tsb', 'demo_var_tshirt_black', '/cdn/demo/tshirt-black.jpg', 'demo/tshirt-black.jpg', 0),
+  ('demo_img_tsb_2', 'demo_var_tshirt_black', '/cdn/demo/tshirt-black-2.jpg', 'demo/tshirt-black-2.jpg', 1),
+  ('demo_img_tsb_3', 'demo_var_tshirt_black', '/cdn/demo/tshirt-black-3.jpg', 'demo/tshirt-black-3.jpg', 2),
+  ('demo_img_tsw', 'demo_var_tshirt_white', '/cdn/demo/tshirt-white.jpg', 'demo/tshirt-white.jpg', 0),
+  ('demo_img_tsw_2', 'demo_var_tshirt_white', '/cdn/demo/tshirt-white-2.jpg', 'demo/tshirt-white-2.jpg', 1),
+  ('demo_img_tsw_3', 'demo_var_tshirt_white', '/cdn/demo/tshirt-white-3.jpg', 'demo/tshirt-white-3.jpg', 2),
+  ('demo_img_mug', 'demo_var_mug_white',    '/cdn/demo/mug.jpg', 'demo/mug.jpg',          0),
+  ('demo_img_cap', 'demo_var_cap_navy',     '/cdn/demo/cap.jpg', 'demo/cap.jpg',          0);
 
 -- ─── Coupons ─────────────────────────────────────────────────────────────────
 -- NOTE: these are D1-only demo coupons (no Stripe promotion-code link), so they
@@ -114,7 +118,7 @@ INSERT OR IGNORE INTO order_items
   (id, order_id, size_option_id, product_id, variant_id, quantity, price_cents, snapshot)
 VALUES
   ('demo_order_1_item_1', 'demo_order_1', 'demo_sz_tsb_m', 'demo_tshirt', 'demo_var_tshirt_black',
-   2, 2500, '{"productName":"Classic Cotton T-Shirt","variantLabel":"Black","size":"M","sku":"TSB-M","imageUrl":"https://picsum.photos/seed/shopflare-tshirt-black/640/640.webp"}');
+   2, 2500, '{"productName":"Classic Cotton T-Shirt","variantLabel":"Black","size":"M","sku":"TSB-M","imageUrl":"/cdn/demo/tshirt-black.jpg"}');
 
 -- ─── Sample approved review (verified purchase against the order above) ───────
 INSERT OR IGNORE INTO reviews (id, order_id, product_id, customer_name, rating, body, approved) VALUES
@@ -222,12 +226,12 @@ INSERT OR IGNORE INTO size_options (id, variant_id, size, sku, price_cents, stoc
   ('demo_sz_bag_bls_os', 'demo_var_bag_blush', 'One Size', 'BAG-BLS-OS', 4500,  8, 1);
 
 INSERT OR IGNORE INTO product_images (id, variant_id, url, r2_key, sort_order) VALUES
-  ('demo_img_bag_blk_1', 'demo_var_bag_black', 'https://picsum.photos/seed/sf-bag-blk-1/640/640.webp', 'demo/bag-black-1.jpg', 0),
-  ('demo_img_bag_blk_2', 'demo_var_bag_black', 'https://picsum.photos/seed/sf-bag-blk-2/640/640.webp', 'demo/bag-black-2.jpg', 1),
-  ('demo_img_bag_blk_3', 'demo_var_bag_black', 'https://picsum.photos/seed/sf-bag-blk-3/640/640.webp', 'demo/bag-black-3.jpg', 2),
-  ('demo_img_bag_bls_1', 'demo_var_bag_blush', 'https://picsum.photos/seed/sf-bag-bls-1/640/640.webp', 'demo/bag-blush-1.jpg', 0),
-  ('demo_img_bag_bls_2', 'demo_var_bag_blush', 'https://picsum.photos/seed/sf-bag-bls-2/640/640.webp', 'demo/bag-blush-2.jpg', 1),
-  ('demo_img_bag_bls_3', 'demo_var_bag_blush', 'https://picsum.photos/seed/sf-bag-bls-3/640/640.webp', 'demo/bag-blush-3.jpg', 2);
+  ('demo_img_bag_blk_1', 'demo_var_bag_black', '/cdn/demo/bag-black-1.jpg', 'demo/bag-black-1.jpg', 0),
+  ('demo_img_bag_blk_2', 'demo_var_bag_black', '/cdn/demo/bag-black-2.jpg', 'demo/bag-black-2.jpg', 1),
+  ('demo_img_bag_blk_3', 'demo_var_bag_black', '/cdn/demo/bag-black-3.jpg', 'demo/bag-black-3.jpg', 2),
+  ('demo_img_bag_bls_1', 'demo_var_bag_blush', '/cdn/demo/bag-blush-1.jpg', 'demo/bag-blush-1.jpg', 0),
+  ('demo_img_bag_bls_2', 'demo_var_bag_blush', '/cdn/demo/bag-blush-2.jpg', 'demo/bag-blush-2.jpg', 1),
+  ('demo_img_bag_bls_3', 'demo_var_bag_blush', '/cdn/demo/bag-blush-3.jpg', 'demo/bag-blush-3.jpg', 2);
 
 -- ─── Landing-page variants ───────────────────────────────────────────────────
 -- 3 selectable non-active variants (lp_default stays active).

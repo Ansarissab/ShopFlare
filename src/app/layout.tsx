@@ -208,16 +208,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             Rendered as individual React elements via inlineHeadTags() so they become
             live <head> children. Never inject config.customHeadTags raw. */}
         {inlineHeadTags(customHead)}
-        {/* Preconnect to worker/CDN origin (logo, product images, API) */}
+        {/* Preconnect to worker/CDN origin — all product images (/cdn AVIF), logo, and API
+            calls share this origin, so the LCP image's DNS/TLS handshake is set up early. */}
         {workerOrigin && <link rel="preconnect" href={workerOrigin} />}
         {workerOrigin && <link rel="dns-prefetch" href={workerOrigin} />}
-        {/* Demo seed images come from picsum.photos (external origin), so the LCP product
-            image pays a fresh DNS/TLS handshake before it can load. Preconnect to set that
-            up early. Real stores serve images from the worker /cdn (preconnected above), so
-            this is a demo-only hint — harmless once real images replace the seed. Mirrors the
-            demo-scoped rule in image-loader.ts. */}
-        <link rel="preconnect" href="https://picsum.photos" />
-        <link rel="dns-prefetch" href="https://picsum.photos" />
         {/* PWA viewport and Apple Web App meta */}
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="apple-mobile-web-app-capable" content="yes" />

@@ -1,7 +1,24 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import imageLoader from './image-loader'
 
+afterEach(() => vi.unstubAllEnvs())
+
 describe('imageLoader', () => {
+  it('resolves an env-agnostic /cdn/ seed path to the configured worker origin', () => {
+    vi.stubEnv('NEXT_PUBLIC_WORKER_URL', 'https://shopflare-worker.workers.dev')
+    expect(imageLoader({ src: '/cdn/demo/tshirt-black.jpg', width: 640 })).toBe(
+      'https://shopflare-worker.workers.dev/cdn/demo/tshirt-black.jpg',
+    )
+  })
+
+  it('resolves a /cdn/ path to localhost in development', () => {
+    vi.stubEnv('NODE_ENV', 'development')
+    vi.stubEnv('NEXT_PUBLIC_WORKER_URL', '')
+    expect(imageLoader({ src: '/cdn/demo/mug.jpg', width: 640 })).toBe(
+      'http://localhost:8787/cdn/demo/mug.jpg',
+    )
+  })
+
   it('rewrites a picsum URL to the requested display width (square)', () => {
     const src = 'https://picsum.photos/seed/abc/800/800'
     expect(imageLoader({ src, width: 256 })).toBe('https://picsum.photos/seed/abc/256/256')
