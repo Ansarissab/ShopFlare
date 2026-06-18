@@ -7,12 +7,10 @@ import {
   ExpirationPlugin,
   CacheableResponsePlugin,
 } from 'serwist'
-import type { PrecacheEntry, SerwistGlobalConfig } from 'serwist'
+import type { SerwistGlobalConfig } from 'serwist'
 
 declare global {
-  interface ServiceWorkerGlobalScope extends SerwistGlobalConfig {
-    __SW_MANIFEST: (PrecacheEntry | string)[] | undefined
-  }
+  interface ServiceWorkerGlobalScope extends SerwistGlobalConfig {}
 }
 
 declare const self: ServiceWorkerGlobalScope
@@ -97,7 +95,7 @@ const runtimeCaching = [
 // ─── Serwist instance ─────────────────────────────────────────────────────────
 
 const serwist = new Serwist({
-  precacheEntries: self.__SW_MANIFEST,
+  precacheEntries: [{ url: '/offline', revision: '1' }],
   skipWaiting: false,
   clientsClaim: true,
   navigationPreload: true,

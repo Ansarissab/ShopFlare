@@ -1,5 +1,4 @@
 import type { NextConfig } from 'next'
-import withSerwistInit from '@serwist/next'
 import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare'
 import { resolveWorkerUrl } from './src/lib/worker-url'
 
@@ -85,11 +84,4 @@ const nextConfig: NextConfig = {
   },
 }
 
-const withSerwist = withSerwistInit({
-  swSrc: 'src/sw.ts',
-  swDest: 'public/sw.js',
-  // SW disabled in dev to avoid cache-hell
-  disable: isDev,
-})
-
-export default withSerwist(nextConfig)
+export default nextConfig
