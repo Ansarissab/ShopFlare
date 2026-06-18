@@ -60,35 +60,62 @@ Legend: ⏱ effort · 🚀 needs a prod deploy · 🔑 needs secrets/config the 
 
 ## Tier 3 — Prod feature verification (needs secrets/config; some user-owned)
 
-- [ ] **6. Admin login in prod.** 🔑 Confirm `ADMIN_PASSWORD` + `ADMIN_SESSION_SECRET` are set
-  on the API worker (`.prod.vars` / `secrets:prod`); log in, confirm the Bearer-token flow
-  works cross-origin (web ↔ api on separate `*.workers.dev` hosts). ⏱ 15 min
-- [ ] **7. Turnstile on prod forms.** 🔑 You hit this earlier — confirm
-  `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (build) + the Turnstile secret (API worker) are the prod
-  pair; verify a public form (contact / admin login) passes the challenge in prod. ⏱ 15 min
-- [ ] **8. Order emails (Resend) in prod.** 🔑 Confirm the Resend key + from/BCC config; place
-  a test COD order, confirm the merchant + customer emails arrive. ⏱ 15 min
-- [ ] **9. Stripe checkout end-to-end in prod.** 🔑 Hardest. Live keys set, webhook endpoint
-  registered + signature verifying; run one real test-mode checkout → order created → webhook
-  marks it paid → email fires. ⏱ 30–45 min
+Curl-verified so far (no secrets needed):
 
-## Tier 4 — Bigger deliverables / your call
+- ✅ **Admin API fails closed.** `/api/admin/{config,orders,products}` all return **401**
+  without a token — `requireAdmin` works in prod.
+- ✅ **Admin login is Turnstile-gated + validates.** `POST /api/admin/login` with no
+  Turnstile token → **400 "Verification failed"** (the prod-only Turnstile enforcement is on).
+- ✅ **Turnstile site key configured** — `/api/public-config` returns a real `0x4AAAAAA…` key.
 
-- [ ] **10. README demo video.** 👤 Generate a Shop + Admin walkthrough on the seed data via
+Still needs you (secrets / browser):
+
+- [ ] **6. Admin login full flow.** 🔑 Confirm `ADMIN_PASSWORD` + `ADMIN_SESSION_SECRET` are set
+  on the API worker; log in via the browser (solves Turnstile) and confirm the Bearer-token
+  flow works cross-origin (web ↔ api on separate `*.workers.dev` hosts). ⏱ 10 min
+- [ ] **7. Turnstile end-to-end.** 🔑 Site key is present; do a real browser submit (admin login
+  or contact form) and confirm the challenge passes (i.e. the Turnstile *secret* on the API
+  worker matches the site key). ⏱ 10 min
+- [ ] **8. Order emails (Resend) in prod.** 🔑 Confirm the Resend key + from/BCC config; place a
+  test COD order, confirm the merchant + customer emails arrive. ⏱ 15 min
+- [ ] **9. Stripe checkout end-to-end in prod.** 🔑 **Blocked until the `pk_` key is set** (item
+  0 — currently `STRIPE_PUBLISHABLE_KEY` holds an `sk_test_` secret; the new guardrail will
+  blank it, so Stripe.js won't init). After setting `pk_test_…`: run one test-mode checkout →
+  order created → webhook (signature-verified) marks it paid → email fires. ⏱ 30–45 min
+
+## Tier 4 — Bigger deliverables
+
+- [ ] **10. Phase 33 — mobile PageSpeed 79 → 95+ (LCP is the sole blocker).** After-deploy
+  mobile report: Perf **79**, and the *only* red metric is **LCP 5.6s** (FCP 0.9s, TBT 10ms,
+  CLS 0, SI 2.0s; A11y/BP/SEO all 100). The LCP element is the hero **product image**. Concrete
+  opportunities from the Lighthouse PDF (`tmp/mobile-after-deploy-v1-…pdf`):
+  1. **Preload the LCP image** (`<link rel="preload" fetchpriority="high">`) — it has
+     `fetchpriority=high` but isn't preloaded, so it's discovered late. (~680ms)
+  2. **Eliminate render-blocking CSS** — two chunks, ~22 KiB, block initial render. (~680ms)
+  3. **Right-size images** — 800×800 served into a 389px box (~136 KiB). Demo uses external
+     `picsum.photos` (no responsive variants); real stores use the R2/AVIF pipeline — add
+     `sizes`/responsive widths + ensure the image loader requests display-sized images.
+  4. **Reduce unused JS** — ~25 KiB in one chunk.
+  See `docs/plans/proposed/phase-33-final-page-speed-gate.md`. **Note:** the demo's picsum
+  images cap the ceiling; verify the win on an R2-backed image too. ⏱ ~half-day
+- [ ] **11. README demo video.** 👤 Generate a Shop + Admin walkthrough on the seed data via
   heygen (`heygen-com/hyperframes`), host it externally (YouTube / CDN / GitHub Release — not
   committed), then swap `REPLACE_WITH_HOSTED_VIDEO_URL` at `README.md:29`. The `## Demo`
-  section + badge are already in place.
-  - **$0 fallback:** I can capture the walkthrough as a **Playwright GIF** against the seed
-    data instead — no external tool; host as a Release asset or gitignore it. ⏱ video: hours / GIF: ~1h
-- [ ] **11. Run the heavy gate.** 👤 `pnpm verify` (build + integration + smoke + e2e) once —
+  section + badge are in place. **$0 fallback:** capture it as a **Playwright GIF** instead. ⏱ video: hours / GIF: ~1h
+- [ ] **12. Run the heavy gate.** 👤 `pnpm verify` (build + integration + smoke + e2e) once —
   lots changed (fetch helper, schemas, worker routes, wrangler). User-run per project rule.
 
 ## Tier 5 — Deferred enhancements (not blocking launch)
 
-- [ ] **12. Re-enable ISR / data cache.** Wire an `incrementalCache` (R2 or KV) in
+- [ ] **13. Quiet test-suite output (CLI/TUI wrapper).** Wrap the test runner so a normal run
+  shows only **failures + the final summary** (not the full per-file firehose), with a
+  `--verbose` flag to show everything. Likely a custom Vitest reporter (cleanest — `onFinished`
+  prints a compact summary; only failed tasks expanded) over wrapping with a TUI package; gate
+  verbose behind an env/flag. Apply to `test`/`test:unit`/`verify` output. ⏱ ~2h
+- [ ] **14. Re-enable ISR / data cache.** Wire an `incrementalCache` (R2 or KV) in
   `open-next.config.ts`, then restore the `next: { revalidate }` option in `fetchFromWorker`
   (currently every store page is `no-store` dynamic — correct + safe, just not cached). ⏱ ~1h
-- [ ] **13. Strip demo coupons from the seed for real stores.** `WELCOME10` / `FLAT500` are
+- [ ] **15. Strip demo coupons from the seed for real stores.** `WELCOME10` / `FLAT500` are
   active with no expiry — fine for the demo, remove (or gate behind a demo flag) before a real
   merchant goes live. ⏱ 10 min
 
