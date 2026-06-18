@@ -2,6 +2,12 @@ import { defineWorkersConfig, readD1Migrations } from '@cloudflare/vitest-pool-w
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 
+// VITEST_VERBOSE=1 → full default reporter; unset → quiet (failures + summary only).
+const reporter =
+  process.env.VITEST_VERBOSE === '1'
+    ? 'default'
+    : path.join(path.dirname(fileURLToPath(import.meta.url)), 'scripts/reporters/quiet.ts')
+
 const root = path.dirname(fileURLToPath(import.meta.url))
 const r = (p: string) => path.join(root, p)
 
@@ -19,6 +25,7 @@ export default defineWorkersConfig(async () => {
       },
     },
     test: {
+      reporters: [reporter],
       name: 'integration',
       // Cap to 3 workers — each spins a miniflare/workerd runtime + ephemeral D1,
       // which is heavy; the 8-core default oversubscribes RAM. Matches the ≤3 rule.

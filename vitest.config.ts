@@ -4,8 +4,17 @@ import { fileURLToPath } from 'node:url'
 // Mirror the tsconfig path aliases so worker + src modules resolve in tests.
 const r = (p: string) => fileURLToPath(new URL(p, import.meta.url))
 
+// VITEST_VERBOSE=1 → full default reporter (every test line).
+// Unset / any other value → quiet reporter (failures + summary only).
+// Example: VITEST_VERBOSE=1 pnpm test:unit
+const reporter =
+  process.env.VITEST_VERBOSE === '1'
+    ? 'default'
+    : new URL('./scripts/reporters/quiet.ts', import.meta.url).pathname
+
 export default defineConfig({
   test: {
+    reporters: [reporter],
     // Cap parallelism to 3 workers (8-core box; 7 default workers thrash RAM/CPU
     // and OOM the run). Matches the project-wide "≤3 concurrent" rule.
     maxWorkers: 3,
