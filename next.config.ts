@@ -50,6 +50,14 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   turbopack: {},
+  // Inline the (already-minified) CSS as a <style> in the HTML instead of a render-blocking
+  // <link rel=stylesheet>, so styles arrive WITH the document and the browser paints without
+  // a second round-trip — the render-block/LCP lever PageSpeed flags (~560ms on mobile).
+  // NOTE: this is NOT experimental.optimizeCss (critters) below — there is no per-request
+  // critical-CSS extraction; it just embeds the built CSS string. Trade-off: ~22 KiB rides
+  // in each HTML response (no separate CSS cache), a good fit for our small atomic Tailwind
+  // bundle + first-load focus. https://nextjs.org/docs/app/api-reference/config/next-config-js/inlineCss
+  experimental: { inlineCss: true },
   // NOTE: we intentionally do NOT use experimental.optimizeCss. Next implements
   // it via require('critters') (deprecated); the maintained fork (beasties) would
   // have to be aliased to that name, and either way the inlining runs as an SSR
