@@ -4,6 +4,35 @@ Status: Proposed. Planned 2026-06-12 (grill-with-docs). Runs LAST — after all 
 Closes the loop opened in [Phase 27](../done/phase-27-page-speed-baseline.md). See
 [roadmap](./phases-27-33-roadmap.md).
 
+---
+
+## Implemented (2026-06-17) — LCP preload + image optimization
+
+Mobile LCP was the sole failing metric before this work (Perf 79, LCP 5.6 s on the
+deployed edge). The following fixes shipped and were verified on workerd:
+
+- **Single hi-priority preload:** `PRIORITY_CARD_COUNT = 1` (only the first product card
+  gets `priority`); featured strip sets `priority` only when `index === 0`. Prevents
+  competing high-priority requests that diluted the browser's fetch queue.
+- **Custom Next image loader** (`image-loader.ts`): removed `images.unoptimized: true`
+  and replaced it with a CF-compatible loader that generates responsive `srcset` — the
+  deployed bundle now serves correctly-sized variants instead of a single oversized
+  source image.
+- **`sizes` added to `StorySection`** so the browser can pick the right srcset entry for
+  the viewport.
+
+Verified on workerd: 1 preload tag in the SSR HTML; responsive `srcset` present on
+product images.
+
+Remaining ceiling before the AC-2 gate can pass: external `picsum.photos` demo images
+(no CDN, external origin latency) and ~680 ms render-blocking Tailwind CSS. Real score
+pending a post-deploy PageSpeed re-run with real R2 product images.
+
+See [`docs/adr/0021-image-optimization-cloudflare.md`](../adr/0021-image-optimization-cloudflare.md)
+for the loader design decision.
+
+---
+
 Baseline measurements, per-metric pass/fail, and the Phase-27 fix log are in
 [`docs/perf/phase-27-budget.md`](../../perf/phase-27-budget.md). Lighthouse snapshots are
 in [`lighthouse_results/v1/`](../../../lighthouse_results/v1/).

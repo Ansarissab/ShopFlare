@@ -33,10 +33,32 @@ in `.env.local`** (which overrides everything and would leak the prod URL into `
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | CF Turnstile site key (widget) |
 | `NEXT_PUBLIC_SITE_URL` | Public site URL — used by `sitemap.ts` |
 
+### Env-file matrix
+
+| File | Purpose | `NEXT_PUBLIC_*`? |
+| --- | --- | --- |
+| `.env.production` | Frontend build-time vars for prod (real `https://` origins) | **Yes — required here** |
+| `.env.local` | Local dev overrides (non-`NEXT_PUBLIC_*` only) | **No — never put `NEXT_PUBLIC_*` here** |
+| `.dev.vars` | API worker dev secrets (`wrangler dev`) | No (worker runtime only) |
+| `.prod.vars` | API worker prod secrets (pushed via `pnpm secrets:prod`) | No (worker runtime only) |
+
+Required `NEXT_PUBLIC_*` in `.env.production`: `NEXT_PUBLIC_WORKER_URL` (real `https://`
+API worker URL, **not** `localhost`), `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`.
+
 - **`.env.development`** (committed, localhost only) → used by `next dev`. Pins the app
   to the local worker. No secrets.
 - **`.env.production`** (gitignored; copy from `.env.production.example`) → baked by
   `pnpm web:deploy`. Holds the deployed URLs + real Turnstile site key.
+
+> **The `.env.local` override trap (critical):** Next.js loads `.env.local` in **every**
+> environment — including production builds — and it **overrides** `.env.production`. Any
+> `NEXT_PUBLIC_*` left in `.env.local` poisons the production build. For example, a stray
+> `NEXT_PUBLIC_WORKER_URL=http://localhost:8787` in `.env.local` bakes `localhost` into the
+> deployed bundle, making every SSR data fetch fail on the real edge. **Rule: keep
+> `NEXT_PUBLIC_*` out of `.env.local` entirely.** Put dev-only `NEXT_PUBLIC_*` overrides in
+> `.env.development.local` (loaded only by `next dev`). The `scripts/preflight-prod.mjs`
+> script enforces this automatically — `pnpm web:deploy` aborts if `.env.local` contains
+> any `NEXT_PUBLIC_*` key.
 
 > Changed a `NEXT_PUBLIC_*` value? **Rebuild + redeploy** (`pnpm web:deploy`) — it's
 > compiled in, not read at runtime.
@@ -68,9 +90,14 @@ Only `pnpm db:migrate` / `db:seed` (the non-`:local` ones) touch remote D1, by d
 > It's enforced only in production (`ENVIRONMENT=production`). One bypass covers every
 > public form + the admin login (DRY).
 
-> **Local admin bypass:** Both `ENVIRONMENT=development` *and* `ADMIN_DEV_BYPASS=1`
-> are required together — neither alone is sufficient. Never set in production
-> (the deploy forces `ENVIRONMENT=production`).
+> **Local admin bypass — both halves required.** A full local bypass needs two flags:
+> (1) **Backend** — `ENVIRONMENT=development` + `ADMIN_DEV_BYPASS=1` in `.dev.vars` → API
+> skips admin token verification. (2) **Frontend** — `NEXT_PUBLIC_ADMIN_DEV_BYPASS=1` in
+> `.env.local` → admin UI skips the login screen. Setting only the backend flag still
+> leaves the frontend login screen showing — the UI still demands a token even though the
+> API would accept any request. Both flags are inert in production builds
+> (`ENVIRONMENT=production` is forced; the frontend flag is a build-time `NEXT_PUBLIC_*`
+> and must not be present in `.env.production`). Never set in production.
 
 ## Generate keys
 ```bash

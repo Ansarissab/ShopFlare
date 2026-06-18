@@ -198,6 +198,58 @@ redeploy.
 
 ---
 
+## Production deploy
+
+Use `pnpm deploy:prod` for a **one-shot, fail-fast production deploy** — it runs the
+following three steps in order, stopping on first failure:
+
+1. `db:migrate:prod` — applies pending D1 migrations to the remote database
+2. `worker:deploy:prod` — deploys the API worker (`wrangler.prod.toml`)
+3. `web:deploy` — runs an env preflight (`scripts/preflight-prod.mjs`) then builds and
+   deploys the frontend via `@opennextjs/cloudflare`
+
+Script: `scripts/deploy-prod.mjs`.
+
+**Individual commands** (for re-running a single step or one-off tasks):
+
+```bash
+pnpm worker:deploy:prod   # API worker only
+pnpm web:deploy           # frontend only (runs env preflight first)
+pnpm secrets:prod         # push .prod.vars to the API worker
+pnpm db:migrate:prod      # migrations only
+pnpm db:seed:prod         # one-time demo seed (idempotent)
+```
+
+> **Secrets and seeding are NOT part of `deploy:prod`** — run them explicitly when
+> needed. Secrets only need to be pushed once (or when rotated). The demo seed is
+> safe to re-run but is only needed on first launch.
+
+### Required compatibility flag — `global_fetch_strictly_public`
+
+`wrangler.frontend.jsonc` must include `global_fetch_strictly_public` in
+`compatibility_flags`. The frontend SSR worker fetches the API worker on the same
+`*.workers.dev` zone. Without this flag, same-zone Worker→Worker fetches are blocked
+on the edge with **Cloudflare error 1042**, causing every SSR data page to render as
+not-found. Adding the flag allows the same-zone request through.
+
+See [`docs/adr/0020-ssr-data-fetch-on-workers.md`](../adr/0020-ssr-data-fetch-on-workers.md)
+for the full technical decision.
+
+### Verify on the real edge — not preview
+
+After deploying, curl or visit a data page on the live `*.workers.dev` host:
+
+```bash
+curl -s https://shopflare-web.YOUR.workers.dev/     # should return product HTML, not 404
+curl -s https://shopflare-web.YOUR.workers.dev/product/demo_tshirt
+```
+
+Local `opennextjs-cloudflare preview` does **not** reproduce the same-zone-fetch
+(error 1042) or missing Data Cache behaviors — "works in preview" is not sufficient
+to confirm production is healthy.
+
+---
+
 ## Uptime monitoring (optional, recommended)
 
 Set up an external monitor that polls `GET /healthz` on the API worker every 3 minutes.

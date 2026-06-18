@@ -8,10 +8,21 @@ Dashboard → Developers → API Keys
 - Publishable key: `pk_live_...` (safe to expose)
 - Secret key: `sk_live_...` (never commit)
 
-## 3. Add secret to CF Worker
+## 3. Add secrets to CF Worker
+
+> **`STRIPE_PUBLISHABLE_KEY` must be the publishable key (`pk_test_…` / `pk_live_…`),
+> never a secret key (`sk_…` / `rk_…`).** It is served to the browser via
+> `/api/public-config` and Stripe.js needs a `pk_` key to initialize — a secret key
+> both fails checkout AND constitutes a public secret leak. A server guard in
+> `worker/lib/public-config.ts` blanks any `sk_`/`rk_` value and logs an error, so a
+> misconfigured secret key is refused rather than served. Double-check the prefix before
+> setting it.
+
 ```bash
 npx wrangler secret put STRIPE_SECRET_KEY
 # paste sk_live_... when prompted
+npx wrangler secret put STRIPE_PUBLISHABLE_KEY
+# paste pk_live_... (publishable key only — never sk_ or rk_)
 ```
 
 ## 4. Set up webhook
