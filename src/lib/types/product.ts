@@ -75,10 +75,17 @@ export interface ProductCardProps {
   /** Inline styles forwarded to the root element (e.g. transition-delay for stagger) */
   style?: React.CSSProperties
   /**
-   * When true, the product image is loaded eagerly with fetchpriority=high (Next.js `priority`).
-   * Pass for the first few above-the-fold cards to improve LCP; leave false for the rest.
+   * When true, the product image is loaded eagerly with fetchpriority=high + a preload link
+   * (Next.js `priority`). Reserve for the top row — preloading too many competes for bandwidth.
    */
   priority?: boolean
+  /**
+   * When true (and not `priority`), the image loads eagerly (`loading="eager"`) WITHOUT a
+   * preload link. Pass for the rest of the above-the-fold cards so the mobile LCP image is
+   * never `loading="lazy"` (which defers it and tanks LCP) — without the preload contention
+   * of marking them all `priority`.
+   */
+  eager?: boolean
 }
 
 export interface ProductHeroProps {

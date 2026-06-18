@@ -21,6 +21,7 @@ export function ProductCard({
   className,
   style,
   priority = false,
+  eager = false,
 }: ProductCardProps) {
   const t = useT()
   const viewportRef = useViewportPrefetch<HTMLAnchorElement>(`/api/products/${product.id}`)
@@ -82,6 +83,9 @@ export function ProductCard({
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             priority={priority}
+            // priority → eager + preload + high (Next handles it). Otherwise mark the rest of
+            // the above-the-fold cards eager so the mobile LCP image is never lazy-deferred.
+            loading={priority ? undefined : eager ? 'eager' : 'lazy'}
             fetchPriority={priority ? 'high' : 'auto'}
             className={cn(
               'object-cover',

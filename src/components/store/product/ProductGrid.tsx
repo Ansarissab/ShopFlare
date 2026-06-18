@@ -2,10 +2,19 @@ import { ProductCard } from '@/components/store/product/ProductCard'
 import { staggerDelay } from '@/lib/styles'
 import type { ProductGridProps } from '@/lib/types/product'
 
-// Only the very first card is the LCP element on mobile — preloading more than one
-// hi-priority image saturates mobile 4G bandwidth and *delays* the LCP image itself.
-// One fetchpriority=high preload is the correct fix; the rest load lazily.
-const PRIORITY_CARD_COUNT = 1
+// Above-the-fold image loading, DERIVED from the grid layout below (not magic numbers) so it
+// stays correct if the columns change. The densest above-the-fold case is mobile (`grid-cols-2`),
+// which drives both counts:
+//   - PRELOAD = one mobile row → fetchpriority=high + preload link. The single most-likely LCP
+//     image gets the strongest hint; preloading more competes for bandwidth.
+//   - EAGER = the mobile rows visible before scrolling → `loading="eager"` (NO preload). This is
+//     the key mobile-LCP fix: the LCP element is often a card *below* the first one, and if it's
+//     `loading="lazy"` it loads late and tanks LCP. Eager-loading the above-the-fold rows fixes
+//     that without the preload contention of marking them all `priority`.
+const MOBILE_COLS = 2 // grid-cols-2 — the densest layout, so it bounds the above-the-fold count
+const ABOVE_FOLD_ROWS = 3 // ~rows of cards visible on a mobile viewport before scrolling
+const PRELOAD_COUNT = MOBILE_COLS // first row
+const EAGER_COUNT = MOBILE_COLS * ABOVE_FOLD_ROWS // above-the-fold
 
 export function ProductGrid({ items }: ProductGridProps) {
   return (
@@ -20,8 +29,9 @@ export function ProductGrid({ items }: ProductGridProps) {
           // pg-enter triggers CSS @starting-style entrance (gated on prefers-reduced-motion)
           className="pg-enter"
           style={{ transitionDelay: staggerDelay(index) }}
-          // Eagerly load the first above-the-fold cards to improve LCP.
-          priority={index < PRIORITY_CARD_COUNT}
+          // First row preloaded (LCP); the rest of the above-the-fold loads eagerly (not lazy).
+          priority={index < PRELOAD_COUNT}
+          eager={index < EAGER_COUNT}
         />
       ))}
     </div>
