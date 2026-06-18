@@ -38,6 +38,7 @@
     "worker:deploy": "wrangler deploy --var ENVIRONMENT:production",
     "worker:deploy:prod": "wrangler deploy --config wrangler.prod.toml --var ENVIRONMENT:production",
     "secrets:prod": "wrangler secret bulk .prod.vars --config wrangler.prod.toml",
+    "deploy:prod": "node scripts/deploy-prod.mjs",
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply shopflare-db0 --local",
     "db:migrate": "wrangler d1 migrations apply shopflare-db0 --remote",
