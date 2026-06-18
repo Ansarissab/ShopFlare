@@ -2,7 +2,6 @@
 // PUT /store (config editor) lives on /api/admin/config behind CF Access.
 
 import { Hono } from 'hono'
-import { sql } from 'drizzle-orm'
 import { createDb } from 'worker/db/index'
 import * as schema from 'worker/db/schema'
 import {
@@ -23,27 +22,23 @@ const app = new Hono<{ Bindings: Bindings }>()
 app.get('/store', async (c) => {
   const db = createDb(c.env.DB)
 
-  // ETag: count + max(updated_at) of store_config rows.
-  // bumpDataVersion() updates the dataVersion row's updated_at on every admin
-  // write, so this fingerprint changes whenever config OR any data changes.
-  const stats = await db
-    .select({
-      count: sql<number>`COUNT(*)`,
-      maxUpdatedAt: sql<string>`MAX(updated_at)`,
-    })
-    .from(schema.storeConfig)
-    .get()
+  // One D1 round-trip: fetch the rows and derive the ETag from them, instead of a
+  // separate COUNT(*)/MAX(updated_at) query followed by the rows query (this endpoint
+  // is fetched on every page, so halving its queries lowers SSR TTFB / LCP). The ETag is
+  // count + latest updated_at — identical fingerprint to the old SQL COUNT/MAX (SQL MAX on
+  // a datetime text column == lexical max). bumpDataVersion() bumps a row's updated_at on
+  // every admin write, so this still changes whenever config OR any data changes.
+  const rows = await db.select().from(schema.storeConfig).all()
 
-  const etag = etagFor({
-    count: stats?.count ?? 0,
-    maxUpdatedAt: stats?.maxUpdatedAt ?? '',
-  })
+  let maxUpdatedAt = ''
+  for (const row of rows) {
+    if (row.updatedAt && row.updatedAt > maxUpdatedAt) maxUpdatedAt = row.updatedAt
+  }
+  const etag = etagFor({ count: rows.length, maxUpdatedAt })
 
   if (c.req.header('If-None-Match') === etag) {
     return c.newResponse(null, 304)
   }
-
-  const rows = await db.select().from(schema.storeConfig).all()
 
   const kv: Record<string, string> = {}
   for (const row of rows) {
