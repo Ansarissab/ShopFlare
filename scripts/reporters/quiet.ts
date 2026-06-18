@@ -72,9 +72,43 @@ function fullTestName(testCase: TestCase): string {
 // ── Reporter implementation ───────────────────────────────────────────────────
 export default class QuietReporter implements Reporter {
   private startTime = 0
+  private filesDone = 0
+  private heartbeat: ReturnType<typeof setInterval> | null = null
+  private frame = 0
+  private readonly SPINNER = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
 
   onTestRunStart(): void {
     this.startTime = Date.now()
+    // Live progress so the run is visibly underway through EVERY phase — including the
+    // long collection phase (no files have finished yet) and when running concurrently
+    // with `build` in `pnpm verify`. Without it, a silent parallel run looks dead.
+    if (process.stdout.isTTY) {
+      // Rewriting spinner on one line:  ⠹ running tests… 12.3s · 42 files
+      this.heartbeat = setInterval(() => this.tick(), 120)
+    } else {
+      // Non-TTY (piped / CI logs): can't rewrite a line, so emit a periodic newline beat.
+      this.heartbeat = setInterval(() => {
+        process.stdout.write(
+          dim(
+            `  … running tests — ${fmt(Date.now() - this.startTime)}, ${this.filesDone} files done\n`,
+          ),
+        )
+      }, 4000)
+    }
+    this.heartbeat.unref?.()
+  }
+
+  private tick(): void {
+    const f = this.SPINNER[this.frame++ % this.SPINNER.length]
+    const n = this.filesDone
+    const line = `${cyan(f)} ${dim(`running tests… ${fmt(Date.now() - this.startTime)} · ${n} file${n === 1 ? '' : 's'}`)}`
+    // \r to column 0, write, then clear-to-EOL so shorter frames leave no tail.
+    process.stdout.write(`\r${line}\x1b[K`)
+  }
+
+  /** Count finished files to feed the live progress signal (failures printed at end). */
+  onTestModuleEnd(_testModule: TestModule): void {
+    this.filesDone++
   }
 
   /**
@@ -86,6 +120,13 @@ export default class QuietReporter implements Reporter {
    * determined, so we can't accidentally influence it.
    */
   onTestRunEnd(testModules: ReadonlyArray<TestModule>): void {
+    // Stop the live heartbeat and wipe the spinner line before printing results.
+    if (this.heartbeat) {
+      clearInterval(this.heartbeat)
+      this.heartbeat = null
+    }
+    if (process.stdout.isTTY) process.stdout.write('\r\x1b[K')
+
     const elapsed = Date.now() - this.startTime
 
     let filesPassed = 0
