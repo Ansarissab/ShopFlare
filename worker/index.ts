@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import type { Bindings } from './types'
 import { healthProbe } from './lib/health'
+import { buildPublicConfig } from './lib/public-config'
 
 const app = new Hono<{ Bindings: Bindings }>()
 
@@ -62,11 +63,7 @@ app.get('/cdn/*', async (c) => {
 
 // Public config (safe keys only — served to client)
 app.get('/api/public-config', async (c) => {
-  return c.json({
-    stripePublishableKey: c.env.STRIPE_PUBLISHABLE_KEY ?? '',
-    turnstileSiteKey: c.env.TURNSTILE_SITE_KEY ?? '',
-    vapidPublicKey: c.env.VAPID_PUBLIC_KEY ?? '',
-  })
+  return c.json(buildPublicConfig(c.env))
 })
 
 // Route stubs — implemented in later phases

@@ -30,14 +30,33 @@ Legend: ⏱ effort · 🚀 needs a prod deploy · 🔑 needs secrets/config the 
   `worker/lib/access.ts`. +5 unit tests. Activate with `NEXT_PUBLIC_ADMIN_DEV_BYPASS=1` in
   `.env.local` (plus the worker side: `ENVIRONMENT=development` + `ADMIN_DEV_BYPASS=1`).
 
-## Tier 2 — Quick prod checks (curl-only, no deploy)
+## 🔴 URGENT (found during the Tier-2 sweep) — Stripe secret key leaked publicly
 
-- [ ] **4. Images serve from R2 in prod.** Curl a real `/cdn/<r2Key>` (e.g. a seeded product
-  image key) on the API worker; confirm 200 + correct content-type, and that product pages
-  render their images. ⏱ 5 min
-- [ ] **5. Public surface sweep.** Curl the remaining public routes in prod (`/shop`, a policy
-  page, `/sitemap.xml`, `/blog/rss.xml`, both manifests, `/healthz`) — confirm none regressed
-  to not-found now that SSR data fetches work. ⏱ 10 min
+- [ ] **0. `STRIPE_PUBLISHABLE_KEY` in prod holds a SECRET key.** `/api/public-config` was
+  serving an `sk_test_…` value (a Stripe **secret** key) under `stripePublishableKey` —
+  publishable keys start with `pk_`. The code reads the right env var; the stored value is
+  wrong. **User actions (I can't — secrets + deploy):**
+  1. **Rotate** the exposed `sk_test_…` key in the Stripe dashboard (it's been public).
+  2. Set `STRIPE_PUBLISHABLE_KEY` to the actual **publishable** key (`pk_test_…` / `pk_live_…`)
+     in `.prod.vars`, then `pnpm secrets:prod`. (Stripe.js on the client needs `pk_` anyway —
+     checkout would fail with a secret key.)
+  3. Redeploy the API worker.
+  - ✅ Code guardrail added (commit below): `/api/public-config` now refuses to emit any
+    `sk_`/`rk_` value (blanks it + logs) so a **live** secret can never leak the same way.
+    Takes effect on the next API-worker deploy.
+
+## Tier 2 — Quick prod checks (curl-only, no deploy) — ✅ DONE
+
+- [x] **4. Images.** Demo products render images via the seed's external `picsum.photos` URLs,
+  so images display. `/cdn/<r2Key>` for demo keys 404s (the seed inserts keys but uploads no
+  real R2 objects) — that's expected; the `/cdn` path is exercised on real admin uploads, not
+  the demo seed.
+- [x] **5. Public surface sweep — green.** 200 on `/shop`, `/policy/privacy`, `/sitemap.xml`,
+  `/blog/rss.xml`, both manifests, `/robots.txt`, `/healthz`. Non-issues confirmed: `/cart` 404
+  is by design (cart is a drawer, no route), `/api/config` bare 404 is by design (app uses
+  `/api/config/store`). **One thing to eyeball in a browser:** `/shop`'s catalog is
+  client-rendered (`StorePageClient`), so it shows products via the client API — confirm it
+  populates visually (raw HTML has no SSR product links, which is normal here).
 
 ## Tier 3 — Prod feature verification (needs secrets/config; some user-owned)
 
