@@ -49,15 +49,17 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   turbopack: {},
-  // Inline the (already-minified) CSS as a <style> in the HTML instead of a render-blocking
-  // <link rel=stylesheet>, so styles arrive WITH the document and the browser paints without
-  // a second round-trip — the render-block/LCP lever PageSpeed flags (~560ms on mobile).
-  // NOTE: this is NOT experimental.optimizeCss (critters) below — there is no per-request
-  // critical-CSS extraction; it just embeds the built CSS string. Trade-off: ~22 KiB rides
-  // in each HTML response (no separate CSS cache), a good fit for our small atomic Tailwind
-  // bundle + first-load focus. https://nextjs.org/docs/app/api-reference/config/next-config-js/inlineCss
-  experimental: { inlineCss: true },
-  // NOTE: we intentionally do NOT use experimental.optimizeCss. Next implements
+  // NOTE: we deliberately do NOT enable experimental.inlineCss. It inlines the CSS as a
+  // <style> per request, which means Next embeds the ENTIRE Tailwind CSS bundle as a STRING
+  // inside the server handler (handler.mjs) so it can emit it at render time. On our small
+  // bundle that ballooned the frontend Worker to ~5 MiB gzip and broke the deploy — Cloudflare's
+  // FREE plan caps a Worker script at 3 MiB (paid: 10 MiB), and our $0 constraint means we stay
+  // free. With a normal <link rel=stylesheet> the CSS ships as a separate static ASSET (served
+  // via the ASSETS binding), which does NOT count against the 3 MiB Worker-script limit. It also
+  // never moved mobile LCP (the real lever was SSR TTFB / D1 latency, addressed separately), and
+  // the ~21 KiB stylesheet loads fast on the real edge — the multi-second render-block Lighthouse
+  // showed was Tailscale-tunnel latency, not the app. See docs/adr (CF edge gotchas).
+  // NOTE: we also intentionally do NOT use experimental.optimizeCss. Next implements
   // it via require('critters') (deprecated); the maintained fork (beasties) would
   // have to be aliased to that name, and either way the inlining runs as an SSR
   // post-process PER REQUEST — on CF Workers (workerd) that adds per-request CPU
