@@ -61,7 +61,15 @@ const nextConfig: NextConfig = {
   // page-speed testing over the tailnet). Wildcard covers every *.ts.net node.
   allowedDevOrigins: ['*.ts.net'],
   images: {
-    unoptimized: true,
+    // Custom loader: rewrites picsum demo URLs to the requested display width so
+    // Next's srcset serves right-sized images (~10× smaller on a ~195px grid slot).
+    // Non-picsum URLs (R2 /cdn/..., data:, blob:) are returned unchanged — they are
+    // pre-compressed at upload and Cloudflare's free plan has no server resizing.
+    // With a custom loader Next does NOT call its own optimizer endpoint (which
+    // OpenNext/workerd can't run) — the loader just returns direct URLs and Next
+    // builds a srcset from them via the `sizes` prop on each <Image>.
+    loader: 'custom',
+    loaderFile: './image-loader.ts',
     remotePatterns: [{ protocol: 'https', hostname: '**' }],
   },
   async headers() {

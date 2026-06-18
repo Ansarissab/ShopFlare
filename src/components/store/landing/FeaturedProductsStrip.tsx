@@ -22,7 +22,7 @@ export function FeaturedProductsStrip({ section, products, t }: FeaturedProducts
             // pg-enter triggers CSS @starting-style entrance (gated on prefers-reduced-motion)
             className="pg-enter"
             style={{ transitionDelay: staggerDelay(index) }}
-            priority={index < 4}
+            priority={index === 0}
           />
         ))}
       </div>

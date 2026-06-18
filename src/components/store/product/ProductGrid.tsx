@@ -2,9 +2,10 @@ import { ProductCard } from '@/components/store/product/ProductCard'
 import { staggerDelay } from '@/lib/styles'
 import type { ProductGridProps } from '@/lib/types/product'
 
-// Cards visible above the fold on the narrowest viewport (2-col grid).
-// Prioritising the first 4 covers the initial 2×2 block without over-fetching.
-const PRIORITY_CARD_COUNT = 4
+// Only the very first card is the LCP element on mobile — preloading more than one
+// hi-priority image saturates mobile 4G bandwidth and *delays* the LCP image itself.
+// One fetchpriority=high preload is the correct fix; the rest load lazily.
+const PRIORITY_CARD_COUNT = 1
 
 export function ProductGrid({ items }: ProductGridProps) {
   return (

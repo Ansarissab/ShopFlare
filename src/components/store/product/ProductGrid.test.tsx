@@ -125,29 +125,27 @@ describe('ProductGrid', () => {
     expect(container.querySelector('div.grid')).toBeTruthy()
   })
 
-  // LCP regression — the first 4 cards must be priority=true; the rest must be false.
-  // This ensures above-the-fold images get fetchpriority=high without penalising
-  // every card in a long list.
-  it('marks the first 4 cards as priority and the rest as non-priority', () => {
+  // LCP regression — only the FIRST card (index 0) is the LCP element on mobile.
+  // Emitting fetchpriority=high for multiple images saturates mobile 4G bandwidth
+  // and delays the true LCP paint. A single hi-priority preload is the correct fix;
+  // every subsequent card must be lazy-loaded (priority=false).
+  it('marks only the first card as priority; all others are non-priority', () => {
     const items = Array.from({ length: 6 }, (_, i) => makeProduct(`p${i}`, `Product ${i}`))
     render(<ProductGrid items={items} />)
     const cards = screen.getAllByTestId('product-card')
     expect(cards).toHaveLength(6)
-    // First 4 → priority
-    for (let i = 0; i < 4; i++) {
-      expect(cards[i].getAttribute('data-priority')).toBe('true')
-    }
-    // Remaining → non-priority (lazy)
-    for (let i = 4; i < 6; i++) {
+    // Only index 0 → priority (the LCP image)
+    expect(cards[0].getAttribute('data-priority')).toBe('true')
+    // All remaining → non-priority (lazy)
+    for (let i = 1; i < 6; i++) {
       expect(cards[i].getAttribute('data-priority')).toBe('false')
     }
   })
 
-  it('all cards are non-priority when the list has fewer than 4 items and index >= 4 is absent', () => {
+  it('single-item grid: the only card is priority (it is the LCP image)', () => {
     const items = [makeProduct('p0', 'Solo')]
     render(<ProductGrid items={items} />)
     const [card] = screen.getAllByTestId('product-card')
-    // Only one card — index 0 — must be priority
     expect(card.getAttribute('data-priority')).toBe('true')
   })
 })

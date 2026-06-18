@@ -19,7 +19,13 @@ export function StorySection({
       <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:gap-12">
         {imageUrl && (
           <div className="relative h-64 w-full overflow-hidden rounded-xl sm:h-80 sm:w-2/5 flex-shrink-0">
-            <Image src={imageUrl} alt={t.store.storyImageAlt} fill className="object-cover" />
+            <Image
+              src={imageUrl}
+              alt={t.store.storyImageAlt}
+              fill
+              sizes="(max-width: 640px) 100vw, 40vw"
+              className="object-cover"
+            />
           </div>
         )}
         <div className="flex-1">
