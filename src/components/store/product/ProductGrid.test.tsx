@@ -127,21 +127,24 @@ describe('ProductGrid', () => {
     expect(container.querySelector('div.grid')).toBeTruthy()
   })
 
-  // LCP regression — derived from the grid layout (MOBILE_COLS=2, ABOVE_FOLD_ROWS=3):
-  //  - first 2 cards (the mobile top row) are `priority` (fetchpriority=high + preload),
+  // LCP regression — derived from the grid layout (PRELOAD_COUNT=1, ABOVE_FOLD_ROWS=3):
+  //  - EXACTLY 1 card is `priority` (fetchpriority=high + preload) — the single most-likely LCP
+  //    image. Preloading more (even the rest of the top row) makes the hi-priority images starve
+  //    each other on mobile 4G and DELAYS the true LCP (proven: 4→1 took mobile PSI 79→84, f49a7c4).
   //  - first 6 cards (the mobile above-the-fold) are `eager` (loading=eager, no preload),
   //  - everything below is lazy (neither).
-  // This keeps the mobile LCP image (often a card BELOW the first) from being lazy-loaded,
-  // without the bandwidth contention of preloading every above-the-fold image.
-  it('preloads the top row and eager-loads the rest of the above-the-fold; lazy below', () => {
+  it('preloads exactly ONE image and eager-loads the rest of the above-the-fold; lazy below', () => {
     const items = Array.from({ length: 9 }, (_, i) => makeProduct(`p${i}`, `Product ${i}`))
     render(<ProductGrid items={items} />)
     const cards = screen.getAllByTestId('product-card')
     expect(cards).toHaveLength(9)
     cards.forEach((card, i) => {
-      expect(card.getAttribute('data-priority')).toBe(i < 2 ? 'true' : 'false')
+      expect(card.getAttribute('data-priority')).toBe(i < 1 ? 'true' : 'false')
       expect(card.getAttribute('data-eager')).toBe(i < 6 ? 'true' : 'false')
     })
+    // Guard the core invariant explicitly: only one preload, no matter the grid size.
+    const priorities = cards.filter((c) => c.getAttribute('data-priority') === 'true')
+    expect(priorities).toHaveLength(1)
   })
 
   it('single-item grid: the only card is priority (it is the LCP image)', () => {
