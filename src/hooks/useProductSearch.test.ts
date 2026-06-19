@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, afterEach, vi } from 'vitest'
-import { act, cleanup, renderHook } from '@testing-library/react'
+import { act, cleanup, renderHook, waitFor } from '@testing-library/react'
 import { useProductSearch } from './useProductSearch'
 import type { ProductWithVariants } from '@/lib/types/product'
 import type { CategoryNode } from '@/lib/types/category'
@@ -10,9 +10,6 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-// Minimal-but-valid ProductWithVariants builders. Only the fields the search /
-// pagination logic touches (product.name, variants.label, categoryIds) need to
-// be realistic; the rest are filled to satisfy the shape used at runtime.
 function makeProduct(id: string, name: string, categoryIds: string[] = []): ProductWithVariants {
   return {
     product: {
@@ -107,7 +104,21 @@ describe('useProductSearch', () => {
     expect(result.current.hasMore).toBe(false)
   })
 
-  it('filters by fuzzy query', () => {
+  it('empty query: no Fuse loaded, returns all items (pure category path)', () => {
+    const { result } = renderHook(() =>
+      useProductSearch({
+        items,
+        pageSize: 10,
+        query: '',
+        activeCategoryId: null,
+        allCategories: [],
+      }),
+    )
+    // All items shown, no fuzzy filtering
+    expect(result.current.totalFiltered).toBe(5)
+  })
+
+  it('filters by fuzzy query (lazy Fuse loaded on non-empty query)', async () => {
     const { result } = renderHook(() =>
       useProductSearch({
         items,
@@ -117,13 +128,17 @@ describe('useProductSearch', () => {
         allCategories: [],
       }),
     )
-    const names = result.current.visibleItems.map((i) => i.product.name)
-    expect(names).toContain('Red Shirt')
-    expect(names).toContain('Blue Shirt')
-    expect(names).not.toContain('Green Hat')
+
+    // Wait for the dynamic import of productFuse to resolve and fuse to build
+    await waitFor(() => {
+      const names = result.current.visibleItems.map((i) => i.product.name)
+      expect(names).toContain('Red Shirt')
+      expect(names).toContain('Blue Shirt')
+      expect(names).not.toContain('Green Hat')
+    })
   })
 
-  it('filters by active category (descendants)', () => {
+  it('filters by active category (descendants) without Fuse', () => {
     const tree: CategoryNode[] = [makeCategory('cat-hats')]
     const { result } = renderHook(() =>
       useProductSearch({
@@ -156,7 +171,7 @@ describe('useProductSearch', () => {
     expect(ids).toEqual(['p1', 'p2', 'p3', 'p4'])
   })
 
-  it('resets to page 1 when the query changes', () => {
+  it('resets to page 1 when the query changes', async () => {
     const { result, rerender } = renderHook((props) => useProductSearch(props), {
       initialProps: {
         items,
@@ -178,7 +193,15 @@ describe('useProductSearch', () => {
       activeCategoryId: null,
       allCategories: [],
     })
+
+    // After rerender, page resets immediately to 1 (the prevFilterKey check fires during render).
+    // Fuse may not be loaded yet → shows category-filtered slice (length 2 = page 1 of all items).
     expect(result.current.visibleItems).toHaveLength(2)
+
+    // Once Fuse loads, still page 1 — now narrowed to shirt results.
+    await waitFor(() => {
+      expect(result.current.visibleItems).toHaveLength(2) // Red Shirt + Blue Shirt, page 1
+    })
   })
 
   it('resets to page 1 when the active category changes', () => {
@@ -203,5 +226,24 @@ describe('useProductSearch', () => {
       allCategories: tree,
     })
     expect(result.current.visibleItems).toHaveLength(1)
+  })
+
+  it('fuzzy query + category: AND narrows results', async () => {
+    const tree: CategoryNode[] = [makeCategory('cat-tops'), makeCategory('cat-hats')]
+    const { result } = renderHook(() =>
+      useProductSearch({
+        items,
+        pageSize: 10,
+        query: 'shirt',
+        activeCategoryId: 'cat-tops',
+        allCategories: tree,
+      }),
+    )
+
+    // After Fuse loads: shirt matches p1+p2 (tops) — hats excluded by category filter.
+    await waitFor(() => {
+      const ids = result.current.visibleItems.map((i) => i.product.id).sort()
+      expect(ids).toEqual(['p1', 'p2'])
+    })
   })
 })

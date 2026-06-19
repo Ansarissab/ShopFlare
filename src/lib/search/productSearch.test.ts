@@ -6,6 +6,7 @@ import {
   buildProductFuse,
   buildSearchFuse,
   collectDescendantIds,
+  filterByCategory,
   filterProducts,
   filterSearchItems,
   paginate,
@@ -110,6 +111,29 @@ describe('filterProducts', () => {
   it('builds a Fuse index on demand when none is passed', () => {
     const result = filterProducts(items, { query: 'hat', descendantIds: null })
     expect(result.map((r) => r.product.name)).toEqual(['Red Hat'])
+  })
+})
+
+// ─── filterByCategory ─────────────────────────────────────────────────────────
+
+describe('filterByCategory', () => {
+  const items = [
+    mkProduct('Shirt', ['tops']),
+    mkProduct('Hat', ['hats']),
+    mkProduct('Pants', ['tops']),
+  ]
+
+  it('returns all items when descendantIds is null', () => {
+    expect(filterByCategory(items, null)).toHaveLength(3)
+  })
+
+  it('filters to only matching category ids', () => {
+    const result = filterByCategory(items, new Set(['tops']))
+    expect(result.map((r) => r.product.name).sort()).toEqual(['Pants', 'Shirt'])
+  })
+
+  it('returns empty array when no items match', () => {
+    expect(filterByCategory(items, new Set(['shoes']))).toHaveLength(0)
   })
 })
 

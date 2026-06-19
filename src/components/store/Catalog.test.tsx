@@ -4,7 +4,7 @@
 // grid immediately without ever showing ProductListingSkeleton.
 //
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, cleanup, fireEvent } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react'
 import { Catalog } from './Catalog'
 import type { ProductWithVariants } from '@/lib/types/product'
 
@@ -236,15 +236,15 @@ describe('Catalog — product states', () => {
 })
 
 describe('Catalog — search / clear handler', () => {
-  it('renders no-results-with-query state and clear button when query yields no matches', () => {
+  it('renders no-results-with-query state and clear button when query yields no matches', async () => {
     // Two products whose names won't match the query "zzznomatch".
     const products = [makeProduct('x1'), makeProduct('x2')]
     mockProductsState = { data: { products }, loading: false, error: null }
     // Seed an initial query via search params so Catalog initialises query state.
     mockSearchParamsMap['q'] = 'zzznomatch'
     render(<Catalog basePath="/" />)
-    // Should show the "no results" message and clear hint.
-    expect(screen.getByText(/zzznomatch/)).toBeTruthy()
+    // Wait for Fuse to lazy-load and produce 0 results (triggers no-results branch).
+    await waitFor(() => expect(screen.getByText(/zzznomatch/)).toBeTruthy())
     // The clear-search button must be present.
     const clearBtn = screen.getByRole('button')
     expect(clearBtn).toBeTruthy()
@@ -399,13 +399,13 @@ describe('Catalog — coming-soon empty state', () => {
 })
 
 describe('Catalog — search no-results heading', () => {
-  it('renders searchNoResultsHeading h2 when query has no matches', () => {
+  it('renders searchNoResultsHeading h2 when query has no matches', async () => {
     const products = [makeProduct('n1'), makeProduct('n2')]
     mockProductsState = { data: { products }, loading: false, error: null }
     mockSearchParamsMap['q'] = 'zzznomatch'
     render(<Catalog basePath="/" />)
-    // searchNoResultsHeading branch: h2 text
-    expect(screen.getByText(/no results found/i)).toBeTruthy()
+    // searchNoResultsHeading branch: wait for Fuse to load and yield 0 results.
+    await waitFor(() => expect(screen.getByText(/no results found/i)).toBeTruthy())
   })
 })
 
