@@ -7,7 +7,7 @@ import { test, expect } from '../fixtures'
 test.describe('admin products page', () => {
   test('loads and shows product list or empty state', async ({ page }) => {
     await page.goto('/admin/products')
-    await page.waitForLoadState('load')
+    await page.waitForLoadState('networkidle')
 
     // Page header with "Products" title must be present
     await expect(page.getByRole('heading', { name: /products/i })).toBeVisible()
@@ -24,7 +24,7 @@ test.describe('admin products page', () => {
 
   test('new product page renders form', async ({ page }) => {
     await page.goto('/admin/products/new')
-    await page.waitForLoadState('load')
+    await page.waitForLoadState('networkidle')
 
     // Basic Info section heading
     await expect(page.getByText('Basic Info')).toBeVisible()
@@ -41,7 +41,7 @@ test.describe('admin products page', () => {
 test.describe('admin categories page', () => {
   test('loads and shows category tree or empty state', async ({ page }) => {
     await page.goto('/admin/categories')
-    await page.waitForLoadState('load')
+    await page.waitForLoadState('networkidle')
 
     // Page header
     await expect(page.getByRole('heading', { name: /categories/i })).toBeVisible()
@@ -56,7 +56,7 @@ test.describe('admin categories page', () => {
 
   test('new category page renders form', async ({ page }) => {
     await page.goto('/admin/categories/new')
-    await page.waitForLoadState('load')
+    await page.waitForLoadState('networkidle')
 
     // Category name input from CategoryForm
     await expect(
@@ -70,7 +70,7 @@ test.describe('admin categories page', () => {
 test.describe('admin coupons page', () => {
   test('loads and shows coupons table or empty state', async ({ page }) => {
     await page.goto('/admin/coupons')
-    await page.waitForLoadState('load')
+    await page.waitForLoadState('networkidle')
 
     // Page header
     await expect(page.getByRole('heading', { name: /coupons/i })).toBeVisible()
@@ -84,7 +84,7 @@ test.describe('admin coupons page', () => {
 
   test('clicking Add Coupon reveals inline form', async ({ page }) => {
     await page.goto('/admin/coupons')
-    await page.waitForLoadState('load')
+    await page.waitForLoadState('networkidle')
 
     await page.getByRole('button', { name: /add coupon/i }).click()
 
@@ -100,7 +100,7 @@ test.describe('admin coupons page', () => {
 test.describe('admin settings page', () => {
   test('loads and shows settings form sections', async ({ page }) => {
     await page.goto('/admin/settings')
-    await page.waitForLoadState('load')
+    await page.waitForLoadState('networkidle')
 
     // Page header (h1 — be specific; "Tax Settings" etc. are section sub-headings)
     await expect(page.getByRole('heading', { name: /store settings/i })).toBeVisible()
@@ -122,7 +122,7 @@ test.describe('admin settings page', () => {
 
   test('primary color input is present and editable', async ({ page }) => {
     await page.goto('/admin/settings')
-    await page.waitForLoadState('load')
+    await page.waitForLoadState('networkidle')
 
     const colorInput = page.locator('#a-primary')
     await expect(colorInput).toBeVisible()

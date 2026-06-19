@@ -47,7 +47,7 @@ test.describe('product detail page', () => {
     }
 
     await page.goto(href)
-    await page.waitForLoadState('load')
+    await page.waitForLoadState('networkidle')
 
     // Product name rendered as h1
     const heading = page.getByRole('heading', { level: 1 })
@@ -63,7 +63,7 @@ test.describe('product detail page', () => {
     }
 
     await page.goto(href)
-    await page.waitForLoadState('load')
+    await page.waitForLoadState('networkidle')
 
     // SizePicker renders a label "Select Size"
     const sizeLabel = page.getByText('Select Size')
@@ -79,7 +79,7 @@ test.describe('product detail page', () => {
     }
 
     await page.goto(href)
-    await page.waitForLoadState('load')
+    await page.waitForLoadState('networkidle')
 
     // VariantSelector renders "Select Color" label
     const variantLabel = page.getByText('Select Color')
@@ -99,7 +99,7 @@ test.describe('product detail page', () => {
     }
 
     await page.goto(href)
-    await page.waitForLoadState('load')
+    await page.waitForLoadState('networkidle')
 
     const addToCartBtn = page.getByRole('button', { name: /add to cart/i })
     await expect(addToCartBtn).toBeVisible({ timeout: 10_000 })

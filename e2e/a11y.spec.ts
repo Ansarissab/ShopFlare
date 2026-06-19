@@ -28,7 +28,7 @@ const ROUTES = [
 for (const route of ROUTES) {
   test('a11y: ' + route, async ({ page, checkA11y }) => {
     await page.goto(route)
-    await page.waitForLoadState('load')
+    await page.waitForLoadState('networkidle')
     await checkA11y(page)
   })
 }

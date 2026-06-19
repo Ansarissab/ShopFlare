@@ -10,7 +10,7 @@ test.describe('mobile viewport (375×812)', () => {
 
   test('page loads and nav is accessible', async ({ page }) => {
     await page.goto('/')
-    await page.waitForLoadState('load')
+    await page.waitForLoadState('networkidle')
 
     // AppTabBar renders <nav aria-label="Main navigation"> only in standalone mode.
     // In a regular browser tab it is hidden. Confirm the page itself renders.
@@ -37,7 +37,7 @@ test.describe('mobile viewport (375×812)', () => {
     })
 
     await page.goto('/')
-    await page.waitForLoadState('load')
+    await page.waitForLoadState('networkidle')
 
     // AppTabBar: <nav aria-label="Main navigation">
     const tabBar = page.getByRole('navigation', { name: 'Main navigation' })
@@ -62,7 +62,7 @@ test.describe('mobile viewport (375×812)', () => {
     })
 
     await page.goto('/')
-    await page.waitForLoadState('load')
+    await page.waitForLoadState('networkidle')
 
     const tabBar = page.getByRole('navigation', { name: 'Main navigation' })
     await expect(tabBar).toBeVisible({ timeout: 8_000 })
@@ -79,7 +79,7 @@ test.describe('desktop viewport (1280×800)', () => {
 
   test('page loads at desktop width', async ({ page }) => {
     await page.goto('/')
-    await page.waitForLoadState('load')
+    await page.waitForLoadState('networkidle')
 
     const body = page.locator('body')
     await expect(body).toBeVisible()
@@ -103,7 +103,7 @@ test.describe('desktop viewport (1280×800)', () => {
     })
 
     await page.goto('/')
-    await page.waitForLoadState('load')
+    await page.waitForLoadState('networkidle')
 
     // AppHeader renders: <header data-app-header>
     const header = page.locator('[data-app-header]')
@@ -113,7 +113,7 @@ test.describe('desktop viewport (1280×800)', () => {
   test('AppTabBar not visible in normal browser mode at desktop width', async ({ page }) => {
     // Without standalone override, AppTabBar returns null
     await page.goto('/')
-    await page.waitForLoadState('load')
+    await page.waitForLoadState('networkidle')
 
     const tabBar = page.locator('[data-tab-bar]')
     await expect(tabBar).not.toBeVisible({ timeout: 3_000 })

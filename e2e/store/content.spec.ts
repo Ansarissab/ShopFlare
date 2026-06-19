@@ -7,7 +7,7 @@ import { test, expect } from '../fixtures'
 test.describe('status page', () => {
   test('loads and shows service health indicators', async ({ page }) => {
     await page.goto('/status')
-    await page.waitForLoadState('load')
+    await page.waitForLoadState('networkidle')
 
     // Header (en.status.title renders as the page heading).
     await expect(page.getByRole('heading').first()).toBeVisible({ timeout: 15_000 })
@@ -23,7 +23,7 @@ test.describe('store blog', () => {
   // Blog is enabled for e2e in auth.setup.ts (it's flag-gated, off in the seed).
   test('blog index loads with its heading', async ({ page }) => {
     await page.goto('/blog')
-    await page.waitForLoadState('load')
+    await page.waitForLoadState('networkidle')
     // h1 "Blog" (en.blog.pageTitle) — list of posts or the empty "no posts" state.
     await expect(page.getByRole('heading', { name: /blog/i }).first()).toBeVisible({
       timeout: 15_000,

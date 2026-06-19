@@ -8,7 +8,7 @@ import { test, expect } from '../fixtures'
 test.describe('store keyboard shortcuts', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/')
-    await page.waitForLoadState('load')
+    await page.waitForLoadState('networkidle')
   })
 
   test('@smoke / opens global search dialog, Escape closes it', async ({ page }) => {
