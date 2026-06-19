@@ -39,17 +39,24 @@ const _cache = new Map<string, unknown>()
 // Only cache read-only public content — never transactional/order paths.
 const shouldCache = (path: string) => !path.startsWith('/api/orders')
 
+// _cache is a client-only SPA-nav optimization — never read during SSR. A warm
+// worker isolate keeps it populated across requests, so reading it server-side
+// diverges from the client's fresh (empty) cache and triggers a hydration
+// mismatch that blanks the grid (white flash → LCP reset). Exported for testing.
+export const canReadCache = (path: string): boolean =>
+  shouldCache(path) && typeof window !== 'undefined' && _cache.has(path)
+
 export function useApiResource<T>(
   path: string | null,
   opts?: UseApiResourceOptions<T>,
 ): ApiResourceState<T> {
   const [data, setData] = useState<T | null>(() => {
-    if (path && shouldCache(path) && _cache.has(path)) return _cache.get(path) as T
+    if (path && canReadCache(path)) return _cache.get(path) as T
     if (opts?.fallbackData !== undefined) return opts.fallbackData
     return null
   })
   const [loading, setLoading] = useState(() => {
-    if (path && shouldCache(path) && _cache.has(path)) return false
+    if (path && canReadCache(path)) return false
     if (opts?.fallbackData !== undefined) return false
     // No cache, no fallback: start loading (or stay loading if path is null).
     return true

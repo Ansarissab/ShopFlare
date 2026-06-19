@@ -13,7 +13,7 @@ vi.mock('@/lib/api', async () => {
 })
 
 import { apiGet, ApiError } from '@/lib/api'
-import { useApiResource, DATA_UPDATED_CHANNEL } from './useApiResource'
+import { useApiResource, canReadCache, DATA_UPDATED_CHANNEL } from './useApiResource'
 
 const mockApiGet = vi.mocked(apiGet)
 
@@ -286,6 +286,37 @@ describe('useApiResource', () => {
       )
       expect(second.result.current.data).toEqual(cached)
       expect(second.result.current.loading).toBe(false)
+    })
+  })
+
+  // LCP regression — _cache must be ignored during SSR or its HTML diverges from
+  // the client's fresh cache and blanks the grid (white flash → LCP reset).
+  describe('canReadCache (SSR hydration guard)', () => {
+    it('returns true for a cached read-only path while window is defined (client)', async () => {
+      const path = uniquePath()
+      mockApiGet.mockResolvedValue({ ok: true })
+      const { result } = renderHook(() => useApiResource(path))
+      await waitFor(() => expect(result.current.loading).toBe(false))
+      expect(canReadCache(path)).toBe(true)
+    })
+
+    it('returns false when window is undefined even if the path is cached (SSR)', async () => {
+      const path = uniquePath()
+      mockApiGet.mockResolvedValue({ ok: true })
+      const { result } = renderHook(() => useApiResource(path))
+      await waitFor(() => expect(result.current.loading).toBe(false))
+      expect(canReadCache(path)).toBe(true)
+
+      vi.stubGlobal('window', undefined)
+      try {
+        expect(canReadCache(path)).toBe(false)
+      } finally {
+        vi.unstubAllGlobals()
+      }
+    })
+
+    it('returns false for order paths (never cached) regardless of window', () => {
+      expect(canReadCache(`/api/orders/${++_n}`)).toBe(false)
     })
   })
 })
