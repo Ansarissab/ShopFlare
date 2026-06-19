@@ -120,7 +120,11 @@ function MessageContent({ msg }: { msg: AnnouncementMessage }) {
   // Internal paths: use next/link; external URLs: plain anchor
   if (safeLink.startsWith('/')) {
     return (
-      <Link href={safeLink} className="underline underline-offset-2 hover:opacity-80">
+      <Link
+        href={safeLink}
+        prefetch={false}
+        className="underline underline-offset-2 hover:opacity-80"
+      >
         {inner}
       </Link>
     )

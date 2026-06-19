@@ -36,6 +36,7 @@ export function CategoryNav({ categories }: CategoryNavProps) {
               <DropdownMenuSubTrigger>
                 <Link
                   href={`/category/${cat.slug}`}
+                  prefetch={false}
                   className="flex-1"
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -45,13 +46,17 @@ export function CategoryNav({ categories }: CategoryNavProps) {
               <DropdownMenuSubContent>
                 {/* Parent link at top of sub-menu */}
                 <DropdownMenuItem>
-                  <Link href={`/category/${cat.slug}`} className="w-full font-medium">
+                  <Link
+                    href={`/category/${cat.slug}`}
+                    prefetch={false}
+                    className="w-full font-medium"
+                  >
                     {cat.name}
                   </Link>
                 </DropdownMenuItem>
                 {cat.children.map((child) => (
                   <DropdownMenuItem key={child.id}>
-                    <Link href={`/category/${child.slug}`} className="w-full ps-2">
+                    <Link href={`/category/${child.slug}`} prefetch={false} className="w-full ps-2">
                       {child.name}
                     </Link>
                   </DropdownMenuItem>
@@ -60,7 +65,7 @@ export function CategoryNav({ categories }: CategoryNavProps) {
             </DropdownMenuSub>
           ) : (
             <DropdownMenuItem key={cat.id}>
-              <Link href={`/category/${cat.slug}`} className="w-full">
+              <Link href={`/category/${cat.slug}`} prefetch={false} className="w-full">
                 {cat.name}
               </Link>
             </DropdownMenuItem>

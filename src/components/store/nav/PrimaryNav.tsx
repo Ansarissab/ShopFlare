@@ -21,6 +21,7 @@ export function PrimaryNav({ links }: PrimaryNavProps) {
         <Link
           key={link.href}
           href={link.href}
+          prefetch={false}
           className="text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           {t.store[link.labelKey]}

@@ -66,6 +66,7 @@ export function ProductCard({
     <Link
       ref={viewportRef}
       href={`/product/${product.id}`}
+      prefetch={false}
       className={cn(
         'group block outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-[3px]',
         className,

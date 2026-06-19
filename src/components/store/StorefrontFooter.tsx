@@ -24,6 +24,7 @@ export function StorefrontFooter() {
           <nav className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
             <Link
               href="/policy/shipping"
+              prefetch={false}
               className="hover:text-foreground transition-colors px-2 py-1"
             >
               {t.policies.shipping}
@@ -31,6 +32,7 @@ export function StorefrontFooter() {
             <Separator orientation="vertical" className="h-4" />
             <Link
               href="/policy/returns"
+              prefetch={false}
               className="hover:text-foreground transition-colors px-2 py-1"
             >
               {t.policies.returns}
@@ -38,6 +40,7 @@ export function StorefrontFooter() {
             <Separator orientation="vertical" className="h-4" />
             <Link
               href="/policy/privacy"
+              prefetch={false}
               className="hover:text-foreground transition-colors px-2 py-1"
             >
               {t.policies.privacy}
@@ -45,6 +48,7 @@ export function StorefrontFooter() {
             <Separator orientation="vertical" className="h-4" />
             <Link
               href="/policy/terms"
+              prefetch={false}
               className="hover:text-foreground transition-colors px-2 py-1"
             >
               {t.policies.terms}

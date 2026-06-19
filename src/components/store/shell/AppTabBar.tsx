@@ -95,7 +95,7 @@ export function AppTabBar() {
             <button
               key={tab.key}
               onClick={tab.onClick}
-              className="flex flex-1 items-center justify-center py-2 min-h-[48px]"
+              className="flex flex-1 items-center justify-center py-2 min-h-12"
               aria-label={tab.label}
             >
               {inner}
@@ -107,7 +107,8 @@ export function AppTabBar() {
           <Link
             key={tab.key}
             href={tab.href!}
-            className="flex flex-1 items-center justify-center py-2 min-h-[48px]"
+            prefetch={false}
+            className="flex flex-1 items-center justify-center py-2 min-h-12"
             onClick={() => vibrate('light')}
             aria-label={tab.label}
           >
