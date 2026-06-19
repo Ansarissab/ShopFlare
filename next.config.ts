@@ -1,6 +1,7 @@
 import type { NextConfig } from 'next'
 import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare'
 import { resolveWorkerUrl } from './src/lib/worker-url'
+import variantConfig from './image-variants.config.json'
 
 // Lets `next dev` see Cloudflare bindings/env via the OpenNext adapter.
 // Safe no-op in production builds.
@@ -79,6 +80,9 @@ const nextConfig: NextConfig = {
     // builds a srcset from them via the `sizes` prop on each <Image>.
     loader: 'custom',
     loaderFile: './image-loader.ts',
+    deviceSizes: [...new Set([...variantConfig.variantWidths, 640, 828, 1080, 1920])].sort(
+      (a, b) => a - b,
+    ),
     remotePatterns: [{ protocol: 'https', hostname: '**' }],
   },
   async headers() {

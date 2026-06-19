@@ -22,6 +22,7 @@
  */
 
 import { resolveWorkerUrl } from '@/lib/worker-url'
+import { r2VariantKey } from '@/lib/images'
 
 interface LoaderParams {
   src: string
@@ -65,10 +66,8 @@ function workerOrigin(): string {
 }
 
 export default function imageLoader({ src, width }: LoaderParams): string {
-  // ENV-AGNOSTIC R2 path from the demo seed ('/cdn/demo/x.jpg') → prefix the worker origin so one
-  // seed.sql works in every environment. Admin uploads store an ABSOLUTE '<origin>/cdn/<key>' URL,
-  // which starts with http(s) (not '/cdn/') and falls through to passthrough unchanged.
-  if (src.startsWith('/cdn/')) return `${workerOrigin()}${src}`
+  // /cdn/ seed path → pick the right R2 variant, then prefix the worker origin.
+  if (src.startsWith('/cdn/')) return `${workerOrigin()}${r2VariantKey(src, width)}`
   for (const rule of RESIZE_RULES) {
     if (rule.test(src)) return rule.toWidth(src, width)
   }

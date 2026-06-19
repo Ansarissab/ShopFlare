@@ -1,4 +1,4 @@
-// Upload the committed demo product photos to the R2 bucket the Worker serves at /cdn/<key>.
+// Upload demo product photos to the R2 bucket the Worker serves at /cdn/<key>.
 //
 // The bytes live in seed-assets/products/<name>.avif (small AVIF, Unsplash free license). They map
 // to the r2_key values in worker/db/seed.sql as demo/<name>.jpg — the .jpg name is historical; the
@@ -10,12 +10,17 @@
 // Pairs with `pnpm db:seed` (the SQL rows). Keep both in sync: one row per file.
 
 import { readdirSync } from 'node:fs'
-import { execFileSync } from 'node:child_process'
+import { execFile } from 'node:child_process'
+import { promisify } from 'node:util'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 
+const execFileAsync = promisify(execFile)
+
 const BUCKET = 'shopflare-images0'
+const CONCURRENCY = 8
 const remote = process.argv.includes('--remote')
+const reset = process.argv.includes('--reset')
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const dir = join(root, 'seed-assets', 'products')
 
@@ -25,25 +30,59 @@ if (files.length === 0) {
   process.exit(1)
 }
 
-for (const file of files) {
-  // seed.sql r2_key uses the .jpg name (content is AVIF; see header note).
-  const key = `demo/${file.replace(/\.avif$/, '.jpg')}`
-  execFileSync(
-    'npx',
-    [
-      'wrangler',
-      'r2',
-      'object',
-      'put',
-      `${BUCKET}/${key}`,
-      remote ? '--remote' : '--local',
-      '--file',
-      join(dir, file),
-      '--content-type',
-      'image/avif',
-    ],
-    { stdio: 'inherit' },
-  )
+/** Run tasks with at most `limit` concurrent promises. */
+async function pool(items, limit, fn) {
+  const queue = [...items]
+  const workers = Array.from({ length: Math.min(limit, queue.length) }, async () => {
+    while (queue.length > 0) {
+      const item = queue.shift()
+      await fn(item)
+    }
+  })
+  await Promise.all(workers)
 }
 
-console.log(`\nUploaded ${files.length} demo images to ${BUCKET} (${remote ? 'remote' : 'local'}).`)
+const start = Date.now()
+
+if (reset) {
+  console.log(`Deleting existing demo objects from ${BUCKET} (${remote ? 'remote' : 'local'})…`)
+  await pool(files, CONCURRENCY, async (file) => {
+    const key = `demo/${file.replace(/\.avif$/, '.jpg')}`
+    try {
+      await execFileAsync('npx', [
+        'wrangler',
+        'r2',
+        'object',
+        'delete',
+        `${BUCKET}/${key}`,
+        remote ? '--remote' : '--local',
+      ])
+      console.log(`  deleted: ${key}`)
+    } catch {
+      console.log(`  skipped (not found): ${key}`)
+    }
+  })
+}
+
+console.log(`Uploading ${files.length} files to ${BUCKET} (${remote ? 'remote' : 'local'})…`)
+await pool(files, CONCURRENCY, async (file) => {
+  const key = `demo/${file.replace(/\.avif$/, '.jpg')}`
+  await execFileAsync('npx', [
+    'wrangler',
+    'r2',
+    'object',
+    'put',
+    `${BUCKET}/${key}`,
+    remote ? '--remote' : '--local',
+    '--file',
+    join(dir, file),
+    '--content-type',
+    'image/avif',
+  ])
+  console.log(`  ok: ${key}`)
+})
+
+const elapsed = ((Date.now() - start) / 1000).toFixed(1)
+console.log(
+  `\nUploaded ${files.length} demo images to ${BUCKET} (${remote ? 'remote' : 'local'}) in ${elapsed}s.`,
+)
