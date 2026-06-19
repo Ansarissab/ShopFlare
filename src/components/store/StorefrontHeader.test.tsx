@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent, cleanup, act } from '@testing-library/react'
+import { render, screen, fireEvent, cleanup } from '@testing-library/react'
 import { StorefrontHeader } from './StorefrontHeader'
 import { en } from '@/lib/i18n/en'
 
@@ -215,22 +215,14 @@ describe('StorefrontHeader', () => {
     expect(call.links.some((l) => l.labelKey === 'trackOrder')).toBe(true)
   })
 
-  it('passes zero shipping props to CartSheet when no config', async () => {
+  it('passes zero shipping props to CartSheet when no config', () => {
     render(<StorefrontHeader />)
-    // CartSheet is lazy — click cart button to trigger mount, then flush async.
-    await act(async () => {
-      fireEvent.click(screen.getByLabelText(en.store.openCart))
-    })
     expect(cartSheetProps).toHaveBeenCalledWith({ flatRateCents: 0, thresholdCents: 0 })
   })
 
-  it('passes live shipping config to CartSheet', async () => {
+  it('passes live shipping config to CartSheet', () => {
     mockConfig = { flatShippingRateCents: 500, freeShippingThresholdCents: 10000 }
     render(<StorefrontHeader />)
-    // CartSheet is lazy — click cart button to trigger mount, then flush async.
-    await act(async () => {
-      fireEvent.click(screen.getByLabelText(en.store.openCart))
-    })
     expect(cartSheetProps).toHaveBeenCalledWith({ flatRateCents: 500, thresholdCents: 10000 })
   })
 })

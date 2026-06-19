@@ -3,9 +3,14 @@ import { Suspense } from 'react'
 import { StorefrontHeader } from '@/components/store/StorefrontHeader'
 import { StorefrontFooter } from '@/components/store/StorefrontFooter'
 import { ThemeProvider } from '@/components/store/ThemeProvider'
+import { AppHeader } from '@/components/store/shell/AppHeader'
+import { AppTabBar } from '@/components/store/shell/AppTabBar'
+import { InstallPrompt } from '@/components/pwa/InstallPrompt'
+import { OfflineBanner } from '@/components/pwa/OfflineBanner'
+import { WhatsAppWidget } from '@/components/store/WhatsAppWidget'
 import { AnnouncementBar } from '@/components/store/AnnouncementBar'
 import { SearchProvider } from '@/components/store/search/SearchProvider'
-import { DeferredChrome } from '@/components/store/shell/DeferredChrome'
+import { StoreShortcuts } from '@/components/store/StoreShortcuts'
 import { TProvider } from '@/lib/i18n/Provider'
 import { getLocaleHeader } from '@/lib/i18n/server'
 import { DEFAULT_LOCALE, LOCALES } from '@/lib/constants'
@@ -29,6 +34,8 @@ export default async function StoreLayout({ children }: { children: React.ReactN
         {/* SearchProvider wraps the store chrome so StorefrontHeader's
             useSearchOverlay() works and the lazy overlay mounts once. */}
         <SearchProvider>
+          {/* Keyboard shortcut engine — headless, must be inside SearchProvider */}
+          <StoreShortcuts />
           {/* flex flex-col flex-1 reproduces the body's column context so the
               inner <main className="flex-1"> still expands (sticky footer). */}
           <div dir={localeDir} lang={locale} className="flex flex-1 flex-col">
@@ -37,6 +44,8 @@ export default async function StoreLayout({ children }: { children: React.ReactN
               <AnnouncementBar />
               <StorefrontHeader />
             </div>
+            {/* Native app chrome — visible only in standalone (AppHeader/AppTabBar self-hide in browser) */}
+            <AppHeader />
             {/* Suspense boundary so client pages using useSearchParams (home/search,
                 category, tracking, checkout success) can statically prerender a shell. */}
             <main className="flex-1">
@@ -45,9 +54,10 @@ export default async function StoreLayout({ children }: { children: React.ReactN
             <div data-web-chrome>
               <StorefrontFooter />
             </div>
-            {/* Deferred: PWA chrome, keyboard shortcuts, floating widgets — all
-                hidden/headless; lazy-loaded off the critical hydration path. */}
-            <DeferredChrome />
+            <AppTabBar />
+            <InstallPrompt />
+            <OfflineBanner />
+            <WhatsAppWidget />
           </div>
         </SearchProvider>
       </ThemeProvider>

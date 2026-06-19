@@ -3,8 +3,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { ShoppingCart, Search } from 'lucide-react'
-import { useState } from 'react'
-import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useCart, useCartItemCount } from '@/hooks/useCart'
@@ -21,23 +19,14 @@ import { layout } from '@/lib/styles'
 import { cn } from '@/lib/utils'
 import { useT } from '@/lib/i18n/Provider'
 import { buildPrimaryNavLinks } from '@/lib/nav'
+import { CartSheet } from '@/components/store/cart/CartSheet'
 import type { CategoryNode } from '@/lib/types/category'
-import type { CartSheetProps } from '@/lib/types/cart'
-
-// Lazy: CartSheet panel JS is excluded from the initial bundle.
-// Mounted after the first openCart() call — same gate pattern as SearchProvider.
-const LazyCartSheet = dynamic<CartSheetProps>(
-  () => import('@/components/store/cart/CartSheet').then((m) => ({ default: m.CartSheet })),
-  { ssr: false },
-)
 
 export function StorefrontHeader() {
   const t = useT()
   const { openCart } = useCart()
   const itemCount = useCartItemCount()
   const isPulsing = useCartPulse()
-  // Gate: only mount CartSheet after the user has opened the cart at least once.
-  const [cartEverOpened, setCartEverOpened] = useState(false)
   const { config } = useStoreConfig()
   const { data: catData } = useApiResource<{ categories: CategoryNode[] }>('/api/categories')
   const { openSearch } = useSearchOverlay()
@@ -102,16 +91,13 @@ export function StorefrontHeader() {
               <LocaleSwitcher />
             </div>
 
-            {/* Cart button — also triggers first mount of LazyCartSheet */}
+            {/* Cart button */}
             <Button
               variant="ghost"
               size="icon"
               aria-label={t.store.openCart}
               className="relative"
-              onClick={() => {
-                setCartEverOpened(true)
-                openCart()
-              }}
+              onClick={openCart}
             >
               <ShoppingCart className={cn('h-5 w-5', isPulsing && 'cart-added-pulse')} />
               {itemCount > 0 && (
@@ -127,14 +113,10 @@ export function StorefrontHeader() {
         </div>
       </header>
 
-      {/* CartSheet — mounted on first open; stays mounted so state survives
-          open/close cycles. LazyCartSheet reads isOpen from Zustand at mount. */}
-      {cartEverOpened && (
-        <LazyCartSheet
-          flatRateCents={config?.flatShippingRateCents ?? 0}
-          thresholdCents={config?.freeShippingThresholdCents ?? 0}
-        />
-      )}
+      <CartSheet
+        flatRateCents={config?.flatShippingRateCents ?? 0}
+        thresholdCents={config?.freeShippingThresholdCents ?? 0}
+      />
     </>
   )
 }
