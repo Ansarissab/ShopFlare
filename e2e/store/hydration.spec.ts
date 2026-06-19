@@ -11,7 +11,7 @@ test('@smoke no React hydration errors on home page', async ({ page }) => {
   page.on('pageerror', (err) => errors.push(String(err)))
 
   await page.goto('/')
-  await page.waitForLoadState('networkidle')
+  await page.waitForLoadState('load')
 
   const hydrationErrors = errors.filter((e) => HYDRATION_ERROR.test(e))
   expect(hydrationErrors, `Hydration errors: ${hydrationErrors.join('; ')}`).toHaveLength(0)

@@ -3,7 +3,7 @@ import { test, expect } from '../fixtures'
 test.describe('order tracking', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/track')
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('load')
   })
 
   test('/track page loads with title', async ({ page }) => {

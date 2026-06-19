@@ -76,7 +76,7 @@ test.describe('cart and checkout', () => {
   test('success page shows order confirmation heading', async ({ page }) => {
     // Navigate directly with a mock method param to test the page shell
     await page.goto('/checkout/success?method=cod&orderId=ORD-TEST123')
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('load')
 
     await expect(page.getByRole('heading', { name: 'Order Confirmed!' })).toBeVisible({
       timeout: 10_000,

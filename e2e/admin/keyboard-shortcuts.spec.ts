@@ -20,14 +20,14 @@ test.describe('admin keyboard shortcuts — navigation', () => {
     // Start from admin root so URL assertions are clean and no prior nav state
     // interferes with the g+o/p/c/a sequences.
     await page.goto('/admin/orders')
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('load')
     // Wait for the admin shell to render (proves the admin token was applied)
     await expect(page.getByRole('heading', { name: /orders/i })).toBeVisible({ timeout: 10_000 })
   })
 
   test('g then o navigates to /admin/orders', async ({ page }) => {
     await page.goto('/admin')
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('load')
 
     await page.keyboard.press('g')
     await page.keyboard.press('o')
@@ -64,7 +64,7 @@ test.describe('admin keyboard shortcuts — navigation', () => {
 test.describe('admin keyboard shortcuts — overlays', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/admin/orders')
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('load')
     await expect(page.getByRole('heading', { name: /orders/i })).toBeVisible({ timeout: 10_000 })
   })
 
@@ -101,7 +101,7 @@ test.describe('admin keyboard shortcuts — overlays', () => {
 test.describe('admin keyboard shortcuts — list navigation (j/k)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/admin/orders')
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('load')
     await expect(page.getByRole('heading', { name: /orders/i })).toBeVisible({ timeout: 10_000 })
   })
 
@@ -138,7 +138,7 @@ test.describe('admin keyboard shortcuts — list navigation (j/k)', () => {
 test.describe('admin keyboard shortcuts — input guard', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/admin/orders')
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('load')
     await expect(page.getByRole('heading', { name: /orders/i })).toBeVisible({ timeout: 10_000 })
   })
 

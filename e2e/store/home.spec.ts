@@ -3,7 +3,7 @@ import { test, expect } from '../fixtures'
 test.describe('home page', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/')
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('load')
   })
 
   test('loads with product grid', async ({ page }) => {
@@ -40,7 +40,7 @@ test.describe('category page metadata', () => {
     // CategoryNav renders links inside a DropdownMenuContent portal — they are only
     // injected into the DOM after the trigger is clicked.
     await page.goto('/')
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('load')
 
     // Check whether the category dropdown trigger exists before clicking it.
     // StorefrontHeader is a client component that fetches /api/categories — allow

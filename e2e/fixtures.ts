@@ -56,7 +56,7 @@ export const test = base.extend<ShopFlareFixtures>({
       if (productPath) {
         // Caller supplied a specific product page — go there directly.
         await page.goto(productPath)
-        await page.waitForLoadState('networkidle')
+        await page.waitForLoadState('load')
       } else {
         // Default: discover a real product from the client-rendered grid so we
         // never land on the home page and look for an add-to-cart button there
@@ -71,7 +71,7 @@ export const test = base.extend<ShopFlareFixtures>({
         const href = await firstProductLink.getAttribute('href')
         if (!href) return
         await page.goto(href)
-        await page.waitForLoadState('networkidle')
+        await page.waitForLoadState('load')
       }
       const addBtn = page.getByRole('button', { name: /add to cart/i }).first()
       if (await addBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {

@@ -7,7 +7,7 @@ import { test, expect } from '../fixtures'
 test.describe('admin orders page', () => {
   test('loads and shows orders table or empty state', async ({ page }) => {
     await page.goto('/admin/orders')
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('load')
 
     // Page has Orders heading
     await expect(page.getByRole('heading', { name: /orders/i })).toBeVisible()
@@ -24,7 +24,7 @@ test.describe('admin orders page', () => {
 
   test('status filter dropdown contains expected options', async ({ page }) => {
     await page.goto('/admin/orders')
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('load')
 
     const trigger = page.getByRole('combobox')
     await expect(trigger).toBeVisible()
@@ -41,7 +41,7 @@ test.describe('admin orders page', () => {
 
   test('order row links are navigable', async ({ page }) => {
     await page.goto('/admin/orders')
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('load')
 
     // If the table has at least one row, clicking the order number should navigate
     const firstOrderLink = page.locator('table tbody tr td a').first()
@@ -58,7 +58,7 @@ test.describe('admin orders page', () => {
 test.describe('admin POS page', () => {
   test('loads and shows POS interface', async ({ page }) => {
     await page.goto('/admin/pos')
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('load')
 
     // POS page title (en.pos.title → "Point of Sale")
     await expect(page.getByRole('heading', { name: /point of sale/i })).toBeVisible()
@@ -66,7 +66,7 @@ test.describe('admin POS page', () => {
 
   test('POS product selector is visible', async ({ page }) => {
     await page.goto('/admin/pos')
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('load')
 
     // POSScreen renders product + variant + size selects or a skeleton while loading.
     // After networkidle, at minimum a Select trigger or skeleton should be in DOM.
@@ -80,7 +80,7 @@ test.describe('admin POS page', () => {
 
   test('POS cart area is present', async ({ page }) => {
     await page.goto('/admin/pos')
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('load')
 
     // Cart section: customer phone input or the completed order message
     // The phone FormField has id starting with customer or contains "phone"
