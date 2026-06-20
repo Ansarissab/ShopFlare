@@ -48,6 +48,13 @@ export const test = base.extend<ShopFlareFixtures>({
       // context mid-scan. Retrying runs it against the final, stable document.
       let results!: Awaited<ReturnType<AxeBuilder['analyze']>>
       await expect(async () => {
+        // Freeze entrance animations (e.g. the .pg-enter @starting-style stagger)
+        // so axe measures final colours, not a mid-fade frame where the
+        // semi-transparent product-card text trips the contrast check.
+        await page.addStyleTag({
+          content:
+            '*,*::before,*::after{transition:none !important;animation:none !important}.pg-enter{opacity:1 !important;transform:none !important}',
+        })
         results = await new AxeBuilder({ page })
           .withTags(['wcag2a', 'wcag2aa'])
           // Live color previews render arbitrary merchant-chosen colors; their
@@ -60,7 +67,21 @@ export const test = base.extend<ShopFlareFixtures>({
         (v) => v.impact === 'serious' || v.impact === 'critical',
       )
       if (critical.length > 0) {
-        throw new Error('A11y violations: ' + critical.map((v) => v.description).join('; '))
+        const detail = critical
+          .map(
+            (v) =>
+              `${v.id}: ${v.description}\n` +
+              v.nodes
+                .map(
+                  (n) =>
+                    `    ${n.target.join(' ')}\n      ${n.html}\n      ${JSON.stringify(
+                      n.any?.[0]?.data ?? {},
+                    )}`,
+                )
+                .join('\n'),
+          )
+          .join('\n')
+        throw new Error('A11y violations:\n' + detail)
       }
     })
   },

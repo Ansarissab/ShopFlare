@@ -99,8 +99,11 @@ test.describe('admin settings page', () => {
   test('loads and shows settings form sections', async ({ page }) => {
     await gotoReady(page, '/admin/settings')
 
-    // Page header (h1 — be specific; "Tax Settings" etc. are section sub-headings)
-    await expect(page.getByRole('heading', { name: /store settings/i })).toBeVisible()
+    // Page header (h1 — be specific; "Tax Settings" etc. are section sub-headings).
+    // /admin/settings can cold-compile slowly under load — give the heading room.
+    await expect(page.getByRole('heading', { name: /store settings/i })).toBeVisible({
+      timeout: 15_000,
+    })
 
     // Appearance section — first config-gated content; allow for a slow load.
     await expect(page.getByText('Appearance')).toBeVisible({ timeout: 15_000 })
