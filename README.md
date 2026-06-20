@@ -1,24 +1,38 @@
-# ShopFlare
+<div align="center">
 
-White-label serverless ecommerce for small businesses. **$0 hosting cost.** Runs entirely on Cloudflare's free tier — no servers to manage, no monthly platform fees.
+# 🛍️ ShopFlare
 
-[![Next.js](https://img.shields.io/badge/Next.js-16.2-black)](https://nextjs.org)
-[![Cloudflare](https://img.shields.io/badge/Cloudflare-Stack-orange)](https://cloudflare.com)
-[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+### White-label serverless ecommerce for small businesses
+
+**[$0 hosting](#cost)** · runs entirely on Cloudflare's free tier — no servers, no monthly platform fees.<br/>
+Fork it, run the setup wizard, start selling.
+
+<br/>
+
+[![Next.js](https://img.shields.io/badge/Next.js-16.2-000000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org)
+[![React](https://img.shields.io/badge/React-19-149ECA?style=flat-square&logo=react&logoColor=white)](https://react.dev)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38BDF8?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![Cloudflare](https://img.shields.io/badge/Cloudflare-Workers-F38020?style=flat-square&logo=cloudflare&logoColor=white)](https://workers.cloudflare.com)
+[![Stripe](https://img.shields.io/badge/Stripe-Checkout-635BFF?style=flat-square&logo=stripe&logoColor=white)](https://stripe.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-22C55E?style=flat-square)](LICENSE)
+
+[![Unit tests](https://img.shields.io/badge/unit_tests-2%2C123-22C55E?style=flat-square&logo=vitest&logoColor=white)](#testing--ci)
+[![Coverage](https://img.shields.io/badge/coverage-95%25-22C55E?style=flat-square)](#testing--ci)
+[![Integration](https://img.shields.io/badge/integration-real_worker_in_workerd-F38020?style=flat-square&logo=cloudflare&logoColor=white)](#testing--ci)
+[![E2E](https://img.shields.io/badge/e2e-Playwright-2EAD33?style=flat-square&logo=playwright&logoColor=white)](#testing--ci)
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Ansarissab/ShopFlare)
+
+</div>
 
 > **Deploy button deploys the API worker only.** For a full store (both workers +
 > migrations + Stripe webhook auto-setup), fork the repo and run `pnpm setup`.
 
-🧪 **2084** unit tests &nbsp;·&nbsp; 🔗 integration suite (real Worker in workerd) &nbsp;·&nbsp; 📊 **95%** coverage
-
-A free, open-source, self-hosted online store. Fork it, run the setup wizard, start selling.
-No monthly platform fees — it runs entirely on Cloudflare's free tier and Stripe's
-pay-per-transaction pricing. Built for small merchants selling a handful of products,
-especially in emerging markets (COD + WhatsApp ordering are first-class).
-
-Replaces Shopify Basic ($29/month) for stores that don't need the heavyweight platform.
+A free, open-source, self-hosted online store that runs on Cloudflare's free tier and
+Stripe's pay-per-transaction pricing. Built for small merchants selling a handful of
+products — especially in emerging markets, where **Cash on Delivery + WhatsApp ordering
+are first-class**. Replaces Shopify Basic ($29/month) for stores that don't need the
+heavyweight platform.
 
 ---
 
@@ -379,6 +393,11 @@ Two Vitest projects (a workspace), both run by `pnpm test`:
 | 5 | **e2e** — full Playwright suite excluding `@smoke` and `visual:` specs, sequential | `--quick` |
 | 6 | **visual** — native screenshot regression, opt-in | must pass `--visual` |
 
+> The heavy test steps (integration, smoke, e2e) run **sequentially** on purpose —
+> overlapping them oversubscribes CPU and measured *slower* (retry storms), not faster.
+> Re-tested 2026-06 after a fetch-dedupe pass; sequential still won. See
+> [ADR 0017](docs/adr/0017-ci-step-concurrency-cap.md).
+
 ```bash
 pnpm verify              # full gate (no visual)
 pnpm verify --quick      # typecheck + lint + unit only (fast dev loop)
@@ -400,6 +419,13 @@ pnpm test:visual:update   # regenerate machine-local baselines
 **E2E and smoke** each boot their own Next.js app + wrangler worker on dynamically-scanned
 free ports, so they never collide with a running dev server and can be run while `pnpm dev`
 is active.
+
+**Resilient by design — no `networkidle`.** Specs wait for the concrete element they assert
+(auto-retrying web-first assertions), not for the network to fall quiet — the storefront's
+live-refresh chrome never lets it. Hydration-sensitive interactions retry until React has
+wired the handler, dialogs retry their close, and the a11y scan freezes animations so it
+measures settled colours. The suite stays green under load instead of flaking on timing. See
+[ADR 0022](docs/adr/0022-e2e-resilience-without-networkidle.md).
 
 **Test output — quiet by default, with a live heartbeat.** Every suite (unit + integration on
 Vitest, e2e/smoke/visual on Playwright) uses a custom reporter that prints only **failures + a
