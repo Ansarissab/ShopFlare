@@ -361,7 +361,7 @@ describe('POST /api/orders/cod with coupon', () => {
     expect(res.status).toBe(422)
   })
 
-  it('concurrent orders: global usageLimit=1 — exactly one wins, usedCount never exceeds limit', async () => {
+  it('concurrent orders: global usageLimit=1 - exactly one wins, usedCount never exceeds limit', async () => {
     // Seed enough stock so the race is on the coupon slot, not on inventory.
     await seedProduct({ priceCents: 2000, stock: 10 })
     await db().insert(schema.coupons).values({

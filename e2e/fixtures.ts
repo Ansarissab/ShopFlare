@@ -26,7 +26,7 @@ export const test = base.extend<ShopFlareFixtures>({
           // defects; routes pass in isolation. The Suspense "switched to client
           // rendering" message is React's downstream fallback when one of those
           // SSR fetches drops mid-stream, so it's the same transient class.
-          !/ERR_ABORTED|ERR_FAILED|ERR_CONNECTION|ECONNRESET|fetch failed|\[fetchFromWorker\]|could not finish this Suspense boundary|Switched to client rendering/.test(
+          !/ERR_ABORTED|ERR_FAILED|ERR_CONNECTION|ECONNRESET|fetch failed|Connection closed|\[fetchFromWorker\]|could not finish this Suspense boundary|Switched to client rendering/.test(
             e,
           ) &&
           // Cloudflare Turnstile widget (sitekey 1x00000000000000000000AA in dev/CI)

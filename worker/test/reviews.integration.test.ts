@@ -442,7 +442,7 @@ describe('Reviews flag matrix', () => {
     expect(body.count).toBe(1)
   })
 
-  it('ON+OFF (per-product off): POST → 403, GET → empty', async () => {
+  it('ON+OFF (per-product off): POST -> 403, GET -> empty', async () => {
     await seedProductWithReviews(false)
     await setSiteWideReviewsFlag(true)
     await seedDeliveredOrder({
@@ -468,7 +468,7 @@ describe('Reviews flag matrix', () => {
     expect(body.average).toBe(0)
   })
 
-  it('OFF+ON (site-wide off): POST → 403, GET → empty for all', async () => {
+  it('OFF+ON (site-wide off): POST -> 403, GET -> empty for all', async () => {
     await seedProductWithReviews(true)
     await setSiteWideReviewsFlag(false)
     await seedDeliveredOrder({
@@ -493,7 +493,7 @@ describe('Reviews flag matrix', () => {
     expect(body.count).toBe(0)
   })
 
-  it('OFF+OFF: POST → 403, GET → empty', async () => {
+  it('OFF+OFF: POST -> 403, GET -> empty', async () => {
     await seedProductWithReviews(false)
     await setSiteWideReviewsFlag(false)
     await seedDeliveredOrder({

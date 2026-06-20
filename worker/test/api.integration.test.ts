@@ -108,7 +108,7 @@ describe('health + public config', () => {
     expect(body).toHaveProperty('vapidPublicKey')
   })
 
-  it('GET /healthz → 200 + overall:ok when all bindings healthy', async () => {
+  it('GET /healthz -> 200 + overall:ok when all bindings healthy', async () => {
     const res = await get('/healthz')
     expect(res.status).toBe(200)
     const body = (await res.json()) as HealthReport
@@ -119,7 +119,7 @@ describe('health + public config', () => {
     expect(typeof body.ts).toBe('string')
   })
 
-  it('healthProbe → 503 shape when DB binding rejects; KV + R2 still ok', async () => {
+  it('healthProbe -> 503 shape when DB binding rejects; KV + R2 still ok', async () => {
     // Call healthProbe directly with a DB stub that throws, proving:
     //   (a) the DB failure is caught (ok: false, error set)
     //   (b) KV and R2 checks are NOT short-circuited (still ok: true)
@@ -231,7 +231,7 @@ describe('bank transfer', () => {
     })
   })
 
-  it('merchant confirms bank_transfer order via admin PATCH: pending→confirmed, stock unchanged', async () => {
+  it('merchant confirms bank_transfer order via admin PATCH: pending->confirmed, stock unchanged', async () => {
     await seedProduct({ stock: 5, priceCents: 2000 })
     const placeRes = await post('/api/orders/bank-transfer', {
       items: [{ sizeOptionId: 's1', quantity: 2 }],
@@ -296,7 +296,7 @@ describe('coupons', () => {
 //   - The actual Stripe-hosted checkout UI and payment flow
 //   - session.url validity (Stripe returns the real hosted URL in production)
 describe('stripe checkout-session POST', () => {
-  it('validates body — rejects missing items (400)', async () => {
+  it('validates body - rejects missing items (400)', async () => {
     const res = await post('/api/stripe/checkout-session', {})
     expect(res.status).toBe(400)
   })
@@ -765,7 +765,7 @@ describe('admin API (CF Access dev-bypass)', () => {
 // that the fix adds, then verify stock and status. This avoids relying on
 // fetchMock interceptor ordering (the persistent 200 stub fires before any
 // one-shot 500 we add, so we can't force a Stripe error through the HTTP layer).
-describe('bug #2 — stripe session.create failure releases inventory', () => {
+describe('bug #2 - stripe session.create failure releases inventory', () => {
   it('cancel+release logic restores stock when called on a pending stripe order', async () => {
     // Seed the order the way the route would leave it after createOrder but
     // BEFORE session.create succeeds — status=pending, stock reserved.
@@ -830,7 +830,7 @@ describe('bug #2 — stripe session.create failure releases inventory', () => {
 })
 
 // BUG #3: Admin-cancelling a confirmed (stock-holding) order must release inventory.
-describe('bug #3 — admin cancel of confirmed order releases inventory', () => {
+describe('bug #3 - admin cancel of confirmed order releases inventory', () => {
   it('releases stock when admin PATCHes confirmed order to cancelled', async () => {
     await seedProduct({ stock: 5, priceCents: 1000 })
     const placeRes = await post('/api/orders/cod', {
@@ -895,7 +895,7 @@ describe('bug #3 — admin cancel of confirmed order releases inventory', () => 
 })
 
 // BUG #4: checkout.session.completed on a cancelled order must NOT reconfirm it.
-describe('bug #4 — completed webhook does not resurrect cancelled orders', () => {
+describe('bug #4 - completed webhook does not resurrect cancelled orders', () => {
   it('does not reconfirm a cancelled order; records idempotency row; stock unchanged', async () => {
     // seedStripeOrder seeds product + variant + sizeOption + creates the order
     const orderId = await seedStripeOrder({ stock: 5 })
@@ -946,7 +946,7 @@ describe('bug #4 — completed webhook does not resurrect cancelled orders', () 
 })
 
 // BUG #6: inactive sizeOption must return 422 — not silently create a partial order.
-describe('bug #6 — inactive item returns 422 from stripe checkout-session', () => {
+describe('bug #6 - inactive item returns 422 from stripe checkout-session', () => {
   it('returns 422 and creates no order when stripePriceId maps to an inactive sizeOption', async () => {
     // Seed an inactive sizeOption with a stripePriceId
     await db()

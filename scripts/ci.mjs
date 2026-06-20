@@ -97,7 +97,14 @@ function run(cmd, argv, extraEnv = {}) {
   })
 }
 
-const fmt = (ms) => (ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${Math.round(ms)}ms`)
+const fmt = (ms) => {
+  if (ms < 1000) return `${Math.round(ms)}ms`
+  const s = ms / 1000
+  if (s < 60) return `${s.toFixed(1)}s`
+  // Minutes for the long steps (e2e/smoke) so the summary reads in m s, not 320.0s.
+  const m = Math.floor(s / 60)
+  return `${m}m${Math.round(s - m * 60)}s`
+}
 
 // Accumulates all step results for the final summary.
 const results = []

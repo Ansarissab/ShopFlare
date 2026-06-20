@@ -296,7 +296,7 @@ describe('PUT /api/admin/config/store - announcement config', () => {
     expect(msgs[0].text).toBe('Holiday sale')
   })
 
-  it('upserts announcement version — second PUT increments', async () => {
+  it('upserts announcement version - second PUT increments', async () => {
     await adminPut('/api/admin/config/store', {
       announcementVersion: 3,
       announcementMessages: [{ text: 'v3' }],

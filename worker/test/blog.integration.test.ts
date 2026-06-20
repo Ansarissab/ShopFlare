@@ -89,7 +89,7 @@ const setBlogEnabled = async (value: boolean) => {
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
-describe('Public blog routes — flag off', () => {
+describe('Public blog routes - flag off', () => {
   it('GET /api/blog returns 404 when blogEnabled=false (default, no store_config row)', async () => {
     const res = await get('/api/blog')
     expect(res.status).toBe(404)
@@ -101,7 +101,7 @@ describe('Public blog routes — flag off', () => {
   })
 })
 
-describe('Public blog routes — flag on, no posts', () => {
+describe('Public blog routes - flag on, no posts', () => {
   it('GET /api/blog returns 200 with empty list after enabling blog', async () => {
     await setBlogEnabled(true)
     const res = await get('/api/blog')
@@ -225,7 +225,7 @@ describe('Admin blog CRUD (dev bypass)', () => {
   })
 })
 
-describe('Draft visibility — draft never leaks on public routes', () => {
+describe('Draft visibility - draft never leaks on public routes', () => {
   it('public list does not include a draft post', async () => {
     await setBlogEnabled(true)
     await adminPost('/api/admin/blog', {
@@ -282,7 +282,7 @@ describe('Draft visibility — draft never leaks on public routes', () => {
 })
 
 describe('Slug uniqueness', () => {
-  it('two posts with same slug — second POST returns 409', async () => {
+  it('two posts with same slug - second POST returns 409', async () => {
     await adminPost('/api/admin/blog', { slug: 'unique-slug', title: 'First Post' })
     const res = await adminPost('/api/admin/blog', { slug: 'unique-slug', title: 'Second Post' })
     expect(res.status).toBe(409)

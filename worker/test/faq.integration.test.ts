@@ -234,7 +234,7 @@ describe('PUT /api/admin/config/store - faqItems persistence', () => {
 // ─── Product faqItems round-trip ──────────────────────────────────────────────
 
 describe('Product faqItems round-trip', () => {
-  it('POST /api/admin/products — creates product with faqItems and returns them', async () => {
+  it('POST /api/admin/products - creates product with faqItems and returns them', async () => {
     const res = await adminPost('/api/admin/products', {
       name: 'FAQ Product',
       faqItems: SAMPLE_FAQ_ITEMS,
@@ -258,7 +258,7 @@ describe('Product faqItems round-trip', () => {
     expect(product.faqItems[1].question).toBe('Do you ship internationally?')
   })
 
-  it('PUT /api/admin/products/:id — updates faqItems and GET reflects new array', async () => {
+  it('PUT /api/admin/products/:id - updates faqItems and GET reflects new array', async () => {
     const createRes = await adminPost('/api/admin/products', {
       name: 'Update FAQ Product',
       faqItems: [{ question: 'Original Q?', answer: 'Original A.' }],
@@ -283,7 +283,7 @@ describe('Product faqItems round-trip', () => {
     expect(product.faqItems[1].question).toBe('New Q?')
   })
 
-  it('GET /api/products/:id — returns empty faqItems array when none stored', async () => {
+  it('GET /api/products/:id - returns empty faqItems array when none stored', async () => {
     const createRes = await adminPost('/api/admin/products', { name: 'No FAQ Product' })
     expect(createRes.status).toBe(201)
     const { id } = (await createRes.json()) as { id: string }
