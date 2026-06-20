@@ -36,6 +36,28 @@ export interface UseApiResourceOptions<T = unknown> {
 
 const _cache = new Map<string, unknown>()
 
+// In-flight GET coalescing: many components read the same path (e.g.
+// /api/config/store) in one hydration tick → collapse to a single request.
+// Entry cleared on settle, so it never serves stale data.
+const _inflight = new Map<string, Promise<unknown>>()
+
+/** apiGet with in-flight coalescing — concurrent identical GETs share one
+ *  request. Caching is the caller's job (see `_cache`). */
+export function dedupedGet<T>(path: string): Promise<T> {
+  const existing = _inflight.get(path)
+  if (existing) return existing as Promise<T>
+  const p = apiGet<T>(path).finally(() => _inflight.delete(path))
+  _inflight.set(path, p)
+  return p
+}
+
+/** Test-only: clear the module-level cache + in-flight maps so suites using a
+ *  fixed path (e.g. useStoreConfig → /api/config/store) don't bleed state. */
+export function __resetApiResourceCache(): void {
+  _cache.clear()
+  _inflight.clear()
+}
+
 // Only cache read-only public content — never transactional/order paths.
 const shouldCache = (path: string) => !path.startsWith('/api/orders')
 
@@ -119,7 +141,7 @@ export function useApiResource<T>(
       }
 
       try {
-        const result = await apiGet<T>(resolvedPath)
+        const result = await dedupedGet<T>(resolvedPath)
         if (!cancelled) {
           if (shouldCache(resolvedPath)) _cache.set(resolvedPath, result)
           setData(result)

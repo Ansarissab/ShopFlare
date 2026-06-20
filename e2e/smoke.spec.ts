@@ -65,7 +65,10 @@ for (const route of ROUTES) {
     }
     const response = await page.goto(route.path)
     expect(response?.status()).toBeLessThan(400)
-    await expect(page.getByRole('heading').first()).toBeVisible({ timeout: 10000 })
-    await expect(page.getByRole('heading').first()).toHaveText(route.heading)
+    // Match the page heading by name — not .first(): the directly-mounted chrome
+    // can render an empty/leading heading before the data-driven title paints.
+    await expect(page.getByRole('heading', { name: route.heading }).first()).toBeVisible({
+      timeout: 10000,
+    })
   })
 }

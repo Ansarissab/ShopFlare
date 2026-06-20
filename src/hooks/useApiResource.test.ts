@@ -13,7 +13,7 @@ vi.mock('@/lib/api', async () => {
 })
 
 import { apiGet, ApiError } from '@/lib/api'
-import { useApiResource, canReadCache, DATA_UPDATED_CHANNEL } from './useApiResource'
+import { useApiResource, canReadCache, dedupedGet, DATA_UPDATED_CHANNEL } from './useApiResource'
 
 const mockApiGet = vi.mocked(apiGet)
 
@@ -317,6 +317,40 @@ describe('useApiResource', () => {
 
     it('returns false for order paths (never cached) regardless of window', () => {
       expect(canReadCache(`/api/orders/${++_n}`)).toBe(false)
+    })
+  })
+
+  // In-flight coalescing: concurrent identical GETs share one request.
+  describe('dedupedGet (in-flight coalescing)', () => {
+    it('collapses concurrent identical GETs into one apiGet call', async () => {
+      const path = uniquePath('/api/config/store')
+      let resolve!: (v: unknown) => void
+      mockApiGet.mockReturnValueOnce(new Promise((r) => (resolve = r)))
+
+      // Fire 5 concurrent calls while the request is still in flight.
+      const calls = [
+        dedupedGet(path),
+        dedupedGet(path),
+        dedupedGet(path),
+        dedupedGet(path),
+        dedupedGet(path),
+      ]
+      expect(mockApiGet).toHaveBeenCalledTimes(1)
+
+      resolve({ ok: true })
+      const results = await Promise.all(calls)
+      // All callers get the same resolved value.
+      for (const r of results) expect(r).toEqual({ ok: true })
+    })
+
+    it('does a fresh request once the prior one settled (no stale entry)', async () => {
+      const path = uniquePath('/api/config/store')
+      mockApiGet.mockResolvedValue({ ok: true })
+
+      await dedupedGet(path)
+      await dedupedGet(path)
+      // Entry cleared on settle → second call hits the network again.
+      expect(mockApiGet).toHaveBeenCalledTimes(2)
     })
   })
 })

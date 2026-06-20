@@ -1,4 +1,5 @@
 import { test, expect } from '../fixtures'
+import { gotoReady } from '../helpers'
 
 // Happy-path coverage for admin features that lacked dedicated e2e specs.
 // Auth comes from the shared storageState login (see e2e/auth.setup.ts); the e2e
@@ -8,8 +9,7 @@ import { test, expect } from '../fixtures'
 
 test.describe('admin analytics page', () => {
   test('loads and shows the analytics dashboard', async ({ page }) => {
-    await page.goto('/admin/analytics')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin/analytics')
 
     await expect(page.getByRole('heading', { name: /analytic/i }).first()).toBeVisible({
       timeout: 15_000,
@@ -21,8 +21,7 @@ test.describe('admin analytics page', () => {
 
 test.describe('admin reviews page', () => {
   test('loads and shows review moderation list or empty state', async ({ page }) => {
-    await page.goto('/admin/reviews')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin/reviews')
 
     await expect(page.getByRole('heading', { name: /review/i }).first()).toBeVisible({
       timeout: 15_000,
@@ -34,8 +33,7 @@ test.describe('admin reviews page', () => {
 
 test.describe('admin restock-requests (notify) page', () => {
   test('loads and shows restock requests or empty state', async ({ page }) => {
-    await page.goto('/admin/notify')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin/notify')
 
     await expect(page.getByRole('heading', { name: /restock|notif/i }).first()).toBeVisible({
       timeout: 15_000,
@@ -46,8 +44,7 @@ test.describe('admin restock-requests (notify) page', () => {
 
 test.describe('admin policy pages', () => {
   test('loads and shows the policy-pages editor', async ({ page }) => {
-    await page.goto('/admin/pages')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin/pages')
 
     await expect(page.getByRole('heading', { name: /pages/i }).first()).toBeVisible({
       timeout: 15_000,
@@ -58,8 +55,7 @@ test.describe('admin policy pages', () => {
 
 test.describe('admin POS', () => {
   test('loads the point-of-sale screen', async ({ page }) => {
-    await page.goto('/admin/pos')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin/pos')
 
     await expect(page.getByRole('heading', { name: /point of sale|pos/i }).first()).toBeVisible({
       timeout: 15_000,
@@ -71,8 +67,7 @@ test.describe('admin POS', () => {
 
 test.describe('admin blog', () => {
   test('loads the blog list with an add-post action', async ({ page }) => {
-    await page.goto('/admin/blog')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin/blog')
 
     await expect(page.getByRole('heading', { name: /blog/i }).first()).toBeVisible({
       timeout: 15_000,
@@ -89,8 +84,7 @@ test.describe('admin blog', () => {
 
 test.describe('admin landing editor', () => {
   test('loads the landing-page section editor', async ({ page }) => {
-    await page.goto('/admin/landing')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin/landing')
 
     await expect(page.getByRole('heading', { name: /landing/i }).first()).toBeVisible({
       timeout: 15_000,

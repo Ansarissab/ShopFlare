@@ -1,4 +1,5 @@
 import { test, expect } from '../fixtures'
+import { gotoReady } from '../helpers'
 
 const HYDRATION_ERROR =
   /hydrat|did not match|Minified React error #(?:418|423|425)|Text content does not match/i
@@ -10,8 +11,7 @@ test('@smoke no React hydration errors on home page', async ({ page }) => {
   })
   page.on('pageerror', (err) => errors.push(String(err)))
 
-  await page.goto('/')
-  await page.waitForLoadState('networkidle')
+  await gotoReady(page, '/')
 
   const hydrationErrors = errors.filter((e) => HYDRATION_ERROR.test(e))
   expect(hydrationErrors, `Hydration errors: ${hydrationErrors.join('; ')}`).toHaveLength(0)

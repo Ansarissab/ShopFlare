@@ -1,4 +1,5 @@
 import { test, expect } from '../fixtures'
+import { gotoReady, actUntil, escapeUntilHidden } from '../helpers'
 
 // Phase-31 keyboard shortcuts — admin layer.
 // AdminShortcuts wires:
@@ -11,75 +12,88 @@ import { test, expect } from '../fixtures'
 //   j   → list next (highlight first/next row)
 //   k   → list prev
 // Typing sequences in a focused input must NOT trigger navigation.
-
-// storageState (admin login) is applied via playwright.config.ts → chromium-desktop
-// which depends on the setup project. No per-test login needed.
+// Listener attaches post-hydration, so each first shortcut is retried via actUntil.
+// Admin login comes from storageState (playwright.config setup) — no per-test login.
 
 test.describe('admin keyboard shortcuts — navigation', () => {
   test.beforeEach(async ({ page }) => {
     // Start from admin root so URL assertions are clean and no prior nav state
     // interferes with the g+o/p/c/a sequences.
-    await page.goto('/admin/orders')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin/orders')
     // Wait for the admin shell to render (proves the admin token was applied)
     await expect(page.getByRole('heading', { name: /orders/i })).toBeVisible({ timeout: 10_000 })
   })
 
   test('g then o navigates to /admin/orders', async ({ page }) => {
-    await page.goto('/admin')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin')
 
-    await page.keyboard.press('g')
-    await page.keyboard.press('o')
-
-    await page.waitForURL('**/admin/orders', { timeout: 5_000 })
+    await actUntil(
+      async () => {
+        await page.keyboard.press('g')
+        await page.keyboard.press('o')
+      },
+      () => page.waitForURL('**/admin/orders', { timeout: 2_000 }),
+      20_000,
+    )
     expect(page.url()).toContain('/admin/orders')
   })
 
   test('g then p navigates to /admin/products', async ({ page }) => {
-    await page.keyboard.press('g')
-    await page.keyboard.press('p')
-
-    await page.waitForURL('**/admin/products', { timeout: 5_000 })
+    await actUntil(
+      async () => {
+        await page.keyboard.press('g')
+        await page.keyboard.press('p')
+      },
+      () => page.waitForURL('**/admin/products', { timeout: 2_000 }),
+      20_000,
+    )
     expect(page.url()).toContain('/admin/products')
   })
 
   test('g then c navigates to /admin/coupons', async ({ page }) => {
-    await page.keyboard.press('g')
-    await page.keyboard.press('c')
-
-    await page.waitForURL('**/admin/coupons', { timeout: 5_000 })
+    await actUntil(
+      async () => {
+        await page.keyboard.press('g')
+        await page.keyboard.press('c')
+      },
+      () => page.waitForURL('**/admin/coupons', { timeout: 2_000 }),
+      20_000,
+    )
     expect(page.url()).toContain('/admin/coupons')
   })
 
   test('g then a navigates to /admin/analytics', async ({ page }) => {
-    await page.keyboard.press('g')
-    await page.keyboard.press('a')
-
-    await page.waitForURL('**/admin/analytics', { timeout: 5_000 })
+    await actUntil(
+      async () => {
+        await page.keyboard.press('g')
+        await page.keyboard.press('a')
+      },
+      () => page.waitForURL('**/admin/analytics', { timeout: 2_000 }),
+      20_000,
+    )
     expect(page.url()).toContain('/admin/analytics')
   })
 })
 
 test.describe('admin keyboard shortcuts — overlays', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/admin/orders')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin/orders')
     await expect(page.getByRole('heading', { name: /orders/i })).toBeVisible({ timeout: 10_000 })
   })
 
   test('? opens shortcuts help dialog, Escape closes it', async ({ page }) => {
-    // Press `?` directly — Playwright maps this to the correct key event (key: '?')
-    await page.keyboard.press('?')
+    // Match the help dialog by its heading; guarded press avoids a stray retry.
+    const dialog = page
+      .getByRole('dialog')
+      .filter({ has: page.getByRole('heading', { name: 'Keyboard shortcuts' }) })
+    await actUntil(
+      async () => {
+        if (!(await dialog.isVisible().catch(() => false))) await page.keyboard.press('?')
+      },
+      () => expect(dialog).toBeVisible({ timeout: 1_500 }),
+    )
 
-    const dialog = page.getByRole('dialog')
-    await expect(dialog).toBeVisible({ timeout: 5_000 })
-
-    // Title from t.shortcuts.title = 'Keyboard shortcuts'
-    await expect(dialog.getByRole('heading', { name: 'Keyboard shortcuts' })).toBeVisible()
-
-    await page.keyboard.press('Escape')
-    await expect(dialog).not.toBeVisible({ timeout: 5_000 })
+    await escapeUntilHidden(page, dialog)
   })
 
   test('/ focuses the admin search input', async ({ page }) => {
@@ -93,15 +107,19 @@ test.describe('admin keyboard shortcuts — overlays', () => {
       return
     }
 
-    await page.keyboard.press('/')
-    await expect(searchInput).toBeFocused({ timeout: 3_000 })
+    await actUntil(
+      async () => {
+        if (!(await searchInput.evaluate((el) => el === document.activeElement).catch(() => false)))
+          await page.keyboard.press('/')
+      },
+      () => expect(searchInput).toBeFocused({ timeout: 1_500 }),
+    )
   })
 })
 
 test.describe('admin keyboard shortcuts — list navigation (j/k)', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/admin/orders')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin/orders')
     await expect(page.getByRole('heading', { name: /orders/i })).toBeVisible({ timeout: 10_000 })
   })
 
@@ -115,9 +133,16 @@ test.describe('admin keyboard shortcuts — list navigation (j/k)', () => {
       return
     }
 
-    // j → moves to index 0 (first row highlighted)
-    await page.keyboard.press('j')
-    await expect(firstRow).toHaveClass(/ring-ring|bg-muted/, { timeout: 3_000 })
+    // j → row 0. Guard on the active class so a retry can't advance past row 0.
+    await actUntil(
+      async () => {
+        const active = await firstRow
+          .evaluate((el) => /ring-ring|bg-muted/.test(el.className))
+          .catch(() => false)
+        if (!active) await page.keyboard.press('j')
+      },
+      () => expect(firstRow).toHaveClass(/ring-ring|bg-muted/, { timeout: 1_500 }),
+    )
 
     // Check if there's a second row before pressing j again
     const secondRow = page.locator('table tbody tr').nth(1)
@@ -137,8 +162,7 @@ test.describe('admin keyboard shortcuts — list navigation (j/k)', () => {
 
 test.describe('admin keyboard shortcuts — input guard', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/admin/orders')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin/orders')
     await expect(page.getByRole('heading', { name: /orders/i })).toBeVisible({ timeout: 10_000 })
   })
 

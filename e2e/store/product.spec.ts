@@ -1,5 +1,5 @@
 import { test, expect } from '../fixtures'
-import { gotoWithRetry, requestGetWithRetry } from '../helpers'
+import { gotoReady, requestGetWithRetry } from '../helpers'
 
 // Helper: wait for the client-rendered product grid and return the href of the
 // first product link. Returns null when the store is genuinely empty (no
@@ -25,17 +25,19 @@ test.describe('product detail page', () => {
       return
     }
 
-    // Fetch raw HTML before any JS hydration
-    const res = await requestGetWithRetry(page, href)
-    const html = await res.text()
-
-    // <title> present
-    expect(html).toMatch(/<title[^>]*>[^<]+<\/title>/)
-    // OG meta present
-    expect(html).toMatch(/og:title/)
-    // JSON-LD script with Product schema in initial HTML (not injected by client JS)
-    expect(html).toMatch(/"@type"\s*:\s*"Product"/)
-    expect(html).toMatch(/application\/ld\+json/)
+    // Re-fetch the raw SSR HTML until it's complete: under load the PDP's SSR
+    // worker-fetch can drop mid-stream, so React falls back to client rendering
+    // and the metadata/JSON-LD isn't in that one response. A retry gets a clean
+    // server render. (requestGetWithRetry only retries connection errors, not a
+    // 200 with an incomplete body.)
+    await expect(async () => {
+      const res = await requestGetWithRetry(page, href)
+      const html = await res.text()
+      expect(html).toMatch(/<title[^>]*>[^<]+<\/title>/) // <title> present
+      expect(html).toMatch(/og:title/) // OG meta present
+      expect(html).toMatch(/"@type"\s*:\s*"Product"/) // Product JSON-LD in SSR
+      expect(html).toMatch(/application\/ld\+json/)
+    }).toPass({ timeout: 20_000, intervals: [500, 1000, 2000] })
   })
 
   test('navigates to a product page from the grid', async ({ page }) => {
@@ -47,8 +49,7 @@ test.describe('product detail page', () => {
       return
     }
 
-    await gotoWithRetry(page, href)
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, href)
 
     // Product name rendered as h1
     const heading = page.getByRole('heading', { level: 1 })
@@ -63,8 +64,7 @@ test.describe('product detail page', () => {
       return
     }
 
-    await gotoWithRetry(page, href)
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, href)
 
     // SizePicker renders a label "Select Size"
     const sizeLabel = page.getByText('Select Size')
@@ -79,8 +79,7 @@ test.describe('product detail page', () => {
       return
     }
 
-    await gotoWithRetry(page, href)
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, href)
 
     // VariantSelector renders "Select Color" label
     const variantLabel = page.getByText('Select Color')
@@ -99,8 +98,7 @@ test.describe('product detail page', () => {
       return
     }
 
-    await gotoWithRetry(page, href)
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, href)
 
     const addToCartBtn = page.getByRole('button', { name: /add to cart/i })
     await expect(addToCartBtn).toBeVisible({ timeout: 10_000 })

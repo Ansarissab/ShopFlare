@@ -1,4 +1,5 @@
 import { test, expect } from '../fixtures'
+import { gotoReady } from '../helpers'
 
 // AppTabBar and AppHeader both return null when !isStandalone (i.e. when the
 // app is running in a normal browser tab, not installed as a PWA).
@@ -9,8 +10,7 @@ test.describe('mobile viewport (375×812)', () => {
   test.use({ viewport: { width: 375, height: 812 } })
 
   test('page loads and nav is accessible', async ({ page }) => {
-    await page.goto('/')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/')
 
     // AppTabBar renders <nav aria-label="Main navigation"> only in standalone mode.
     // In a regular browser tab it is hidden. Confirm the page itself renders.
@@ -36,8 +36,7 @@ test.describe('mobile viewport (375×812)', () => {
       })
     })
 
-    await page.goto('/')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/')
 
     // AppTabBar: <nav aria-label="Main navigation">
     const tabBar = page.getByRole('navigation', { name: 'Main navigation' })
@@ -61,8 +60,7 @@ test.describe('mobile viewport (375×812)', () => {
       })
     })
 
-    await page.goto('/')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/')
 
     const tabBar = page.getByRole('navigation', { name: 'Main navigation' })
     await expect(tabBar).toBeVisible({ timeout: 8_000 })
@@ -78,8 +76,7 @@ test.describe('desktop viewport (1280×800)', () => {
   test.use({ viewport: { width: 1280, height: 800 } })
 
   test('page loads at desktop width', async ({ page }) => {
-    await page.goto('/')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/')
 
     const body = page.locator('body')
     await expect(body).toBeVisible()
@@ -102,8 +99,7 @@ test.describe('desktop viewport (1280×800)', () => {
       })
     })
 
-    await page.goto('/')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/')
 
     // AppHeader renders: <header data-app-header>
     const header = page.locator('[data-app-header]')
@@ -112,8 +108,7 @@ test.describe('desktop viewport (1280×800)', () => {
 
   test('AppTabBar not visible in normal browser mode at desktop width', async ({ page }) => {
     // Without standalone override, AppTabBar returns null
-    await page.goto('/')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/')
 
     const tabBar = page.locator('[data-tab-bar]')
     await expect(tabBar).not.toBeVisible({ timeout: 3_000 })

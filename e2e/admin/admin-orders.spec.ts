@@ -1,4 +1,5 @@
 import { test, expect } from '../fixtures'
+import { gotoReady } from '../helpers'
 
 // Admin orders + POS smoke tests.
 // No mutations — just verify pages load and key UI elements are present.
@@ -6,8 +7,7 @@ import { test, expect } from '../fixtures'
 
 test.describe('admin orders page', () => {
   test('loads and shows orders table or empty state', async ({ page }) => {
-    await page.goto('/admin/orders')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin/orders')
 
     // Page has Orders heading
     await expect(page.getByRole('heading', { name: /orders/i })).toBeVisible()
@@ -23,8 +23,7 @@ test.describe('admin orders page', () => {
   })
 
   test('status filter dropdown contains expected options', async ({ page }) => {
-    await page.goto('/admin/orders')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin/orders')
 
     const trigger = page.getByRole('combobox')
     await expect(trigger).toBeVisible()
@@ -40,8 +39,7 @@ test.describe('admin orders page', () => {
   })
 
   test('order row links are navigable', async ({ page }) => {
-    await page.goto('/admin/orders')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin/orders')
 
     // If the table has at least one row, clicking the order number should navigate
     const firstOrderLink = page.locator('table tbody tr td a').first()
@@ -57,19 +55,17 @@ test.describe('admin orders page', () => {
 
 test.describe('admin POS page', () => {
   test('loads and shows POS interface', async ({ page }) => {
-    await page.goto('/admin/pos')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin/pos')
 
     // POS page title (en.pos.title → "Point of Sale")
     await expect(page.getByRole('heading', { name: /point of sale/i })).toBeVisible()
   })
 
   test('POS product selector is visible', async ({ page }) => {
-    await page.goto('/admin/pos')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin/pos')
 
     // POSScreen renders product + variant + size selects or a skeleton while loading.
-    // After networkidle, at minimum a Select trigger or skeleton should be in DOM.
+    // After page load, at minimum a Select trigger or skeleton should be in DOM.
     await expect(
       page
         .getByRole('combobox')
@@ -79,8 +75,7 @@ test.describe('admin POS page', () => {
   })
 
   test('POS cart area is present', async ({ page }) => {
-    await page.goto('/admin/pos')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin/pos')
 
     // Cart section: customer phone input or the completed order message
     // The phone FormField has id starting with customer or contains "phone"

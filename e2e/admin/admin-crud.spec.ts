@@ -1,4 +1,5 @@
 import { test, expect } from '../fixtures'
+import { gotoReady, actUntil } from '../helpers'
 
 // Admin routes are open in wrangler dev with ADMIN_DEV_BYPASS=1.
 // Seed data is applied from worker/db/seed.sql before the test run.
@@ -6,8 +7,7 @@ import { test, expect } from '../fixtures'
 
 test.describe('admin products page', () => {
   test('loads and shows product list or empty state', async ({ page }) => {
-    await page.goto('/admin/products')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin/products')
 
     // Page header with "Products" title must be present
     await expect(page.getByRole('heading', { name: /products/i })).toBeVisible()
@@ -23,8 +23,7 @@ test.describe('admin products page', () => {
   })
 
   test('new product page renders form', async ({ page }) => {
-    await page.goto('/admin/products/new')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin/products/new')
 
     // Basic Info section heading
     await expect(page.getByText('Basic Info')).toBeVisible()
@@ -40,8 +39,7 @@ test.describe('admin products page', () => {
 
 test.describe('admin categories page', () => {
   test('loads and shows category tree or empty state', async ({ page }) => {
-    await page.goto('/admin/categories')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin/categories')
 
     // Page header
     await expect(page.getByRole('heading', { name: /categories/i })).toBeVisible()
@@ -55,8 +53,7 @@ test.describe('admin categories page', () => {
   })
 
   test('new category page renders form', async ({ page }) => {
-    await page.goto('/admin/categories/new')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin/categories/new')
 
     // Category name input from CategoryForm
     await expect(
@@ -69,8 +66,7 @@ test.describe('admin categories page', () => {
 
 test.describe('admin coupons page', () => {
   test('loads and shows coupons table or empty state', async ({ page }) => {
-    await page.goto('/admin/coupons')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin/coupons')
 
     // Page header
     await expect(page.getByRole('heading', { name: /coupons/i })).toBeVisible()
@@ -83,30 +79,31 @@ test.describe('admin coupons page', () => {
   })
 
   test('clicking Add Coupon reveals inline form', async ({ page }) => {
-    await page.goto('/admin/coupons')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin/coupons')
 
-    await page.getByRole('button', { name: /add coupon/i }).click()
-
-    // CouponForm should appear (it has a code input field)
-    await expect(
-      page
-        .locator('input[id^="coupon-code"], input[placeholder*="code" i], input[id="coupon-code"]')
-        .first(),
-    ).toBeVisible({ timeout: 3000 })
+    // CouponForm appears on click — retry until the (post-hydration) handler fires.
+    const codeInput = page
+      .locator('input[id^="coupon-code"], input[placeholder*="code" i], input[id="coupon-code"]')
+      .first()
+    await actUntil(
+      async () => {
+        if (!(await codeInput.isVisible().catch(() => false)))
+          await page.getByRole('button', { name: /add coupon/i }).click()
+      },
+      () => expect(codeInput).toBeVisible({ timeout: 1_500 }),
+    )
   })
 })
 
 test.describe('admin settings page', () => {
   test('loads and shows settings form sections', async ({ page }) => {
-    await page.goto('/admin/settings')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin/settings')
 
     // Page header (h1 — be specific; "Tax Settings" etc. are section sub-headings)
     await expect(page.getByRole('heading', { name: /store settings/i })).toBeVisible()
 
-    // Appearance section
-    await expect(page.getByText('Appearance')).toBeVisible()
+    // Appearance section — first config-gated content; allow for a slow load.
+    await expect(page.getByText('Appearance')).toBeVisible({ timeout: 15_000 })
 
     // Identity section with store name field
     await expect(page.locator('#s-name')).toBeVisible()
@@ -121,8 +118,7 @@ test.describe('admin settings page', () => {
   })
 
   test('primary color input is present and editable', async ({ page }) => {
-    await page.goto('/admin/settings')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin/settings')
 
     const colorInput = page.locator('#a-primary')
     await expect(colorInput).toBeVisible()

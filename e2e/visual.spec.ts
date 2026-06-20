@@ -1,4 +1,5 @@
 import { test, expect } from './fixtures'
+import { gotoReady } from './helpers'
 
 // Product media is remote placeholder imagery (picsum / swap-for-R2). Its paint
 // timing over the network is non-deterministic, so every screenshot masks <img>
@@ -13,20 +14,14 @@ const settle = (page: import('@playwright/test').Page) =>
 test.describe.configure({ mode: 'serial' })
 
 test.describe('visual: store', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.waitForLoadState('networkidle')
-  })
-
   test('home page', async ({ page }) => {
-    await page.goto('/')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/')
     await settle(page)
     await expect(page).toHaveScreenshot('home.png', mask(page))
   })
 
   test('cart sheet empty', async ({ page }) => {
-    await page.goto('/')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/')
     // open cart — aria-label is "Open cart" per AppHeader.tsx
     const cartBtn = page.getByRole('button', { name: /cart/i }).first()
     if (await cartBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
@@ -39,15 +34,13 @@ test.describe('visual: store', () => {
 
 test.describe('visual: admin', () => {
   test('admin dashboard', async ({ page }) => {
-    await page.goto('/admin')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin')
     await settle(page)
     await expect(page).toHaveScreenshot('admin-dashboard.png', mask(page))
   })
 
   test('admin products', async ({ page }) => {
-    await page.goto('/admin/products')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/admin/products')
     await settle(page)
     await expect(page).toHaveScreenshot('admin-products.png', mask(page))
   })

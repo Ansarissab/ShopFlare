@@ -2,11 +2,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act, waitFor, cleanup } from '@testing-library/react'
 import { apiGet } from '@/lib/api'
-import { DATA_UPDATED_CHANNEL } from '@/hooks/useApiResource'
+import { DATA_UPDATED_CHANNEL, __resetApiResourceCache } from '@/hooks/useApiResource'
 
-vi.mock('@/lib/api', () => ({
-  apiGet: vi.fn(),
-}))
+// Spread the real module so ApiError stays a real class — useApiResource (which
+// useStoreConfig now wraps) does `err instanceof ApiError` in its catch path.
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
+  return { ...actual, apiGet: vi.fn() }
+})
 
 const mockConfig = { storeName: 'Test Store', currency: { code: 'PKR' } } as never
 
@@ -30,6 +33,9 @@ class MockBroadcastChannel {
 
 beforeEach(() => {
   lastChannel = null
+  // useStoreConfig now rides the shared useApiResource cache (keyed on the fixed
+  // /api/config/store path) — reset it so each test starts cold (loading=true).
+  __resetApiResourceCache()
   vi.mocked(apiGet).mockResolvedValue(mockConfig)
   vi.stubGlobal('BroadcastChannel', MockBroadcastChannel as unknown as typeof BroadcastChannel)
 })
@@ -74,7 +80,8 @@ describe('useStoreConfig', () => {
     const useStoreConfig = await importHook()
     const { result } = renderHook(() => useStoreConfig())
     await waitFor(() => expect(result.current.loading).toBe(false))
-    expect(result.current.error).toBe('Failed to load config')
+    // Generic message comes from the shared useApiResource error path.
+    expect(result.current.error).toBe('An error occurred')
   })
 
   it('refetches when the tab becomes visible', async () => {

@@ -1,63 +1,61 @@
 import { test, expect } from '../fixtures'
+import { gotoReady, actUntil, escapeUntilHidden } from '../helpers'
 
 // Phase-31 keyboard shortcuts — storefront layer.
 // StoreShortcuts wires: / → search overlay, c → cart sheet, ? → shortcuts help.
-// Escape closes whichever panel is open (help > search > cart precedence).
-// Typing in a focused input must NOT trigger any shortcut.
+// Listener attaches post-hydration, so each first press is retried via actUntil.
 
 test.describe('store keyboard shortcuts', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/')
   })
 
   test('@smoke / opens global search dialog, Escape closes it', async ({ page }) => {
     // Press `/` with no input focused — should open the search overlay
-    await page.keyboard.press('/')
-
-    // GlobalSearchOverlay renders a Dialog with a visually hidden title (sr-only)
-    // — getByRole('dialog') will find the dialog, then we can check for the
-    // search input within it.
     const dialog = page.getByRole('dialog')
-    await expect(dialog).toBeVisible({ timeout: 5_000 })
+    await actUntil(
+      // Guarded so a retry can't queue a stray press after it opens.
+      async () => {
+        if (!(await dialog.isVisible().catch(() => false))) await page.keyboard.press('/')
+      },
+      () => expect(dialog).toBeVisible({ timeout: 1_500 }),
+    )
 
     // The overlay contains a search input placeholder
     await expect(dialog.locator('input[type="search"]')).toBeVisible()
 
     // Escape should close
-    await page.keyboard.press('Escape')
-    await expect(dialog).not.toBeVisible({ timeout: 5_000 })
+    await escapeUntilHidden(page, dialog)
   })
 
   test('c opens cart sheet, Escape closes it', async ({ page }) => {
-    await page.keyboard.press('c')
-
-    // CartSheet renders a Sheet (role=dialog) with the title from t.cart.title
     const cartSheet = page.getByRole('dialog')
-    await expect(cartSheet).toBeVisible({ timeout: 5_000 })
+    await actUntil(
+      async () => {
+        if (!(await cartSheet.isVisible().catch(() => false))) await page.keyboard.press('c')
+      },
+      () => expect(cartSheet).toBeVisible({ timeout: 1_500 }),
+    )
 
-    // The cart sheet title is "Your Cart" (or equivalent from i18n)
-    // — at minimum the dialog itself should be present
-    await expect(cartSheet).toBeVisible()
-
-    await page.keyboard.press('Escape')
-    await expect(cartSheet).not.toBeVisible({ timeout: 5_000 })
+    await escapeUntilHidden(page, cartSheet)
   })
 
   test('? opens shortcuts cheat-sheet dialog titled "Keyboard shortcuts", Escape closes it', async ({
     page,
   }) => {
-    // Press `?` directly — Playwright maps this to the correct key event (key: '?')
-    await page.keyboard.press('?')
+    // Match the help dialog by its heading so a slow/partial render (or another
+    // dialog) can't satisfy the wait — keep pressing `?` until it's fully present.
+    const dialog = page
+      .getByRole('dialog')
+      .filter({ has: page.getByRole('heading', { name: 'Keyboard shortcuts' }) })
+    await actUntil(
+      async () => {
+        if (!(await dialog.isVisible().catch(() => false))) await page.keyboard.press('?')
+      },
+      () => expect(dialog).toBeVisible({ timeout: 1_500 }),
+    )
 
-    const dialog = page.getByRole('dialog')
-    await expect(dialog).toBeVisible({ timeout: 5_000 })
-
-    // Title from t.shortcuts.title = 'Keyboard shortcuts'
-    await expect(dialog.getByRole('heading', { name: 'Keyboard shortcuts' })).toBeVisible()
-
-    await page.keyboard.press('Escape')
-    await expect(dialog).not.toBeVisible({ timeout: 5_000 })
+    await escapeUntilHidden(page, dialog)
   })
 
   test('typing shortcut keys in a focused text input does NOT trigger shortcuts', async ({
@@ -66,9 +64,13 @@ test.describe('store keyboard shortcuts', () => {
     // Phase 29 removed the inline catalog SearchBar; the always-available text
     // input is the GlobalSearchOverlay's search field. Open it, focus the input,
     // then type shortcut chars — they must land in the input, not fire shortcuts.
-    await page.keyboard.press('/')
     const dialog = page.getByRole('dialog')
-    await expect(dialog).toBeVisible({ timeout: 5_000 })
+    await actUntil(
+      async () => {
+        if (!(await dialog.isVisible().catch(() => false))) await page.keyboard.press('/')
+      },
+      () => expect(dialog).toBeVisible({ timeout: 1_500 }),
+    )
 
     const input = dialog.locator('input[type="search"]')
     await input.click()
@@ -82,7 +84,6 @@ test.describe('store keyboard shortcuts', () => {
     // Still exactly one dialog (the search overlay), no cart/help stacked on top.
     await expect(page.getByRole('dialog')).toHaveCount(1)
 
-    await page.keyboard.press('Escape')
-    await expect(dialog).not.toBeVisible({ timeout: 5_000 })
+    await escapeUntilHidden(page, dialog)
   })
 })

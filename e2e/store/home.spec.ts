@@ -1,9 +1,9 @@
 import { test, expect } from '../fixtures'
+import { gotoReady, actUntil } from '../helpers'
 
 test.describe('home page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/')
   })
 
   test('loads with product grid', async ({ page }) => {
@@ -18,9 +18,15 @@ test.describe('home page', () => {
     // Phase 29: the inline SearchBar was removed. Search is now the header icon
     // button (aria-label "Search") which opens the lazy GlobalSearchOverlay
     // containing the search <input> (placeholder "Search products...").
-    await page.getByRole('button', { name: 'Search' }).first().click()
+    // Retry the click until the overlay opens — a pre-hydration click is dropped.
     const overlayInput = page.getByPlaceholder('Search products')
-    await expect(overlayInput).toBeVisible()
+    await actUntil(
+      async () => {
+        if (!(await overlayInput.isVisible().catch(() => false)))
+          await page.getByRole('button', { name: 'Search' }).first().click()
+      },
+      () => expect(overlayInput).toBeVisible({ timeout: 1_500 }),
+    )
   })
 
   test('category nav is visible when categories exist', async ({ page }) => {
@@ -39,8 +45,7 @@ test.describe('category page metadata', () => {
     // Find a category link by opening the "Browse Categories" dropdown in the header.
     // CategoryNav renders links inside a DropdownMenuContent portal — they are only
     // injected into the DOM after the trigger is clicked.
-    await page.goto('/')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/')
 
     // Check whether the category dropdown trigger exists before clicking it.
     // StorefrontHeader is a client component that fetches /api/categories — allow

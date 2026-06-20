@@ -1,12 +1,12 @@
 import { test, expect } from '../fixtures'
+import { gotoReady } from '../helpers'
 
 test.describe('policy pages', () => {
   const POLICY_SLUGS = ['shipping', 'returns', 'privacy', 'terms']
 
   for (const slug of POLICY_SLUGS) {
     test(`/policy/${slug} loads without crashing`, async ({ page }) => {
-      await page.goto(`/policy/${slug}`)
-      await page.waitForLoadState('networkidle')
+      await gotoReady(page, `/policy/${slug}`)
 
       // Either the page content renders or the "Page Not Found" state is shown —
       // both paths render a "Back to store" link. Auto-wait (cold dev compile +
@@ -20,8 +20,7 @@ test.describe('policy pages', () => {
 
 test.describe('PWA manifest', () => {
   test('manifest link exists in <head>', async ({ page }) => {
-    await page.goto('/')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/')
 
     // Next.js adds <link rel="manifest" href="/manifest.webmanifest"> or similar.
     // Wait for the link to be attached — with Suspense/streaming SSR the head
@@ -35,8 +34,7 @@ test.describe('PWA manifest', () => {
   })
 
   test('manifest file is reachable', async ({ page }) => {
-    await page.goto('/')
-    await page.waitForLoadState('networkidle')
+    await gotoReady(page, '/')
 
     // Wait for the manifest link to be present before reading its href.
     const manifestLink = page.locator('link[rel="manifest"]')
