@@ -18,8 +18,11 @@ import { dirname, join } from 'node:path'
 const execFileAsync = promisify(execFile)
 
 const BUCKET = 'shopflare-images0'
-const CONCURRENCY = 8
 const remote = process.argv.includes('--remote')
+// Remote R2 (API) handles parallel puts fine. LOCAL R2 is one miniflare sqlite
+// state file — concurrent `wrangler --local` processes contend on it and fail
+// with "put: Unspecified error (500)", so local must be sequential.
+const CONCURRENCY = remote ? 8 : 1
 const reset = process.argv.includes('--reset')
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const dir = join(root, 'seed-assets', 'products')

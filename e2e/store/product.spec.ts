@@ -1,4 +1,5 @@
 import { test, expect } from '../fixtures'
+import { gotoWithRetry, requestGetWithRetry } from '../helpers'
 
 // Helper: wait for the client-rendered product grid and return the href of the
 // first product link. Returns null when the store is genuinely empty (no
@@ -25,7 +26,7 @@ test.describe('product detail page', () => {
     }
 
     // Fetch raw HTML before any JS hydration
-    const res = await page.request.get(href)
+    const res = await requestGetWithRetry(page, href)
     const html = await res.text()
 
     // <title> present
@@ -46,7 +47,7 @@ test.describe('product detail page', () => {
       return
     }
 
-    await page.goto(href)
+    await gotoWithRetry(page, href)
     await page.waitForLoadState('networkidle')
 
     // Product name rendered as h1
@@ -62,7 +63,7 @@ test.describe('product detail page', () => {
       return
     }
 
-    await page.goto(href)
+    await gotoWithRetry(page, href)
     await page.waitForLoadState('networkidle')
 
     // SizePicker renders a label "Select Size"
@@ -78,7 +79,7 @@ test.describe('product detail page', () => {
       return
     }
 
-    await page.goto(href)
+    await gotoWithRetry(page, href)
     await page.waitForLoadState('networkidle')
 
     // VariantSelector renders "Select Color" label
@@ -98,7 +99,7 @@ test.describe('product detail page', () => {
       return
     }
 
-    await page.goto(href)
+    await gotoWithRetry(page, href)
     await page.waitForLoadState('networkidle')
 
     const addToCartBtn = page.getByRole('button', { name: /add to cart/i })

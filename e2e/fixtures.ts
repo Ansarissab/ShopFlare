@@ -1,5 +1,6 @@
 import { test as base, expect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
+import { gotoWithRetry } from './helpers'
 
 type ShopFlareFixtures = {
   consoleErrors: string[]
@@ -55,7 +56,7 @@ export const test = base.extend<ShopFlareFixtures>({
     await use(async (page, productPath?: string) => {
       if (productPath) {
         // Caller supplied a specific product page — go there directly.
-        await page.goto(productPath)
+        await gotoWithRetry(page, productPath)
         await page.waitForLoadState('networkidle')
       } else {
         // Default: discover a real product from the client-rendered grid so we
@@ -70,7 +71,7 @@ export const test = base.extend<ShopFlareFixtures>({
         if (!found) return // store is genuinely empty — caller's guard handles the skip
         const href = await firstProductLink.getAttribute('href')
         if (!href) return
-        await page.goto(href)
+        await gotoWithRetry(page, href)
         await page.waitForLoadState('networkidle')
       }
       const addBtn = page.getByRole('button', { name: /add to cart/i }).first()

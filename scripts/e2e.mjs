@@ -174,6 +174,31 @@ console.log('[e2e] Applying local D1 migrations…')
 spawnSync('pnpm', ['db:migrate:local'], { stdio: 'inherit' })
 console.log('[e2e] Seeding local D1…')
 spawnSync('pnpm', ['db:seed:local'], { stdio: 'inherit' })
+// Seed local R2 with product images + width variants — but ONCE, not every run
+// (42 sequential local uploads is slow). A marker keyed to the base source images
+// records that the current set is already in local R2; skip when it matches. The
+// marker lives in .wrangler/ so wiping local state forces a re-seed, and adding/
+// changing a source image changes the signature and re-seeds. Without seeding,
+// the loader's /cdn/<name>.w384.jpg URLs 404 in miniflare R2 → broken images →
+// "Failed to load resource" console errors trip the e2e gate.
+const imgDir = path.join(process.cwd(), 'seed-assets', 'products')
+const imgSig = fs
+  .readdirSync(imgDir)
+  .filter((f) => f.endsWith('.avif') && !/\.w\d+\.avif$/.test(f)) // base sources only
+  .sort()
+  .map((f) => `${f}:${fs.statSync(path.join(imgDir, f)).size}`)
+  .join('|')
+const imgMarker = path.join(process.cwd(), '.wrangler', '.e2e-images-seeded')
+if (fs.existsSync(imgMarker) && fs.readFileSync(imgMarker, 'utf8') === imgSig) {
+  console.log('[e2e] Local R2 images already seeded — skipping')
+} else {
+  console.log('[e2e] Seeding local R2 images + variants (first run / sources changed)…')
+  const seeded = spawnSync('pnpm', ['seed:images'], { stdio: 'inherit' })
+  if (seeded.status === 0) {
+    fs.mkdirSync(path.dirname(imgMarker), { recursive: true })
+    fs.writeFileSync(imgMarker, imgSig)
+  }
+}
 
 // Normalize feature flags to their defaults (both OFF) so e2e is deterministic
 // regardless of what a dev has toggled in their local admin. The seed is
