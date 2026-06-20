@@ -92,9 +92,31 @@ dozens of tests, every run.
   oversubscribes cores and runs *slower*, the same finding as the coverage-iteration note
   (parallel vitest processes are slower, not faster).
 
+## Re-test (2026-06-20) — overlap still loses
+
+After the config-fetch dedupe (ADR 0022) cut per-page request volume, we re-ran the
+experiment behind a temporary `--parallel` flag: pair each I/O-bound Playwright run with a
+CPU-bound vitest run — Group A `smoke + unit`, Group B `e2e + integration` (smoke and e2e
+kept in separate groups, since they share the persisted `.wrangler/state` D1/KV/R2 and
+would corrupt each other if overlapped). State isolation held; the problem was CPU.
+
+| layout | wall | notes |
+| --- | --- | --- |
+| sequential (default) | **11m18s** | baseline |
+| parallel (A: smoke+unit, B: e2e+integration) | **10m53s** | only −25s |
+
+Under overlap every step ran ~2× slower — `unit` 2m44s → **5m11s**, `smoke` ~2m → 3m25s,
+`e2e` ~3m20s → 4m14s — and an e2e spec flaked (passed on retry). The box is **CPU-bound
+under overlap, not I/O-bound**: the ~167% CPU in the *sequential* run is just steps never
+loading more than ~2 cores; overlapping saturates them, and the per-step slowdown nearly
+cancels the parallelism. Net ~4% faster for more flakiness → **not worth it**. The
+`--parallel` flag was removed; sequential stays the only path.
+
 ## Related
 
 - [ADR 0008](./0008-coverage-gate-unit-only.md) — coverage gate is unit-only; integration
   is a behavioral gate. Explains why integration is a separate step at all.
+- [ADR 0022](./0022-e2e-resilience-without-networkidle.md) — the config-fetch dedupe whose
+  load reduction prompted the 2026-06 re-test above.
 - `scripts/ci.mjs` — the executable form of this decision (step layout + the measured
   comment block this ADR formalizes).
