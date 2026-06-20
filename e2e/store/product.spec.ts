@@ -66,8 +66,10 @@ test.describe('product detail page', () => {
 
     await gotoReady(page, href)
 
-    // SizePicker renders a label "Select Size"
-    const sizeLabel = page.getByText('Select Size')
+    // SizePicker renders a label "Select Size". Target the visible one: during
+    // hydration the SSR node and the hydrated node can briefly both be in the DOM
+    // (one hidden), which trips strict mode on a bare getByText.
+    const sizeLabel = page.getByText('Select Size').filter({ visible: true }).first()
     await expect(sizeLabel).toBeVisible({ timeout: 10_000 })
   })
 
@@ -81,8 +83,8 @@ test.describe('product detail page', () => {
 
     await gotoReady(page, href)
 
-    // VariantSelector renders "Select Color" label
-    const variantLabel = page.getByText('Select Color')
+    // VariantSelector renders "Select Color" label (visible one — see size note)
+    const variantLabel = page.getByText('Select Color').filter({ visible: true }).first()
     const visible = await variantLabel.isVisible({ timeout: 3_000 }).catch(() => false)
     // Only assert when selector is rendered (single-variant products omit it)
     if (visible) {
@@ -107,7 +109,10 @@ test.describe('product detail page', () => {
     // button becomes enabled. Target within the SizePicker container to avoid
     // accidentally clicking a VariantSelector button (also aria-pressed) which
     // would reset the size selection and keep Add to Cart disabled.
-    const sizeSectionLabel = page.getByText('Select Size', { exact: true })
+    const sizeSectionLabel = page
+      .getByText('Select Size', { exact: true })
+      .filter({ visible: true })
+      .first()
     const hasSizeSection = await sizeSectionLabel.isVisible({ timeout: 2_000 }).catch(() => false)
     if (hasSizeSection) {
       const firstSizeBtn = sizeSectionLabel.locator('..').locator('button:not([disabled])').first()

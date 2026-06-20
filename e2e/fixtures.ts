@@ -116,7 +116,10 @@ export const test = base.extend<ShopFlareFixtures>({
         // and have rounded-full; clicking an already-selected variant button resets
         // selectedSizeId → null, keeping Add to Cart disabled. Target size buttons
         // specifically by looking within the SizePicker container (sibling of the label).
-        const sizeSectionLabel = page.getByText('Select Size', { exact: true })
+        const sizeSectionLabel = page
+          .getByText('Select Size', { exact: true })
+          .filter({ visible: true })
+          .first()
         const hasSizeSection = await sizeSectionLabel
           .isVisible({ timeout: 3_000 })
           .catch(() => false)
